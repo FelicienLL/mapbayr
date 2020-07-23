@@ -1,6 +1,6 @@
 Package: mapbayr
 Title: MAP-Bayesian estimation of PK parameters
-Version: 0.0.1.9000
+Version: 0.0.0.9000
 Authors@R: 
     person(given = "Felicien",
            family = "Le Louedec",
@@ -31,6 +31,5 @@ Imports:
     stringr,
     tibble,
     tidyr
-
 URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/hadley/FelicienLL/mapbayr
