@@ -4,7 +4,7 @@
 \alias{compute_prediction}
 \title{Title}
 \usage{
-compute_prediction(data, estimates, model, time_target)
+compute_prediction(data, estimates, model, time_target, choose_delta = 0.1)
 }
 \arguments{
 \item{data}{a dataframe, NM-TRAN like}
@@ -14,6 +14,8 @@ compute_prediction(data, estimates, model, time_target)
 \item{model}{a mapbay_model list, with the characteristics of the model, including a compiled mrgsolve_model}
 
 \item{time_target}{a numeric, time needed for reestimation of concentration}
+
+\item{choose_delta}{a numeric, delta for simulation process (default = .1)}
 }
 \value{
 a dataframe, a mrgsolve 'df' output
