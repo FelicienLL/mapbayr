@@ -1,0 +1,55 @@
+#' Title
+#'
+#' @param eta a vector, initial eta, as a named vector (ETA1, ETA2...)
+#' @param data a tibble, dataset to fit; formatted like NM-TRAN
+#' @param mrgsolve_model a compiled mrgsolve model
+#' @param sigma a matrix, population values of sigma. 1 proportional error, 2 additive error
+#' @param log.tranformation logical operator. Useful for proportional error models (i.e. log transformed additive)
+#' @param DVobs vector of observation (provided by mapbay_estimation to avoid its calculation at each iteration)
+#' @param omega.inv inverse of omega matix (provided by mapbay_estimation to avoid its calculation at each iteration)
+#' @param obs_cmt vector of obs cmt
+#'
+#' @return a single value (the objective function value)
+#' @export
+#' @import mrgsolve
+#' @importFrom magrittr %>%
+#'
+#'
+#'
+compute_ofv_m <- function(eta, data, mrgsolve_model, sigma, log.tranformation, DVobs, omega.inv, obs_cmt){
+
+  if(log.tranformation){DVobs <- log(DVobs)}
+
+  mrgsolve_model <- mrgsolve_model %>%
+    param(as.list(eta))
+
+  output <- mrgsolve_model %>%
+    obsonly %>%
+    zero_re() %>%
+    data_set(data) %>%
+    mrgsim(carry.out = "cmt")
+
+  DVpred <- output$DV
+
+  if(log.tranformation){DVpred <- log(DVpred)}
+
+  H <- as.matrix(
+    data.frame(
+      H1 = ifelse(output$cmt==obs_cmt[1], DVpred, 0), #err prop parent
+      H2 = ifelse(output$cmt==obs_cmt[1], 1,      0), #err add  parent
+      H3 = ifelse(output$cmt==obs_cmt[2], DVpred, 0), #err prop metab
+      H4 = ifelse(output$cmt==obs_cmt[2], 1,      0)  #err add  metab
+    )
+  )
+
+  Sigsq <- diag(H %*% sigma %*% t(H))
+
+  Deviation_concentration <- sum(log(Sigsq) + (DVobs - DVpred)^2/Sigsq)
+
+  Deviation_parameter <- diag(matrix(eta, nrow = 1) %*% omega.inv %*% matrix(eta, ncol = 1))
+
+  OFV <- Deviation_concentration + Deviation_parameter
+
+  return(OFV) #value  : ofv
+
+}

@@ -1,0 +1,97 @@
+---
+title: "Rapport Analyse TICE"
+output: word_document
+date: "`r format(Sys.time(), '%d %B %Y')`"
+params:
+  table_nonmem: NA
+  tous_les_inputs: NA
+  biologiste: NA
+  adaptation: NA
+  figure_concentration_temps_fit : NA
+  figure_concentration_temps_cycle : NA
+  figure_distribution_param : NA
+  text_resultat : NA
+  text_commentaire : NA
+---
+
+# Recapitulatif des valeurs saisies
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE, 
+                      warning = FALSE)
+
+table0 <- params$tous_les_inputs %>% 
+  unlist(recursive = T) %>% 
+  tibble::enframe() %>% 
+  dplyr::arrange(name) %>%
+  dplyr::mutate(value = ifelse(name == "date_adm", as.character.Date(lubridate::as_date(as.double(value)),"%d/%m/%Y"), value))
+
+
+```
+
+```{r}
+table0 %>% 
+  dplyr::filter(name%in%c("nom", "prenom", "bsa")) %>% 
+  knitr::kable(caption = "Patient")
+```
+<!-- -->
+
+```{r}
+table0 %>% 
+  dplyr::filter(name%in%c("n_cycle", "auc_cible", "date_adm", "amt", "h_debut_perf", "h_fin_perf")) %>% 
+  knitr::kable(caption = "Protocole / Dose")
+```
+<!-- -->
+```{r}
+table0 %>% 
+  dplyr::filter(name%in%c("h_prlvmt1", "h_prlvmt2", "h_prlvmt3",
+                   "dv_1", "dv_2", "dv_3",
+                   "mdv1", "mdv2", "mdv3", 
+                   "num_LA_1", "num_LA_2", "num_LA_3")) %>% 
+  knitr::kable(caption = "Concentration")
+```
+
+# Analyse  
+
+Biologiste: `r params$biologiste`  
+
+```{r}
+params$table_nonmem %>% 
+  knitr::kable(caption = "Tableau récapitulatif type NONMEM", digits = 2)
+```
+
+<!-- -->
+
+## Resultat analyse  
+
+Clairance estimee : **`r params$adaptation$CL` mL/min**  
+
+AUC du J1 : **`r params$adaptation$AUC_D1 ` mg.mL/min**  
+
+Dose du J3: **`r params$adaptation$DOSE_D3` mg**  
+
+## Resultat saisi MOLIS
+
+```{r}
+cat(params$text_resultat)
+```
+
+## Commentaire MOLIS
+
+```{r}
+cat(params$text_commentaire)
+```
+
+# Figures
+
+```{r, fig.height = 2.5, fig.width=  6}
+params$figure_distribution_param
+```
+
+```{r, fig.height = 2.5, fig.width=  6}
+params$figure_concentration_temps_fit
+```
+
+```{r, fig.height = 2.5, fig.width= 6}
+params$figure_concentration_temps_cycle
+```
