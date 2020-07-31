@@ -22,6 +22,7 @@ Imports:
     mrgsolve,
     purrr,
     rclipboard,
+    readr,
     rlang,
     rmarkdown,
     scales,
