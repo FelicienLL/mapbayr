@@ -52,6 +52,16 @@ interpretation_tki <- function(){
         mutate(
           choice = str_c(.data$amt, "mg/", .data$ii,"h")
         )
+    ),
+    Imatinib = list(
+      drug                 = "Imatinib",
+      concentration_unit   = "ng/mL",
+      concentration_target = 1000,
+      target_ref           = "Larson et al, Blood, 2008",
+      sim_dose_regimens   = data.frame(
+        amt = c(100, 300, 400, 600, 400),
+        ii  = c(24, 24, 24, 24, 12)) %>%
+        mutate(choice = str_c(.data$amt, "mg/", .data$ii, "h"))
     )
   )
 

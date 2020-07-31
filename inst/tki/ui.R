@@ -29,6 +29,8 @@ ui <- dashboardPage(
                                         c("Gallais et al, Clin Pharmacokinet, 2020" = "ibrutinib_gallais",
                                           "Marostica et al, Cancer Chemother Pharmacol, 2015" = "ibrutinib_marostica"
                                         ),
+                                      IMATINIB =
+                                        c("Delbaldo et al, Clin Cancer Res, 2006" = "imatinib_delbaldo"),
                                       NILOTINIB =
                                         c("Larson et al, Eur J Clin Pharmacol, 2012"     = "nilotinib_larson",
                                           "Giles et al, Eur J Clin Pharmacol, 2013"      = "nilotinib_giles"

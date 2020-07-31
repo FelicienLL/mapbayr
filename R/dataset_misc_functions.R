@@ -210,6 +210,13 @@ add_covariates <- function(data, model, covariates = list()){
       fill(.data$TOLA)
   }
 
+  if("DAY30" %in% model$covariate_names) {
+    d <- d %>%
+      addl_to_linebyline() %>%
+      mutate(DAY30 = ifelse(.data$time >= 30*24 , 1, 0)) %>%
+      fill(.data$DAY30)
+  }
+
   if("MATIN" %in% model$covariate_names & !is.null(covariates$"MATIN")) {
     m_obs <- filter(d, .data$evid != 1) %>%
       mutate(MATIN = NA_real_)
