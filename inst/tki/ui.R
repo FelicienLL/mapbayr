@@ -13,30 +13,7 @@ ui <- dashboardPage(
     fluidRow(
       column(width = 3,
              fluidRow(
-               box(title = "Modele", width = 12,
-                   selectInput("MODEL",label = "Modele :",
-                               selected = 'pazopanib_yu',
-                               choices =
-                                 list(PAZOPANIB =
-                                        c("Yu et al, Clin Pharmacokinet, 2016"    = "pazopanib_yu",
-                                          "Complex (These DES PH Felicien, 2019)" = "pazopanib_complex",
-                                          "Simple (These DES PH Felicien, 2019)"  = "pazopanib_simple"
-                                        ),
-                                      CABOZANTINIB =
-                                        c("Lacy et al, Cancer Chemother Pharmacol, 2018" = "cabozantinib_lacy"
-                                        ),
-                                      IBRUTINIB =
-                                        c("Gallais et al, Clin Pharmacokinet, 2020" = "ibrutinib_gallais",
-                                          "Marostica et al, Cancer Chemother Pharmacol, 2015" = "ibrutinib_marostica"
-                                        ),
-                                      IMATINIB =
-                                        c("Delbaldo et al, Clin Cancer Res, 2006" = "imatinib_delbaldo"),
-                                      NILOTINIB =
-                                        c("Larson et al, Eur J Clin Pharmacol, 2012"     = "nilotinib_larson",
-                                          "Giles et al, Eur J Clin Pharmacol, 2013"      = "nilotinib_giles"
-                                        )
-                                 )
-                   )
+               box(title = "Modele", width = 12, uiOutput("MODEL"), actionButton("LOAD", "LOAD")
                ),
                tabBox(title = "", id = "input_box", width = 12,
                       tabPanel(title = "Dose & Concentrations", width = 12,

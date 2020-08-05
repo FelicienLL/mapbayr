@@ -14,7 +14,7 @@ server <- function(input, output, session){
     }
 
     cn <- re_model()$covariate_names
-    cn <- cn[!cn%in%c("AOLA", "TOLA")]
+    cn <- cn[!cn%in%c("AOLA", "TOLA", "DAY30")]
 
     cd <- re_model()$covariate_description
     cd <- cd[re_model()$covariate_names %in%  cn]
@@ -26,15 +26,19 @@ server <- function(input, output, session){
     createSelect(name  = cn, descr = cd, value = cv)
 
   })
-
-
   outputOptions(output, "covariates", suspendWhenHidden = FALSE)
+
+  output$MODEL <- renderUI({
+    selectInput(inputId = "MODEL", label = "Modele :", choices = mapbay_library(app_list = T), width = "80%")
+  })
+
+
 
   #########################
   ###  Reactive values  ###
   #########################
 
-  re_model <- reactive({
+  re_model <- eventReactive(input$LOAD, {
     load_mapbay_model(model = input$MODEL)
   })
 
@@ -75,7 +79,6 @@ server <- function(input, output, session){
   })
 
   re_time_last_dose <- reactive({
-
     time_last_dose(re_input_data())
   })
 
@@ -100,9 +103,9 @@ server <- function(input, output, session){
 
 
   re_pred <- reactive({
-   compute_prediction(data = isolate(re_input_data()),
+    compute_prediction(data = isolate(re_input_data()),
                        estimates = re_estimates(),
-                       model = isolate(re_model()),
+                       model =re_model(),
                        time_target = isolate(re_time_target()))
   })
 
@@ -148,7 +151,7 @@ server <- function(input, output, session){
 
     plot_pred_mapbay(pred_data  = re_pred(),
                      input_data = isolate(re_input_data()),
-                     model      = isolate(re_model()),
+                     model      = re_model(),
                      hline      = isolate(re_interpretation()$concentration_target)
     )
   })
@@ -159,7 +162,7 @@ server <- function(input, output, session){
 
     plot_pred_mapbay(pred_data  = re_pred(),
                      input_data = isolate(re_input_data()),
-                     model = isolate(re_model()),
+                     model = re_model(),
                      from = isolate(re_time_last_dose()),
                      hline = isolate(re_interpretation()$concentration_target)
     )
@@ -170,8 +173,8 @@ server <- function(input, output, session){
   output$plot_log_normal_distribution <- renderPlot({
     purrr::pmap(
       .l = list(
-        PAR = isolate(re_model()$param_names),
-        TV =  isolate(re_model()$param_typical_values),
+        PAR = re_model()$param_names,
+        TV =  re_model()$param_typical_values,
         OM = diag(isolate(re_model()$param_omega_matrix)),
         EBE = re_estimates()[["final_eta"]],
         UNIT = isolate(re_model()$param_units)
@@ -186,7 +189,7 @@ server <- function(input, output, session){
   output$plot_sim <- renderPlot({
 
     plot_sim_tki(sim_data = re_sim(),
-                 model = isolate(re_model()),
+                 model = re_model(),
                  interpretation_tki = isolate(re_interpretation()),
                  zoom = input$ZOOM)
   })
@@ -198,18 +201,15 @@ server <- function(input, output, session){
 
 
   output$txt01 <- renderText({
-
-
-
     c(write_comment_fit_tki(pred_data   = re_pred(),
                             estimates = re_estimates(),
-                          model     = isolate(re_model()),
+                            model     = re_model(),
                             time_last_dose = isolate(re_time_last_dose()),
                             time_target    = isolate(re_time_target())),
 
       "\n\n" ,
       write_comment_biology_tki(pred_data   = re_pred(),
-                                model       = isolate(re_model()),
+                                model       = re_model(),
                                 interpretation_tki = isolate(re_interpretation()),
                                 time_target = isolate(re_time_target()))
     )

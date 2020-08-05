@@ -41,6 +41,7 @@ mapbay_library <- function(path = system.file('mrg_models', package='mapbayr'), 
     tab <- tibble(
       DRUG = drugs,
       MODEL= filenames %>%
+        str_remove("_mapbay.cpp") %>%
         set_names(refs)
     ) %>%
       group_by(.data$DRUG) %>%
