@@ -2,16 +2,16 @@
 % Please edit documentation in R/mapbay_estimation.R
 \name{mapbay_estimation}
 \alias{mapbay_estimation}
-\title{Title}
+\title{Perform mapbay estimation from NM-TRAN data and mapbay model}
 \usage{
-mapbay_estimation(data, model, output = "default", force_initial_eta = NULL)
+mapbay_estimation(data, model, output_df = F, force_initial_eta = NULL)
 }
 \arguments{
 \item{data}{a dataframe, dataset (NM-TRAN format) of one individual to fit}
 
 \item{model}{a mapbay_model list, with the characteristics of the model, including a compiled mrgsolve_model}
 
-\item{output}{a string. If output = "df" a dataframe is returned and not a list of component. Useful for mapping multiple individual datasets}
+\item{output_df}{If TRUE, output = dataframe is returned and not a list of components}
 
 \item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate )}
 }
@@ -19,5 +19,5 @@ mapbay_estimation(data, model, output = "default", force_initial_eta = NULL)
 default: a list with initial eta, newuoa outputs, final eta and a NM-like dataset with predictions
 }
 \description{
-Title
+Perform mapbay estimation from NM-TRAN data and mapbay model
 }

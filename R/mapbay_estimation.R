@@ -1,8 +1,8 @@
-#' Title
+#' Perform mapbay estimation from NM-TRAN data and mapbay model
 #'
 #' @param data a dataframe, dataset (NM-TRAN format) of one individual to fit
 #' @param model a mapbay_model list, with the characteristics of the model, including a compiled mrgsolve_model
-#' @param output a string. If output = "df" a dataframe is returned and not a list of component. Useful for mapping multiple individual datasets
+#' @param output_df If TRUE, output = dataframe is returned and not a list of components
 #' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
 #'
 #' @return default: a list with initial eta, newuoa outputs, final eta and a NM-like dataset with predictions
@@ -17,7 +17,7 @@
 #' @importFrom stats runif
 #' @importFrom stringr str_c
 #'
-mapbay_estimation <- function(data, model, output = "default", force_initial_eta = NULL){
+mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NULL){
 
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
@@ -27,7 +27,7 @@ mapbay_estimation <- function(data, model, output = "default", force_initial_eta
   if(is.null(force_initial_eta)){
     initial_eta <- runif(n_omega, -0.5, 0.5) %>% magrittr::set_names(str_c("ETA", 1:n_omega))
   } else {
-    initial_eta <- force_initial_eta
+    initial_eta <- force_initial_eta %>% magrittr::set_names(str_c("ETA", 1:n_omega))
   }
 
   data_to_fit <- data %>%
@@ -55,18 +55,21 @@ mapbay_estimation <- function(data, model, output = "default", force_initial_eta
 
   final_eta <- newuoa_value$par %>% magrittr::set_names(str_c("ETA", 1:n_omega))
 
+
+  carry <- data %>%
+    select(-any_of(c("ID", "time","DV"))) %>%
+    names()
+
+
   mapbay_tab <- model$mrgsolve_model %>%
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim_df(carry_out = c("evid", "mdv", "cmt")) %>%
+    mrgsim(carry_out = carry) %>%
     as_tibble() %>%
-    mutate(IPRED = .data$DV) %>%
-    select(.data$ID, .data$time, .data$evid, .data$cmt, .data$mdv, .data$IPRED, starts_with("ETA")) %>%
-    right_join(data, by = c("ID", "time", "evid", "cmt", "mdv"))%>%
-    select(any_of(c("ID", "time", "evid", "cmt", "mdv", "amt", "addl", "ii", "DV", "PAR", "MET", "IPRED", "DOSE")), starts_with('ETA'))
+    mutate(IPRED = .data$DV)
 
-  if(output == "df"){
+  if(output_df){
 
     mapbay_output <- mapbay_tab
 
