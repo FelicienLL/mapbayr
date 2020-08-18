@@ -67,7 +67,8 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
     zero_re() %>%
     mrgsim(carry_out = carry) %>%
     as_tibble() %>%
-    mutate(IPRED = .data$DV)
+    mutate(IPRED = .data$DV) %>%
+    mutate(DV = data$DV)
 
   if(output_df){
 
