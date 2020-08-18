@@ -1,4 +1,4 @@
-$PROB 
+$PROB
 
 - drug: Cabozantinib
 - model_name: Cabozantinib Nguyen
@@ -16,26 +16,26 @@ TVVC     : 212    : Central volume (L)
 Q        : 30.0   : Intercompartmental clearance (L.h-1)
 VP       : 177    : Peripheral volume (L)
 ALAG1    : 0.821  : Lag time (h)
-TVFR     : 0.83   : Fraction of Depot 1 () 
-KA_DOSE  : 0.734  : Effect of DOSE  on KA ()   
-CL_AGE   : -0.157 : Effect of AGE   on CL ()   
-CL_SEX   : 0.76   : Effect of SEX   on CL ()   
-CL_WT    : -0.0393: Effect of WT    on CL ()   
-CL_RCC   : 0.87   : Effect of RCC   on CL ()   
-CL_CRPC  : 0.989  : Effect of CRPC  on CL ()   
-CL_MTC   : 1.9    : Effect of MTC   on CL ()   
-CL_GB    : 1.2    : Effect of GB    on CL ()   
-CL_OTHER : 1.19   : Effect of OTHER on CL ()   
-CL_HCC   : 0.878  : Effect of HCC   on CL ()   
-VC_AGE   : 0.0644 : Effect of AGE   on VC ()   
-VC_SEX   : 1.1    : Effect of SEX   on VC ()   
-VC_WT    : 1.19   : Effect of WT    on VC ()   
-VC_RCC   : 0.656  : Effect of RCC   on VC ()   
-VC_CRPC  : 0.743  : Effect of CRPC  on VC ()   
-VC_MTC   : 0.936  : Effect of MTC   on VC ()   
-VC_GB    : 0.479  : Effect of GB    on VC ()   
-VC_OTHER : 0.762  : Effect of OTHER on VC ()   
-VC_HCC   : 0.847  : Effect of HCC   on VC ()   
+TVFR     : 0.83   : Fraction of Depot 1 ()
+KA_DOSE  : 0.734  : Effect of DOSE  on KA ()
+CL_AGE   : -0.157 : Effect of AGE   on CL ()
+CL_SEX   : 0.76   : Effect of SEX   on CL ()
+CL_WT    : -0.0393: Effect of WT    on CL ()
+CL_RCC   : 0.87   : Effect of RCC   on CL ()
+CL_CRPC  : 0.989  : Effect of CRPC  on CL ()
+CL_MTC   : 1.9    : Effect of MTC   on CL ()
+CL_GB    : 1.2    : Effect of GB    on CL ()
+CL_OTHER : 1.19   : Effect of OTHER on CL ()
+CL_HCC   : 0.878  : Effect of HCC   on CL ()
+VC_AGE   : 0.0644 : Effect of AGE   on VC ()
+VC_SEX   : 1.1    : Effect of SEX   on VC ()
+VC_WT    : 1.19   : Effect of WT    on VC ()
+VC_RCC   : 0.656  : Effect of RCC   on VC ()
+VC_CRPC  : 0.743  : Effect of CRPC  on VC ()
+VC_MTC   : 0.936  : Effect of MTC   on VC ()
+VC_GB    : 0.479  : Effect of GB    on VC ()
+VC_OTHER : 0.762  : Effect of OTHER on VC ()
+VC_HCC   : 0.847  : Effect of HCC   on VC ()
 
 ETA1 : 0 : KA (h-1)
 ETA2 : 0 : CL (L/h)
@@ -61,7 +61,7 @@ $OMEGA @block
 0.00 0.211 0.443
 0.00 0.000 0.000 2.55
 
-$SIGMA 
+$SIGMA
 0.000 // prop
 0.118 // (log) additive
 
@@ -87,7 +87,7 @@ VC = TVVC_COV * exp(ETA3 + ETA(3))  ;
 
 FR= exp(log(TVFR/(1-TVFR))+(ETA4 + ETA(4)))/(1+exp(log(TVFR/(1-TVFR))+(ETA4 + ETA(4)))) ;
 
-K12 = KA      ; 
+K12 = KA      ;
 K23 = Q  / VC ;
 K32 = Q  / VP ;
 K20 = CL / VC ;
@@ -100,8 +100,8 @@ D_CENTRAL  = D2 ;
 ALAG_CENTRAL = 0.000001 ;
 
 $ODE
-dxdt_DEPOT   = - K12 * DEPOT                                          ; 
-dxdt_CENTRAL =   K12 * DEPOT   + K32 * PERIPH - (K23 + K20) * CENTRAL ; 
+dxdt_DEPOT   = - K12 * DEPOT                                          ;
+dxdt_CENTRAL =   K12 * DEPOT   + K32 * PERIPH - (K23 + K20) * CENTRAL ;
 dxdt_PERIPH  =   K23 * CENTRAL - K32 * PERIPH                         ;
 
 $CAPTURE @annotated
