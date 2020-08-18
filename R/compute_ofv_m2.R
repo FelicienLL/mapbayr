@@ -4,10 +4,10 @@
 #' @param data a tibble, dataset to fit; formatted like NM-TRAN
 #' @param mrgsolve_model a compiled mrgsolve model
 #' @param sigma a matrix, population values of sigma. 1 proportional error, 2 additive error
-#' @param log.tranformation logical operator. Useful for proportional error models (i.e. log transformed additive)
+#' @param log.transformation logical operator. Useful for proportional error models (i.e. log transformed additive)
 #' @param DVobs vector of observation (provided by mapbay_estimation to avoid its calculation at each iteration)
 #' @param omega.inv inverse of omega matix (provided by mapbay_estimation to avoid its calculation at each iteration)
-#' @param obs_cmt vector of obs cmt (not used)
+#' @param obs_cmt vector of obs cmt
 #'
 #' @return a single value (the objective function value)
 #' @export
@@ -16,9 +16,9 @@
 #'
 #'
 #'
-compute_ofv <- function(eta, data, mrgsolve_model, sigma, log.tranformation, DVobs, omega.inv, obs_cmt){
+compute_ofv_m <- function(eta, data, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
 
-  if(log.tranformation){DVobs <- log(DVobs)}
+  if(log.transformation){DVobs <- log(DVobs)}
 
   mrgsolve_model <- mrgsolve_model %>%
     param(as.list(eta))
@@ -27,18 +27,20 @@ compute_ofv <- function(eta, data, mrgsolve_model, sigma, log.tranformation, DVo
     obsonly %>%
     zero_re() %>%
     data_set(data) %>%
-    mrgsim
+    mrgsim(carry.out = "cmt")
 
   DVpred <- output$DV
 
-  if(log.tranformation){DVpred <- log(DVpred)}
+  if(log.transformation){DVpred <- log(DVpred)}
 
   H <- as.matrix(
     data.frame(
-      H1 = DVpred,                #err prop
-      H2 = 1                      #err add
-      )
+      H1 = ifelse(output$cmt==obs_cmt[1], DVpred, 0), #err prop parent
+      H2 = ifelse(output$cmt==obs_cmt[1], 1,      0), #err add  parent
+      H3 = ifelse(output$cmt==obs_cmt[2], DVpred, 0), #err prop metab
+      H4 = ifelse(output$cmt==obs_cmt[2], 1,      0)  #err add  metab
     )
+  )
 
   Sigsq <- diag(H %*% sigma %*% t(H))
 

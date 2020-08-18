@@ -47,7 +47,7 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
     data  = data_to_fit,
     mrgsolve_model = model$mrgsolve_model,
     sigma = model$param_sigma_matrix,
-    log.tranformation = model$log.tranformation,
+    log.transformation = model$log.transformation,
     DVobs = DVobs,
     omega.inv = omega.inv,
     obs_cmt = model$obs_cmt,
