@@ -63,9 +63,8 @@ load_mapbay_model <- function(model, path = NULL){
   mapbay_model$param_sigma_matrix <- mrgsolve_model@sigma@data$...
 
   #Other
-  mapbay_model$model_file <- as.list(mrgsolve_model)$covariates%>%
+  mapbay_model$model_file <- mrgsolve_model@model %>%
     str_remove("_mapbay_cpp")
-
   mapbay_model$log.tranformation  <- str_detect(tolower(mapbay_model$error_model), "exp")
   mapbay_model$scaling_conc_from_user_to_model <- switch (mapbay_model$concentration_unit,
                                                           "mg/L" = 1,
