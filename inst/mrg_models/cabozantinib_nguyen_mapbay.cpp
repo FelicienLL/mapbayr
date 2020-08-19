@@ -63,7 +63,7 @@ $OMEGA @block
 
 $SIGMA
 0.000 // prop
-0.118 // (log) additive
+0.127 // (log) additive
 
 $CMT @annotated
 DEPOT   : Depot      (mg)
