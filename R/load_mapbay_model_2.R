@@ -59,8 +59,8 @@ load_mapbay_model <- function(model, path = NULL){
 
   #Matrices
 
-  mapbay_model$param_omega_matrix <- mrgsolve_model@omega@data$...
-  mapbay_model$param_sigma_matrix <- mrgsolve_model@sigma@data$...
+  mapbay_model$param_omega_matrix <- omat(mrgsolve_model, make = T)
+  mapbay_model$param_sigma_matrix <- smat(mrgsolve_model, make = T)
 
   #Other
   mapbay_model$model_file <- mrgsolve_model@model %>%
