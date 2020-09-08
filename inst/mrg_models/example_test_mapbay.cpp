@@ -1,8 +1,7 @@
 $PROB
 
-- drug: Ibrutinib
-- model_name: Ibrutinib Gallais
-- model_ref: Gallais et al, Clin Pharmacokinetics, 2020
+- drug: Examplinib
+- model_ref: Modelisator et al, Clin Pharmacokinet, 2020
 - error_model: Prop
 
 $PARAM @annotated

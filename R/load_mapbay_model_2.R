@@ -9,7 +9,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang set_names
 #' @importFrom purrr map splice
-#' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which
+#' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace
 #' @importFrom dplyr filter mutate right_join pull arrange all_of slice
 #' @importFrom tibble enframe
 #' @importFrom tidyr replace_na
@@ -29,8 +29,8 @@ load_mapbay_model <- function(model, path = NULL){
 
   #Character of length 1
 
-  mapbay_model <- c("drug", "model_name", "model_ref", "error_model") %>%
-    set_names(c("drug", "model_name", "model_ref", "error_model")) %>%
+  mapbay_model <- c("drug", "model_ref", "error_model") %>%
+    set_names(c("drug", "model_ref", "error_model")) %>%
     map(mrgsolve_model = mrgsolve_model,
         .f = function(.x, mrgsolve_model){
           pat <- paste0("\\s*-\\s*",.x, "\\s*:\\s*")
@@ -41,6 +41,11 @@ load_mapbay_model <- function(model, path = NULL){
         }) %>%
     splice(mapbay_model)
 
+
+  mapbay_model$model_name <- mrgsolve_model@model %>%
+    str_remove("_mapbay_cpp") %>%
+    str_replace("_", " ") %>%
+    str_to_title()
 
   #Read compartment
 
