@@ -2,7 +2,6 @@ $PROB
 
 - drug: Examplinib
 - model_ref: Modelisator et al, Clin Pharmacokinet, 2020
-- error_model: Prop
 
 $PARAM @annotated
 TVALAG   : 0.238192 : Lag time (h)

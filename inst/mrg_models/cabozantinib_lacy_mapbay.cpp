@@ -1,12 +1,7 @@
 $PROB 
 
 - drug: Cabozantinib
-- model_name: Cabozantinib Lacy
 - model_ref: Lacy et al, Cancer Chemother Pharmacol, 2018
-- error_model: expo
-- adm_cmt: 1, 2
-- obs_cmt: 2
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVKA     : 0.804   : h-1
@@ -32,9 +27,9 @@ $OMEGA 2.063 0.202 0.233 0.466
 $SIGMA 0.000 0.118 
 
 $CMT @annotated
-DEPOT   : Depot      (mg)
-CENTRAL : Central    (mg)
-PERIPH  : Peripheral (mg)
+DEPOT   : Depot      () [ADM]
+CENTRAL : Central    (mg/L) [ADM, OBS]
+PERIPH  : Peripheral ()
 
 $GLOBAL
 double K12, K23, K32, K20, KA, CL, VC, PHI, FR   ;

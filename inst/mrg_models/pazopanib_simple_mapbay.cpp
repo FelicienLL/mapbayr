@@ -1,12 +1,7 @@
 $PROB 
 
 - drug: Pazopanib
-- model_name: Pazopanib Simple
 - model_ref: Le Louedec et al, These d'exercice DES PH, 2019 
-- error_model: Prop
-- adm_cmt: 1
-- obs_cmt: 2
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVKA    : 1.44319  : Absorption rate constant (h-1)
@@ -41,8 +36,8 @@ $OMEGA @block
 $SIGMA 0.04445646 0.00000000
 
 $CMT @annotated
-DEPOT1 : Depot compartment 1 (mg)
-CENTRAL : Central compartment (mg)
+DEPOT1 : Depot compartment 1 () [ADM]
+CENTRAL : Central compartment (mg/L) [OBS]
 
 $GLOBAL
 double CL, V, ALAG1, KA, K20 ;

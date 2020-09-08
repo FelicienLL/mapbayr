@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Nilotinib
-- model_name: Nilotinib Giles
 - model_ref: Giles et al, Eur Clin Pharmacol, 2013
-- error_model: Prop + Add (mg/L)
-- adm_cmt: 1
-- obs_cmt: 1
-- concentration_unit: ng/mL
 
 $PARAM @annotated
 TVCL : 12.8  : Clearance (L/h)
@@ -45,7 +40,7 @@ $OMEGA @block
 $SIGMA 0.11088900 0.00395641
 
 $CMT @annotated
-CENT : Central compartment
+CENT : Central compartment (ng/mL) [ADM, OBS]
 PER : Perif compartment
 
 $GLOBAL

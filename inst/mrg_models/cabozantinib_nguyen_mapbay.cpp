@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Cabozantinib
-- model_name: Cabozantinib Nguyen
 - model_ref: Nguyen et al, J Clin Pharmacol, 2019
-- error_model: expo
-- adm_cmt: 1, 2
-- obs_cmt: 2
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVKA     : 1.24   : Absorption constant (h-1)
@@ -66,9 +61,9 @@ $SIGMA
 0.127 // (log) additive
 
 $CMT @annotated
-DEPOT   : Depot      (mg)
-CENTRAL : Central    (mg)
-PERIPH  : Peripheral (mg)
+DEPOT   : Depot      ()  [ADM]
+CENTRAL : Central    (mg/L)[ADM, OBS]
+PERIPH  : Peripheral ()  []
 
 $GLOBAL
 double K12, K23, K32, K20, KA, CL, VC, PHI, FR, TVCL_COV, TVVC_COV ;

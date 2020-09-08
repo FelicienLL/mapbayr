@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Ibrutinib
-- model_name: Ibrutinib Gallais
 - model_ref: Gallais et al, Clin Pharmacokinetics, 2020
-- error_model: Prop
-- adm_cmt: 1
-- obs_cmt: 2, 4
-- concentration_unit: ng/mL
 
 $PARAM @annotated
 TVALAG   : 0.238192 : Lag time (h)
@@ -46,12 +41,14 @@ $OMEGA @block
 0.374779 0.421162000 0.195424 0.3658180
 0.298891 0.287158000 0.156798 0.2487940 0.345464
 0.000000 0.000591386 0.180014 0.0217671 0.129532 0.347017000
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.501473 
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.282336 0.844851
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.000000 0.000000 0.197216
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.000000 0.000000 0.000000 0.197216
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.000000 0.000000 0.000000 0.000000 0.0637684
-0.000000 0.000000000 0.000000 0.0000000 0.000000 0.000000000 0.000000 0.000000 0.000000 0.000000 0.0000000 0.0637684
+$OMEGA @block
+0.501473 
+0.282336 0.844851
+$OMEGA
+0.197216
+0.197216
+0.0637684
+0.0637684
 
 $SIGMA
 0.128496
@@ -60,11 +57,11 @@ $SIGMA
 0
 
 $CMT @annotated
-EV : Extravascular compartment
-CENTibru : Central compartment for ibrutinib
-PERibru : Perif compartment for ibrutinib
-CENTdhd : Central compartment for DHD
-PERdhd :Perif compartment for DHD
+EV       : Extravascular compartment     ())     [ADM]
+CENTibru : Central compartment ibrutinib (ng/mL) [OBS]
+PERibru  : Perif compartment ibrutinib   ()
+CENTdhd  : Central compartment DHD       (ng/mL) [OBS]
+PERdhd   : Perif compartment DHD         ()
 
 $GLOBAL
 double PAR, MET, DV, K20, K23, K32, K24, K45, K54, K40, D, ALAG, CLibru, V2, V3, CLmet, KAdhd, CLdhd, K12, K14 ;

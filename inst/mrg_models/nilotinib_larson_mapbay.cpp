@@ -1,12 +1,8 @@
 $PROB
 
 - drug: Nilotinib
-- model_name: Nilotinib Larson
 - model_ref: Larson et al, Eur Clin Pharmacol, 2012
-- error_model: Prop + Add (mg/L)
-- adm_cmt: 1
-- obs_cmt: 1
-- concentration_unit: ng/mL
+
 
 $PARAM @annotated
 TVCL : 21   : Clearance (L/h)
@@ -42,7 +38,7 @@ $OMEGA @block
 $SIGMA 0.088804 0.012100
 
 $CMT @annotated
-CENT : Central compartment
+CENT : Central compartment (ng/mL) [ADM, OBS]
 PER : Perif compartment
 
 $GLOBAL
@@ -73,7 +69,7 @@ dxdt_CENT = - K10*CENT - K12*CENT + K21*PER ;
 dxdt_PER = K12*CENT - K21*PER ;
 
 $CAPTURE @annotated
-DV : Plasma concentration (mass/volume)
+DV : Plasma concentration (ng/mL)
 ETA1 : CL (L/h)
 ETA2 : V1 (L)
 ETA3 : V2 (L)

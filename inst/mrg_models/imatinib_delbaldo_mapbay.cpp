@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Imatinib
-- model_name: Imatinib Delbaldo
 - model_ref: Delbaldo et al, Clinical Cancer Res, 2006
-- error_model: Prop
-- adm_cmt: 1
-- obs_cmt: 1,2
-- concentration_unit: ng/mL
 
 $PARAM @annotated
 TVCLIMAT  : 7.97  : Imatinib clearance (L/h)
@@ -46,8 +41,8 @@ $SIGMA
 0
 
 $CMT @annotated
-CENTIMAT : Central compartment for imatinib
-CENTNDIM : Central compartment for CGP
+CENTIMAT : Central compartment for imatinib (ng/mL) [ADM, OBS]
+CENTNDIM : Central compartment for CGP (ng/mL) [OBS]
 
 $GLOBAL
 double PAR, MET, DV, CLIMAT, CLNDIM, K12, K20, D1, VIMAT, VNDIM, OCC1, OCC2 ;

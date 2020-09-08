@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Ibrutinib
-- model_name: Ibrutinib Marostica
 - model_ref: Marostica et al, Cancer Chemoter Pharmacol, 2015
-- error_model: Prop
-- adm_cmt: 1
-- obs_cmt: 2
-- concentration_unit: ng/mL
 
 $PARAM @annotated
 TVALAG    : 0.283 : Lag time (h)
@@ -57,10 +52,9 @@ $SIGMA
 
 $CMT @annotated
 
-DEPOT : Extravascular compartment
-CENT : Central compartment
-PER : Perif compartment
-
+DEPOT : Extravascular compartment () [ADM]
+CENT : Central compartment (ng/mL)  [OBS]
+PER : Periph compartment
 
 $GLOBAL
 #define DV (CENT/V2 + CENT*EPS(1)/V2)

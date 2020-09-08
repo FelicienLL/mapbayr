@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Pazopanib
-- model_name: Pazopanib Yu
 - model_ref: Yu et al, Clin Pharmacokinet, 2017
-- error_model: Additive + Prop
-- adm_cmt: 1, 3
-- obs_cmt: 2
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVCL     : 0.27  : 1  Apparent clearance (L.h-1)
@@ -43,20 +38,20 @@ ET5: 0.555025 : rF_IOV1 ()
 ET6: 0.555025 : rF_IOV2 ()
 
 $SIGMA @annotated
-EP1: 0.0064 : prop ()
-EP2: 9.61   : add  (mg/L)
+0.0064 : prop ()
+9.61   : add  (mg/L)
 
 $CMT @annotated
-DEPOT1 : Depot compartment 1 (mg)
-CENTRAL : Central compartment (mg)
-DEPOT3 : Depot compartment 3 (mg)
-PERIPHERAL : Peripheral compartment (mg)
+DEPOT1     : Depot compartment 1    () [ADM]       
+CENTRAL    : Central compartment (mg/L)[OBS]  
+DEPOT3     : Depot compartment 3    () [ADM]   
+PERIPHERAL : Peripheral compartment () []
 
 $GLOBAL
 double CL, V2, KAF, KAS, ALAG3, Q24, V4, LAMBDA, DCRP, ED50, TVFT, TVFD, TVFI, TVF, FR, F1, F3, K20, K24, K42 ;
 
 $TABLE
-double DV  = (CENTRAL / V2) * (1 + EP1) + EP2 ;
+double DV  = (CENTRAL / V2) * (1 + EPS(1)) + EPS(2) ;
 
 $MAIN
 CL = TVCL * exp(ETA1 + ET1)    ;

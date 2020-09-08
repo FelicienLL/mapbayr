@@ -1,12 +1,7 @@
 $PROB
 
 - drug: Carboplatine
-- model_name: Carboplatine Adulte 188
 - model_ref: Non publie (188 patients adultes)
-- error_model: Prop 
-- adm_cmt: 1
-- obs_cmt: 1
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVCL : 6.38  : 1  Clearance (L.h-1)
@@ -25,8 +20,8 @@ $OMEGA 0.1050 0.0378 0.0260
 $SIGMA 0.0381, 0
 
 $CMT @annotated
-CENTRAL : Central compartment (mcg)
-PERIPHERAL : Peripheral compartment (mcg)
+CENTRAL : Central compartment (mg/L) [ADM, OBS]
+PERIPHERAL : Peripheral compartment ()
 
 $GLOBAL
 double CL, VC, Q, VP, D1, K12, K21, K10 ;

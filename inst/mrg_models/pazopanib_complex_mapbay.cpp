@@ -1,12 +1,7 @@
 $PROB 
 
 - drug: Pazopanib
-- model_name: Pazopanib Complex
 - model_ref: Mourey et al, ..., ... 
-- error_model: Prop
-- adm_cmt: 1, 3
-- obs_cmt: 2
-- concentration_unit: mg/L
 
 $PARAM @annotated
 TVCL     : 0.45600181 : 1  Apparent clearance (L.h-1)
@@ -36,10 +31,10 @@ $OMEGA 0.2201188 3.9105070 0.2580377 0.1367867 0.1790653 0.1790653
 $SIGMA 0.03240458 0.00000000
 
 $CMT @annotated
-DEPOT1 : Depot compartment 1 (mcg)
-CENTRAL : Central compartment (mcg)
-DEPOT3 : Depot compartment 3 (mcg)
-PERIPHERAL : Peripheral compartment (mcg)
+DEPOT1 : Depot compartment 1 () [ADM]
+CENTRAL : Central compartment (mg/L) [OBS]
+DEPOT3 : Depot compartment 3 () [ADM]
+PERIPHERAL : Peripheral compartment () [OBS]
 
 $GLOBAL
 double CL, V2, KAF, KAS, ALAG3, Q24, V4, LAMBDA, DCRP, TVFT, TVFI, TVF, FR, F1, F3, K20, K24, K42 ;
