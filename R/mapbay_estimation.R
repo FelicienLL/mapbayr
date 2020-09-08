@@ -30,6 +30,8 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
     initial_eta <- force_initial_eta %>% magrittr::set_names(str_c("ETA", 1:n_omega))
   }
 
+  if(nrow(data %>% filter(.data$time == 0, .data$mdv ==0)) > 0) stop("Observation line (mdv = 0) not accepted at t0 (time = 0)")
+
   data_to_fit <- data %>%
     filter(!(.data$evid==0&.data$mdv==1))
 
@@ -55,6 +57,10 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
 
   final_eta <- newuoa_value$par %>% magrittr::set_names(str_c("ETA", 1:n_omega))
 
+  if(is.nan(newuoa_value$fval)) {
+    final_eta <- rep(0, n_omega) %>% magrittr::set_names(str_c("ETA", 1:n_omega))
+    warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
+  }
 
   carry <- data %>%
     select(-any_of(c("ID", "time","DV"))) %>%
