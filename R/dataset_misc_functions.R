@@ -258,10 +258,7 @@ add_rate_column <- function(data, model, rate = -2){
   if(rate != -2){
     cmt_rate <- model$adm_cmt
   } else {
-    cmt_rate <- model$mrgsolve_model@code %>%
-      str_subset("D_") %>%
-      str_match("(?<=D_)\\w+") %>%
-      match(model$mrgsolve_model@cmtL)
+    cmt_rate <- model$zero_order_cmt
   }
 
   data %>%

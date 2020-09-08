@@ -59,6 +59,16 @@ load_mapbay_model <- function(model, path = NULL){
     set_names(c("adm_cmt", "obs_cmt")) %>%
     splice(mapbay_model)
 
+  mapbay_model$zero_order_cmt <- str_c("D_", mrgsolve_model@cmtL) %>%
+    map(str_detect, string = mrgsolve_model@code) %>%
+    map(any) %>%
+    as.logical() %>%
+    which()
+
+
+
+
+
   # Concentrations
   mapbay_model$concentration_unit <- as.list(mrgsolve_model)$details$data %>%
     filter(.data$block == "CMT", .data$unit != '') %>%

@@ -107,7 +107,7 @@ K12 = KAibru      ;
 K14 = KAdhd       ;
 
 
-D_EV = D ;
+D_EV    = D    ;
 ALAG_EV = ALAG ;
 
 
