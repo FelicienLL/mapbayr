@@ -29,8 +29,8 @@ load_mapbay_model <- function(model, path = NULL){
 
   #Character of length 1
 
-  mapbay_model <- c("drug", "model_ref", "error_model") %>%
-    set_names(c("drug", "model_ref", "error_model")) %>%
+  mapbay_model <- c("drug", "model_ref") %>%
+    set_names(c("drug", "model_ref")) %>%
     map(mrgsolve_model = mrgsolve_model,
         .f = function(.x, mrgsolve_model){
           pat <- paste0("\\s*-\\s*",.x, "\\s*:\\s*")
@@ -83,7 +83,10 @@ load_mapbay_model <- function(model, path = NULL){
   #Other
   mapbay_model$model_file <- mrgsolve_model@model %>%
     str_remove("_mapbay_cpp")
-  mapbay_model$log.transformation  <- str_detect(tolower(mapbay_model$error_model), "exp")
+
+  mapbay_model$log.transformation  <- mrgsolve_model@code  %>%
+    str_subset("EPS") %>%
+    str_detect("exp *\\(.*EPS")
 
   mapbay_model$scaling_conc_from_user_to_model <- switch (mapbay_model$concentration_unit,
                                                           "mg/L"  = 1,
