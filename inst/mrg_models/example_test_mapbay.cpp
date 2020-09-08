@@ -4,9 +4,6 @@ $PROB
 - model_name: Ibrutinib Gallais
 - model_ref: Gallais et al, Clin Pharmacokinetics, 2020
 - error_model: Prop
-- adm_cmt: 1
-- obs_cmt: 2, 4
-- concentration_unit: ng/mL
 
 $PARAM @annotated
 TVALAG   : 0.238192 : Lag time (h)
@@ -17,7 +14,7 @@ TVKAdhd  : 1.20812  : Absorption constant for DHD (h-1)
 Qibru    : 171.094 : Intercompartmental clearance for ibrutinib (L/h)
 TVCLmet  : 149.622 : Metabolisation clearance of ibrutinib (L/h)
 TVCLibru : 241.899 : Elimination clearance of ibrutinib (L/h)
-Qdhd     : 50.3012  : Intercompartmental clearance for DHD (L/h)
+Qdhd     : 50.3012 : Intercompartmental clearance for DHD (L/h)
 TVCLdhd  : 180.972 : Elimination clearance of DHD (L/h)
 
 TVV2     : 1005.03 : Central volume (L)
@@ -62,11 +59,11 @@ $SIGMA
 0
 
 $CMT @annotated
-EV : Extravascular compartment
-CENTibru : Central compartment for ibrutinib
-PERibru : Perif compartment for ibrutinib
-CENTdhd : Central compartment for DHD
-PERdhd :Perif compartment for DHD
+EV       : Extravascular compartment         ()[ADM]
+CENTibru : Central compartment for ibrutinib (pg/mL)[OBS]
+PERibru  : Perif compartment for ibrutinib   ()[obs, adm]
+CENTdhd  : Central compartment for DHD       (ng/mL)[OBS]
+PERdhd   : Perif compartment for DHD         ()[]
 
 $GLOBAL
 double PAR, MET, DV, K20, K23, K32, K24, K45, K54, K40, D, ALAG, CLibru, V2, V3, CLmet, KAdhd, CLdhd, K12, K14 ;

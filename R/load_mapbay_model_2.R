@@ -9,8 +9,8 @@
 #' @importFrom magrittr %>%
 #' @importFrom rlang set_names
 #' @importFrom purrr map splice
-#' @importFrom stringr str_subset str_remove str_squish str_split str_detect
-#' @importFrom dplyr filter mutate right_join pull arrange
+#' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which
+#' @importFrom dplyr filter mutate right_join pull arrange all_of slice
 #' @importFrom tibble enframe
 #' @importFrom tidyr replace_na
 #'
@@ -21,14 +21,16 @@ load_mapbay_model <- function(model, path = NULL){
   } else{
     mrgsolve_model <- mread(model = path)
   }
+
+
   mapbay_model <- list(
     mrgsolve_model = mrgsolve_model
   )
 
   #Character of length 1
 
-  mapbay_model <- c("drug", "model_name", "model_ref", "error_model", "concentration_unit") %>%
-    set_names(c("drug", "model_name", "model_ref", "error_model", "concentration_unit")) %>%
+  mapbay_model <- c("drug", "model_name", "model_ref", "error_model") %>%
+    set_names(c("drug", "model_name", "model_ref", "error_model")) %>%
     map(mrgsolve_model = mrgsolve_model,
         .f = function(.x, mrgsolve_model){
           pat <- paste0("\\s*-\\s*",.x, "\\s*:\\s*")
@@ -39,23 +41,24 @@ load_mapbay_model <- function(model, path = NULL){
         }) %>%
     splice(mapbay_model)
 
-  #Numeric vector
 
-  mapbay_model <- c("adm_cmt", "obs_cmt") %>%
+  #Read compartment
+
+  mapbay_model <- c("adm", "obs") %>%
+    map(str_which,
+        string = as.list(mrgsolve_model)$details$data %>%
+          filter(.data$block == "CMT") %>%
+          select(all_of('options')) %>%
+          pull() %>%
+          tolower()) %>%
     set_names(c("adm_cmt", "obs_cmt")) %>%
-    map(mrgsolve_model = mrgsolve_model,
-        .f = function(.x, mrgsolve_model){
-          pat <- paste0("\\s*-\\s*",.x, "\\s*:\\s*")
-          mrgsolve_model@code %>%
-            str_subset(pat) %>%
-            str_remove(pat)%>%
-            str_squish() %>%
-            str_split(",") %>%
-            unlist() %>%
-            str_squish() %>%
-            as.numeric()
-        }) %>%
     splice(mapbay_model)
+
+  # Concentrations
+  mapbay_model$concentration_unit <- as.list(mrgsolve_model)$details$data %>%
+    filter(.data$block == "CMT", .data$unit != '') %>%
+    slice(1) %>%
+    pull(.data$unit)
 
   #Matrices
 
@@ -66,9 +69,11 @@ load_mapbay_model <- function(model, path = NULL){
   mapbay_model$model_file <- mrgsolve_model@model %>%
     str_remove("_mapbay_cpp")
   mapbay_model$log.transformation  <- str_detect(tolower(mapbay_model$error_model), "exp")
+
   mapbay_model$scaling_conc_from_user_to_model <- switch (mapbay_model$concentration_unit,
-                                                          "mg/L" = 1,
-                                                          "ng/mL"= 1000)
+                                                          "mg/L"  = 1,
+                                                          "ng/mL" = 1000,
+                                                          "pg/mL" = 1000000)
   mapbay_model$covariate_names <- as.list(mrgsolve_model)$covariates
   mapbay_model$covariate_ref_values <- unlist(mrgsolve_model@param[mapbay_model$covariate_names])
   mapbay_model$covariate_description <-  as.list(mrgsolve_model)$details$data%>%
