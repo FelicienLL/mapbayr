@@ -1,5 +1,5 @@
 
-# mapbayr <img align="right" src = "inst/logo.png" width="135px">
+<img align="right" src = "inst/logo.png" width="135px">
 
 mapbayr is a package for *maximum a posteriori* bayesian estimation of
 individual PK/PD parameters, especially including non-linear and complex
