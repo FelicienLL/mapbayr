@@ -29,17 +29,17 @@ CYCLE : 1 : default cycle for computation of IOV
 AOLA  : 200 : Amount Of Last Administration
 TOLA  : 0 : Time Of Last Administration
 
-$OMEGA @annotated
-ET1: 0.095481 : CL  (L/h)
-ET2: 1.96     : KAF (h-1)
-ET3: 0.964324 : V4  (L)
-ET4: 0.126736 : rF  ()
-ET5: 0.555025 : rF_IOV1 ()
-ET6: 0.555025 : rF_IOV2 ()
+$OMEGA
+0.095481
+1.96    
+0.964324
+0.126736
+0.555025
+0.555025
 
-$SIGMA @annotated
-0.0064 : prop ()
-9.61   : add  (mg/L)
+$SIGMA
+0.0064
+9.61  
 
 $CMT @annotated
 DEPOT1     : Depot compartment 1    () [ADM]       
@@ -54,13 +54,13 @@ $TABLE
 double DV  = (CENTRAL / V2) * (1 + EPS(1)) + EPS(2) ;
 
 $MAIN
-CL = TVCL * exp(ETA1 + ET1)    ;
+CL = TVCL * exp(ETA1 + ETA(1))    ;
 V2 = TVV2                      ;
-KAF= TVKAF* exp(ETA2 + ET2)    ;
+KAF= TVKAF* exp(ETA2 + ETA(2))    ;
 KAS= TVKAS                     ;
 ALAG3 = TVALAG3                ;
 Q24 = TVQ24                    ;
-V4 = TVV4 * exp(ETA3 + ET3)    ;
+V4 = TVV4 * exp(ETA3 + ETA(3))    ;
 LAMBDA = TVLAMBDA / 24         ;
 DCRP = TVDCRP                  ;
 ED50 = TVED50                  ;
@@ -69,12 +69,12 @@ ED50 = TVED50                  ;
 TVFT = 1 - DCRP + DCRP * exp(-LAMBDA * TOLA)          ;
 TVFD = 1 - (1*(AOLA - 200) / (ED50 + (AOLA - 200))) ;
 
-TVFI = TVFD * TVFT * exp(ETA4 + ET4) ;
+TVFI = TVFD * TVFT * exp(ETA4 + ETA(4)) ;
 
 if (CYCLE == 1){
-    TVF = TVFI * exp(ETA5 + ET5)   ;
+    TVF = TVFI * exp(ETA5 + ETA(5))   ;
 } else {
-    TVF = TVFI * exp(ETA6 + ET6)   ;
+    TVF = TVFI * exp(ETA6 + ETA(6))   ;
 }
 
 FR = TVFR ;
