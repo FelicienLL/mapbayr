@@ -42,7 +42,7 @@ $OMEGA @block
 0.298891 0.287158000 0.156798 0.2487940 0.345464
 0.000000 0.000591386 0.180014 0.0217671 0.129532 0.347017000
 $OMEGA @block
-0.501473 
+0.501473
 0.282336 0.844851
 $OMEGA
 0.197216
@@ -64,7 +64,7 @@ CENTdhd  : Central compartment DHD       (ng/mL) [OBS]
 PERdhd   : Perif compartment DHD         ()
 
 $GLOBAL
-double PAR, MET, DV, K20, K23, K32, K24, K45, K54, K40, D, ALAG, CLibru, V2, V3, CLmet, KAdhd, CLdhd, K12, K14 ;
+double PAR, MET, DV, K20, K23, K32, K24, K45, K54, K40, D, ALAG, CLibru, V2, V3, CLmet, KAdhd, CLdhd, K12, K14, OCC1, OCC2 ;
 
 $TABLE
 PAR = (CENTibru / V2) * (1 + EPS(1)) ;
@@ -82,17 +82,17 @@ V2 = TVV2 * exp (ETA(2) + ETA2) ;
 
 
 KAdhd = TVKAdhd * exp (ETA(5) + ETA5) ;
-CLmet = TVCLmet * exp (ETA(6) + ETA6) ; 
+CLmet = TVCLmet * exp (ETA(6) + ETA6) ;
 ALAG  = TVALAG  * exp (ETA(7) + ETA7) ;
 D     = TVD     * exp (ETA(8) + ETA8) ;
 
-if (CYCLE == 1){
-    CLdhd  = TVCLdhd  * exp (ETA(3) + ETA3 + ETA(11) + ETA11) ;
-    CLibru = TVCLibru * exp (ETA(4) + ETA4 + ETA(9)  + ETA9 ) ;
-} else {
-    CLdhd  = TVCLdhd  * exp (ETA(3) + ETA3 + ETA(12) + ETA12) ;
-    CLibru = TVCLibru * exp (ETA(4) + ETA4 + ETA(10) + ETA10) ;
-}
+OCC1 = 0 ;
+OCC2 = 0 ;
+if(CYCLE == 1) OCC1 = 1 ;
+if(CYCLE == 2) OCC2 = 1 ;
+
+CLdhd  = TVCLdhd  * exp ((ETA(3)+ETA3) + OCC1*(ETA(11)+ETA11) + OCC2*(ETA(12)+ETA12)) ;
+CLibru = TVCLibru * exp ((ETA(4)+ETA4) + OCC1*(ETA(9) +ETA9 ) + OCC2*(ETA(10)+ETA10)) ;
 
 
 K20 = CLibru / V2 ;
@@ -132,5 +132,5 @@ ETA7 : eta ALAG
 ETA8 : eta D
 ETA9 : IOV_CLibru
 ETA10: IOV_CLibru
-ETA11: IOV_CLdhd 
-ETA12: IOV_CLdhd 
+ETA11: IOV_CLdhd
+ETA12: IOV_CLdhd
