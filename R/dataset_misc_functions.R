@@ -37,7 +37,7 @@ time_last_dose <- function(data){
   data %>%
     filter(.data$evid == 1) %>%
     mutate(t = .data$time + .data$addl * .data$ii) %>%
-    slice_max(.data$t, 1) %>%
+    slice_max(.data$t, n = 1) %>%
     slice(1) %>%
     pull(.data$t)
 }

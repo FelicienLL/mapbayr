@@ -60,10 +60,10 @@ server <- function(input, output, session){
                      ii = input$II,
                      amt = input$AMT)
 
-    DV_vec <-  if(!is.na(input$DV_met2)){
-      c(input$DV, input$DV_met2)
+    if(!is.na(input$DV_met2)){
+      DV_vec <- c(input$DV, input$DV_met2)
     } else{
-      input$DV
+      DV_vec <- input$DV
     }
 
     obs <- obs_lines(re_model(),
