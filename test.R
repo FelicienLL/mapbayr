@@ -20,4 +20,9 @@ devtools::load_all()
 mapbay_estimation(data = datacabo, model= modelcabo)
 mapbay_estimation(data = dataibru, model= modelibru)
 
-modelibru$log.transformation
+modelibru$mrgsolve_model@cmtL
+
+
+mapbay_estimation(data = datacabo, model= modelcabo ,output_df = T) %>%
+  select(-any_of(modelcabo$mrgsolve_model@cmtL))
+

@@ -19,6 +19,8 @@
 #'
 mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NULL){
 
+  data0 <- data
+
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE"))) %>%
     mutate(evid = ifelse(.data$evid == 0, 2, .data$evid))
@@ -27,39 +29,10 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
 
   newuoa_value <- do.call(newuoa, pre)
 
-  final_eta <- newuoa_value$par %>% magrittr::set_names(names(pre$par))
+  post <- postprocess(data = data, model = model, newuoa_value = newuoa_value, data0 = data0, pre = pre)
 
-  if(is.nan(newuoa_value$fval)) {
-    final_eta <- rep(0, n_omega) %>% magrittr::set_names(names(pre$par))
-    warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
-  }
-
-  carry <- data %>%
-    select(-any_of(c("ID", "time","DV"))) %>%
-    names()
-
-  mapbay_tab <- model$mrgsolve_model %>%
-    param(final_eta) %>%
-    data_set(data) %>%
-    zero_re() %>%
-    mrgsim(carry_out = carry, end = -1) %>%
-    as_tibble() %>%
-    mutate(IPRED = .data$DV, .after = "DV") %>%
-    mutate(DV = data$DV)
-
-  if(output_df){
-
-    mapbay_output <- mapbay_tab
-
-  } else {
-
-    mapbay_output <- list(
-      initial_eta  = pre$par,
-      newuoa_value = newuoa_value,
-      final_eta    = final_eta,
-      mapbay_tab   = mapbay_tab )
-
-  }
+  mapbay_output <- post
+  if(output_df) mapbay_output <- post$mapbay_tab
 
   return(mapbay_output)
 
