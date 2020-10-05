@@ -20,45 +20,17 @@
 mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NULL){
 
   data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE"))) %>%
+    mutate(evid = ifelse(.data$evid == 0, 2, .data$evid))
 
-  n_omega <- length(diag(model$param_omega_matrix))
+  pre <- preprocess(data = data, model = model, force_initial_eta = force_initial_eta)
 
-  if(is.null(force_initial_eta)){
-    initial_eta <- runif(n_omega, -0.5, 0.5) %>% magrittr::set_names(str_c("ETA", 1:n_omega))
-  } else {
-    initial_eta <- force_initial_eta %>% magrittr::set_names(str_c("ETA", 1:n_omega))
-  }
+  newuoa_value <- do.call(newuoa, pre)
 
-  if(nrow(data %>% filter(.data$time == 0, .data$mdv ==0)) > 0) stop("Observation line (mdv = 0) not accepted at t0 (time = 0)")
-
-  data_to_fit <- data %>%
-    filter(!(.data$evid==0&.data$mdv==1))
-
-  omega.inv <- solve(model$param_omega_matrix)
-
-  DVobs <- data_to_fit[data_to_fit$evid==0,]$DV
-
-  f_compute_ofv <- ifelse(length(model$obs_cmt)>1,
-                          compute_ofv_m,
-                          compute_ofv)
-
-  newuoa_value <- newuoa(
-    initial_eta,
-    f_compute_ofv,
-    data  = data_to_fit,
-    mrgsolve_model = model$mrgsolve_model,
-    sigma = model$param_sigma_matrix,
-    log.transformation = model$log.transformation,
-    DVobs = DVobs,
-    omega.inv = omega.inv,
-    obs_cmt = model$obs_cmt,
-    control = list(iprint = 2, maxfun = 50000))
-
-  final_eta <- newuoa_value$par %>% magrittr::set_names(str_c("ETA", 1:n_omega))
+  final_eta <- newuoa_value$par %>% magrittr::set_names(names(pre$par))
 
   if(is.nan(newuoa_value$fval)) {
-    final_eta <- rep(0, n_omega) %>% magrittr::set_names(str_c("ETA", 1:n_omega))
+    final_eta <- rep(0, n_omega) %>% magrittr::set_names(names(pre$par))
     warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
   }
 
@@ -66,14 +38,13 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
     select(-any_of(c("ID", "time","DV"))) %>%
     names()
 
-
   mapbay_tab <- model$mrgsolve_model %>%
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry) %>%
+    mrgsim(carry_out = carry, end = -1) %>%
     as_tibble() %>%
-    mutate(IPRED = .data$DV) %>%
+    mutate(IPRED = .data$DV, .after = "DV") %>%
     mutate(DV = data$DV)
 
   if(output_df){
@@ -83,7 +54,7 @@ mapbay_estimation <- function(data, model, output_df = F, force_initial_eta = NU
   } else {
 
     mapbay_output <- list(
-      initial_eta  = initial_eta,
+      initial_eta  = pre$par,
       newuoa_value = newuoa_value,
       final_eta    = final_eta,
       mapbay_tab   = mapbay_tab )

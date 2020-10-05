@@ -35,3 +35,6 @@ Imports:
     tidyr
 URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/hadley/FelicienLL/mapbayr
+Suggests: 
+    knitr
+VignetteBuilder: knitr

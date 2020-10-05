@@ -1,5 +1,31 @@
 #' Title
 #'
+#' @param v_DV vector of concentrations to derivate (typically data$DV)
+#' @param v_cmt vector of compartment associated to the concentrations (typically data$cmt)
+#' @param cmts numbers of compartment compartment associated with an observations, to derive concentration (typically obs_cmt)
+#'
+#' @return a matrix
+#' @export
+derivatives <- function(v_DV, v_cmt, cmts){
+  LIST <- list()
+  for(i in cmts){
+    condcmts <- v_cmt == i
+    col_prop <- paste0("P", i)
+    col_add <- paste0("A", i)
+    LIST[[col_prop]] <- v_DV
+    LIST[[col_prop]][!condcmts] <- 0
+    LIST[[col_add]]  <- rep.int(1, length(v_DV))
+    LIST[[col_add]][!condcmts]  <- 0
+  }
+  return(as.matrix(as.data.frame(LIST)))
+}
+
+
+
+
+
+#' Title
+#'
 #' @param eta a vector, initial eta, as a named vector (ETA1, ETA2...)
 #' @param data a tibble, dataset to fit; formatted like NM-TRAN
 #' @param mrgsolve_model a compiled mrgsolve model
@@ -18,27 +44,17 @@
 #'
 compute_ofv <- function(eta, data, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
 
-  if(log.transformation){DVobs <- log(DVobs)}
-
-  mrgsolve_model <- mrgsolve_model %>%
-    param(as.list(eta))
-
   output <- mrgsolve_model %>%
-    obsonly %>%
-    zero_re() %>%
-    data_set(data) %>%
-    mrgsim
+    param(as.list(eta)) %>%
+    mrgsim_df(end = -1)
+
+  output <- output[output$evid%in%c(0,2),] #Cannot use obsonly() because filter evid==0 only.
 
   DVpred <- output$DV
 
   if(log.transformation){DVpred <- log(DVpred)}
 
-  H <- as.matrix(
-    data.frame(
-      H1 = DVpred,                #err prop
-      H2 = 1                      #err add
-    )
-  )
+  H <- derivatives(v_DV = DVpred, v_cmt = output$cmt, cmts = obs_cmt)
 
   Sigsq <- diag(H %*% sigma %*% t(H))
 

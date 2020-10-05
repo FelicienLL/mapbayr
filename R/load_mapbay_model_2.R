@@ -86,7 +86,8 @@ load_mapbay_model <- function(model, path = NULL){
 
   mapbay_model$log.transformation  <- mrgsolve_model@code  %>%
     str_subset("EPS") %>%
-    str_detect("exp *\\(.*EPS")
+    str_detect("exp *\\(.*EPS") %>%
+    any()
 
   mapbay_model$scaling_conc_from_user_to_model <- switch (mapbay_model$concentration_unit,
                                                           "mg/L"  = 1,
