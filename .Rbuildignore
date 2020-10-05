@@ -3,3 +3,6 @@
 ^devtools_history\.R$
 README.Rmd
 ^test$
+^tests$
+^mapbay_estimation2$
+^R/mapbay_estimation2\.R$

@@ -6,16 +6,14 @@
 #' @param pre preprocessed object
 #' @param data0 original data
 #'
-#' @return
+#' @return a list of post processing values
 #' @export
-#'
-#' @examples
 postprocess <- function(data, model, newuoa_value, data0, pre){
 
   final_eta <- newuoa_value$par %>% magrittr::set_names(names(pre$par))
 
   if(is.nan(newuoa_value$fval)) {
-    final_eta <- rep(0, n_omega) %>% magrittr::set_names(names(pre$par))
+    final_eta <- rep(0, length(diag(model$param_omega_matrix))) %>% magrittr::set_names(names(pre$par))
     warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
   }
 

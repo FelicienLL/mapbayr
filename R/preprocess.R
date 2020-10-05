@@ -8,7 +8,6 @@
 #' @export
 preprocess <- function(model, data, force_initial_eta = NULL){
 
-
   n_omega <- length(diag(model$param_omega_matrix))
 
   if(is.null(force_initial_eta)){
@@ -25,8 +24,7 @@ preprocess <- function(model, data, force_initial_eta = NULL){
   mrgsolve_model <- model$mrgsolve_model %>%
     #obsonly() %>%
     zero_re() %>%
-    data_set(data_to_fit) %>%
-    carry_out(cmt, evid)
+    data_set(data_to_fit)
 
   omega.inv <- solve(model$param_omega_matrix)
 

@@ -2,3 +2,6 @@
 .Rhistory
 inst/doc
 test
+tests
+mapbay_estimation2
+R/mapbay_estimation2.R
