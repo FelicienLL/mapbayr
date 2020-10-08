@@ -52,7 +52,7 @@ load_mapbay_model <- function(model, path = NULL){
   mapbay_model <- c("adm", "obs") %>%
     map(str_which,
         string = as.list(mrgsolve_model)$details$data %>%
-          filter(.data$block == "CMT") %>%
+          filter(.data$block %in%c("CMT", "INIT")) %>%
           select(all_of('options')) %>%
           pull() %>%
           tolower()) %>%
