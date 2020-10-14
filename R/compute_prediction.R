@@ -18,7 +18,7 @@ compute_prediction <- function(data, estimates, model, time_target, choose_delta
 
   model$mrgsolve_model %>%
     param(estimates[["final_eta"]]) %>%
-    zero_re %>%
+    zero_re() %>%
     data_set(data) %>%
     obsaug() %>%
     mrgsim_df(end = t_end, delta = choose_delta, carry_out = c("evid", "cmt", "mdv")) %>%

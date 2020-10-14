@@ -40,10 +40,12 @@ postprocess <- function(data, model, newuoa_value, data0, pre){
     select(-any_of(model$mrgsolve_model@cmtL))
 
   list(
-      initial_eta  = pre$par,
-      newuoa_value = newuoa_value,
-      final_eta    = final_eta,
-      mapbay_tab   = mapbay_tab
+    data = data,
+    model = model,
+    initial_eta  = pre$par,
+    newuoa_value = newuoa_value,
+    final_eta    = final_eta,
+    mapbay_tab   = mapbay_tab
   )
 
 }
