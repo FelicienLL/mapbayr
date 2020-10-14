@@ -6,7 +6,6 @@
 \usage{
 compute_ofv(
   eta,
-  data,
   mrgsolve_model,
   sigma,
   log.transformation,
@@ -17,8 +16,6 @@ compute_ofv(
 }
 \arguments{
 \item{eta}{a vector, initial eta, as a named vector (ETA1, ETA2...)}
-
-\item{data}{a tibble, dataset to fit; formatted like NM-TRAN}
 
 \item{mrgsolve_model}{a compiled mrgsolve model}
 

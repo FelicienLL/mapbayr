@@ -27,7 +27,6 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #' Title
 #'
 #' @param eta a vector, initial eta, as a named vector (ETA1, ETA2...)
-#' @param data a tibble, dataset to fit; formatted like NM-TRAN
 #' @param mrgsolve_model a compiled mrgsolve model
 #' @param sigma a matrix, population values of sigma. 1 proportional error, 2 additive error
 #' @param log.transformation logical operator. Useful for proportional error models (i.e. log transformed additive)
@@ -42,7 +41,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #'
 #'
 #'
-compute_ofv <- function(eta, data, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
+compute_ofv <- function(eta, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
 
   output <- mrgsolve_model %>%
     param(as.list(eta)) %>%
