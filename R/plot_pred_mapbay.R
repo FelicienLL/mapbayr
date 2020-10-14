@@ -10,7 +10,7 @@
 #' @return a ggplot-object
 #' @export
 #'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_hline labs theme_light scale_x_continuous scale_color_manual facet_grid
+#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_hline labs theme_light scale_x_continuous scale_color_manual facet_grid %+replace% theme
 #' @importFrom dplyr filter vars mutate
 #' @importFrom tidyr pivot_longer
 #' @importFrom rlang .data set_names
