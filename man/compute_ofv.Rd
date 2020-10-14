@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_ofv.R
 \name{compute_ofv}
 \alias{compute_ofv}
-\title{Title}
+\title{Compute the objective function values. Called iteratively during minimization}
 \usage{
 compute_ofv(
   eta,
@@ -33,5 +33,5 @@ compute_ofv(
 a single value (the objective function value)
 }
 \description{
-Title
+Compute the objective function values. Called iteratively during minimization
 }

@@ -1,7 +1,7 @@
 #' Title
 #'
-#' @param v_DV vector of concentrations to derivate (typically data$DV)
-#' @param v_cmt vector of compartment associated to the concentrations (typically data$cmt)
+#' @param v_DV vector of concentrations to derivate (typically output$DV)
+#' @param v_cmt vector of compartment associated to the concentrations (typically output$cmt)
 #' @param cmts numbers of compartment compartment associated with an observations, to derive concentration (typically obs_cmt)
 #'
 #' @return a matrix
@@ -24,7 +24,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 
 
 
-#' Title
+#' Compute the objective function values. Called iteratively during minimization
 #'
 #' @param eta a vector, initial eta, as a named vector (ETA1, ETA2...)
 #' @param mrgsolve_model a compiled mrgsolve model
@@ -36,11 +36,6 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #'
 #' @return a single value (the objective function value)
 #' @export
-#' @import mrgsolve
-#' @importFrom magrittr %>%
-#'
-#'
-#'
 compute_ofv <- function(eta, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
 
   output <- mrgsolve_model %>%

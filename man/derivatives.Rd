@@ -7,9 +7,9 @@
 derivatives(v_DV, v_cmt, cmts)
 }
 \arguments{
-\item{v_DV}{vector of concentrations to derivate (typically data$DV)}
+\item{v_DV}{vector of concentrations to derivate (typically output$DV)}
 
-\item{v_cmt}{vector of compartment associated to the concentrations (typically data$cmt)}
+\item{v_cmt}{vector of compartment associated to the concentrations (typically output$cmt)}
 
 \item{cmts}{numbers of compartment compartment associated with an observations, to derive concentration (typically obs_cmt)}
 }

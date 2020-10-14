@@ -9,15 +9,6 @@
 #'
 #' @return a ggplot-object
 #' @export
-#'
-#' @importFrom ggplot2 ggplot aes geom_line geom_point geom_hline labs theme_light scale_x_continuous scale_color_manual facet_grid %+replace% theme
-#' @importFrom dplyr filter vars mutate
-#' @importFrom tidyr pivot_longer
-#' @importFrom rlang .data set_names
-#' @importFrom magrittr %>%
-#' @importFrom stringr str_c
-#'
-#'
 plot_pred_mapbay <- function(pred_data, input_data, model, from = 0, to = max(pred_data$time), hline = NULL){
 
   theme_custom <- function(...) {

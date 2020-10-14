@@ -8,10 +8,6 @@
 #'
 #' @return a dataframe, a mrgsolve 'df' output
 #' @export
-#' @import mrgsolve
-#' @importFrom dplyr as_tibble
-#' @importFrom magrittr %>%
-#'
 compute_prediction <- function(data, estimates, model, time_target, choose_delta = .1){
 
   t_end = max(max(data[["time"]]), time_target) # if sampling time > to theoretical trough time

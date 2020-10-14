@@ -5,15 +5,6 @@
 #'
 #' @return a mapbay_model list, with the characteristics of the model, including a compiled mrgsolve_model
 #' @export
-#' @import mrgsolve
-#' @importFrom magrittr %>%
-#' @importFrom rlang set_names
-#' @importFrom purrr map splice
-#' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace
-#' @importFrom dplyr filter mutate right_join pull arrange all_of slice
-#' @importFrom tibble enframe
-#' @importFrom tidyr replace_na
-#'
 load_mapbay_model <- function(model, path = NULL){
 
   if(is.null(path)){
