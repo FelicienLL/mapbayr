@@ -2,7 +2,7 @@
 % Please edit documentation in R/mapbay_estimation.R
 \name{mbrest}
 \alias{mbrest}
-\title{Title}
+\title{Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset}
 \usage{
 mbrest(x, data = NULL, output = NULL, force_initial_eta = NULL)
 }
@@ -19,5 +19,5 @@ mbrest(x, data = NULL, output = NULL, force_initial_eta = NULL)
 default: a list with data, model, initial eta, newuoa outputs, final eta, and mapbay_tab
 }
 \description{
-Title
+Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset
 }
