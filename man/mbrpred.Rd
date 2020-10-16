@@ -4,10 +4,12 @@
 \alias{mbrpred}
 \title{Compute full PK profile prediction from mapbayr estimates.}
 \usage{
-mbrpred(est, end = NULL, ...)
+mbrpred(est, data = NULL, end = NULL, ...)
 }
 \arguments{
 \item{est}{a list, default output of mbrest}
+
+\item{data}{dataset to pass to mrgsolve for simulation (default is dataset used for estimation)}
 
 \item{end}{end of infusion time (passed to mrgsim)}
 
