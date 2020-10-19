@@ -1,4 +1,4 @@
-#' @importFrom dplyr all_of any_of arrange as_tibble distinct filter mutate pull rename_with right_join select slice starts_with vars
+#' @importFrom dplyr all_of any_of arrange as_tibble bind_rows desc distinct filter mutate pull rename_with right_join select slice starts_with vars
 #' @importFrom ggplot2 ggplot aes facet_wrap geom_line geom_point geom_hline geom_vline labs theme_light theme_bw scale_x_continuous scale_color_manual stat_function facet_grid %+replace% theme label_both
 #' @importFrom ggpubr ggarrange
 #' @importFrom magrittr %>%
@@ -9,5 +9,5 @@
 #' @importFrom stats runif optim dnorm
 #' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace str_c
 #' @importFrom tibble tibble enframe
-#' @importFrom tidyr replace_na pivot_longer
+#' @importFrom tidyr replace_na pivot_longer crossing
 NULL
