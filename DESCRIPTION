@@ -32,7 +32,8 @@ Imports:
     stats,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    ggpubr
 URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/hadley/FelicienLL/mapbayr
 Suggests: 

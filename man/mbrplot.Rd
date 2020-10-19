@@ -7,7 +7,7 @@
 mbrplot(est)
 }
 \arguments{
-\item{est}{a list, default output of mbrest augmented with compute_pred}
+\item{est}{a list, default output of mbrest augmented with mbrpred}
 }
 \value{
 a ggplot-object
