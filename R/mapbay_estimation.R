@@ -12,6 +12,9 @@ mbrest <- function(x, data = NULL, output = NULL, force_initial_eta = NULL){
   if(is.null(data)){
     data <- x@args$data
   }
+
+  if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
+
   data0 <- data
 
   data <- data %>%

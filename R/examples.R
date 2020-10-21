@@ -9,5 +9,5 @@
 #' mod <- mrgsolve::mread("ex_mbr3", mbrlib())
 #' }
 mbrlib <- function(){
-  file.path(path.package("mapbayr"), "models")
+  system.file("models", package = "mapbayr")
 }
