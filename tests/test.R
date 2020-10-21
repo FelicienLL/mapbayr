@@ -120,16 +120,3 @@ ex3 %>%
 
 
 devtools::load_all()
-derivatives()
-
-derivatives(
-  v_DV = c(400, 40, 200, 20),
-  v_cmt = c(2, 3, 2, 3),
-  cmts = c(2,3)
-  )
-
-derivatives(
-  v_DV = c(400, 40, 200, 20),
-  v_cmt = c(2, 3, 2, 3),
-  cmts = c(2,3)
-)
