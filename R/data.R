@@ -95,6 +95,54 @@ obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
 
 }
 
+
+
+#' Add covariates to the dataset, as well as TOLA and AOLA
+#'
+#' @param model model object
+#' @param covariates a list of named covariates, with a single value or exact number of lines than data
+#' @param output defaut: a mrgsolve model with a data_set in args. if "df" return a data frame
+#'
+#' @return model object with dataset
+#' @export
+add_covariates <- function(model, covariates = list(), output = NULL){
+  if(is.null(model@args$data)) stop("Please provide a dataset")
+
+  d <- model@args$data %>%
+    arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
+    bind_cols(covariates)
+
+  if("AOLA" %in% mbr_cov_names(model)) {
+    d <- d %>%
+      mutate(AOLA = .data$amt) %>%
+      fill(.data$AOLA)
+  }
+
+  if("TOLA" %in% mbr_cov_names(model)) {
+    d <- d %>%
+      realize_addl() %>%
+      mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
+      fill(.data$TOLA)
+  }
+
+  dd <- model %>%
+    data_set(d)
+
+  if(!is.null(output)){
+    if(output == "df") dd <- dd@args$data
+  }
+
+  return(dd)
+
+}
+
+
+
+
+
+
+
+
 #' Print tibble data to the console
 #'
 #' @param x model object
