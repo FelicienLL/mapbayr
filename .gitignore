@@ -1,7 +1,6 @@
 .Rproj.user
 .Rhistory
 inst/doc
-test
-tests
+tests/test
 mapbay_estimation2
 R/mapbay_estimation2.R
