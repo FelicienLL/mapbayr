@@ -16,6 +16,6 @@ a named vector of numerics
 Get covariate reference values from mrgsolve model
 }
 \examples{
-model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+model <- mrgsolve::mread("ex_mbr1", mbrlib())
 mbr_cov_refvalues(model)
 }

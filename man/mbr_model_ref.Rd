@@ -16,7 +16,7 @@ model reference as a character string
 Get model reference from mrgsolve model
 }
 \examples{
-model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+model <- mrgsolve::mread("ex_mbr1", mbrlib())
 mbr_model_ref(model)
 
 }

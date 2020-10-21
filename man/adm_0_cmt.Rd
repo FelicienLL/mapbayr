@@ -16,6 +16,6 @@ vector of integer
 Get zero-order infusion compartment from mrgsolve model
 }
 \examples{
-model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+model <- mrgsolve::mread("ex_mbr1", mbrlib())
 adm_0_cmt(model)
 }

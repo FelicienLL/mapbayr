@@ -19,6 +19,6 @@ Get scaling factor from user to model
 #Dose expected in mg, and Volume of distribution in L.
 #Possible values for concentration units: mg/L, ng/mL, pg/mL
 #Microgramme not supported for compatibility and encoding reasons (greek letter mu)
-model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+model <- mrgsolve::mread("ex_mbr1", mbrlib())
 mbr_conc_scaling(model)
 }

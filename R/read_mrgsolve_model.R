@@ -5,7 +5,7 @@
 #' @return name of the drug as a character string
 #' @export
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_drug(model)
 #'
 mbr_drug <- function(x){
@@ -27,7 +27,7 @@ mbr_drug <- function(x){
 #' @return model reference as a character string
 #' @export
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_model_ref(model)
 #'
 mbr_model_ref <- function(x){
@@ -49,7 +49,7 @@ mbr_model_ref <- function(x){
 #' @return model file as a character string
 #' @export
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_model_name(model)
 #'
 mbr_model_file <- function(x){
@@ -69,7 +69,7 @@ mbr_model_file <- function(x){
 #' @return model name as a character string
 #' @export
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_model_name(model)
 #'
 mbr_model_name <- function(x){
@@ -91,7 +91,7 @@ mbr_model_name <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_conc_unit(model)
 mbr_conc_unit <- function(x){
   as.list(x)$details$data %>%
@@ -115,7 +115,7 @@ mbr_conc_unit <- function(x){
 #' #Dose expected in mg, and Volume of distribution in L.
 #' #Possible values for concentration units: mg/L, ng/mL, pg/mL
 #' #Microgramme not supported for compatibility and encoding reasons (greek letter mu)
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_conc_scaling(model)
 mbr_conc_scaling <- function(x){
   switch(mbr_conc_unit(x),
@@ -134,7 +134,7 @@ mbr_conc_scaling <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' adm_cmt(model)
 adm_cmt <- function(x){
   as.list(x)$details$data %>%
@@ -159,7 +159,7 @@ adm_cmt <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' obs_cmt(model)
 obs_cmt <- function(x){
   as.list(x)$details$data %>%
@@ -184,7 +184,7 @@ obs_cmt <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' adm_0_cmt(model)
 adm_0_cmt <- function(x){
   str_c("D_", x@cmtL) %>%
@@ -218,7 +218,7 @@ log.transformation <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_names(model)
 mbr_cov_names <- function(x){
   as.list(x)$covariates
@@ -237,7 +237,7 @@ mbr_cov_names <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_refvalues(model)
 mbr_cov_refvalues <- function(x){
   unlist(x@param[mbr_cov_names(x)])
@@ -255,7 +255,7 @@ mbr_cov_refvalues <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_descr(model)
 mbr_cov_descr <- function(x){
   as.list(x)$details$data %>%
@@ -276,7 +276,7 @@ mbr_cov_descr <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_param_names(model)
 mbr_param_names <- function(x){
   ((as.list(x))$details$data %>%
@@ -296,7 +296,7 @@ mbr_param_names <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_param_units(model)
 mbr_param_units <- function(x){
   ((as.list(x))$details$data %>%
@@ -315,7 +315,7 @@ mbr_param_units <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread(system.file("mrg_models/example_test_mapbay.cpp", package = "mapbayr"))
+#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_param_tv(model)
 mbr_param_tv <- function(x){
   tab <- (as.list(x))$details$data %>%
