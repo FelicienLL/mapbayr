@@ -95,3 +95,13 @@ obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
 
 }
 
+#' Print tibble data to the console
+#'
+#' @param x model object
+#' @param ... passed to print
+#'
+#' @return called for its side effect
+#' @export
+see_data <- function(x, ...){
+  print(as_tibble(x@args$data), ...)
+}
