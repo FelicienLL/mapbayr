@@ -2,7 +2,7 @@
 % Please edit documentation in R/compute_ofv.R
 \name{derivatives}
 \alias{derivatives}
-\title{Title}
+\title{Compute the derivatives}
 \usage{
 derivatives(v_DV, v_cmt, cmts)
 }
@@ -17,5 +17,13 @@ derivatives(v_DV, v_cmt, cmts)
 a matrix
 }
 \description{
-Title
+Compute the derivatives
+}
+\examples{
+derivatives(
+v_DV = c(400, 40, 200, 20),
+v_cmt = c(2, 3, 2, 3),
+cmts = c(2,3)
+)
+
 }

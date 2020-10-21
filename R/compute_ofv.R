@@ -1,4 +1,4 @@
-#' Title
+#' Compute the derivatives
 #'
 #' @param v_DV vector of concentrations to derivate (typically output$DV)
 #' @param v_cmt vector of compartment associated to the concentrations (typically output$cmt)
@@ -6,6 +6,13 @@
 #'
 #' @return a matrix
 #' @export
+#' @examples
+#' derivatives(
+#' v_DV = c(400, 40, 200, 20),
+#' v_cmt = c(2, 3, 2, 3),
+#' cmts = c(2,3)
+#' )
+#'
 derivatives <- function(v_DV, v_cmt, cmts){
   LIST <- list()
   for(i in cmts){
