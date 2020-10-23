@@ -12,6 +12,13 @@
 #' @return model object with dataset
 #' @export
 adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, realize_addl = F, output = NULL){
+  if(is.null(model@args$data)){
+    model@args$data <- tibble()
+    iID <- 1
+  }else{
+    iID <- utils::head(model@args$data$ID, 1)
+  }
+
   d <- tibble(
     ID    = 1,
     time  = time,
@@ -28,9 +35,6 @@ adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, real
     d <- realize_addl(d)
   }
 
-  if(is.null(model@args$data)){
-    model@args$data <- tibble()
-  }
 
   d <- model@args$data %>%
     bind_rows(d) %>%
@@ -60,6 +64,14 @@ adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, real
 #' @return model object with dataset
 #' @export
 obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
+
+  if(is.null(model@args$data)){
+    model@args$data <- tibble()
+    iID <- 1
+  }else{
+    iID <- utils::head(model@args$data$ID, 1)
+  }
+
   d <- tibble(
     time = time,
     DV   = DV,
@@ -74,11 +86,9 @@ obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
     pivot_longer(starts_with("DV"), values_to = "DV") %>%
     mutate(cmt = ifelse(.data$name == "DV", (obs_cmt(model))[1], (obs_cmt(model))[2])) %>%
     select(-any_of("name")) %>%
-    mutate(ID = 1, evid = 0, addl = 0, ii = 0, amt = 0, rate = 0)
+    mutate(ID = iID, evid = 0, addl = 0, ii = 0, amt = 0, rate = 0)
 
-  if(is.null(model@args$data)){
-    model@args$data <- tibble()
-  }
+
 
   d <- model@args$data %>%
     bind_rows(d) %>%
@@ -114,15 +124,19 @@ add_covariates <- function(model, covariates = list(), output = NULL){
 
   if("AOLA" %in% mbr_cov_names(model)) {
     d <- d %>%
-      mutate(AOLA = .data$amt) %>%
-      fill(.data$AOLA)
+      group_by(.data$ID) %>%
+      mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
+      fill(.data$AOLA) %>%
+      ungroup()
   }
 
   if("TOLA" %in% mbr_cov_names(model)) {
     d <- d %>%
       realize_addl() %>%
+      group_by(.data$ID) %>%
       mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
-      fill(.data$TOLA)
+      fill(.data$TOLA)%>%
+      ungroup()
   }
 
   dd <- model %>%
@@ -143,13 +157,12 @@ add_covariates <- function(model, covariates = list(), output = NULL){
 
 
 
-#' Print tibble data to the console
+#' Return tibble data
 #'
 #' @param x model object
-#' @param ... passed to print
 #'
-#' @return called for its side effect
+#' @return a tibble
 #' @export
-see_data <- function(x, ...){
-  print(as_tibble(x@args$data), ...)
+see_data <- function(x){
+  as_tibble(x@args$data)
 }

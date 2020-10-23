@@ -1,4 +1,5 @@
 .Rproj.user
 .Rhistory
 inst/doc
+tests/test2.R
 tests/test.R

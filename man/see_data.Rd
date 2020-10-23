@@ -2,18 +2,16 @@
 % Please edit documentation in R/data.R
 \name{see_data}
 \alias{see_data}
-\title{Print tibble data to the console}
+\title{Return tibble data}
 \usage{
-see_data(x, ...)
+see_data(x)
 }
 \arguments{
 \item{x}{model object}
-
-\item{...}{passed to print}
 }
 \value{
-called for its side effect
+a tibble
 }
 \description{
-Print tibble data to the console
+Return tibble data
 }

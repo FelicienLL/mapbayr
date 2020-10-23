@@ -16,9 +16,12 @@ CL_WT : 0.2 : Effect of weight on CL ()
 
 ETA1 : 0 : KA (h-1)
 ETA2 : 0 : CL (L/h)
-ETA3 : 0 : VC 
+ETA3 : 0 : VC
 
 $PARAM @annotated @covariates
+CYCLE: 1  : Cycle ()
+AOLA : 60 : Amount of last admin (mg)
+TOLA : 0  : Time of last admin (mg)
 WT   : 80 : Body weight (kg)
 
 $OMEGA @block

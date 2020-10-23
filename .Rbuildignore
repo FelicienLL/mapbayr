@@ -2,4 +2,5 @@
 ^\.Rproj\.user$
 ^devtools_history\.R$
 README.Rmd
-^tests/test.R$
+^tests/test\.R$
+^tests/test2\.R$
