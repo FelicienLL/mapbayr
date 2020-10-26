@@ -9,5 +9,5 @@
 #' @importFrom stats runif optim dnorm
 #' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace str_c
 #' @importFrom tibble tibble enframe
-#' @importFrom tidyr fill replace_na pivot_longer crossing
+#' @importFrom tidyr expand_grid fill pivot_longer replace_na
 NULL

@@ -28,7 +28,7 @@ adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, real
     amt   = amt,
     mdv   = 1
   ) %>%
-    crossing(cmt = adm_cmt(model)) %>%
+    expand_grid(cmt = adm_cmt(model)) %>%
     mutate(rate = ifelse(.data$cmt %in% adm_0_cmt(model), -2, rate))
 
   if(realize_addl){
