@@ -85,6 +85,7 @@ obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
   d <- d %>%
     pivot_longer(starts_with("DV"), values_to = "DV") %>%
     mutate(cmt = ifelse(.data$name == "DV", (obs_cmt(model))[1], (obs_cmt(model))[2])) %>%
+    filter(!is.na(.data$cmt)) %>%
     select(-any_of("name")) %>%
     mutate(ID = iID, evid = 0, addl = 0, ii = 0, amt = 0, rate = 0)
 
