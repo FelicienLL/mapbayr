@@ -26,7 +26,7 @@ WT   : 80 : Body weight (kg)
 
 $OMEGA @block
 0.15
-0.00 0.20
+0.05 0.20
 0.00 0.05 0.25
 
 $SIGMA
