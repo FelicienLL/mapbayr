@@ -134,6 +134,7 @@ add_covariates <- function(model, covariates = list(), output = NULL){
   if("TOLA" %in% mbr_cov_names(model)) {
     d <- d %>%
       realize_addl() %>%
+      arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
       group_by(.data$ID) %>%
       mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
       fill(.data$TOLA)%>%

@@ -18,8 +18,8 @@ mbrest <- function(x, data = NULL, output = NULL, force_initial_eta = NULL){
   data0 <- data
 
   data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE"))) %>%
-    mutate(evid = ifelse(.data$evid == 0, 2, .data$evid))
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE"))) #%>%
+    #mutate(evid = ifelse(.data$evid == 0, 2, .data$evid))
 
   pre <- preprocess(data = data, model = x, force_initial_eta = force_initial_eta)
 
@@ -65,6 +65,10 @@ preprocess <- function(model, data, force_initial_eta = NULL){
     zero_re() %>%
     data_set(data_to_fit)
 
+  if(time_varying(data_to_fit)){
+    model@hmax <- 0.01
+  }
+
   DVobs <- data_to_fit[data_to_fit$evid%in%c(0,2),]$DV
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
@@ -80,6 +84,13 @@ preprocess <- function(model, data, force_initial_eta = NULL){
   )
 }
 
+time_varying <- function(data){
+  n_val_cov <- data %>%
+    select(-any_of(c("ID", "time", "evid", "addl", "ii", "amt", "mdv", "cmt", "ss", "rate", "DV"))) %>%
+    summarise(across(everything(), n_distinct)) %>%
+    as.integer()
+  any(n_val_cov>1)
+}
 
 
 
@@ -112,7 +123,7 @@ postprocess <- function(data, model, newuoa_value, data0, pre){
   typical_pred <- model %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1) %>%
+    mrgsim(carry_out = carry, end = -1, hmax = 0.01) %>%
     as_tibble() %>%
     pull(.data$DV)
 
@@ -120,11 +131,11 @@ postprocess <- function(data, model, newuoa_value, data0, pre){
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1) %>%
+    mrgsim(carry_out = carry, end = -1, hmax = 0.01) %>%
     as_tibble() %>%
     mutate(IPRED = .data$DV, PRED = typical_pred, .after = "DV") %>%
     mutate(DV = data$DV) %>%
-    mutate(evid = data0$evid) %>%
+#    mutate(evid = data0$evid) %>%
     select(-any_of(model@cmtL))
 
   list(
