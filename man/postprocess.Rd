@@ -4,18 +4,18 @@
 \alias{postprocess}
 \title{Post process results from optimization}
 \usage{
-postprocess(data, model, newuoa_value, data0, pre)
+postprocess(data, model, opt.value, arg.optim, arg.ofv)
 }
 \arguments{
 \item{data}{data passed through processing}
 
 \item{model}{a compiled mrgsolve_model}
 
-\item{newuoa_value}{output returned by newuoa (list of length 4)}
+\item{opt.value}{value obtained by optimization function}
 
-\item{data0}{original data}
+\item{arg.optim}{argument passed to optimization function}
 
-\item{pre}{preprocessed object}
+\item{arg.ofv}{argument passed to optimization function}
 }
 \value{
 a list of post processing values

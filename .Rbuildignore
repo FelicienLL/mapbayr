@@ -5,3 +5,4 @@ README.Rmd
 ^tests/test\.R$
 ^tests/test2\.R$
 ^tests/draft\.R$
+^tests/draftmethod\.R$

@@ -2,30 +2,34 @@
 #'
 #' @param x model file
 #' @param data NM tran data to optimize
+#' @param method "newuoa" or "L-BFGS-B"
 #' @param output return a mapbay_tab only
-#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
+#' @param force_initial_eta for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )
+#' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
 #'
-#' @return default: a list with data, model, initial eta, newuoa outputs, final eta, and mapbay_tab
+#' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export
 #'
-mbrest <- function(x, data = NULL, output = NULL, force_initial_eta = NULL){
+mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, force_initial_eta = NULL, quantile_bound = 0.001){
   if(is.null(data)){
     data <- x@args$data
   }
 
   if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
 
-  data0 <- data
-
   data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE"))) #%>%
-    #mutate(evid = ifelse(.data$evid == 0, 2, .data$evid))
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  pre <- preprocess(data = data, model = x, force_initial_eta = force_initial_eta)
+  fn.optim <- switch(method,
+                     "newuoa" = newuoa,
+                     "L-BFGS-B" = stats::optim)
 
-  newuoa_value <- do.call(newuoa, pre)
+  arg.optim <- preprocess.optim(method = method, model = x, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.ofv <- preprocess.ofv(data = data, model = x)
 
-  post <- postprocess(data = data, model = x, newuoa_value = newuoa_value, data0 = data0, pre = pre)
+  opt.value <- do.call(fn.optim, c(arg.optim, arg.ofv))
+
+  post <- postprocess(data = data, model = x, opt.value = opt.value, arg.optim = arg.optim, arg.ofv = arg.ofv)
 
   mapbay_output <- post
   if(!is.null(output)){
@@ -37,24 +41,18 @@ mbrest <- function(x, data = NULL, output = NULL, force_initial_eta = NULL){
 
 
 
-#' Preprocess model and data for optimization
+#' Preprocess model and data for ofv computation
 #'
 #' @param model a compiled mrgsolve_model
 #' @param data a dataframe, dataset (NM-TRAN format) of one individual to fit
-#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
 #'
-#' @return a data.frame ready for mapbay_estimation
+#' @return a list of argument passed to optimization function
 #' @export
-preprocess <- function(model, data, force_initial_eta = NULL){
+preprocess.ofv <- function(model, data){
 
   n_omega <- length(diag(omat(model, make = T)))
   omega.inv <- solve(omat(model, make = T))
   sigma <- smat(model, make = T)
-  if(is.null(force_initial_eta)){
-    initial_eta <- runif(n_omega, -0.5, 0.5) %>% set_names(str_c("ETA", 1:n_omega))
-  } else {
-    initial_eta <- force_initial_eta %>% set_names(str_c("ETA", 1:n_omega))
-  }
 
   if(nrow(data %>% filter(.data$time == 0, .data$mdv ==0)) > 0) stop("Observation line (mdv = 0) not accepted at t0 (time = 0)")
 
@@ -72,17 +70,58 @@ preprocess <- function(model, data, force_initial_eta = NULL){
   DVobs <- data_to_fit[data_to_fit$evid%in%c(0,2),]$DV
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
-  list(par = initial_eta,
-       fn  = compute_ofv,
-       mrgsolve_model = model,
-       sigma = sigma,
-       log.transformation = log.transformation(model),
-       DVobs = DVobs,
-       omega.inv = omega.inv,
-       obs_cmt = obs_cmt(model),
-       control = list(iprint = 2, maxfun = 50000)
+  list(#par = initial_eta,
+    #fn  = compute_ofv,
+    mrgsolve_model = model,
+    sigma = sigma,
+    log.transformation = log.transformation(model),
+    DVobs = DVobs,
+    omega.inv = omega.inv,
+    obs_cmt = obs_cmt(model)
   )
 }
+
+
+
+
+
+#' Preprocess: arguments for optimization function
+#'
+#' @param method string character of method to use ("newuoa" or "L-BFGS-B")
+#' @param model model object
+#' @param force_initial_eta for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )
+#' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
+#'
+#' @return a list of argument passed to optimization function
+#' @export
+preprocess.optim <- function(method, model, force_initial_eta, quantile_bound){
+  diag_omega <- diag(omat(model, make = T))
+  if(method == "newuoa"){
+    initial_eta <- force_initial_eta
+    if(is.null(force_initial_eta)){
+      initial_eta <- runif(length(diag_omega), -0.5, 0.5)
+    }
+    arg <- list(
+      par = initial_eta %>% set_names(str_c("ETA", 1:length(diag_omega))),
+      fn = compute_ofv,
+      control = list(iprint = 2, maxfun = 50000)
+    )
+  }
+  if(method == "L-BFGS-B"){
+    bound <- map_dbl(sqrt(diag(omat(model, make= T))), qnorm, p = quantile_bound, mean = 0)
+    arg <- list(
+      par = rep(0,length(diag_omega)) %>% set_names(str_c("ETA", 1:length(diag_omega))),
+      fn = compute_ofv,
+      method = "L-BFGS-B",
+      control = list(),
+      lower = bound,
+      upper = -bound
+    )
+  }
+  return(arg)
+}
+
+
 
 time_varying <- function(data){
   n_val_cov <- data %>%
@@ -94,26 +133,24 @@ time_varying <- function(data){
 
 
 
-
-
-
 #' Post process results from optimization
 #'
 #' @param data data passed through processing
 #' @param model a compiled mrgsolve_model
-#' @param newuoa_value output returned by newuoa (list of length 4)
-#' @param pre preprocessed object
-#' @param data0 original data
+#' @param opt.value value obtained by optimization function
+#' @param arg.optim argument passed to optimization function
+#' @param arg.ofv argument passed to optimization function
 #'
 #' @return a list of post processing values
 #' @export
-postprocess <- function(data, model, newuoa_value, data0, pre){
+postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
+  final_eta <- opt.value$par %>% set_names(names(arg.optim$par))
 
-  final_eta <- newuoa_value$par %>% set_names(names(pre$par))
-
-  if(is.nan(newuoa_value$fval)) {
-    final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(pre$par))
-    warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
+  if(!is.null(opt.value$fval)){
+    if(is.nan(opt.value$fval)) {
+      final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.ofv$par))
+      warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
+    }
   }
 
   carry <- data %>%
@@ -135,16 +172,16 @@ postprocess <- function(data, model, newuoa_value, data0, pre){
     as_tibble() %>%
     mutate(IPRED = .data$DV, PRED = typical_pred, .after = "DV") %>%
     mutate(DV = data$DV) %>%
-#    mutate(evid = data0$evid) %>%
     select(-any_of(model@cmtL))
 
   list(
     data = data,
     model = model,
-    initial_eta  = pre$par,
-    newuoa_value = newuoa_value,
-    final_eta    = final_eta,
-    mapbay_tab   = mapbay_tab
+    arg.optim = arg.optim,
+    arg.ofv = arg.ofv,
+    opt.value = opt.value,
+    final_eta = final_eta,
+    mapbay_tab = mapbay_tab
   )
 
 }

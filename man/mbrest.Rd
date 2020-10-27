@@ -4,19 +4,30 @@
 \alias{mbrest}
 \title{Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset}
 \usage{
-mbrest(x, data = NULL, output = NULL, force_initial_eta = NULL)
+mbrest(
+  x,
+  data = NULL,
+  method = "newuoa",
+  output = NULL,
+  force_initial_eta = NULL,
+  quantile_bound = 0.001
+)
 }
 \arguments{
 \item{x}{model file}
 
 \item{data}{NM tran data to optimize}
 
+\item{method}{"newuoa" or "L-BFGS-B"}
+
 \item{output}{return a mapbay_tab only}
 
-\item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate )}
+\item{force_initial_eta}{for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )}
+
+\item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
 }
 \value{
-default: a list with data, model, initial eta, newuoa outputs, final eta, and mapbay_tab
+default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 }
 \description{
 Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset

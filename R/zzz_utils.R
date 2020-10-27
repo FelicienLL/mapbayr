@@ -4,9 +4,9 @@
 #' @importFrom magrittr %>%
 #' @importFrom minqa newuoa
 #' @importFrom mrgsolve mread mrgsim mrgsim_df realize_addl param zero_re data_set obsaug omat smat as.list
-#' @importFrom purrr map pmap
+#' @importFrom purrr map pmap map_dbl
 #' @importFrom rlang .data set_names splice
-#' @importFrom stats runif optim dnorm
+#' @importFrom stats runif optim dnorm qnorm
 #' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace str_c
 #' @importFrom tibble tibble enframe
 #' @importFrom tidyr expand_grid fill pivot_longer replace_na
