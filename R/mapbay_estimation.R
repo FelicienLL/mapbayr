@@ -4,18 +4,22 @@
 #' @param data NM tran data to optimize
 #' @param method "newuoa" or "L-BFGS-B"
 #' @param output return a mapbay_tab only
-#' @param force_initial_eta for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )
+#' @param control a list passed to the optimizer (see source code for default, as function of the optimizer)
+#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
 #' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
 #'
 #' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export
 #'
-mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, force_initial_eta = NULL, quantile_bound = 0.001){
+mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = NULL, force_initial_eta = NULL, quantile_bound = 0.001){
   if(is.null(data)){
     data <- x@args$data
   }
 
+  okmethod <- c("newuoa", "L-BFGS-B")
+
   if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
+  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", ")))
 
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
@@ -24,7 +28,7 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, force_initi
                      "newuoa" = newuoa,
                      "L-BFGS-B" = stats::optim)
 
-  arg.optim <- preprocess.optim(method = method, model = x, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv <- preprocess.ofv(data = data, model = x)
 
   opt.value <- do.call(fn.optim, c(arg.optim, arg.ofv))
@@ -89,35 +93,51 @@ preprocess.ofv <- function(model, data){
 #'
 #' @param method string character of method to use ("newuoa" or "L-BFGS-B")
 #' @param model model object
-#' @param force_initial_eta for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )
+#' @param control a list passed to the optimizer
+#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate)
 #' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
 #'
 #' @return a list of argument passed to optimization function
 #' @export
-preprocess.optim <- function(method, model, force_initial_eta, quantile_bound){
+preprocess.optim <- function(method, model, control, force_initial_eta, quantile_bound){
   diag_omega <- diag(omat(model, make = T))
+
   if(method == "newuoa"){
     initial_eta <- force_initial_eta
     if(is.null(force_initial_eta)){
-      initial_eta <- runif(length(diag_omega), -0.5, 0.5)
+      initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(str_c("ETA", 1:length(diag_omega)))
     }
+    if(is.null(control)){
+      control <- list(iprint = 2, maxfun = 50000)
+    }
+
     arg <- list(
-      par = initial_eta %>% set_names(str_c("ETA", 1:length(diag_omega))),
+      par = initial_eta,
       fn = compute_ofv,
-      control = list(iprint = 2, maxfun = 50000)
+      control = control
     )
   }
+
   if(method == "L-BFGS-B"){
+    initial_eta <- force_initial_eta
+    if(is.null(force_initial_eta)){
+      initial_eta <- rep(0,length(diag_omega)) %>% set_names(str_c("ETA", 1:length(diag_omega)))
+    }
+    if(is.null(control)){
+      control <- list(fnscale = 0.001, trace = 1, maxit = 2000, lmm = 7)
+    }
     bound <- map_dbl(sqrt(diag(omat(model, make= T))), qnorm, p = quantile_bound, mean = 0)
+
     arg <- list(
-      par = rep(0,length(diag_omega)) %>% set_names(str_c("ETA", 1:length(diag_omega))),
+      par = initial_eta,
       fn = compute_ofv,
       method = "L-BFGS-B",
-      control = list(),
+      control = control,
       lower = bound,
       upper = -bound
     )
   }
+
   return(arg)
 }
 

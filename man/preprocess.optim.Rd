@@ -4,14 +4,16 @@
 \alias{preprocess.optim}
 \title{Preprocess: arguments for optimization function}
 \usage{
-preprocess.optim(method, model, force_initial_eta, quantile_bound)
+preprocess.optim(method, model, control, force_initial_eta, quantile_bound)
 }
 \arguments{
 \item{method}{string character of method to use ("newuoa" or "L-BFGS-B")}
 
 \item{model}{model object}
 
-\item{force_initial_eta}{for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )}
+\item{control}{a list passed to the optimizer}
+
+\item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate)}
 
 \item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
 }

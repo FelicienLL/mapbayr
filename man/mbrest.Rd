@@ -9,6 +9,7 @@ mbrest(
   data = NULL,
   method = "newuoa",
   output = NULL,
+  control = NULL,
   force_initial_eta = NULL,
   quantile_bound = 0.001
 )
@@ -22,7 +23,9 @@ mbrest(
 
 \item{output}{return a mapbay_tab only}
 
-\item{force_initial_eta}{for newuoa only: a numeric vector of starting estimates (exact length of eta to estimate )}
+\item{control}{a list passed to the optimizer (see source code for default, as function of the optimizer)}
+
+\item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate )}
 
 \item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
 }
