@@ -16,26 +16,18 @@ RoxygenNote: 7.1.1
 Imports: 
     dplyr,
     ggplot2,
-    lubridate,
+    ggpubr,
     magrittr,
     minqa,
     mrgsolve,
-    nloptr,
     purrr,
-    rclipboard,
-    readr,
     rlang,
-    rmarkdown,
-    scales,
-    shiny,
-    shinydashboard,
     stats,
     stringr,
     tibble,
-    tidyr,
-    ggpubr
+    tidyr
 URL: http://github.com/FelicienLL/mapbayr
-BugReports: http://github.com/hadley/FelicienLL/mapbayr
+BugReports: http://github.com/FelicienLL/mapbayr/issues
 Suggests: 
     knitr
 VignetteBuilder: knitr
