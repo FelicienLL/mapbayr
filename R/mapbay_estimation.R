@@ -144,11 +144,18 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
 
 
 time_varying <- function(data){
-  n_val_cov <- data %>%
-    select(-any_of(c("ID", "time", "evid", "addl", "ii", "amt", "mdv", "cmt", "ss", "rate", "DV"))) %>%
-    summarise(across(everything(), n_distinct)) %>%
-    as.integer()
-  any(n_val_cov>1)
+  d_cov <- data %>%
+    select(-any_of(c("ID", "time", "evid", "addl", "ii", "amt", "mdv", "cmt", "ss", "rate", "DV")))
+
+  if(length(d_cov != 0)){
+    n_val_cov <- d_cov %>%
+      summarise(across(everything(), n_distinct)) %>%
+      as.integer()
+    ret <-any(n_val_cov>1)
+  } else {
+    ret <- F
+  }
+  return(ret)
 }
 
 
