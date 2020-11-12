@@ -20,7 +20,7 @@ adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, real
   }
 
   d <- tibble(
-    ID    = 1,
+    ID    = iID,
     time  = time,
     evid  = 1,
     addl  = addl,
