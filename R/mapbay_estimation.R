@@ -105,6 +105,7 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   if(method == "newuoa"){
     initial_eta <- force_initial_eta
     if(is.null(force_initial_eta)){
+      set.seed(1)
       initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(str_c("ETA", 1:length(diag_omega)))
     }
     if(is.null(control)){
