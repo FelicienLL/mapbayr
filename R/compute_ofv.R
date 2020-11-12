@@ -15,6 +15,7 @@
 #'
 derivatives <- function(v_DV, v_cmt, cmts){
   LIST <- list()
+  v_DV <- ifelse(v_DV == 0, 1, v_DV)
   for(i in cmts){
     condcmts <- v_cmt == i
     col_prop <- paste0("P", i)
