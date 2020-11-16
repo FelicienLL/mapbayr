@@ -67,15 +67,10 @@ preprocess.ofv <- function(model, data){
     zero_re() %>%
     data_set(data_to_fit)
 
-  if(time_varying(data_to_fit)){
-    model@hmax <- 0.01
-  }
-
   DVobs <- data_to_fit[data_to_fit$evid%in%c(0,2),]$DV
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
-  list(#par = initial_eta,
-    #fn  = compute_ofv,
+  list(
     mrgsolve_model = model,
     sigma = sigma,
     log.transformation = log.transformation(model),
@@ -144,23 +139,6 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
 
 
 
-time_varying <- function(data){
-  d_cov <- data %>%
-    select(-any_of(c("ID", "time", "evid", "addl", "ii", "amt", "mdv", "cmt", "ss", "rate", "DV")))
-
-  if(length(d_cov != 0)){
-    n_val_cov <- d_cov %>%
-      summarise(across(everything(), n_distinct)) %>%
-      as.integer()
-    ret <-any(n_val_cov>1)
-  } else {
-    ret <- F
-  }
-  return(ret)
-}
-
-
-
 #' Post process results from optimization
 #'
 #' @param data data passed through processing
@@ -188,7 +166,7 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
   typical_pred <- model %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1, hmax = 0.01) %>%
+    mrgsim(carry_out = carry, end = -1) %>%
     as_tibble() %>%
     pull(.data$DV)
 
@@ -196,7 +174,7 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1, hmax = 0.01) %>%
+    mrgsim(carry_out = carry, end = -1) %>%
     as_tibble() %>%
     mutate(IPRED = .data$DV, PRED = typical_pred, .after = "DV") %>%
     mutate(DV = data$DV) %>%
