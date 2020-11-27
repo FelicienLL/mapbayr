@@ -3,10 +3,10 @@ $PROB
 - model_ref: XXX, J Pharmacokinet, 2020
 
 $PARAM @annotated
-TVCL   :  7 : Clearance (volume/time)
+TVCL   : .7 : Clearance (volume/time)
 TVV1   : 20 : Central volume (volume)
 TVV2   : 10 : Peripheral volume of distribution (volume)
-Q    :  3 : Inter-compartmental clearance (volume/time)
+Q      :  3 : Inter-compartmental clearance (volume/time)
 
 ETA1 : 0 : Clearance (L/h)
 ETA2 : 0 : Central volume (L)
@@ -17,7 +17,7 @@ $SIGMA 0.06 0
 
 $CMT @annotated
 CENT   : Central compartment (mg/L)[ADM, OBS]
-PERIPH : Peripheral compartment () 
+PERIPH : Peripheral compartment ()
 
 $TABLE
 double DV = (CENT/V2) *(1 + EPS(1)) ;
@@ -31,4 +31,4 @@ $PKMODEL ncmt = 2
 
 $CAPTURE @annotated
 DV : Plasma concentration (mass/time)
-  
+
