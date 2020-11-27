@@ -1,36 +1,135 @@
 
-# mapbayr <img align="right" src = "inst/logo.png" width="135px">
+<!-- README.md is generated from README.Rmd. Please edit that file -->
 
-mapbayr is a package for *maximum a posteriori* bayesian estimation of
-individual PK/PD parameters, especially including non-linear and complex
-models. Its purpose is to ease the dose individualization of anticancer
-drugs in the context of therapeutic drug monitoring with:
+# mapbayr <img align="right" src = "inst/logo2.png" width="135px">
 
-  - on the one hand: a `mapbay_estimation` function that performs its
-    estimation from an NM-TRAN like dataset and a *mapbayr model*
-    object.
-  - on the other hand: a suite of user-friendly **shiny** apps for
-    different clinical application such as:
-      - mapbayr-tki: for the re-estimation of drug concentration at a
-        convenient time after dose (*i.e.* T+24h).
-      - mapbayr-carbo: for dose-adjustment of carboplatin in
-        [intensification
-        protocol](https://doi.org/10.1158/1078-0432.ccr-17-1344).
+mapbayr is a free and open source package for *maximum a posteriori*
+bayesian estimation in R. Thanks to a single function, `mbrest()`, you
+can estimate individual PK parameters from:
 
-## Requirements
+  - a data set of concentrations to fit (NM-TRAN format),
+  - a population PK model coded in *mrgsolve*,
 
-mapbayr relies on [mrgsolve](https://mrgsolve.github.io/) for model
-implementation and ordinary differential equation solving, which
-requires [Rtools](https://cran.r-project.org/bin/windows/Rtools/) for
-C++ compilation.
+It was designed to be easily wrapped in [shiny
+apps](https://shiny.rstudio.com/) in order to ease model-based
+therapeutic drug monitoring, also referred to as Model-Informed
+Prediction Dosing (MIPD).
+
+## Installation
+
+mapbayr is not (yet) available on CRAN. You can install it from github
+by executing the following code in R console.
+
+``` r
+install.packages("devtools")
+devtools::install_github("FelicienLL/mapbayr")
+```
+
+mapbayr relies on
+[mrgsolve](https://github.com/metrumresearchgroup/mrgsolve) for model
+implementation and ordinary differential equation solving which requires
+C++ compilers. Please refer to the [installation
+guide](https://github.com/metrumresearchgroup/mrgsolve/wiki/mrgsolve-Installation)
+of mrgsolve for additional information.
+
+## Example
+
+``` r
+library(mapbayr)
+library(mrgsolve)
+
+my_model <- mread("ex_mbr3.cpp", mbrlib())
+
+my_data <- data.frame(
+  ID = 1, 
+  time = c(0, 6, 20),
+  amt = c(100, NA, NA), 
+  rate = c(20, 0, 0), 
+  DV = c(NA, 5, 2), 
+  cmt = 1, 
+  evid = c(1,0,0), 
+  mdv = c(1,0,0)
+)
+
+est <- my_model %>% 
+  data_set(my_data) %>% 
+  mbrest()
+```
+
+``` r
+print(est$mapbay_tab)
+#> # A tibble: 3 x 10
+#>      ID  time  evid   amt   cmt  rate   mdv    DV IPRED  PRED
+#>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
+#> 1     1     0     1   100     1    20     1    NA  0    0    
+#> 2     1     6     0     0     1     0     0     5  5.68 2.80 
+#> 3     1    20     0     0     1     0     0     2  1.69 0.163
+```
+
+``` r
+est %>% 
+  mbrpred() %>% 
+  mbrplot()
+```
+
+![](man/figures/README-plot1-1.png)<!-- -->
+
+If you are too lazy to build a dataset by yourself, you can pass
+administration and observation information through pipe-friendly
+functions, such as:
+
+``` r
+est <- my_model %>% 
+  adm_lines(time = 0, amt = 100, rate = 20) %>% 
+  obs_lines(time = 6, DV = 5) %>% 
+  obs_lines(time = 20, DV = 2) %>% 
+  mbrest()
+```
+
+## Features
+
+mapbayr is a generalization of the “MAP Bayes estimation” tutorial
+available on the [mrgsolve
+blog](https://mrgsolve.github.io/blog/map_bayes.html). Additional
+features are:
+
+  - a unique function to perform the estimation: `mbrest()`.
+  - handles multiple error models such as additive, proportional, mixed
+    or exponential error (without prior log-transformation of data).
+  - fit multiple patients.
+  - fit both parent drugs and metabolites simultaneously.
+  - accepts any kind of models thanks to the flexibility of mrgsolve.
+  - functions to easily pass administration and observation information,
+    as well as plot methods to visualize predictions and parameter
+    distribution.
+  - a single output object to ease post-processing, depending on the
+    purpose of the estimation.
+  - several optimization algorithm available, such as “NEWUOA” (the
+    default) or “L-BFGS-B”.
+
+## Performance
+
+Performance, in terms of quality of parameter predictions, was validated
+against NONMEM for a wide variety of models and data. However
+predictions might differ depending on the complexity of the user’s data
+or model, or as function of the number of parameter to estimate. The
+user is invited to investigate if discrepancies come from the prediction
+of the concentrations (i.e. mrgsolve) or from the optimization process
+*per se* (i.e. mapbayr). Feel free to contact us through the [issue
+tracker](https://github.com/FelicienLL/mapbayr/issues).
 
 ## *mrgsolve* model specification
 
-*mapbayr* contains a library of *mrgsolve* model files (.cpp),
-accessible with `mapbay_library`. The users are also invited to perform
-map-bayesian estimation with their own mrgsolve models. These model
-files should be slightly modified in order to be “loaded” in *mapbayr*
-with the subsequent specifications :
+mapbayr contains a library of example model files (.cpp), accessible
+with `mbrlib()`
+
+``` r
+my_model <- mread("ex_mbr1.cpp", mbrlib())
+```
+
+The user is invited to perform map-bayesian estimation with his/her own
+mrgsolve models. These model files should be slightly modified in order
+to be “read” by mapbayr with the subsequent specifications :
 
 ### 1\. `$PREAMBLE` block
 
@@ -147,7 +246,7 @@ describe error as exponential to concentrations.
 
 ``` c
 $TABLE
-DV  = (CENTRAL / VC) * exp(EPS(1)) ;
+double DV  = (CENTRAL / VC) * exp(EPS(1)) ;
 ```
 
 For fitting parent drug and metabolite simultaneously, please refer to
@@ -156,9 +255,9 @@ computation of OFV)
 
 ``` c
 $TABLE
-PAR = (CENT_PAR / V) * (1 + EPS(1)) ;
-MET = (CENT_MET / V) * (1 + EPS(3)) ;
-DV = PAR ;
+double PAR = (CENT_PAR / V) * (1 + EPS(1)) ;
+double MET = (CENT_MET / V) * (1 + EPS(3)) ;
+double DV = PAR ;
 if(self.cmt == 4) DV = MET ;
 ```
 
@@ -170,7 +269,7 @@ random effects)
 
 ``` c
 $PK
-CL = TVCL * exp(ETA1 + ETA(1))
+double CL = TVCL * exp(ETA1 + ETA(1))
 ```
 
 ### 8\. `$CAPTURE` block

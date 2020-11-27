@@ -2,6 +2,7 @@
 ^\.Rproj\.user$
 ^devtools_history\.R$
 README.Rmd
+^man/figures/README-.*\.png$
 ^tests/test\.R$
 ^tests/test2\.R$
 ^tests/draft\.R$
