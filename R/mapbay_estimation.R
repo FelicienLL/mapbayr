@@ -11,7 +11,7 @@
 #' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export
 #'
-mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = NULL, force_initial_eta = NULL, quantile_bound = 0.001){
+mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   if(is.null(data)){
     data <- x@args$data
   }
