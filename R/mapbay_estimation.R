@@ -27,7 +27,7 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = N
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv <- preprocess.ofv(data = data, model = x)
 
-  opt.value <- do.call(optimx, c(arg.optim, arg.ofv))
+  opt.value <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   post <- postprocess(data = data, model = x, opt.value = opt.value, arg.optim = arg.optim, arg.ofv = arg.ofv)
 
