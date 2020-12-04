@@ -25,7 +25,8 @@ Imports:
     stats,
     stringr,
     tibble,
-    tidyr
+    tidyr,
+    optimx
 URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/FelicienLL/mapbayr/issues
 Suggests: 

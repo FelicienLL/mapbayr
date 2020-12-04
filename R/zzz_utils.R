@@ -4,6 +4,7 @@
 #' @importFrom magrittr %>%
 #' @importFrom minqa newuoa
 #' @importFrom mrgsolve mread mrgsim mrgsim_df realize_addl param zero_re data_set obsaug omat smat as.list
+#' @importFrom optimx optimx
 #' @importFrom purrr map pmap map_dbl
 #' @importFrom rlang .data set_names splice
 #' @importFrom stats runif optim dnorm qnorm
