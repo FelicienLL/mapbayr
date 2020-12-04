@@ -152,10 +152,13 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
 #' @return a list of post processing values
 #' @export
 postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
-  final_eta <- opt.value$par %>% set_names(names(arg.optim$par))
 
-  if(!is.null(opt.value$fval)){
-    if(is.nan(opt.value$fval)) {
+  final_eta <- opt.value[names(arg.optim$par)] %>%
+    as.double() %>%
+    set_names(names(arg.optim$par))
+
+  if(!is.null(opt.value$fevals)){
+    if(is.nan(opt.value$fevals)) {
       final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.ofv$par))
       warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
     }
