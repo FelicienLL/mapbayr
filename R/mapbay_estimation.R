@@ -113,7 +113,12 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   method <- method[1]
 
   #control
-
+  if(is.null(control$trace)){
+    control <- c(control, list(trace = 0))
+  }
+  if(is.null(control$kkt)){
+    control <- c(control, list(kkt = FALSE))
+  }
   if(method == "L-BFGS-B"){
     if(is.null(control$fnscale))
       control <- c(control, list(fnscale = 0.001))
