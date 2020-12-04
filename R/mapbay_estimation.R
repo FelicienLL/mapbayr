@@ -24,14 +24,10 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = N
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  fn.optim <- switch(method,
-                     "newuoa" = newuoa,
-                     "L-BFGS-B" = stats::optim)
-
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv <- preprocess.ofv(data = data, model = x)
 
-  opt.value <- do.call(fn.optim, c(arg.optim, arg.ofv))
+  opt.value <- do.call(optimx, c(arg.optim, arg.ofv))
 
   post <- postprocess(data = data, model = x, opt.value = opt.value, arg.optim = arg.optim, arg.ofv = arg.ofv)
 
