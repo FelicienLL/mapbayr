@@ -11,7 +11,7 @@
 #' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export
 #'
-mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = NULL, force_initial_eta = NULL, quantile_bound = 0.001){
+mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   if(is.null(data)){
     data <- x@args$data
   }
@@ -24,14 +24,10 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = N
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  fn.optim <- switch(method,
-                     "newuoa" = newuoa,
-                     "L-BFGS-B" = stats::optim)
-
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv <- preprocess.ofv(data = data, model = x)
 
-  opt.value <- do.call(fn.optim, c(arg.optim, arg.ofv))
+  opt.value <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   post <- postprocess(data = data, model = x, opt.value = opt.value, arg.optim = arg.optim, arg.ofv = arg.ofv)
 
@@ -92,47 +88,58 @@ preprocess.ofv <- function(model, data){
 #' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate)
 #' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
 #'
-#' @return a list of argument passed to optimization function
+#' @return a list of argument passed to optimization function (optimx)
 #' @export
 preprocess.optim <- function(method, model, control, force_initial_eta, quantile_bound){
   diag_omega <- diag(omat(model, make = T))
+  eta_names <- str_c("ETA", 1:length(diag_omega))
 
-  if(method == "newuoa"){
-    initial_eta <- force_initial_eta
-    if(is.null(force_initial_eta)){
+  #par
+  initial_eta <- force_initial_eta
+  if(is.null(initial_eta)){
+    if(method == "newuoa"){
       set.seed(1)
       initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(str_c("ETA", 1:length(diag_omega)))
     }
-    if(is.null(control)){
-      control <- list(iprint = 2, maxfun = 50000)
-    }
-
-    arg <- list(
-      par = initial_eta,
-      fn = compute_ofv,
-      control = control
-    )
-  }
-
-  if(method == "L-BFGS-B"){
-    initial_eta <- force_initial_eta
-    if(is.null(force_initial_eta)){
+    if(method == "L-BFGS-B"){
       initial_eta <- rep(0,length(diag_omega)) %>% set_names(str_c("ETA", 1:length(diag_omega)))
     }
-    if(is.null(control)){
-      control <- list(fnscale = 0.001, trace = 1, maxit = 2000, lmm = 7)
-    }
-    bound <- map_dbl(sqrt(diag(omat(model, make= T))), qnorm, p = quantile_bound, mean = 0)
 
-    arg <- list(
-      par = initial_eta,
-      fn = compute_ofv,
-      method = "L-BFGS-B",
-      control = control,
-      lower = bound,
-      upper = -bound
-    )
   }
+
+  #fn = compute_ofv
+
+  #method
+  method <- method[1]
+
+  #control
+  if(is.null(control$trace)){
+    control <- c(control, list(trace = 0))
+  }
+  if(is.null(control$kkt)){
+    control <- c(control, list(kkt = FALSE))
+  }
+  if(method == "L-BFGS-B"){
+    if(is.null(control$fnscale))
+      control <- c(control, list(fnscale = 0.001))
+    if(is.null(control$lmm))
+      control <- c(control, list(lmm = 7))
+  }
+
+  #lower, upper
+  bound = Inf
+  if(method == "L-BFGS-B"){
+    bound <- map_dbl(sqrt(diag_omega), qnorm, p = quantile_bound, mean = 0)
+  }
+
+  arg <- list(
+    par = initial_eta,
+    fn = compute_ofv,
+    method = method,
+    control = control,
+    lower = -bound,
+    upper = bound
+  )
 
   return(arg)
 }
@@ -150,10 +157,13 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
 #' @return a list of post processing values
 #' @export
 postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
-  final_eta <- opt.value$par %>% set_names(names(arg.optim$par))
 
-  if(!is.null(opt.value$fval)){
-    if(is.nan(opt.value$fval)) {
+  final_eta <- opt.value[names(arg.optim$par)] %>%
+    as.double() %>%
+    set_names(names(arg.optim$par))
+
+  if(!is.null(opt.value$fevals)){
+    if(is.nan(opt.value$fevals)) {
       final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.ofv$par))
       warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
     }

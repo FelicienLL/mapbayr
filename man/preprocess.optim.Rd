@@ -18,7 +18,7 @@ preprocess.optim(method, model, control, force_initial_eta, quantile_bound)
 \item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
 }
 \value{
-a list of argument passed to optimization function
+a list of argument passed to optimization function (optimx)
 }
 \description{
 Preprocess: arguments for optimization function

@@ -1,6 +1,3 @@
-library(testthat)
-library(mapbayr)
-
 test_that("newuoa vs nm", {
   mod <- mread('ex_mbr1', mbrlib())
   data1 <- mod %>%

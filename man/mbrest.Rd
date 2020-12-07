@@ -9,7 +9,7 @@ mbrest(
   data = NULL,
   method = "newuoa",
   output = NULL,
-  control = NULL,
+  control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001
 )
