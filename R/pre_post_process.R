@@ -48,6 +48,13 @@ preprocess.ofv <- function(model, data){
 #' @return a list of argument passed to optimization function (optimx)
 #' @export
 preprocess.optim <- function(method, model, control, force_initial_eta, quantile_bound){
+  #Checks argument
+
+  #method
+  okmethod <- c("newuoa", "L-BFGS-B")
+  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
+  method <- method[1]
+
   diag_omega <- diag(omat(model, make = T))
   eta_names <- str_c("ETA", 1:length(diag_omega))
 
@@ -65,9 +72,6 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   }
 
   #fn = compute_ofv
-
-  #method
-  method <- method[1]
 
   #control
   if(is.null(control$trace)){

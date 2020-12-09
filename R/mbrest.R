@@ -16,10 +16,7 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
     data <- x@args$data
   }
 
-  okmethod <- c("newuoa", "L-BFGS-B")
-
   if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
-  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", ")))
 
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
