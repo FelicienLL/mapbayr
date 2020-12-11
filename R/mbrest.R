@@ -12,16 +12,17 @@
 #' @export
 #'
 mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
+  arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+
   if(is.null(data)){
     data <- x@args$data
   }
 
-  if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
-
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
+
   arg.ofv <- preprocess.ofv(data = data, model = x)
 
   opt.value <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
