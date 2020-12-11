@@ -21,17 +21,29 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  if(length(unique(data$ID)) != 1) stop("Only one individual at a time (consider apply or map)")
+  idata <- data %>%
+    group_by(.data$ID) %>%
+    group_split()
 
-  arg.ofv <- preprocess.ofv(data = data, model = x)
+  arg.ofv <- idata %>%
+    map(preprocess.ofv, model = x)
 
-  opt.value <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
+  opt.value <- arg.ofv %>%
+    map(function(x){
+      do.call(quietly(optimx), c(arg.optim, x))$result
+    })
 
-  post <- postprocess(data = data, model = x, opt.value = opt.value, arg.optim = arg.optim, arg.ofv = arg.ofv)
+  post <- list(
+    data = idata,
+    opt.value = opt.value,
+    arg.ofv = arg.ofv ) %>%
+    pmap(postprocess,
+         model = x,
+         arg.optim = arg.optim)
 
   mapbay_output <- post
   if(!is.null(output)){
-    if(output == "df") mapbay_output <- post$mapbay_tab
+    if(output == "df") mapbay_output <- map_dfr(post, "mapbay_tab")
   }
 
   return(mapbay_output)

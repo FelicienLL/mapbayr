@@ -1,0 +1,28 @@
+test_that("mapbayr fits multiple ID", {
+  mod <- mread('ex_mbr1', mbrlib())
+  data1 <- mod %>%
+    adm_lines(amt = 10, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
+    add_covariates(list(WT = 70)) %>%
+    see_data()
+
+  data2 <- mod %>%
+    adm_lines(amt = 10, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
+    add_covariates(list(WT = 70)) %>%
+    see_data() %>%
+    mutate(ID = 2)
+
+  data12 <- bind_rows(data1, data2)
+
+  expect_error(est <- mbrest(x = mod, data = data12), NA)
+  expect_equal(length(est), 2)
+  expect_error(esttab <- mbrest(x = mod, data = data12, output = "df"), NA)
+  expect_equal(data12$ID,   esttab$ID)
+  expect_equal(data12$time, esttab$time  )
+  expect_equal(data12$evid, esttab$evid)
+  expect_equal(data12$amt,  esttab$amt)
+  expect_equal(data12$cmt,  esttab$cmt)
+  expect_equal(data12$mdv,  esttab$mdv)
+  expect_equal(data12$DV,   esttab$DV)
+})
