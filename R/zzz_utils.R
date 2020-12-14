@@ -9,6 +9,6 @@
 #' @importFrom rlang .data set_names splice
 #' @importFrom stats runif optim dnorm qnorm
 #' @importFrom stringr str_subset str_remove str_squish str_split str_detect str_which str_to_title str_replace str_c
-#' @importFrom tibble tibble enframe
+#' @importFrom tibble enframe tibble rownames_to_column
 #' @importFrom tidyr expand_grid fill pivot_longer replace_na
 NULL
