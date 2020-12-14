@@ -206,9 +206,8 @@ output_mbr <- function(idata, model, arg.optim, arg.ofv, opt.value, post, output
     if(output == "df") out <- map_dfr(post, "mapbay_tab")
 
   } else {
-
     out <- list(
-      data = bind_rows(idata),
+      data = bind_rows(unname(idata)),
       model = model,
       arg.optim = arg.optim,
       arg.ofv = arg.ofv,
@@ -216,8 +215,10 @@ output_mbr <- function(idata, model, arg.optim, arg.ofv, opt.value, post, output
       final_eta = map(post, "final_eta"),
       mapbay_tab = map_dfr(post, "mapbay_tab")
     )
-  }
 
+    class(out) <- "mbrests"
+
+  }
   return(out)
 
 }
