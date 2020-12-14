@@ -8,7 +8,7 @@ test_that("mapbayr fits multiple ID", {
 
   data2 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
-    obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
+    obs_lines(DV = c(.1, .2), time = c(19, 41)) %>%
     add_covariates(list(WT = 70)) %>%
     see_data() %>%
     mutate(ID = 2)
@@ -26,3 +26,4 @@ test_that("mapbayr fits multiple ID", {
   expect_equal(data12$mdv,  esttab$mdv)
   expect_equal(data12$DV,   esttab$DV)
 })
+
