@@ -1,7 +1,29 @@
+#' Preprocess: data into a list of individual data
+#'
+#' @param data a NM-TRAN data set of one or multiple individuals.
+#'
+#' @return a named list of n data set (n individuals)
+#' @export
+preprocess.data <- function(data){
+  if(is.null(data)) "No data provided"
+
+  data <- data %>%
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
+
+  idata <- data %>%
+    group_by(.data$ID) %>%
+    group_split() %>%
+    set_names(unique(data$ID))
+
+  return(idata)
+}
+
+
+
 #' Preprocess model and data for ofv computation
 #'
 #' @param model a compiled mrgsolve_model
-#' @param data a dataframe, dataset (NM-TRAN format) of one individual to fit
+#' @param data a dataframe, dataset (NM-TRAN format)
 #'
 #' @return a list of argument passed to optimization function
 #' @export
@@ -24,7 +46,7 @@ preprocess.ofv <- function(model, data){
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
   list(
-    mrgsolve_model = model,
+    mrgsolve_model = model, #this model is 'updated' with zero re and include the data adm
     sigma = sigma,
     log.transformation = log.transformation(model),
     DVobs = DVobs,
@@ -125,40 +147,74 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
 
   if(!is.null(opt.value$fevals)){
     if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.ofv$par))
+      final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.optim$par))
       warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
     }
   }
 
-  carry <- data %>%
-    select(-any_of(c("ID", "time","DV"))) %>%
-    names()
-
   typical_pred <- model %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1) %>%
+    mrgsim(end = -1) %>%
     as_tibble() %>%
     pull(.data$DV)
 
-  mapbay_tab <- model %>%
+
+  indiv_pred <- model %>%
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(carry_out = carry, end = -1) %>%
+    mrgsim(end = -1) %>%
     as_tibble() %>%
-    mutate(IPRED = .data$DV, PRED = typical_pred, .after = "DV") %>%
-    mutate(DV = data$DV) %>%
-    select(-any_of(model@cmtL))
+    pull(.data$DV)
+
+  mapbay_tab <- data %>%
+    mutate(IPRED = indiv_pred, PRED = typical_pred, .after = "DV") %>%
+    select(-any_of(model@cmtL)) %>%
+    bind_cols(bind_rows(final_eta))
 
   list(
-    data = data,
-    model = model,
-    arg.optim = arg.optim,
-    arg.ofv = arg.ofv,
-    opt.value = opt.value,
+    #  data = data,
+    #  model = model,
+    #  arg.optim = arg.optim,
+    #  arg.ofv = arg.ofv,
+    #  opt.value = opt.value,
     final_eta = final_eta,
     mapbay_tab = mapbay_tab
   )
+
+}
+
+
+#' Build the output of mbrest function
+#' @param idata data passed through processing
+#' @param model a compiled mrgsolve_model
+#' @param arg.optim argument passed to optimization function
+#' @param arg.ofv argument passed to optimization function
+#' @param opt.value value obtained by optimization function
+#' @param post output of the post.process function
+#' @param output return a mapbay_tab only
+#'
+#' @return a mbrests list object
+#' @export
+output_mbr <- function(idata, model, arg.optim, arg.ofv, opt.value, post, output){
+
+  if(!is.null(output)){
+    if(output == "df") out <- map_dfr(post, "mapbay_tab")
+
+  } else {
+
+    out <- list(
+      data = bind_rows(idata),
+      model = model,
+      arg.optim = arg.optim,
+      arg.ofv = arg.ofv,
+      opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
+      final_eta = map(post, "final_eta"),
+      mapbay_tab = map_dfr(post, "mapbay_tab")
+    )
+  }
+
+  return(out)
 
 }

@@ -11,7 +11,7 @@ test_that("newuoa vs nm", {
   est1_l <- mod %>%
     data_set(data1) %>%
     mbrest(method = "L-BFGS-B")
-  expect_equal(est1_n[[1]]$final_eta, est1_l[[1]]$final_eta, tolerance = 0.00001)
+  expect_equal(est1_n$final_eta[[1]], est1_l$final_eta[[1]], tolerance = 0.00001)
 
   data2 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
@@ -24,6 +24,6 @@ test_that("newuoa vs nm", {
   est2_l <- mod %>%
     data_set(data2) %>%
     mbrest(method = "L-BFGS-B")
-  expect_false(isTRUE(all.equal(est2_n[[1]]$final_eta, est2_l[[1]]$final_eta, tolerance = 0.1)))
-  expect_equal(unname(est2_l[[1]]$final_eta[2:3]), est2_l[[1]]$arg.optim$lower[2:3], tolerance = 0.001)
+  expect_false(isTRUE(all.equal(est2_n$final_eta[[1]], est2_l$final_eta[[1]], tolerance = 0.1)))
+  expect_equal(unname(est2_l$final_eta[[1]][2:3]), est2_l$arg.optim$lower[2:3], tolerance = 0.001)
 })

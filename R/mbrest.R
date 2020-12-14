@@ -18,12 +18,7 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
     data <- x@args$data
   }
 
-  data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
-
-  idata <- data %>%
-    group_by(.data$ID) %>%
-    group_split()
+  idata <- preprocess.data(data)
 
   arg.ofv <- idata %>%
     map(preprocess.ofv, model = x)
@@ -36,15 +31,10 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
   post <- list(
     data = idata,
     opt.value = opt.value,
-    arg.ofv = arg.ofv ) %>%
+    arg.ofv = arg.ofv) %>%
     pmap(postprocess,
          model = x,
          arg.optim = arg.optim)
 
-  mapbay_output <- post
-  if(!is.null(output)){
-    if(output == "df") mapbay_output <- map_dfr(post, "mapbay_tab")
-  }
-
-  return(mapbay_output)
+  output_mbr(idata = idata, model = x, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
 }

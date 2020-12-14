@@ -16,7 +16,7 @@ test_that("mapbayr fits multiple ID", {
   data12 <- bind_rows(data1, data2)
 
   expect_error(est <- mbrest(x = mod, data = data12), NA)
-  expect_equal(length(est), 2)
+  expect_equal(length(est$final_eta), 2)
   expect_error(esttab <- mbrest(x = mod, data = data12, output = "df"), NA)
   expect_equal(data12$ID,   esttab$ID)
   expect_equal(data12$time, esttab$time  )

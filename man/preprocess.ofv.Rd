@@ -9,7 +9,7 @@ preprocess.ofv(model, data)
 \arguments{
 \item{model}{a compiled mrgsolve_model}
 
-\item{data}{a dataframe, dataset (NM-TRAN format) of one individual to fit}
+\item{data}{a dataframe, dataset (NM-TRAN format)}
 }
 \value{
 a list of argument passed to optimization function
