@@ -10,10 +10,13 @@ preprocess.data <- function(data){
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
+  iID <- unique(data$ID)
+
   idata <- data %>%
-    group_by(.data$ID) %>%
-    group_split() %>%
-    set_names(unique(data$ID))
+    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
+    group_by(.data$split_ID) %>%
+    group_split(.keep = FALSE) %>%
+    set_names(iID)
 
   return(idata)
 }
