@@ -9,7 +9,7 @@
 \arguments{
 \item{x}{A \code{mbrests} object.}
 
-\item{...}{further arguments passed to or from other methods}
+\item{...}{additional arguments}
 }
 \description{
 Print a mbrests object
