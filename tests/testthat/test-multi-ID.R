@@ -27,3 +27,42 @@ test_that("mapbayr fits multiple ID", {
   expect_equal(data12$DV,   esttab$DV)
 })
 
+test_that("order of IDs is preserved", {
+  mod <- mread('ex_mbr1', mbrlib())
+  data1 <- mod %>%
+    adm_lines(amt = 10, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
+    add_covariates(list(WT = 70)) %>%
+    see_data()
+
+  data30 <- mod %>%
+    adm_lines(amt = 10, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.5, .6), time = c(19, 41)) %>%
+    add_covariates(list(WT = 90)) %>%
+    see_data() %>%
+    mutate(ID = 30)
+
+  data2 <- mod %>%
+    adm_lines(amt = 10, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(1, 2), time = c(15, 36)) %>%
+    add_covariates(list(WT = 50)) %>%
+    see_data() %>%
+    mutate(ID = 2)
+
+  data_all <- bind_rows(data1, data30, data2)
+
+  est1 <-  mbrest(mod, data1, verbose = F)$final_eta[[1]]
+  est30 <-  mbrest(mod, data30, verbose = F)$final_eta[[1]]
+  est2 <-  mbrest(mod, data2, verbose = F)$final_eta[[1]]
+
+  est_all <- mbrest(mod, data_all, verbose = F)$final_eta
+
+  est_all_1 <- est_all[[1]]
+  est_all_30 <- est_all[[2]]
+  est_all_2 <- est_all[[3]]
+
+  expect_equal(est1, est_all_1)
+  expect_equal(est30, est_all_30)
+  expect_equal(est2, est_all_2)
+
+})
