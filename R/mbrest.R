@@ -25,7 +25,11 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
 
   opt.value <- arg.ofv %>%
     map(function(x){
-      do.call(quietly(optimx), c(arg.optim, x))$result
+       cat(paste0("\nID ", unique(x$mrgsolve_model@args$data$ID), "..."))
+      #cat(paste0("\nID ", names(x), "..."))
+      opt <- do.call(quietly(optimx), c(arg.optim, x))$result
+      cat(" done.\n")
+      return(opt)
     })
 
   post <- list(
