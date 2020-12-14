@@ -137,8 +137,8 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
     fn = compute_ofv,
     method = method,
     control = control,
-    lower = -bound,
-    upper = bound
+    lower = bound,
+    upper = -bound
   )
 
   return(arg)
