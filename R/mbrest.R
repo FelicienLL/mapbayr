@@ -11,7 +11,7 @@
 #' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export
 #'
-mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
+mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, verbose = TRUE, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
 
   if(is.null(data)){
@@ -25,10 +25,9 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, control = l
 
   opt.value <- arg.ofv %>%
     map(function(x){
-       cat(paste0("\nID ", unique(x$mrgsolve_model@args$data$ID), "..."))
-      #cat(paste0("\nID ", names(x), "..."))
+      if(verbose) cat(paste0("\nID ", unique(x$mrgsolve_model@args$data$ID), "..."))
       opt <- do.call(quietly(optimx), c(arg.optim, x))$result
-      cat(" done.\n")
+      if(verbose) cat(" done.\n")
       return(opt)
     })
 
