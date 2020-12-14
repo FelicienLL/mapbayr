@@ -9,6 +9,7 @@ mbrest(
   data = NULL,
   method = "newuoa",
   output = NULL,
+  verbose = TRUE,
   control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001
@@ -22,6 +23,8 @@ mbrest(
 \item{method}{"newuoa" or "L-BFGS-B"}
 
 \item{output}{return a mapbay_tab only}
+
+\item{verbose}{a logical. If TRUE (the default), will print the steps of optimization.}
 
 \item{control}{a list passed to the optimizer (see source code for default, as function of the optimizer)}
 

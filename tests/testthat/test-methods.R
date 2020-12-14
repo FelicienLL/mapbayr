@@ -7,10 +7,10 @@ test_that("newuoa vs nm", {
     see_data()
   est1_n <- mod %>%
     data_set(data1) %>%
-    mbrest(method = "newuoa")
+    mbrest(method = "newuoa", verbose = F)
   est1_l <- mod %>%
     data_set(data1) %>%
-    mbrest(method = "L-BFGS-B")
+    mbrest(method = "L-BFGS-B", verbose = F)
   expect_equal(est1_n$final_eta[[1]], est1_l$final_eta[[1]], tolerance = 0.00001)
 
   data2 <- mod %>%
@@ -20,10 +20,10 @@ test_that("newuoa vs nm", {
     see_data()
   est2_n <- mod %>%
     data_set(data2) %>%
-    mbrest(method = "newuoa")
+    mbrest(method = "newuoa", verbose = F)
   est2_l <- mod %>%
     data_set(data2) %>%
-    mbrest(method = "L-BFGS-B")
+    mbrest(method = "L-BFGS-B", verbose = F)
   expect_false(isTRUE(all.equal(est2_n$final_eta[[1]], est2_l$final_eta[[1]], tolerance = 0.1)))
   expect_equal(unname(est2_l$final_eta[[1]][2:3]), est2_l$arg.optim$lower[2:3], tolerance = 0.001)
 })

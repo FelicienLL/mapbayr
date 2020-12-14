@@ -4,6 +4,7 @@
 #' @param data NM tran data to optimize
 #' @param method "newuoa" or "L-BFGS-B"
 #' @param output return a mapbay_tab only
+#' @param verbose a logical. If TRUE (the default), will print the steps of optimization.
 #' @param control a list passed to the optimizer (see source code for default, as function of the optimizer)
 #' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
 #' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
