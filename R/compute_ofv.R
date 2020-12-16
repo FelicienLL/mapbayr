@@ -50,7 +50,7 @@ compute_ofv <- function(eta, mrgsolve_model, sigma, log.transformation, DVobs, o
     param(as.list(eta)) %>%
     mrgsim_df(end = -1, carry_out = c("cmt", "evid"))
 
-  output <- output[output$evid%in%c(0,2),] #Cannot use obsonly() because filter evid==0 only.
+  output <- output[output$evid==0,]
 
   DVpred <- output$DV
 
