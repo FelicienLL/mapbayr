@@ -5,7 +5,7 @@
 #' @return a named list of n data set (n individuals)
 #' @export
 preprocess.data <- function(data){
-  if(is.null(data)) "No data provided"
+  if(is.null(data)) stop("No data provided", call. = F)
 
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
