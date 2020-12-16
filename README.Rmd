@@ -37,52 +37,98 @@ devtools::install_github("FelicienLL/mapbayr")
 mapbayr relies on [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve) for model implementation and ordinary differential equation solving which requires C++ compilers. Please refer to the [installation guide](https://github.com/metrumresearchgroup/mrgsolve/wiki/mrgsolve-Installation) of mrgsolve for additional information.
 
 ## Example
-
 ```{r,echo = T, results='hide', message=FALSE}
 library(mapbayr)
 library(mrgsolve)
+```
 
-my_model <- mread("ex_mbr3.cpp", mbrlib())
+#### 1) Properly code you model 
 
+```{r, echo = T, results='hide', message=FALSE}
+code <- "
+$PROB
+- drug: Examplinib
+- model_ref: XXX, J Pharmacokinet, 2020
+
+$PARAM @annotated
+TVCL:  0.5 : Clearance
+TVV1: 20.0 : Central volume
+V2  : 10.0 : Peripheral volume of distribution
+Q   :  3.0 : Intercompartmental clearance
+
+ETA1: 0 : Clearance (L/h)
+ETA2: 0 : Central volume (L)
+
+$OMEGA 0.3 0.2
+$SIGMA
+0.06 // proportional
+0.1 // additive
+
+$CMT @annotated
+CENT  : Central compartment (mg/L)[ADM, OBS]
+PERIPH: Peripheral compartment ()
+
+$TABLE
+double DV = (CENT/V2) *(1 + EPS(1)) + EPS(2);
+
+$MAIN
+double CL = TVCL * exp(ETA1 + ETA(1)) ;
+double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$CAPTURE DV
+"
+
+
+my_model <- mcode("Example_model", code)
+```
+
+#### 2) Build your dataset
+
+```{r, echo = T, results='hide', message=FALSE}
 my_data <- data.frame(
   ID = 1, 
-  time = c(0, 6, 20),
-  amt = c(100, NA, NA), 
-  rate = c(20, 0, 0), 
-  DV = c(NA, 5, 2), 
+  time = c(0, 6, 20, 24),
+  amt = c(100, NA, NA, NA), 
+  rate = c(20, 0, 0, 0), 
+  DV = c(NA, 5, 2, 4), 
   cmt = 1, 
-  evid = c(1,0,0), 
-  mdv = c(1,0,0)
+  evid = c(1, 0, 0, 0), 
+  mdv = c(1, 0, 0, 1)
 )
-
-est <- my_model %>% 
-  data_set(my_data) %>% 
-  mbrest()
-
 ```
 
+#### 3) And estimate !
 
-
-```{r, message=FALSE,}
-print(est$mapbay_tab)
+```{r, message=FALSE}
+est <- mbrest(my_model, data = my_data)
 ```
-
-
-
-```{r, plot1, fig.height=4}
-est %>% 
-  mbrpred() %>% 
-  mbrplot()
-```
-
-If you are too lazy to build a dataset by yourself, you can pass administration and observation information through pipe-friendly functions, such as: 
-
+As building dataset into a NM-tran format can be painful, you can use pipe-friendly functions in order to pass administration and observation information, and perform the estimation subsequently.
 ```{r, eval=FALSE}
 est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
   obs_lines(time = 6, DV = 5) %>% 
   obs_lines(time = 20, DV = 2) %>% 
+  obs_lines(time = 24, DV = 4, mdv = 1) %>% 
   mbrest()
+```
+
+```{r, message=FALSE}
+print(est)
+```
+
+```{r, plot1, fig.height=4, message=FALSE}
+mbrplot(est)
+```
+
+```{r, plot2, fig.height=2.5, message=FALSE}
+mbrdist(est)  
 ```
 
 ## Features
@@ -92,7 +138,7 @@ mapbayr is a generalization of the "MAP Bayes estimation" tutorial available on 
 * a unique function to perform the estimation: `mbrest()`.
 * handles multiple error models such as additive, proportional, mixed or exponential error (without prior log-transformation of data).
 * fit multiple patients. 
-* fit both parent drugs and metabolites simultaneously.
+* fit both parent drug and metabolite simultaneously.
 * accepts any kind of models thanks to the flexibility of mrgsolve. 
 * functions to easily pass administration and observation information, as well as plot methods to visualize predictions and parameter distribution.
 * a single output object to ease post-processing, depending on the purpose of the estimation.
@@ -223,11 +269,10 @@ double CL = TVCL * exp(ETA1 + ETA(1))
 
 
 ### 8.  `$CAPTURE` block
-DV and ETAn must be captured, as well as PAR and MET for models with parent + metabolite.
+DV must be captured, as well as PAR and MET for models with parent + metabolite.
 
 ```{c, eval = F}
-$CAPTURE 
-DV ETA1 ETA2 ETA3 PAR MET
+$CAPTURE DV PAR MET
 ```
 
 

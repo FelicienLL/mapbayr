@@ -37,54 +37,121 @@ of mrgsolve for additional information.
 ``` r
 library(mapbayr)
 library(mrgsolve)
+```
 
-my_model <- mread("ex_mbr3.cpp", mbrlib())
+#### 1\) Properly code you model
 
+``` r
+code <- "
+$PROB
+- drug: Examplinib
+- model_ref: XXX, J Pharmacokinet, 2020
+
+$PARAM @annotated
+TVCL:  0.5 : Clearance
+TVV1: 20.0 : Central volume
+V2  : 10.0 : Peripheral volume of distribution
+Q   :  3.0 : Intercompartmental clearance
+
+ETA1: 0 : Clearance (L/h)
+ETA2: 0 : Central volume (L)
+
+$OMEGA 0.3 0.2
+$SIGMA
+0.06 // proportional
+0.1 // additive
+
+$CMT @annotated
+CENT  : Central compartment (mg/L)[ADM, OBS]
+PERIPH: Peripheral compartment ()
+
+$TABLE
+double DV = (CENT/V2) *(1 + EPS(1)) + EPS(2);
+
+$MAIN
+double CL = TVCL * exp(ETA1 + ETA(1)) ;
+double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$CAPTURE DV
+"
+
+
+my_model <- mcode("Example_model", code)
+```
+
+#### 2\) Build your dataset
+
+``` r
 my_data <- data.frame(
   ID = 1, 
-  time = c(0, 6, 20),
-  amt = c(100, NA, NA), 
-  rate = c(20, 0, 0), 
-  DV = c(NA, 5, 2), 
+  time = c(0, 6, 20, 24),
+  amt = c(100, NA, NA, NA), 
+  rate = c(20, 0, 0, 0), 
+  DV = c(NA, 5, 2, 4), 
   cmt = 1, 
-  evid = c(1,0,0), 
-  mdv = c(1,0,0)
+  evid = c(1, 0, 0, 0), 
+  mdv = c(1, 0, 0, 1)
 )
-
-est <- my_model %>% 
-  data_set(my_data) %>% 
-  mbrest()
 ```
+
+#### 3\) And estimate \!
 
 ``` r
-print(est$mapbay_tab)
-#> # A tibble: 3 x 10
-#>      ID  time  evid   amt   cmt  rate   mdv    DV IPRED  PRED
-#>   <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl> <dbl>
-#> 1     1     0     1   100     1    20     1    NA  0    0    
-#> 2     1     6     0     0     1     0     0     5  5.68 2.80 
-#> 3     1    20     0     0     1     0     0     2  1.69 0.163
+est <- mbrest(my_model, data = my_data)
+#> 
+#> ID 1... done.
 ```
 
-``` r
-est %>% 
-  mbrpred() %>% 
-  mbrplot()
-```
-
-![](man/figures/README-plot1-1.png)<!-- -->
-
-If you are too lazy to build a dataset by yourself, you can pass
-administration and observation information through pipe-friendly
-functions, such as:
+As building dataset into a NM-tran format can be painful, you can use
+pipe-friendly functions in order to pass administration and observation
+information, and perform the estimation subsequently.
 
 ``` r
 est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
   obs_lines(time = 6, DV = 5) %>% 
   obs_lines(time = 20, DV = 2) %>% 
+  obs_lines(time = 24, DV = 4, mdv = 1) %>% 
   mbrest()
 ```
+
+``` r
+print(est)
+#> Example Model 
+#> ID : 1  individual(s).
+#> OBS: 2  observation(s).
+#> ETA: 2  parameter(s) to estimate.
+#> 
+#> Estimates: 
+#>   ID      ETA1      ETA2
+#> 1  1 0.6180307 -0.542415
+#> 
+#> Output (4 lines): 
+#>   ID time amt rate DV    IPRED     PRED cmt evid mdv      ETA1      ETA2
+#> 1  1    0 100   20 NA 0.000000 0.000000   1    1   1 0.6180307 -0.542415
+#> 2  1    6  NA    0  5 4.991384 6.946975   1    0   0 0.6180307 -0.542415
+#> 3  1   20  NA    0  2 2.317034 4.819891   1    0   0 0.6180307 -0.542415
+#> 4  1   24  NA    0  4 1.973957 4.513590   1    0   1 0.6180307 -0.542415
+```
+
+``` r
+mbrplot(est)
+```
+
+![](man/figures/README-plot1-1.png)<!-- -->
+
+``` r
+mbrdist(est)  
+```
+
+![](man/figures/README-plot2-1.png)<!-- -->
 
 ## Features
 
@@ -97,7 +164,7 @@ features are:
   - handles multiple error models such as additive, proportional, mixed
     or exponential error (without prior log-transformation of data).
   - fit multiple patients.
-  - fit both parent drugs and metabolites simultaneously.
+  - fit both parent drug and metabolite simultaneously.
   - accepts any kind of models thanks to the flexibility of mrgsolve.
   - functions to easily pass administration and observation information,
     as well as plot methods to visualize predictions and parameter
@@ -274,10 +341,9 @@ double CL = TVCL * exp(ETA1 + ETA(1))
 
 ### 8\. `$CAPTURE` block
 
-DV and ETAn must be captured, as well as PAR and MET for models with
-parent + metabolite.
+DV must be captured, as well as PAR and MET for models with parent +
+metabolite.
 
 ``` c
-$CAPTURE 
-DV ETA1 ETA2 ETA3 PAR MET
+$CAPTURE DV PAR MET
 ```
