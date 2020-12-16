@@ -21,7 +21,7 @@ ETA3 : 0 : CLpar (L/h)
 ETA4 : 0 : CLmet (L/h)
 ETA5 : 0 : FM ()
 
-$OMEGA 
+$OMEGA
 0.2
 0.4
 0.2
@@ -73,13 +73,7 @@ dxdt_PERIPHPAR =   K23 * CENTPAR - K32 * PERIPHPAR ;
 dxdt_CENTMET   =   K24 * CENTPAR + K54 * PERIPHMET - (K40 + K45) * CENTMET ;
 dxdt_PERIPHMET =   K45 * CENTMET - K54 * PERIPHMET  ;
 
-$CAPTURE @annotated
-PAR: Central concentration parent drug
-MET: Central concentration metabolite
-DV : Concentration to fit 
-
-ETA1 : KA
-ETA2 : VC
-ETA3 : CLpar
-ETA4 : CLmet
-ETA5 : FM
+$CAPTURE
+DV
+PAR
+MET

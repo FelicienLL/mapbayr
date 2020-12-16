@@ -63,8 +63,4 @@ dxdt_DEPOT   = - K12 * DEPOT                                          ;
 dxdt_CENTRAL =   K12 * DEPOT   + K32 * PERIPH - (K23 + K20) * CENTRAL ;
 dxdt_PERIPH  =   K23 * CENTRAL - K32 * PERIPH                         ;
 
-$CAPTURE @annotated
-DV : mg/L
-ETA1 : KA (h-1)
-ETA2 : CL (L/h)
-ETA3 : VC (L)
+$CAPTURE DV
