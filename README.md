@@ -122,6 +122,13 @@ est <- my_model %>%
   mbrest()
 ```
 
+#### 4\) Then, use the estimations
+
+The results are returned in a single object (“mbrests” S3 class) which
+includes input (model and data), output (etas and tables) and internal
+arguments passed to the internal algorithm (useful for debugging).
+Additional methods are provided, notably to plot the results quickly.
+
 ``` r
 print(est)
 #> Example Model 
@@ -153,6 +160,12 @@ mbrdist(est)
 
 ![](man/figures/README-plot2-1.png)<!-- -->
 
+## Development
+
+mapbayr is under development. Your feedback for additional features
+request or bug reporting is welcome. Contact us through the [issue
+tracker](https://github.com/FelicienLL/mapbayr/issues).
+
 ## Features
 
 mapbayr is a generalization of the “MAP Bayes estimation” tutorial
@@ -163,7 +176,7 @@ features are:
   - a unique function to perform the estimation: `mbrest()`.
   - handles multiple error models such as additive, proportional, mixed
     or exponential error (without prior log-transformation of data).
-  - fit multiple patients.
+  - fit multiple patients stored in a single dataset.
   - fit both parent drug and metabolite simultaneously.
   - accepts any kind of models thanks to the flexibility of mrgsolve.
   - functions to easily pass administration and observation information,
