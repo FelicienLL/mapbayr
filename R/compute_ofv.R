@@ -48,9 +48,9 @@ compute_ofv <- function(eta, mrgsolve_model, sigma, log.transformation, DVobs, o
 
   output <- mrgsolve_model %>%
     param(as.list(eta)) %>%
-    mrgsim_df(end = -1, carry_out = c("cmt", "evid"))
+    mrgsim_df(end = -1, carry_out = c("cmt", "mdv"))
 
-  output <- output[output$evid==0,]
+  output <- output[output$mdv==0,]
 
   DVpred <- output$DV
 

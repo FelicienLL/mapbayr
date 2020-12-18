@@ -11,6 +11,7 @@ preprocess.data <- function(data){
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed")
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.")
   if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0) stop("Observation line (mdv = 0) not accepted at time = 0")
 
   iID <- unique(data$ID)
@@ -35,18 +36,14 @@ preprocess.data <- function(data){
 #' @export
 preprocess.ofv <- function(model, data){
 
-  n_omega <- length(diag(omat(model, make = T)))
   omega.inv <- solve(omat(model, make = T))
   sigma <- smat(model, make = T)
 
-  data_to_fit <- data %>%
-    filter(!(.data$evid%in%c(0,2)&.data$mdv==1)) #remove lines with evid=0or2 and with mdv==1. Keeps administration lines.
-
   model <- model %>%
     zero_re() %>%
-    data_set(data_to_fit)
+    data_set(data)
 
-  DVobs <- data_to_fit[data_to_fit$mdv==0,]$DV #keep observations only
+  DVobs <- data[data$mdv==0,]$DV #keep observations to fit only
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
   list(
