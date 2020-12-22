@@ -24,13 +24,7 @@ mbrest <- function(x, data = NULL, method = "newuoa", output = NULL, verbose = T
   arg.ofv <- idata %>%
     map(preprocess.ofv, model = x)
 
-  opt.value <- arg.ofv %>%
-    map(function(x){
-      if(verbose) cat(paste0("\nID ", unique(x$mrgsolve_model@args$data$ID), "..."))
-      opt <- do.call(quietly(optimx), c(arg.optim, x))$result
-      if(verbose) cat(" done.\n")
-      return(opt)
-    })
+  opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose)
 
   post <- list(
     data = idata,
