@@ -160,7 +160,6 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
     as_tibble() %>%
     pull(.data$DV)
 
-
   indiv_pred <- model %>%
     param(final_eta) %>%
     data_set(data) %>%
@@ -175,11 +174,6 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
     bind_cols(bind_rows(final_eta))
 
   list(
-    #  data = data,
-    #  model = model,
-    #  arg.optim = arg.optim,
-    #  arg.ofv = arg.ofv,
-    #  opt.value = opt.value,
     final_eta = final_eta,
     mapbay_tab = mapbay_tab
   )
