@@ -9,4 +9,3 @@ test_that("mbrest verbose works", {
   expect_output(mbrest(mod, data, verbose = T))
   expect_output(mbrest(mod, data, verbose = F), regexp = NA)
 })
-
