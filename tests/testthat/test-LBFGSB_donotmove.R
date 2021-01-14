@@ -80,7 +80,7 @@ DV : Concentration central
   #With initial eta = 0, this subject automatically converge to... 0.
 
   #Need a "reset" of the estimation with other values:
-  expect_warning(est_lbfgsb_reset <- mbrest(model, data739, method = "L-BFGS-B", verbose = F, reset = T), "No change in OFV after optimization. Rerun with initial values:")
+  expect_warning(est_lbfgsb_reset <- mbrest(model, data739, method = "L-BFGS-B", verbose = F, reset = T), "Error in optimization. Reset with initial values:")
   expect_equal(unname(round(est_lbfgsb_reset$final_eta[[1]], 4)), c(0.0477, -0.0314, -0.0007, -0.0738))
 
 })
