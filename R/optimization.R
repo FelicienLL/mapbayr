@@ -1,10 +1,10 @@
 
 
-do_optimization <- function(arg.ofv, arg.optim, verbose){
+do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$mrgsolve_model@args$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-  while(isTRUE(all.equal(opt$value, initial_ofv(arg.ofv, arg.optim)))){
+  while(reset & isTRUE(all.equal(opt$value, initial_ofv(arg.ofv, arg.optim)))){
     nam <- names(arg.optim$par)
     new_ini <- round(runif(length(arg.optim$par), -1, 1), 6)
     names(new_ini) <- nam

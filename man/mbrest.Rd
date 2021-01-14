@@ -12,7 +12,8 @@ mbrest(
   verbose = TRUE,
   control = list(),
   force_initial_eta = NULL,
-  quantile_bound = 0.001
+  quantile_bound = 0.001,
+  reset = F
 )
 }
 \arguments{
@@ -31,6 +32,8 @@ mbrest(
 \item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate )}
 
 \item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
+
+\item{reset}{boolean. Reset to different initial eta if LBFGS do not move (default to F)}
 }
 \value{
 default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
