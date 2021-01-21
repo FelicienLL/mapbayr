@@ -75,7 +75,7 @@ DV : Concentration central
   expect_equal(unname(round(est_newuoa$final_eta[[1]], 4)), c(0.0477, -0.0314, -0.0007, -0.0738))
 
   #But there is with L-BFGS-B:
-  est_lbfgsb0 <- mbrest(model, data739, method = "L-BFGS-B", verbose = F)
+  est_lbfgsb0 <- mbrest(model, data739, method = "L-BFGS-B", verbose = F, reset = F)
   expect_equal(unname(round(est_lbfgsb0$final_eta[[1]], 4)), c(0, 0, 0, 0))
   #With initial eta = 0, this subject automatically converge to... 0.
 

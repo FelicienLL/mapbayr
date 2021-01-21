@@ -7,13 +7,13 @@
 mbrest(
   x,
   data = NULL,
-  method = "newuoa",
+  method = "L-BFGS-B",
   output = NULL,
   verbose = TRUE,
   control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001,
-  reset = F
+  reset = T
 )
 }
 \arguments{
