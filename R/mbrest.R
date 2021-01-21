@@ -15,13 +15,13 @@
 #'
 mbrest <- function(x,
                    data = NULL,
-                   method = "newuoa",
+                   method = "L-BFGS-B",
                    output = NULL,
                    verbose = TRUE,
                    control = list(),
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
-                   reset = F){
+                   reset = T){
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
 
   if(is.null(data)){
