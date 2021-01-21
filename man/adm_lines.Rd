@@ -9,6 +9,7 @@ adm_lines(
   time = 0,
   addl = 0,
   ii = 0,
+  ss = 0,
   amt = 0,
   rate = 0,
   realize_addl = F,
@@ -23,6 +24,8 @@ adm_lines(
 \item{addl}{a numeric value}
 
 \item{ii}{a numeric value}
+
+\item{ss}{a numeric value}
 
 \item{amt}{a numeric value}
 

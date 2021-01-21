@@ -4,6 +4,7 @@
 #' @param time a numeric value
 #' @param addl a numeric value
 #' @param ii a numeric value
+#' @param ss a numeric value
 #' @param amt a numeric value
 #' @param rate a numeric value (for IV only. Automatically filled with -2 if zero order set in model code)
 #' @param realize_addl a logical (see mrgsolve::realize_addl)
@@ -11,7 +12,7 @@
 #'
 #' @return model object with dataset
 #' @export
-adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, realize_addl = F, output = NULL){
+adm_lines <- function(model, time = 0, addl = 0, ii = 0, ss = 0, amt = 0, rate = 0, realize_addl = F, output = NULL){
   if(is.null(model@args$data)){
     model@args$data <- tibble()
     iID <- 1
@@ -25,6 +26,7 @@ adm_lines <- function(model, time = 0, addl = 0, ii = 0, amt = 0, rate = 0, real
     evid  = 1,
     addl  = addl,
     ii    = ii,
+    ss    = ss,
     amt   = amt,
     mdv   = 1
   ) %>%
@@ -87,7 +89,7 @@ obs_lines <- function(model, time, DV, mdv = 0, DVmet = NULL, output = NULL){
     mutate(cmt = ifelse(.data$name == "DV", (obs_cmt(model))[1], (obs_cmt(model))[2])) %>%
     filter(!is.na(.data$cmt)) %>%
     select(-any_of("name")) %>%
-    mutate(ID = iID, evid = 0, addl = 0, ii = 0, amt = 0, rate = 0)
+    mutate(ID = iID, evid = 0, addl = 0, ii = 0, amt = 0, rate = 0, ss = 0)
 
 
 
