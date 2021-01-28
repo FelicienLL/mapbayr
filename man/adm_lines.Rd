@@ -4,36 +4,12 @@
 \alias{adm_lines}
 \title{Generate Administration lines for a dataset}
 \usage{
-adm_lines(
-  model,
-  time = 0,
-  addl = 0,
-  ii = 0,
-  ss = 0,
-  amt = 0,
-  rate = 0,
-  realize_addl = F,
-  output = NULL
-)
+adm_lines(x, ...)
 }
 \arguments{
-\item{model}{model object}
+\item{x}{model object}
 
-\item{time}{a numeric value}
-
-\item{addl}{a numeric value}
-
-\item{ii}{a numeric value}
-
-\item{ss}{a numeric value}
-
-\item{amt}{a numeric value}
-
-\item{rate}{a numeric value (for IV only. Automatically filled with -2 if zero order set in model code)}
-
-\item{realize_addl}{a logical (see mrgsolve::realize_addl)}
-
-\item{output}{defaut : a mrgsolve model with a data_set args. if "df" return a data frame}
+\item{...}{passed to mrgsolve::ev}
 }
 \value{
 model object with dataset

@@ -4,14 +4,12 @@
 \alias{add_covariates}
 \title{Add covariates to the dataset, as well as TOLA and AOLA}
 \usage{
-add_covariates(model, covariates = list(), output = NULL)
+add_covariates(model, covariates = list())
 }
 \arguments{
 \item{model}{model object}
 
 \item{covariates}{a list of named covariates, with a single value or exact number of lines than data}
-
-\item{output}{defaut: a mrgsolve model with a data_set in args. if "df" return a data frame}
 }
 \value{
 model object with dataset

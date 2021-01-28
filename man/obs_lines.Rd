@@ -4,10 +4,10 @@
 \alias{obs_lines}
 \title{Generate observation lines for a dataset}
 \usage{
-obs_lines(model, time, DV, mdv = 0, DVmet = NULL, output = NULL)
+obs_lines(x, time, DV, mdv = 0, DVmet = NULL)
 }
 \arguments{
-\item{model}{model object}
+\item{x}{model object}
 
 \item{time}{vector of time}
 
@@ -16,8 +16,6 @@ obs_lines(model, time, DV, mdv = 0, DVmet = NULL, output = NULL)
 \item{mdv}{should the Dv be ignored (1) or not (0)}
 
 \item{DVmet}{optional : metabolite data to fit}
-
-\item{output}{defaut : a mrgsolve model with a data_set args. if "df" return a data frame}
 }
 \value{
 model object with dataset
