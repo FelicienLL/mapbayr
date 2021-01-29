@@ -75,7 +75,13 @@ adm_0_cmt <- function(x){
   return(v)
 }
 
-#Is error exponential = Does it require log transformation ?
+
+#' Check if error is log-additive
+#'
+#' @param x model file
+#'
+#' @return a logical
+#' @noRd
 log.transformation <- function(x){
   x@code %>%
     str_subset("EPS") %>%
