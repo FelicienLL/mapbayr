@@ -36,6 +36,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #'
 #' @param eta a vector, initial eta, as a named vector (ETA1, ETA2...)
 #' @param mrgsolve_model a compiled mrgsolve model
+#' @param data data set for administration and cmt/mdv data
 #' @param sigma a matrix, population values of sigma. 1 proportional error, 2 additive error
 #' @param log.transformation logical operator. Useful for proportional error models (i.e. log transformed additive)
 #' @param DVobs vector of observation (provided by mapbay_estimation to avoid its calculation at each iteration)
@@ -44,28 +45,29 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #'
 #' @return a single value (the objective function value)
 #' @export
-compute_ofv <- function(eta, mrgsolve_model, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
+compute_ofv <- function(eta, mrgsolve_model, data, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
 
-  output <- mrgsolve_model %>%
-    param(as.list(eta)) %>%
-    mrgsim_df(end = -1, carry_out = c("cmt", "mdv"))
+  #Update ETA values
+  mod <- param(mrgsolve_model, as.list(eta))
 
-  output <- output[output$mdv==0,]
+  #Compute Predicted concentrations
+  output <- mrgsim_q(x = mod, data = data, output = "df")
 
+  #Add compartment column
+  output[["cmt"]] <- data[["cmt"]]
+
+  #Filter MDV == 0
+  output <- output[data$mdv==0,]
+
+  #Get DVpred
   DVpred <- output$DV
-
   if(log.transformation){DVpred <- log(DVpred)}
 
+  #Compute H matrix
   H <- derivatives(v_DV = DVpred, v_cmt = output$cmt, cmts = obs_cmt)
 
+  #Compute OFV
   Sigsq <- diag(H %*% sigma %*% t(H))
-
-  Deviation_concentration <- sum(log(Sigsq) + (DVobs - DVpred)^2/Sigsq)
-
-  Deviation_parameter <- diag(matrix(eta, nrow = 1) %*% omega.inv %*% matrix(eta, ncol = 1))
-
-  OFV <- Deviation_concentration + Deviation_parameter
-
-  return(OFV) #value  : ofv
+  sum(log(Sigsq) + (DVobs - DVpred)^2/Sigsq) + diag(matrix(eta, nrow = 1) %*% omega.inv %*% matrix(eta, ncol = 1))
 
 }

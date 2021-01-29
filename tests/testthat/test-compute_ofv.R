@@ -8,6 +8,7 @@ test_that("compute basic ofv", {
   arg.ofv <- preprocess.ofv(data = data1, model = mod)
   of_value <- compute_ofv(eta = c(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
               mrgsolve_model = arg.ofv$mrgsolve_model,
+              data = arg.ofv$data,
               sigma = arg.ofv$sigma,
               log.transformation = arg.ofv$log.transformation,
               DVobs = arg.ofv$DVobs,

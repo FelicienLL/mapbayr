@@ -8,6 +8,7 @@
   - mbraugment with n compartments > 1 and n ID > 1 #33
 
 * Miscellaneous: 
+  - ofv computation now uses mrgsim_q() faster than basic mrgsim_df (theoretically because I did not benchmarked)
   - Added a `NEWS.md` file to track changes to the package.
 
 # mapbayr 0.2.0

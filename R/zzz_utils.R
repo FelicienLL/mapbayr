@@ -3,7 +3,7 @@
 #' @importFrom ggpubr ggarrange
 #' @importFrom magrittr %>%
 #' @importFrom minqa newuoa
-#' @importFrom mrgsolve as.list data_set ev mread mrgsim mrgsim_df obsaug omat param realize_addl smat zero_re
+#' @importFrom mrgsolve as.list data_set ev mread mrgsim mrgsim_df mrgsim_q obsaug omat param realize_addl smat zero_re
 #' @importFrom optimx optimx
 #' @importFrom purrr map map2 map_dbl map_dfr pmap pmap_dfr quietly simplify transpose
 #' @importFrom rlang .data set_names splice

@@ -7,6 +7,7 @@
 compute_ofv(
   eta,
   mrgsolve_model,
+  data,
   sigma,
   log.transformation,
   DVobs,
@@ -18,6 +19,8 @@ compute_ofv(
 \item{eta}{a vector, initial eta, as a named vector (ETA1, ETA2...)}
 
 \item{mrgsolve_model}{a compiled mrgsolve model}
+
+\item{data}{data set for administration and cmt/mdv data}
 
 \item{sigma}{a matrix, population values of sigma. 1 proportional error, 2 additive error}
 
