@@ -22,6 +22,9 @@ mbrest <- function(x,
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
                    reset = T){
+  ok <- check_mapbayr_model(x)
+  if(!isTRUE(ok)) stop(c("\n", paste(ok, collapse = "\n")), call. = F)
+
   arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
 
   if(is.null(data)){
@@ -44,4 +47,36 @@ mbrest <- function(x,
          arg.optim = arg.optim)
 
   output_mbr(idata = idata, model = x, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+}
+
+
+#' Check if model is valid for mapbayr
+#'
+#' @param x model file
+#'
+#' @return TRUE value if check is passed, a vector of character with errors otherwise.
+#' @export
+#'
+#' @examples
+#' library(mapbayr)
+#' library(mrgsolve)
+#' check_mapbayr_model(house())
+check_mapbayr_model <- function(x){
+ # browser()
+  if(!is.mrgmod(x)){
+    stop("the first argument to mbrest must be a model object", call. = F)
+  }else{
+    check <- character()
+    if(!"DV" %in% x@capL) check <- c(check, "DV must be present in $CAPTURE")
+    if(is.null(obs_cmt(x))) check <- c(check, "No [OBS] compartment(s) defined in $CMT")
+    if(is.null(adm_cmt(x))) check <- c(check, "No [ADM] compartment(s) defined in $CMT")
+
+    #@param has eta  ?
+    #@param = as many as
+
+
+
+  }
+  if(length(check)==0) check <- TRUE
+  return(check)
 }
