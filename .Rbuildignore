@@ -9,3 +9,4 @@ README.Rmd
 ^tests/draftmethod\.R$
 ^tests/draftoptimx\.R$
 ^tests/draft_output\.R$
+^tests/draft_sd\.R$

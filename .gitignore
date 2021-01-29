@@ -8,3 +8,4 @@ tests/draftmethod.R
 tests/draftoptimx.R
 tests/draft_output.R
 mapbayr.Rproj
+tests/draft_sd.R
