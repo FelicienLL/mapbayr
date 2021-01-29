@@ -1,7 +1,7 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
-# mapbayr <img align="right" src = "inst/logo2.png" width="135px">
+# mapbayr <img align="right" src = "inst/logo.png" width="135px">
 
 <!-- badges: start -->
 

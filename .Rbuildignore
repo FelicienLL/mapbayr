@@ -1,12 +1,8 @@
 ^mapbayr\.Rproj$
 ^\.Rproj\.user$
-^devtools_history\.R$
 README.Rmd
 ^man/figures/README-.*\.png$
-^tests/test\.R$
-^tests/test2\.R$
 ^tests/draft\.R$
 ^tests/draftmethod\.R$
-^tests/draftoptimx\.R$
 ^tests/draft_output\.R$
 ^tests/draft_sd\.R$

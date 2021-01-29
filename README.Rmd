@@ -16,7 +16,7 @@ knitr::opts_chunk$set(
 ```{r,echo=FALSE}
 library(knitr)
 ```
-# mapbayr <img align="right" src = "inst/logo2.png" width="135px">
+# mapbayr <img align="right" src = "inst/logo.png" width="135px">
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
