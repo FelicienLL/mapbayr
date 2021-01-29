@@ -6,7 +6,7 @@
 #' @method print mbrests
 #' @export
 print.mbrests <- function(x, ...){
-  NAME <- mbr_model_name(x$model)
+  NAME <- x$model@model
   nID <- length(x$arg.ofv)
   nOBS <- x$arg.ofv %>% map("DVobs") %>% unname() %>%  simplify() %>% length()
   nETA <- length(x$arg.optim$par)

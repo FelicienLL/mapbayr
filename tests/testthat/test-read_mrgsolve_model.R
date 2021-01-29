@@ -1,10 +1,10 @@
-test_that("read model specifications", {
-  mod1 <- mread("ex_mbr1", mbrlib())
-  expect_equal(mbr_drug(mod1), "Examplinib1")
-  expect_equal(mbr_model_ref(mod1), "XXX et al, J Pharmacokinet, 2020")
-  expect_equal(mbr_model_file(mod1), "ex_mbr1")
-  expect_equal(mbr_model_name(mod1), "Ex Mbr1")
-})
+#test_that("read model specifications", {
+#  mod1 <- mread("ex_mbr1", mbrlib())
+#  expect_equal(mbr_drug(mod1), "Examplinib1")
+#  expect_equal(mbr_model_ref(mod1), "XXX et al, J Pharmacokinet, 2020")
+#  expect_equal(mbr_model_file(mod1), "ex_mbr1")
+#  expect_equal(mbr_model_name(mod1), "Ex Mbr1")
+#})
 
 test_that("read cmts", {
   mod1 <- mread("ex_mbr1", mbrlib())
