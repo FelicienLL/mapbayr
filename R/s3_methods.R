@@ -8,15 +8,15 @@
 print.mbrests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv)
-  nOBS <- x$arg.ofv %>% map("DVobs") %>% unname() %>%  simplify() %>% length()
-  nETA <- length(x$arg.optim$par)
+  nOBS <- x$arg.ofv %>% map("DVobs") %>% unname() %>% simplify() %>% length()
+  nETA <- n_eta(x)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
     as.data.frame() %>%
     utils::head()
   TAB <- utils::head(as.data.frame(x$mapbay_tab))
 
-  cat(NAME, "\n")
+  cat("Model: ", NAME, "\n")
   cat("ID :", nID, " individual(s).\n")
   cat("OBS:", nOBS, " observation(s).\n")
   cat("ETA:", nETA, " parameter(s) to estimate.\n\n")

@@ -6,9 +6,6 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   while(reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt))){
-    #nam <- names(arg.optim$par)
-    #new_ini <- round(runif(length(arg.optim$par), arg.optim$lower, arg.optim$upper), 6)
-    #names(new_ini) <- nam
     set.seed(123+RUN)
     arg.optim$par <- new_ini(arg.ofv, arg.optim)
 

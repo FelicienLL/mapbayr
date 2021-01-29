@@ -93,18 +93,17 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   method <- method[1]
 
-  diag_omega <- diag(omat(model, make = T))
-  eta_names <- paste0("ETA", 1:length(diag_omega))
-
   #par
   initial_eta <- force_initial_eta
   if(is.null(initial_eta)){
     if(method == "newuoa"){
       set.seed(1)
-      initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(paste0("ETA", 1:length(diag_omega)))
+      initial_eta <- runif(n_eta(model), -0.01, 0.01)
+      names(initial_eta) <- eta_names(model)
     }
     if(method == "L-BFGS-B"){
-      initial_eta <- rep(0,length(diag_omega)) %>% set_names(paste0("ETA", 1:length(diag_omega)))
+      initial_eta <- rep(0, n_eta(model))
+      names(initial_eta) <- eta_names(model)
     }
 
   }
@@ -128,7 +127,7 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   #lower, upper
   bound = Inf
   if(method == "L-BFGS-B"){
-    bound <- map_dbl(sqrt(diag_omega), qnorm, p = quantile_bound, mean = 0)
+    bound <- map_dbl(sqrt(odiag(model)), qnorm, p = quantile_bound, mean = 0)
   }
 
   arg <- list(
@@ -157,13 +156,13 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
 #' @export
 postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
 
-  final_eta <- opt.value[names(arg.optim$par)] %>%
+  final_eta <- opt.value[eta_names(model)] %>%
     as.double() %>%
-    set_names(names(arg.optim$par))
+    set_names(eta_names(model))
 
   if(!is.null(opt.value$fevals)){
     if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, length(diag(omat(model, make = T)))) %>% set_names(names(arg.optim$par))
+      final_eta <- rep(0, n_eta(model)) %>% set_names(eta_names(model))
       warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
     }
   }

@@ -89,20 +89,36 @@ log.transformation <- function(x){
     any()
 }
 
-# ETA NAMES -----------
+# ETA -----------
 
+#' Number of ETA to estimate
+#'
+#' @param x model file
+#'
+#' @return a numeric
+#' @noRd
+n_eta <- function(x){
+  length(eta_names(x))
+}
 
-#' Get eta names from mrgsolve model
+#' Name of ETA no estimate
+#'
+#' @param x model file
+#'
+#' @return a vector of character
+#' @noRd
+eta_names <- function(x){
+  ((as.list(x))$details$data %>%
+     filter(.data$block=="PARAM", str_detect(.data$name, "ETA")))$name
+}
+
+#' Description of ETA to estimate
 #'
 #' @param x model object
 #'
-#' @return a character string vector
-#' @export
-#'
-#' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-#' mbr_eta_names(model)
-mbr_eta_names <- function(x){
+#' @return a vector of character
+#' @noRd
+eta_descr <- function(x){
   ((as.list(x))$details$data %>%
      filter(.data$block=="PARAM", str_detect(.data$name, "ETA")))$descr
 }

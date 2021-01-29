@@ -11,3 +11,17 @@
 #' @importFrom tibble tibble rownames_to_column
 #' @importFrom tidyr expand_grid fill pivot_longer
 NULL
+
+
+
+#' Get diagonal of omega matix
+#'
+#' @param x model object
+#'
+#' @return a vector of numeric
+#' @noRd
+odiag <- function(x){
+  if(!is.mrgmod(x)) stop("the first argument to odiag must be a model object", call. = F)
+  diag(omat(x, make = T))
+}
+

@@ -172,10 +172,10 @@ The user is invited to perform map-bayesian estimation with his/her own mrgsolve
 #### ETA specifications
 * Mandatory: 
   + Add as many ETA as there are parameters to estimate (i.e. the length of the OMEGA matrix diagonal). 
-  + Refer them as ETAn (n being the number of ETA).
+  + Name them as ETAn (n being the N° of ETA).
   + Set 0 as default value. 
 * Strongly recommended:   
-  + Provide a description as a plain text (will be used as internal “eta names”)
+  + Provide a description as a plain text
 ```{c, eval = F}
 $PARAM @annotated
 ETA1 : 0 : CL (L/h)
