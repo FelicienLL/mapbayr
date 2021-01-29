@@ -137,13 +137,19 @@ mbr_conc_scaling <- function(x){
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' adm_cmt(model)
 adm_cmt <- function(x){
-  as.list(x)$details$data %>%
+  v <- as.list(x)$details$data %>%
     filter(.data$block %in%c("CMT", "INIT")) %>%
     select(all_of('options')) %>%
     pull() %>%
     tolower() %>%
     str_which("adm") %>%
     as.integer()
+
+  if(length(v)== 0){
+    v <- NULL
+  }
+
+  return(v)
 }
 
 
@@ -162,13 +168,20 @@ adm_cmt <- function(x){
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' obs_cmt(model)
 obs_cmt <- function(x){
-  as.list(x)$details$data %>%
+  v <- as.list(x)$details$data %>%
     filter(.data$block %in%c("CMT", "INIT")) %>%
     select(all_of('options')) %>%
     pull() %>%
     tolower() %>%
     str_which("obs") %>%
     as.integer()
+
+  if(length(v)== 0){
+    v <- NULL
+  }
+
+  return(v)
+
 }
 
 
