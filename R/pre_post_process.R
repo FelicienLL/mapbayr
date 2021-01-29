@@ -10,9 +10,20 @@ preprocess.data <- function(data){
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed")
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.")
-  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0) stop("Observation line (mdv = 0) not accepted at time = 0")
+  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
+  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
+  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
+  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
+  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
+  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
+  if(is.null(data[["mdv"]])){
+    data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
+  }
+  if(is.null(data[["mdv"]]))   stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
+
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
+  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0) stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
 
   iID <- unique(data$ID)
 
