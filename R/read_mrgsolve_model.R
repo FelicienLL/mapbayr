@@ -62,7 +62,7 @@ obs_cmt <- function(x){
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' adm_0_cmt(model)
 adm_0_cmt <- function(x){
-  v <- str_c("D_", x@cmtL) %>%
+  v <- paste0("D_", x@cmtL) %>%
     map(str_detect, string = x@code) %>%
     map(any) %>%
     as.logical() %>%

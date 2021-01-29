@@ -94,17 +94,17 @@ preprocess.optim <- function(method, model, control, force_initial_eta, quantile
   method <- method[1]
 
   diag_omega <- diag(omat(model, make = T))
-  eta_names <- str_c("ETA", 1:length(diag_omega))
+  eta_names <- paste0("ETA", 1:length(diag_omega))
 
   #par
   initial_eta <- force_initial_eta
   if(is.null(initial_eta)){
     if(method == "newuoa"){
       set.seed(1)
-      initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(str_c("ETA", 1:length(diag_omega)))
+      initial_eta <- runif(length(diag_omega), -0.01, 0.01)  %>% set_names(paste0("ETA", 1:length(diag_omega)))
     }
     if(method == "L-BFGS-B"){
-      initial_eta <- rep(0,length(diag_omega)) %>% set_names(str_c("ETA", 1:length(diag_omega)))
+      initial_eta <- rep(0,length(diag_omega)) %>% set_names(paste0("ETA", 1:length(diag_omega)))
     }
 
   }

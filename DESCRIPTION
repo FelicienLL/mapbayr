@@ -18,15 +18,14 @@ Imports:
     ggplot2,
     ggpubr,
     magrittr,
-    minqa,
     mrgsolve,
+    optimx,
     purrr,
     rlang,
     stats,
     stringr,
     tibble,
-    tidyr,
-    optimx
+    tidyr
 URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/FelicienLL/mapbayr/issues
 Suggests: 
