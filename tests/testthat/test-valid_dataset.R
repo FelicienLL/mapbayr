@@ -16,7 +16,7 @@ test_that("Dataset check is correct", {
 
 test_that("auto-supply of MDV if missing", {
   data_mdv <- select(data1, -mdv)
-  expect_error(est <- mbrest(mod1, data_mdv), NA)
+  expect_error(est <- mbrest(mod1, data_mdv, verbose = F), NA)
   expect_true(!is.null(est$mapbay_tab[["mdv"]]))
 })
 
