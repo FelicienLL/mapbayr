@@ -7,8 +7,8 @@ mapbayr is a free and open source package for *maximum a posteriori*
 bayesian estimation in R. Thanks to a single function, `mbrest()`, you
 can estimate individual PK parameters from:
 
-  - a data set of concentrations to fit (NM-TRAN format),
   - a population PK model coded in *mrgsolve*,
+  - a data set of concentrations to fit (NM-TRAN format).
 
 It was designed to be easily wrapped in [shiny
 apps](https://shiny.rstudio.com/) in order to ease model-based
@@ -28,7 +28,8 @@ devtools::install_github("FelicienLL/mapbayr")
 mapbayr relies on
 [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve) for model
 implementation and ordinary differential equation solving which requires
-C++ compilers. Please refer to the [installation
+C++ compilers. If you are a Windows user, you would probably need to
+install Rtools. Please refer to the [installation
 guide](https://github.com/metrumresearchgroup/mrgsolve/wiki/mrgsolve-Installation)
 of mrgsolve for additional information.
 
@@ -137,15 +138,15 @@ print(est)
 #> ETA: 2  parameter(s) to estimate.
 #> 
 #> Estimates: 
-#>   ID      ETA1      ETA2
-#> 1  1 0.6180307 -0.542415
+#>   ID    ETA1       ETA2
+#> 1  1 0.61803 -0.5424151
 #> 
 #> Output (4 lines): 
-#>   ID time amt rate DV    IPRED     PRED cmt evid mdv      ETA1      ETA2
-#> 1  1    0 100   20 NA 0.000000 0.000000   1    1   1 0.6180307 -0.542415
-#> 2  1    6  NA    0  5 4.991384 6.946975   1    0   0 0.6180307 -0.542415
-#> 3  1   20  NA    0  2 2.317034 4.819891   1    0   0 0.6180307 -0.542415
-#> 4  1   24  NA    0  4 1.973957 4.513590   1    0   1 0.6180307 -0.542415
+#>   ID time amt rate DV    IPRED     PRED cmt evid mdv    ETA1       ETA2
+#> 1  1    0 100   20 NA 0.000000 0.000000   1    1   1 0.61803 -0.5424151
+#> 2  1    6  NA    0  5 4.991384 6.946975   1    0   0 0.61803 -0.5424151
+#> 3  1   20  NA    0  2 2.317035 4.819891   1    0   0 0.61803 -0.5424151
+#> 4  1   24  NA    0  4 1.973959 4.513590   1    0   1 0.61803 -0.5424151
 ```
 
 ``` r
@@ -184,8 +185,8 @@ features are:
     distribution.
   - a single output object to ease post-processing, depending on the
     purpose of the estimation.
-  - several optimization algorithm available, such as “NEWUOA” (the
-    default) or “L-BFGS-B”.
+  - several optimization algorithm available, such as “L-BFGS-B” (the
+    default) or “NEWUOA”.
 
 ## Performance
 
@@ -211,25 +212,20 @@ The user is invited to perform map-bayesian estimation with his/her own
 mrgsolve models. These model files should be slightly modified in order
 to be “read” by mapbayr with the subsequent specifications :
 
-### 1\. `$PREAMBLE` block
+### 1\. `$PARAM` block
 
-Two lines with `- drug` and `- model_ref`, describing the name of the
-drug and the bibliographic reference of the model, must be filled. This
-block still accepts free text to make notes about the model.
+#### ETA specifications
 
-``` c
-$PREAMBLE
-- drug: examplinib
-- model_ref: Smith et al, J Pharmacokinet, 2020
-```
+  - Mandatory:
+      - Add as many ETA as there are parameters to estimate (i.e. the
+        length of the OMEGA matrix diagonal).
+      - Refer them as ETAn (n being the number of ETA).
+      - Set 0 as default value.
+  - Strongly recommended:
+      - Provide a description as a plain text (will be used as internal
+        “eta names”)
 
-### 2\. `$PARAM` block
-
-Add as many ETA as there are parameters to estimate. Refer them as ETAn
-(n being the number of ETA). Set 0 as default value. Plain text provided
-description will be used as internal “parameter names”. Text provided in
-parentheses will be used as internal “parameter units” (use of empty
-parentheses is advised for parameters without units).
+<!-- end list -->
 
 ``` c
 $PARAM @annotated
@@ -240,11 +236,18 @@ ETA3 : 0 : F ()
 //do not write iETA
 ```
 
-A `@covariates` tag must be used to record covariates in the `$PARAM`
-block. Set the reference value. Plain text provided description will be
-used as internal “covariate names”. Text provided in parentheses will be
-used as “covariate units” (description of 0/1 coding is advised for
-categorical covariates)
+#### Covariates
+
+  - Strongly recommended :
+      - Use a `@covariates` tag to record covariates in the `$PARAM`
+        block.
+      - Set the reference value.
+      - Provide a description as a plain text (will be used as internal
+        “covariate names”)
+      - Provide units in parentheses (description of 0/1 coding is
+        advised for categorical covariates)
+
+<!-- end list -->
 
 ``` c
 $PARAM @annotated @covariates
@@ -265,10 +268,47 @@ TOLA : 0 : Time of last adm (h)
 AOLA : 100 : Amt of last adm (mg)
 ```
 
+### 2\. `$CMT` block
+
+  - Mandatory:
+      - A `@annotated` tag must be used to record compartments.
+      - Write OBS in brackets to define the observation compartment(s).
+        This information is **mandatory** for the optimization process.
+        Also used by `obs_lines()` to build your dataset. Strongly
+        recommended:
+      - Write ADM in brackets to define “default” administration
+        compartment(s). This information is not used for optimization
+        process and the `mbrest()` function. The information is
+        mandatory if you use `adm_lines()` to build your dataset in
+        order to automatically set the value of the ‘cmt’ column.
+        Especially useful if you use a model with an absorption from
+        several depot compartment requiring to duplicate administrations
+        lines in the data set.
+
+<!-- end list -->
+
+``` c
+//example: model with dual zero and first order absorption in compartment 1 & 2, respectively, and observation of parent drug + metabolite 
+$CMT @annotated
+DEPOT: Depot [ADM]
+CENT_PAR: examplinib central [ADM, OBS]
+PERIPH : examplinib peripheral
+CENT_MET : methylexamplinib central [OBS] 
+```
+
 ### 3\. `$OMEGA` block
 
-Please ensure that omega values correspond to the order of the ETAs
-provided in `$PARAM`. Omega values can be recorded in multiple blocks.
+  - Mandatory:
+      - The length of the omega matrix must be the same as the number of
+        ETAn provided in `$PARAM`.
+      - The order of the omega values must correspond to the order of
+        the ETAs provided in `$PARAM`. This cannot be checked by mapbayr
+        \!
+  - Optional:
+      - Omega values can be recorded in multiple blocks such as in a
+        regular mrgsolve model code.
+
+<!-- end list -->
 
 ``` c
 $OMEGA
@@ -280,17 +320,43 @@ $OMEGA @block
 
 ### 4\. `$SIGMA` block
 
-Two (diagonal) values are expected. The first will be used for the
-proportional error, the second for (log) additive error.
+  - Mandatory :
+      - A pair of two (diagonal) values is expected per dependent
+        variable. The first value represents proportional error, the
+        second is (log) additive error.
+      - The order of the pairs must respect the order of the
+        compartments assigned with \[OBS\] in `$CMT`. This cannot be
+        checked by mapbayr \!
+
+To put it more clearly, the sigma matrix will be interpreted as such
+whatever the model :
+
+| N° in the SIGMA matrix diagonal |                      Associated error                      |
+| :-----------------------------: | :--------------------------------------------------------: |
+|                1                | Proportional on concentrations in the 1st cmt with \[OBS\] |
+|                2                |   Additive on concentrations in the 1st cmt with \[OBS\]   |
+|                3                | Proportional on concentrations in the 2nd cmt with \[OBS\] |
+|                4                |   Additive on concentrations in the 2nd cmt with \[OBS\]   |
+|                …                |                             …                              |
+
+For a model describing the concentrations of a single compound
+(i.e. parent drug only), the error model can be coded as such:
 
 ``` c
 $SIGMA 0.111 0 // proportional error 
+```
+
+``` c
 $SIGMA 0 0.222 // (log) additive error
+```
+
+``` c
 $SIGMA 0.333 0.444 // mixed error
 ```
 
-When a parent drug and its metabolite are fitted simultaneously, four
-values are expected.
+For a model describing the concentrations of two variables (i.e. parent
+drug and metabolite), four values are expected: a pair of proportional
+and additive error for both compounds.
 
 ``` c
 //example: correlated proportional error between parent and metabolite
@@ -301,51 +367,56 @@ $SIGMA
 0.000 0.000 0.000 0.000 // additive error on metabolite
 ```
 
-### 5\. `$CMT` block
+  - Optional:
+      - Sigma values can be recorded in multiple blocks such as in a
+        regular mrgsolve model code.
 
-A `@annotated` tag must be used to record compartments. Text provided in
-parentheses will be used as internal “concentration units” (possible
-values: **mg/L**, **ng/mL** or **pg/mL**). Text provided in brackets
-will be used to define which parameters correspond to administration
-\[ADM\] and/or observation \[OBS\] compartment.
+### 6\. `$TABLE` block or `$ERROR` block
 
-``` c
-//example: model with dual zero and first order absorption in compartment 1 & 2, respectively, and observation of parent drug + metabolite 
-$CMT @annotated
-DEPOT: Depot () [ADM]
-CENT_PAR: examplinib central (ng/mL) [ADM, OBS]
-PERIPH : examplinib peripheral
-CENT_MET : methylexamplinib central (ng/mL) [OBS] 
-```
+  - Mandatory:
+      - Refer the concentration variable to fit as `DV`. Mind the code,
+        especially if concentrations are observed in multiple
+        compartments.
+      - Express log-additive error models as exponential. This way,
+        concentrations will automatically log-transformed during the
+        optimization process, with no necessity to prior log-transform
+        your concentration.
 
-### 6\. `$TABLE` block
-
-Please refer the concentration variable to fit as `DV`. For log additive
-error models, there is no need to log transform the data. Please
-describe error as exponential to concentrations.
+<!-- end list -->
 
 ``` c
 $TABLE
-double DV  = (CENTRAL / VC) * exp(EPS(1)) ;
+double DV  = (CENTRAL / VC) * exp(EPS(2)) ;
 ```
 
-For fitting parent drug and metabolite simultaneously, please refer to
-them as PAR and MET, and define DV accordingly (DV will be used for
-computation of OFV)
+  - For fitting parent drug and metabolite simultaneously, refer to them
+    as PAR and MET, and define DV accordingly (only DV will be used
+    during the optimization process, but PAR and MET variables are
+    mandatory for post-processing internal functions)
+
+<!-- end list -->
 
 ``` c
 $TABLE
 double PAR = (CENT_PAR / V) * (1 + EPS(1)) ;
 double MET = (CENT_MET / V) * (1 + EPS(3)) ;
 double DV = PAR ;
-if(self.cmt == 4) DV = MET ;
+if(self.cmt == 4) DV = MET ; 
+// reminder: use "self.cmt" to internaly refer to a compartment in a mrgsolve model code. 
 ```
 
 ### 7\. `$MAIN` block
 
-Double every expression containing ETA information, with ETAn (used for
-estimation of parameters) and ETA(n) (generated for simulations with
-random effects)
+  - Mandatory:
+      - Double every expression containing ETA information, with ETAn
+        (will be used for optimization of parameters) and ETA(n)
+        (generated for simulations with random effects like a “regular”
+        mrgsolve model)
+      - Mind the attribution to the good ETAn and ETA(n) as respect to
+        the information you provided in `$PARAM` and `$OMEGA`. This
+        cannot be checked by mapbayr \!
+
+<!-- end list -->
 
 ``` c
 $PK
@@ -354,8 +425,12 @@ double CL = TVCL * exp(ETA1 + ETA(1))
 
 ### 8\. `$CAPTURE` block
 
-DV must be captured, as well as PAR and MET for models with parent +
-metabolite.
+  - Mandatory:
+      - DV must be captured
+      - For models with parent + metabolite, PAR and MET must be
+        captured too.
+
+<!-- end list -->
 
 ``` c
 $CAPTURE DV PAR MET
