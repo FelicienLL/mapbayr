@@ -18,6 +18,10 @@ library(knitr)
 ```
 # mapbayr <img align="right" src = "inst/logo2.png" width="135px">
 
+<!-- badges: start -->
+[![CRAN status](https://www.r-pkg.org/badges/version/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
+<!-- badges: end -->
+
 mapbayr is a free and open source package for *maximum a posteriori* bayesian estimation in R. Thanks to a single function, `mbrest()`, you can estimate individual PK parameters from: 
 
 * a population PK model coded in *mrgsolve*,
