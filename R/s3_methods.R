@@ -9,7 +9,7 @@ print.mbrests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv)
   nOBS <- x$arg.ofv %>% map("DVobs") %>% unname() %>% simplify() %>% length()
-  nETA <- n_eta(x)
+  nETA <- n_eta(x$model)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
     as.data.frame() %>%
