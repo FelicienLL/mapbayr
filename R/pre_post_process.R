@@ -23,7 +23,7 @@ preprocess.data <- function(data){
 
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
-  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0) stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
+  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
 
   iID <- unique(data$ID)
 

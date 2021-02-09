@@ -116,6 +116,17 @@ log.transformation <- function(x){
 
 # ETA -----------
 
+#' Name of ETA no estimate
+#'
+#' @param x model file
+#'
+#' @return a vector of character
+#' @noRd
+eta_names <- function(x){
+  ((as.list(x))$details$data %>%
+     filter(.data$block=="PARAM", str_detect(.data$name, "^ETA\\d+$")))$name
+}
+
 #' Number of ETA to estimate
 #'
 #' @param x model file
@@ -126,17 +137,6 @@ n_eta <- function(x){
   length(eta_names(x))
 }
 
-#' Name of ETA no estimate
-#'
-#' @param x model file
-#'
-#' @return a vector of character
-#' @noRd
-eta_names <- function(x){
-  ((as.list(x))$details$data %>%
-     filter(.data$block=="PARAM", str_detect(.data$name, "ETA")))$name
-}
-
 #' Description of ETA to estimate
 #'
 #' @param x model object
@@ -145,7 +145,7 @@ eta_names <- function(x){
 #' @noRd
 eta_descr <- function(x){
   ((as.list(x))$details$data %>%
-     filter(.data$block=="PARAM", str_detect(.data$name, "ETA")))$descr
+     filter(.data$block=="PARAM", str_detect(.data$name, "^ETA\\d+$")))$descr
 }
 
 
