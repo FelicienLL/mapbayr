@@ -8,7 +8,8 @@
 #' @param control a list passed to the optimizer (see source code for default, as function of the optimizer)
 #' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
 #' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
-#' @param reset boolean. Reset to different initial eta if LBFGS do not move (default to F)
+#' @param reset logical. Reset to different initial eta if LBFGS do not move (default is TRUE)
+#' @param check logical. Check model code for mapbayr specification (default is TRUE)
 #'
 #' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
 #' @export

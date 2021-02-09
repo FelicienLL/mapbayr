@@ -13,7 +13,8 @@ mbrest(
   control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001,
-  reset = T
+  reset = T,
+  check = T
 )
 }
 \arguments{
@@ -33,7 +34,9 @@ mbrest(
 
 \item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
 
-\item{reset}{boolean. Reset to different initial eta if LBFGS do not move (default to F)}
+\item{reset}{logical. Reset to different initial eta if LBFGS do not move (default is TRUE)}
+
+\item{check}{logical. Check model code for mapbayr specification (default is TRUE)}
 }
 \value{
 default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
