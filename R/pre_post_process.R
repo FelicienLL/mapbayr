@@ -47,27 +47,26 @@ preprocess.data <- function(data){
 #' @export
 preprocess.ofv <- function(model, data){
 
-  omega.inv <- solve(omat(model, make = T))
-  sigma <- smat(model, make = T)
+  #mrgsolve_model
+  q_model <- zero_re(model)
+  q_model@end <- -1 #Make sure no modif in the time grid
+  q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
+  q_model@Icmt <- integer(0)
+  q_model@Icap <- which(model@capL== "DV") # Only return DV among $captured items
+  q_model@capL <- "DV"
 
-  model <- zero_re(model)
-  model@end <- -1 #Make sure no modif in the time grid
-  model@cmtL <- character(0) # Do not return amounts in compartments in the output
-  model@Icmt <- integer(0)   #
-  model@Icap <- which(model@capL== "DV") # Only return DV among $captured items
-  model@capL <- "DV"
-
+  #DVobs
   DVobs <- data[data$mdv==0,]$DV #keep observations to fit only
   if(log.transformation(model)){DVobs <- log(DVobs)}
 
   list(
-    mrgsolve_model = model, #this model is 'updated' with zero re, carry out, end and "Req(DV)"
+    mrgsolve_model = q_model, #this model is 'updated' with zero re, end and "Req(DV)"
     data = data,
-    sigma = sigma,
+    sigma = smat(model, make = T),
     log.transformation = log.transformation(model),
     DVobs = DVobs,
-    omega.inv = omega.inv,
-    obs_cmt = obs_cmt(model)
+    omega.inv = solve(omat(model, make = T)),
+    obs_cmt = fit_cmt(model, data)
   )
 }
 

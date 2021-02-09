@@ -51,6 +51,31 @@ obs_cmt <- function(x){
 
 }
 
+
+fit_cmt <- function(x, idata){
+  cmt_data <- sort(unique(idata[idata$mdv==0,]$cmt))
+  cmt_model <- obs_cmt(x)
+
+  if(is.null(cmt_model)){
+    if(length(cmt_data)!=1) stop(paste0("ID =", idata$ID[1], "; CMT =", paste(cmt_data, collapse = " "), "\nMore than one 'observation compartment' to detect from data. Consider editing model code with [OBS] in $CMT."), call. = F)
+    if(any(!(cmt_data %in% x@Icmt))) stop(paste0("ID =", idata$ID[1], "; CMT =", cmt_data, "\n Compartment number with observation in dataset does not exist in model."))
+    return(cmt_data)
+  } else {
+    if(any(!cmt_data %in% cmt_model)) stop(paste0("ID =", idata$ID[1], "; CMT =", cmt_data, "\n One or more compartment with observation (mdv=0) in data don't match those defined with [OBS] in $CMT."), call. = F)
+    return(cmt_model)
+  }
+}
+
+
+
+
+
+
+
+
+
+
+
 #' Get zero-order infusion compartment from mrgsolve model
 #'
 #' @param x model object
