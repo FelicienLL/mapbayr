@@ -14,19 +14,6 @@
 #' @importFrom tidyr expand_grid fill pivot_longer
 NULL
 
-
-
-#S3 GENERICS ----------
-augment <- function (x, ...)
-{
-  UseMethod("augment")
-}
-
-
-
-
-
-
 #MISCELLANEOUS ----------
 
 #' Get diagonal of omega matix
