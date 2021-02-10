@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbrest_check_and_preprocess.R
 \name{preprocess.data}
 \alias{preprocess.data}
-\title{Preprocess: data into a list of individual data}
+\title{Pre-process: data into a list of individual data}
 \usage{
 preprocess.data(data)
 }
@@ -13,5 +13,5 @@ preprocess.data(data)
 a named list of data set (n individuals)
 }
 \description{
-Preprocess: data into a list of individual data
+Pre-process: data into a list of individual data
 }

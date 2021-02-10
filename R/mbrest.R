@@ -54,11 +54,11 @@ mbrest <- function(x,
     data = idata,
     opt.value = opt.value,
     arg.ofv = arg.ofv) %>%
-    pmap(postprocess,
+    pmap(postprocess.optim,
          x = x,
          arg.optim = arg.optim)
 
-  out <- output_mbr(x, data = idata, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+  out <- postprocess.output(x, data = idata, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
 
   return(out)
 }

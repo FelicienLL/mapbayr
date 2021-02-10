@@ -1,6 +1,6 @@
 
 
-#' Post process results from optimization
+#' Post-process: derive predictions from optimization
 #'
 #' @inheritParams mbrest
 #' @param opt.value value returned by optimizer
@@ -8,7 +8,7 @@
 #'
 #' @return a list of post processing values
 #' @export
-postprocess <- function(x, data, opt.value, arg.optim, arg.ofv){
+postprocess.optim <- function(x, data, opt.value, arg.optim, arg.ofv){
 
   final_eta <- opt.value[eta_names(x)] %>%
     as.double() %>%
@@ -49,14 +49,14 @@ postprocess <- function(x, data, opt.value, arg.optim, arg.ofv){
 }
 
 
-#' Build the output of mbrest function
+#' Post-process: Build the output (mbrests model object)
 #' @inheritParams mbrest
-#' @inheritParams postprocess
+#' @inheritParams postprocess.optim
 #' @param post output of the post.process function
 #'
 #' @return a mbrests model object
 #' @export
-output_mbr <- function(x, data, arg.optim, arg.ofv, opt.value, post, output){
+postprocess.output <- function(x, data, arg.optim, arg.ofv, opt.value, post, output){
 
   if(!is.null(output)){
     if(output == "df") out <- map_dfr(post, "mapbay_tab")

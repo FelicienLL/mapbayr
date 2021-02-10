@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbrest_check_and_preprocess.R
 \name{preprocess.optim}
 \alias{preprocess.optim}
-\title{Preprocess: arguments for optimization function}
+\title{Pre-process: arguments for optimization function}
 \usage{
 preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
 }
@@ -21,5 +21,5 @@ preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
 a list of named arguments passed to optimizer (i.e. arg.optim)
 }
 \description{
-Preprocess: arguments for optimization function
+Pre-process: arguments for optimization function
 }

@@ -55,7 +55,7 @@ check_mapbayr_model <- function(x){
 
 
 
-#' Preprocess: arguments for optimization function
+#' Pre-process: arguments for optimization function
 #'
 #' @inheritParams mbrest
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
@@ -118,7 +118,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 }
 
 
-#' Preprocess: data into a list of individual data
+#' Pre-process: data into a list of individual data
 #'
 #' @inheritParams mbrest
 #' @return a named list of data set (n individuals)
@@ -157,7 +157,7 @@ preprocess.data <- function(data){
 
 
 
-#' Preprocess: model and data for ofv computation
+#' Pre-process: model and data for ofv computation
 #' @inheritParams mbrest
 #' @return a list of named arguments passed to optimizer (i.e. arg.ofv)
 #' @export

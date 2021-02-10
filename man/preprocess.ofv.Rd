@@ -2,7 +2,7 @@
 % Please edit documentation in R/mbrest_check_and_preprocess.R
 \name{preprocess.ofv}
 \alias{preprocess.ofv}
-\title{Preprocess: model and data for ofv computation}
+\title{Pre-process: model and data for ofv computation}
 \usage{
 preprocess.ofv(x, data)
 }
@@ -15,5 +15,5 @@ preprocess.ofv(x, data)
 a list of named arguments passed to optimizer (i.e. arg.ofv)
 }
 \description{
-Preprocess: model and data for ofv computation
+Pre-process: model and data for ofv computation
 }
