@@ -1,3 +1,5 @@
+#NAMESPACE ----------
+
 #' @importFrom dplyr all_of any_of arrange as_tibble bind_cols bind_rows desc distinct everything filter group_by group_split mutate pull rename_with select slice_max slice_min starts_with ungroup vars
 #' @importFrom ggplot2 %+replace% aes element_rect facet_grid geom_hline geom_line geom_point geom_vline ggplot label_both labs theme_bw scale_shape_manual scale_color_manual stat_function theme
 #' @importFrom ggpubr ggarrange
@@ -13,6 +15,19 @@
 NULL
 
 
+
+#S3 GENERICS ----------
+augment <- function (x, ...)
+{
+  UseMethod("augment")
+}
+
+
+
+
+
+
+#MISCELLANEOUS ----------
 
 #' Get diagonal of omega matix
 #'
@@ -38,3 +53,5 @@ odiag <- function(x){
 mbrlib <- function(){
   system.file("models", package = "mapbayr")
 }
+
+
