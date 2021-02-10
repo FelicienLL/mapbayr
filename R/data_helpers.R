@@ -161,13 +161,6 @@ add_covariates <- function(model, covariates = list()){
 
 }
 
-
-
-
-
-
-
-
 #' Return tibble data
 #'
 #' @param x model object

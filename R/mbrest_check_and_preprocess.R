@@ -1,3 +1,60 @@
+#' Check if model is valid for mapbayr
+#'
+#' @param x model file
+#'
+#' @return TRUE value if check is passed, a vector of character with errors otherwise.
+#' @export
+#'
+#' @examples
+#' library(mapbayr)
+#' library(mrgsolve)
+#' check_mapbayr_model(house())
+check_mapbayr_model <- function(x){
+  # browser()
+  if(!is.mrgmod(x)){
+    stop("the first argument must be a model object", call. = F)
+  }else{
+    check <- tibble(stop = logical(0), descr = character(0))
+
+    # $PARAM
+    neta <- length(eta_names(x))
+    if(neta == 0) {
+      check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: No ETA (ETA1, ETA2...) defined."))
+    } else {
+      if(any(eta_names(x) != paste0("ETA", seq.int(length.out = neta)))) check <-  bind_rows(check, list(stop = TRUE, descr = paste0("$PARAM: ", neta, " ETA found, but not sequentially named ETA1.")))
+      if(!all(x[eta_names(x)]==0)) check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: Initial value is not 0 for all ETA."))
+      if(any(is.na(eta_descr(x)))) check <- bind_rows(check, list(stop = FALSE, descr = "$PARAM: Description missing for at least one ETA (optionnal)."))
+    }
+
+    # $CMT
+    if(is.null(adm_cmt(x))) check <- bind_rows(check, list(stop = FALSE, descr = "$CMT: No [ADM] compartment(s) defined (optionnal)."))
+    if(is.null(obs_cmt(x))) check <- bind_rows(check, list(stop = FALSE, descr = "$CMT: No [OBS] compartment(s) defined (optionnal)."))
+
+    # $OMEGA as much as ETA ?
+    nomega <- length(diag(omat(x, make = T)))
+    if(nomega != neta) check <- bind_rows(check, list(stop = TRUE, descr = "$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM."))
+
+    # $SIGMA
+    nsig <- length(diag(smat(x, make = T)))
+    if(nsig%%2 !=0) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: A pair number of sigma values is expected (", nsig, " values found).")))
+    if(is.null(obs_cmt(x))){
+      if(nsig != 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$SIGMA: Define only one pair of sigma values (prop + add errors) in $SIGMA if you do not use [OBS] in $CMT. (One observation compartment will be defined from MDV=0 lines in individual data"))
+    } else {
+      ncmt <- length(obs_cmt(x))
+      if(ncmt != nsig/2) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."))
+    }
+
+    # $CAPTURE
+    if(!"DV" %in% x@capL) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE: DV must be captured."))
+    if(any(!(c("PAR", "MET") %in% x@capL)) & nsig > 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE PAR and MET must be captured if multiple types of DV are fitted (more than one pair of sigma provided in $SIGMA)"))
+
+  }
+  if(nrow(check)==0) check <- TRUE
+  return(check)
+}
+
+
+
 #' Preprocess: arguments for optimization function
 #'
 #' @inheritParams mbrest
@@ -133,83 +190,3 @@ preprocess.ofv <- function(x, data){
 
 
 
-
-
-#' Post process results from optimization
-#'
-#' @inheritParams mbrest
-#' @param opt.value value returned by optimizer
-#' @param arg.optim,arg.ofv argument passed to optimizer
-#'
-#' @return a list of post processing values
-#' @export
-postprocess <- function(x, data, opt.value, arg.optim, arg.ofv){
-
-  final_eta <- opt.value[eta_names(x)] %>%
-    as.double() %>%
-    set_names(eta_names(x))
-
-  if(!is.null(opt.value$fevals)){
-    if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, n_eta(x)) %>% set_names(eta_names(x))
-      warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
-    }
-  }
-
-  typical_pred <- x %>%
-    data_set(data) %>%
-    zero_re() %>%
-    mrgsim(end = -1) %>%
-    as_tibble() %>%
-    pull(.data$DV)
-
-  indiv_pred <- x %>%
-    param(final_eta) %>%
-    data_set(data) %>%
-    zero_re() %>%
-    mrgsim(end = -1) %>%
-    as_tibble() %>%
-    pull(.data$DV)
-
-  mapbay_tab <- data %>%
-    mutate(IPRED = indiv_pred, PRED = typical_pred, .after = "DV") %>%
-    select(-any_of(x@cmtL)) %>%
-    bind_cols(bind_rows(final_eta))
-
-  list(
-    final_eta = final_eta,
-    mapbay_tab = mapbay_tab
-  )
-
-}
-
-
-#' Build the output of mbrest function
-#' @inheritParams mbrest
-#' @inheritParams postprocess
-#' @param post output of the post.process function
-#'
-#' @return a mbrests model object
-#' @export
-output_mbr <- function(x, data, arg.optim, arg.ofv, opt.value, post, output){
-
-  if(!is.null(output)){
-    if(output == "df") out <- map_dfr(post, "mapbay_tab")
-
-  } else {
-    out <- list(
-      model = x,
-      data = bind_rows(unname(data)),
-      arg.optim = arg.optim,
-      arg.ofv = arg.ofv,
-      opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
-      final_eta = map(post, "final_eta"),
-      mapbay_tab = map_dfr(post, "mapbay_tab")
-    )
-
-    class(out) <- "mbrests"
-
-  }
-  return(out)
-
-}
