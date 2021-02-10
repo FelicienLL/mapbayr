@@ -1,8 +1,11 @@
 # mapbayr (Development version)
+
+# mapbayr 0.2.1
 * Features: 
   - Refactor adm_lines() and obs_lines() function. adm_lines() is now based on mrgsolve::ev, and can accept "ss" specification. Covered by tests.
   - Check for mandatory columns in data set. MDV automatically supplied.  #31
-  - Check the model to see if it fills mapbayr specification
+  - Check the model to see if it fills mapbayr specification. Covered with tests
+  - [OBS] is not mandatory in $CMT if there is only one compartment with observations in the dataset.
   
 * Fix bugs: 
   - Throw an error if no dataset is passed. #29
@@ -10,6 +13,8 @@
   - mbraugment with n compartments > 1 and n ID > 1 #33
 
 * Miscellaneous: 
+  - Update README
+  - Remove some useless functions
   - ofv computation now uses mrgsim_q() faster than basic mrgsim_df (theoretically because I did not benchmarked)
   - Added a `NEWS.md` file to track changes to the package.
 
