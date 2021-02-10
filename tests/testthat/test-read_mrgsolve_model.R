@@ -127,6 +127,7 @@ $OMEGA 0.3 0.2 0.1
 $SIGMA
 0.06 // proportional
 0.1 // additive
+0.1 //                                             error here
 
 $CMT CENT PERIPH
 
@@ -155,7 +156,7 @@ $CAPTURE DV
   expect_true("$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM." %in% check1$descr)
   expect_true("$CMT: No [ADM] compartment(s) defined (optionnal)." %in% check1$descr)
   expect_true("$CMT: No [OBS] compartment(s) defined (optionnal)." %in% check1$descr)
-  expect_false("$SIGMA: Define only one pair of sigma values (prop + add errors) in $SIGMA if you do not use [OBS] in $CMT. (One observation compartment will be defined from MDV=0 lines in individual data" %in% check1$descr)
+  expect_true("$SIGMA: A pair number of sigma values is expected (3 values found)." %in% check1$descr)
 
 })
 

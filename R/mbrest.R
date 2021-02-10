@@ -94,6 +94,7 @@ check_mapbayr_model <- function(x){
 
     # $SIGMA
     nsig <- length(diag(smat(x, make = T)))
+    if(nsig%%2 !=0) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: A pair number of sigma values is expected (", nsig, " values found).")))
     if(is.null(obs_cmt(x))){
       if(nsig != 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$SIGMA: Define only one pair of sigma values (prop + add errors) in $SIGMA if you do not use [OBS] in $CMT. (One observation compartment will be defined from MDV=0 lines in individual data"))
     } else {
