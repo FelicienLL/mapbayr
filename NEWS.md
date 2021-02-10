@@ -1,5 +1,7 @@
 # mapbayr (Development version)
 
+- Data helpers are now 'mrgmod' methods
+
 # mapbayr 0.2.2
 
 - mbraugment(), mbrplot() and mbrhist() are deleted, and replaced by augment(), plot() and hist() S3 methods.

@@ -1,11 +1,17 @@
+#-------------------------
+#---   Data helpers   ----
+#-------------------------
+
+adm_lines <- function(x, ...) UseMethod("adm_lines")
+
 #' Generate Administration lines for a dataset
 #'
 #' @param x model object
 #' @param ... passed to mrgsolve::ev
-#'
+#' @method adm_lines mrgmod
 #' @return model object with dataset
 #' @export
-adm_lines <- function(x, ...){
+adm_lines.mrgmod <- function(x, ...){
   #if (!mrgsolve:::is.mrgmod(x))
   #  mrgsolve:::mod_first()
 
@@ -60,7 +66,7 @@ adm_lines <- function(x, ...){
 
 }
 
-
+obs_lines <- function(x, ...) UseMethod("obs_lines")
 
 #' Generate observation lines for a dataset
 #'
@@ -69,10 +75,11 @@ adm_lines <- function(x, ...){
 #' @param DV vector of values to fit
 #' @param mdv should the Dv be ignored (1) or not (0)
 #' @param DVmet optional : metabolite data to fit
+#' @method obs_lines mrgmod
 #'
 #' @return model object with dataset
 #' @export
-obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL){
+obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL){
 
   if(is.null(x@args$data)){
     d0 <- tibble()
@@ -120,16 +127,16 @@ obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL){
 
 }
 
-
+add_covariates <- function(x, ...) UseMethod("add_covariates")
 
 #' Add covariates to the dataset, as well as TOLA and AOLA
 #'
 #' @param model model object
 #' @param covariates a list of named covariates, with a single value or exact number of lines than data
-#'
+#' @method add_covariates mrgmod
 #' @return model object with dataset
 #' @export
-add_covariates <- function(model, covariates = list()){
+add_covariates.mrgmod <- function(model, covariates = list()){
   if(is.null(model@args$data)) stop("Please provide a dataset")
 
   d <- model@args$data %>%
@@ -161,12 +168,14 @@ add_covariates <- function(model, covariates = list()){
 
 }
 
+see_data <- function(x, ...) UseMethod("see_data")
+
 #' Return tibble data
 #'
 #' @param x model object
-#'
+#' @method see_data mrgmod
 #' @return a tibble
 #' @export
-see_data <- function(x){
+see_data.mrgmod <- function(x){
   as_tibble(x@args$data)
 }
