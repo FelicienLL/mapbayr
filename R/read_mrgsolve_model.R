@@ -156,8 +156,7 @@ eta_descr <- function(x){
 #' @param x model object
 #'
 #' @return a character string vector
-#' @export
-#'
+#' @noRd
 #' @examples
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_names(model)
@@ -170,8 +169,7 @@ mbr_cov_names <- function(x){
 #' @param x model object
 #'
 #' @return a named vector of numerics
-#' @export
-#'
+#' @noRd
 #' @examples
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_refvalues(model)
@@ -188,8 +186,7 @@ mbr_cov_refvalues <- function(x){
 #' @param x model object
 #'
 #' @return a character string vector
-#' @export
-#'
+#' @noRd
 #' @examples
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' mbr_cov_descr(model)

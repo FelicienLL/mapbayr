@@ -32,7 +32,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 
 
 
-#' Compute the objective function values.
+#' Compute the objective function value
 #'
 #' @param eta a named vector of numeric (ETA1, ETA2...)
 #' @param mrgsolve_model model object (updated for purpose)

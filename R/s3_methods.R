@@ -37,3 +37,4 @@ print.mbrests <- function(x, ...){
 as.data.frame.mbrests <- function(x, row.names = NULL, optional = FALSE, ...){
   as.data.frame(x$mapbay_tab, ...)
 }
+
