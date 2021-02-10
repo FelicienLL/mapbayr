@@ -49,7 +49,7 @@ as.data.frame.mbrests <- function(x, row.names = NULL, optional = FALSE, ...){
 #' @method plot mbrests
 #' @export
 plot.mbrests <- function(x, ...){
-#  if(!inherits(x, "mbrests")) stop("Provided object is not a mbrests class object")
+  #  if(!inherits(x, "mbrests")) stop("Provided object is not a mbrests class object")
 
   if(is.null(x$aug_tab)){
     message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
@@ -202,7 +202,9 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
 
   aug_tab <- bind_rows(ipred, pred)
 
-  if(length(obs_cmt(x$model))>1){
+  fitcmt <- fit_cmt(x$model, idata[[1]])
+
+  if(length(fitcmt)>1){
     aug_tab <- select(aug_tab, -any_of(c("DV")))
   } else{
     aug_tab <- select(aug_tab, -any_of(c("PAR", "MET")))
@@ -210,7 +212,7 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
 
   aug_tab <- aug_tab %>%
     pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
-    mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), obs_cmt(x$model)[1], obs_cmt(x$model)[2]))%>%
+    mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2]))%>%
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
   x <- c(x, aug_tab = list(aug_tab))

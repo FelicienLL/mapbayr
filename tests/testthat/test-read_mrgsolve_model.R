@@ -22,6 +22,7 @@ test_that("Detection of cmt to fit in data is correct", {
   ##3) If more than one compartment with observation in the dataset (in one individual) : stop, user should use [OBS] if multiple obs compartments are used
   ##4) Compartment must exist in the model
   ##5) Sigma must be equal to 2
+  ##6) mbrests methods must work too
 
 
   basecode <- "
@@ -90,9 +91,10 @@ PERIPH: Peripheral compartment ()
   expect_true("$CMT: No [ADM] compartment(s) defined (optionnal)." %in% check3$descr)
   expect_true("$CMT: No [OBS] compartment(s) defined (optionnal)." %in% check3$descr)
   expect_equal(fit_cmt(mod3, data1), 1)
+  expect_null(obs_cmt(mod3))
 
   #This works
-  expect_s3_class(mbrest(mod3, data1, verbose = F), "mbrests")
+  expect_s3_class(est3 <- mbrest(mod3, data1, verbose = F), "mbrests")
 
   ##3) Only one obs compartment in data
   data3 <- mutate(data1, cmt = c(1,2,1))
@@ -107,6 +109,13 @@ PERIPH: Peripheral compartment ()
   mcode("mod5", code = paste0(basecode, sigma1, cmt3)) %>%
     mbrest(data = data1) %>%
     expect_error(".*Define only one pair of sigma values .* if you do not use .*One observation compartment will be defined from MDV=0 lines in individual data")
+
+  ##6) Method
+  expect_output(print(est3))
+  expect_error(as.data.frame(est3), NA)
+  expect_error(augment(est3), NA)
+  expect_error(plot(est3), NA)
+  expect_error(hist(est3), NA)
 
 })
 
