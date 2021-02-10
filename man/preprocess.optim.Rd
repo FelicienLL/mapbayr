@@ -4,21 +4,21 @@
 \alias{preprocess.optim}
 \title{Preprocess: arguments for optimization function}
 \usage{
-preprocess.optim(method, model, control, force_initial_eta, quantile_bound)
+preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
 }
 \arguments{
-\item{method}{string character of method to use ("newuoa" or "L-BFGS-B")}
+\item{x}{the model object}
 
-\item{model}{model object}
+\item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
 
-\item{control}{a list passed to the optimizer}
+\item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
 
-\item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate)}
+\item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
-\item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
+\item{quantile_bound}{a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1\%)}
 }
 \value{
-a list of argument passed to optimization function (optimx)
+a list of named arguments passed to optimizer (i.e. arg.optim)
 }
 \description{
 Preprocess: arguments for optimization function

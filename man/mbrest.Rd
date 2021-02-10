@@ -2,45 +2,45 @@
 % Please edit documentation in R/mbrest.R
 \name{mbrest}
 \alias{mbrest}
-\title{Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset}
+\title{Estimate parameters (maximum a posteriori)}
 \usage{
 mbrest(
   x,
   data = NULL,
   method = "L-BFGS-B",
-  output = NULL,
-  verbose = TRUE,
-  control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001,
-  reset = T,
-  check = T
+  control = list(),
+  check = TRUE,
+  verbose = TRUE,
+  reset = TRUE,
+  output = NULL
 )
 }
 \arguments{
-\item{x}{model file}
+\item{x}{the model object}
 
-\item{data}{NM tran data to optimize}
+\item{data}{NMTRAN-like data set}
 
-\item{method}{"newuoa" or "L-BFGS-B"}
+\item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
 
-\item{output}{return a mapbay_tab only}
+\item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
-\item{verbose}{a logical. If TRUE (the default), will print the steps of optimization.}
+\item{quantile_bound}{a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1\%)}
 
-\item{control}{a list passed to the optimizer (see source code for default, as function of the optimizer)}
+\item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
 
-\item{force_initial_eta}{a numeric vector of starting estimates (exact length of eta to estimate )}
+\item{check}{check model code for mapbayr specification (a logical, default is \code{TRUE})}
 
-\item{quantile_bound}{for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA}
+\item{verbose}{print the steps of the estimations to the console (a logical, default is \code{TRUE})}
 
-\item{reset}{logical. Reset to different initial eta if LBFGS do not move (default is TRUE)}
+\item{reset}{reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is \code{TRUE})}
 
-\item{check}{logical. Check model code for mapbayr specification (default is TRUE)}
+\item{output}{if \code{NULL} (the default) a mbrests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 }
 \value{
-default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
+a mbrests model object
 }
 \description{
-Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset
+The main function of the mapbayr package. Performs a \emph{maximum a posteriori} Bayesian estimation of parameters, from a mrgsolve model object and a dataset containing information about administrations and observed concentrations.
 }

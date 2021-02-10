@@ -7,10 +7,10 @@
 preprocess.data(data)
 }
 \arguments{
-\item{data}{a NM-TRAN data set of one or multiple individuals.}
+\item{data}{NMTRAN-like data set}
 }
 \value{
-a named list of n data set (n individuals)
+a named list of data set (n individuals)
 }
 \description{
 Preprocess: data into a list of individual data

@@ -2,18 +2,18 @@
 % Please edit documentation in R/pre_post_process.R
 \name{preprocess.ofv}
 \alias{preprocess.ofv}
-\title{Preprocess model and data for ofv computation}
+\title{Preprocess: model and data for ofv computation}
 \usage{
-preprocess.ofv(model, data)
+preprocess.ofv(x, data)
 }
 \arguments{
-\item{model}{a compiled mrgsolve_model}
+\item{x}{the model object}
 
-\item{data}{a dataframe, dataset (NM-TRAN format)}
+\item{data}{NMTRAN-like data set}
 }
 \value{
-a list of argument passed to optimization function
+a list of named arguments passed to optimizer (i.e. arg.ofv)
 }
 \description{
-Preprocess model and data for ofv computation
+Preprocess: model and data for ofv computation
 }

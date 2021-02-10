@@ -1,4 +1,6 @@
 # mapbayr (Development version)
+* Miscellaneous:
+  - Re-write documentation and arguments of mbrest() and its internal process.
 
 # mapbayr 0.2.1
 * Features: 

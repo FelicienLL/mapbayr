@@ -1,8 +1,70 @@
+#' Preprocess: arguments for optimization function
+#'
+#' @inheritParams mbrest
+#' @return a list of named arguments passed to optimizer (i.e. arg.optim)
+#' @export
+preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){
+  #Checks argument
+
+  #method
+  okmethod <- c("newuoa", "L-BFGS-B")
+  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
+  method <- method[1]
+
+  #par
+  initial_eta <- force_initial_eta
+  if(is.null(initial_eta)){
+    if(method == "newuoa"){
+      set.seed(1)
+      initial_eta <- runif(n_eta(x), -0.01, 0.01)
+      names(initial_eta) <- eta_names(x)
+    }
+    if(method == "L-BFGS-B"){
+      initial_eta <- rep(0, n_eta(x))
+      names(initial_eta) <- eta_names(x)
+    }
+
+  }
+
+  #fn = compute_ofv
+
+  #control
+  if(is.null(control$trace)){
+    control <- c(control, list(trace = 0))
+  }
+  if(is.null(control$kkt)){
+    control <- c(control, list(kkt = FALSE))
+  }
+  if(method == "L-BFGS-B"){
+    if(is.null(control$fnscale))
+      control <- c(control, list(fnscale = 0.001))
+    if(is.null(control$lmm))
+      control <- c(control, list(lmm = 7))
+  }
+
+  #lower, upper
+  bound = Inf
+  if(method == "L-BFGS-B"){
+    bound <- map_dbl(sqrt(odiag(x)), qnorm, p = quantile_bound, mean = 0)
+  }
+
+  arg <- list(
+    par = initial_eta,
+    fn = compute_ofv,
+    method = method,
+    control = control,
+    lower = bound,
+    upper = -bound
+  )
+
+  return(arg)
+}
+
+
 #' Preprocess: data into a list of individual data
 #'
-#' @param data a NM-TRAN data set of one or multiple individuals.
-#'
-#' @return a named list of n data set (n individuals)
+#' @inheritParams mbrest
+#' @return a named list of data set (n individuals)
 #' @export
 preprocess.data <- function(data){
   if(is.null(data)) stop("No data provided", call. = F)
@@ -38,142 +100,70 @@ preprocess.data <- function(data){
 
 
 
-#' Preprocess model and data for ofv computation
-#'
-#' @param model a compiled mrgsolve_model
-#' @param data a dataframe, dataset (NM-TRAN format)
-#'
-#' @return a list of argument passed to optimization function
+#' Preprocess: model and data for ofv computation
+#' @inheritParams mbrest
+#' @return a list of named arguments passed to optimizer (i.e. arg.ofv)
 #' @export
-preprocess.ofv <- function(model, data){
+preprocess.ofv <- function(x, data){
 
   #mrgsolve_model
-  q_model <- zero_re(model)
+  q_model <- zero_re(x)
   q_model@end <- -1 #Make sure no modif in the time grid
   q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
   q_model@Icmt <- integer(0)
-  q_model@Icap <- which(model@capL== "DV") # Only return DV among $captured items
+  q_model@Icap <- which(x@capL== "DV") # Only return DV among $captured items
   q_model@capL <- "DV"
 
   #DVobs
   DVobs <- data[data$mdv==0,]$DV #keep observations to fit only
-  if(log.transformation(model)){DVobs <- log(DVobs)}
+  if(log.transformation(x)){DVobs <- log(DVobs)}
 
   list(
     mrgsolve_model = q_model, #this model is 'updated' with zero re, end and "Req(DV)"
     data = data,
-    sigma = smat(model, make = T),
-    log.transformation = log.transformation(model),
+    sigma = smat(x, make = T),
+    log.transformation = log.transformation(x),
     DVobs = DVobs,
-    omega.inv = solve(omat(model, make = T)),
-    obs_cmt = fit_cmt(model, data)
+    omega.inv = solve(omat(x, make = T)),
+    obs_cmt = fit_cmt(x, data)
   )
 }
 
 
 
 
-
-#' Preprocess: arguments for optimization function
-#'
-#' @param method string character of method to use ("newuoa" or "L-BFGS-B")
-#' @param model model object
-#' @param control a list passed to the optimizer
-#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate)
-#' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
-#'
-#' @return a list of argument passed to optimization function (optimx)
-#' @export
-preprocess.optim <- function(method, model, control, force_initial_eta, quantile_bound){
-  #Checks argument
-
-  #method
-  okmethod <- c("newuoa", "L-BFGS-B")
-  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
-  method <- method[1]
-
-  #par
-  initial_eta <- force_initial_eta
-  if(is.null(initial_eta)){
-    if(method == "newuoa"){
-      set.seed(1)
-      initial_eta <- runif(n_eta(model), -0.01, 0.01)
-      names(initial_eta) <- eta_names(model)
-    }
-    if(method == "L-BFGS-B"){
-      initial_eta <- rep(0, n_eta(model))
-      names(initial_eta) <- eta_names(model)
-    }
-
-  }
-
-  #fn = compute_ofv
-
-  #control
-  if(is.null(control$trace)){
-    control <- c(control, list(trace = 0))
-  }
-  if(is.null(control$kkt)){
-    control <- c(control, list(kkt = FALSE))
-  }
-  if(method == "L-BFGS-B"){
-    if(is.null(control$fnscale))
-      control <- c(control, list(fnscale = 0.001))
-    if(is.null(control$lmm))
-      control <- c(control, list(lmm = 7))
-  }
-
-  #lower, upper
-  bound = Inf
-  if(method == "L-BFGS-B"){
-    bound <- map_dbl(sqrt(odiag(model)), qnorm, p = quantile_bound, mean = 0)
-  }
-
-  arg <- list(
-    par = initial_eta,
-    fn = compute_ofv,
-    method = method,
-    control = control,
-    lower = bound,
-    upper = -bound
-  )
-
-  return(arg)
-}
 
 
 
 #' Post process results from optimization
 #'
-#' @param data data passed through processing
-#' @param model a compiled mrgsolve_model
-#' @param opt.value value obtained by optimization function
-#' @param arg.optim argument passed to optimization function
-#' @param arg.ofv argument passed to optimization function
+#' @inheritParams mbrest
+#' @param opt.value value returned by optimizer
+#' @param arg.optim,arg.ofv argument passed to optimizer
 #'
 #' @return a list of post processing values
 #' @export
-postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
+postprocess <- function(x, data, opt.value, arg.optim, arg.ofv){
 
-  final_eta <- opt.value[eta_names(model)] %>%
+  final_eta <- opt.value[eta_names(x)] %>%
     as.double() %>%
-    set_names(eta_names(model))
+    set_names(eta_names(x))
 
   if(!is.null(opt.value$fevals)){
     if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, n_eta(model)) %>% set_names(eta_names(model))
+      final_eta <- rep(0, n_eta(x)) %>% set_names(eta_names(x))
       warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
     }
   }
 
-  typical_pred <- model %>%
+  typical_pred <- x %>%
     data_set(data) %>%
     zero_re() %>%
     mrgsim(end = -1) %>%
     as_tibble() %>%
     pull(.data$DV)
 
-  indiv_pred <- model %>%
+  indiv_pred <- x %>%
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
@@ -183,7 +173,7 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
 
   mapbay_tab <- data %>%
     mutate(IPRED = indiv_pred, PRED = typical_pred, .after = "DV") %>%
-    select(-any_of(model@cmtL)) %>%
+    select(-any_of(x@cmtL)) %>%
     bind_cols(bind_rows(final_eta))
 
   list(
@@ -195,25 +185,21 @@ postprocess <- function(data, model, opt.value, arg.optim, arg.ofv){
 
 
 #' Build the output of mbrest function
-#' @param idata data passed through processing
-#' @param model a compiled mrgsolve_model
-#' @param arg.optim argument passed to optimization function
-#' @param arg.ofv argument passed to optimization function
-#' @param opt.value value obtained by optimization function
+#' @inheritParams mbrest
+#' @inheritParams postprocess
 #' @param post output of the post.process function
-#' @param output return a mapbay_tab only
 #'
-#' @return a mbrests list object
+#' @return a mbrests model object
 #' @export
-output_mbr <- function(idata, model, arg.optim, arg.ofv, opt.value, post, output){
+output_mbr <- function(x, data, arg.optim, arg.ofv, opt.value, post, output){
 
   if(!is.null(output)){
     if(output == "df") out <- map_dfr(post, "mapbay_tab")
 
   } else {
     out <- list(
-      data = bind_rows(unname(idata)),
-      model = model,
+      model = x,
+      data = bind_rows(unname(data)),
       arg.optim = arg.optim,
       arg.ofv = arg.ofv,
       opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),

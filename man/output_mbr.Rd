@@ -4,25 +4,25 @@
 \alias{output_mbr}
 \title{Build the output of mbrest function}
 \usage{
-output_mbr(idata, model, arg.optim, arg.ofv, opt.value, post, output)
+output_mbr(x, data, arg.optim, arg.ofv, opt.value, post, output)
 }
 \arguments{
-\item{idata}{data passed through processing}
+\item{x}{the model object}
 
-\item{model}{a compiled mrgsolve_model}
+\item{data}{NMTRAN-like data set}
 
-\item{arg.optim}{argument passed to optimization function}
+\item{arg.optim}{argument passed to optimizer}
 
-\item{arg.ofv}{argument passed to optimization function}
+\item{arg.ofv}{argument passed to optimizer}
 
-\item{opt.value}{value obtained by optimization function}
+\item{opt.value}{value returned by optimizer}
 
 \item{post}{output of the post.process function}
 
-\item{output}{return a mapbay_tab only}
+\item{output}{if \code{NULL} (the default) a mbrests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 }
 \value{
-a mbrests list object
+a mbrests model object
 }
 \description{
 Build the output of mbrest function

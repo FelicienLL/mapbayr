@@ -1,29 +1,36 @@
-#' Perform mapbayesian estimation from a mrgsolve model and a NM_tran dataset
+#' Estimate parameters (maximum a posteriori)
 #'
-#' @param x model file
-#' @param data NM tran data to optimize
-#' @param method "newuoa" or "L-BFGS-B"
-#' @param output return a mapbay_tab only
-#' @param verbose a logical. If TRUE (the default), will print the steps of optimization.
-#' @param control a list passed to the optimizer (see source code for default, as function of the optimizer)
-#' @param force_initial_eta a numeric vector of starting estimates (exact length of eta to estimate )
-#' @param quantile_bound for L-BFGS-B only: a numeric value of the probability expected as extreme value for a ETA
-#' @param reset logical. Reset to different initial eta if LBFGS do not move (default is TRUE)
-#' @param check logical. Check model code for mapbayr specification (default is TRUE)
 #'
-#' @return default: a list with data, model, initial and final eta, mapbay_tab and rough optimization output
+#' @description
+#' The main function of the mapbayr package. Performs a \emph{maximum a posteriori} Bayesian estimation of parameters, from a mrgsolve model object and a dataset containing information about administrations and observed concentrations.
+#'
+#' @param x the model object
+#' @param data NMTRAN-like data set
+#' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
+#' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
+#' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
+#' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
+#' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
+#' @param verbose print the steps of the estimations to the console (a logical, default is `TRUE`)
+#' @param reset reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is `TRUE`)
+#' @param output if `NULL` (the default) a mbrests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
+#'
+#'
+#'
+#' @return a mbrests model object
 #' @export
 #'
 mbrest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
-                   output = NULL,
-                   verbose = TRUE,
-                   control = list(),
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
-                   reset = T,
-                   check = T){
+                   control = list(),
+                   check = TRUE,
+                   verbose = TRUE,
+                   reset = TRUE,
+                   output = NULL
+                   ){
   if(check){
     ok <- check_mapbayr_model(x)
     if(!isTRUE(ok)){
@@ -31,7 +38,7 @@ mbrest <- function(x,
     }
   }
 
-  arg.optim <- preprocess.optim(method = method, model = x, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.optim <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
 
   if(is.null(data)){
     data <- x@args$data
@@ -39,7 +46,7 @@ mbrest <- function(x,
 
   idata <- preprocess.data(data)
 
-  arg.ofv <-  map(idata, preprocess.ofv, model = x)
+  arg.ofv <-  map(idata, preprocess.ofv, x = x)
 
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
@@ -48,10 +55,10 @@ mbrest <- function(x,
     opt.value = opt.value,
     arg.ofv = arg.ofv) %>%
     pmap(postprocess,
-         model = x,
+         x = x,
          arg.optim = arg.optim)
 
-  out <- output_mbr(idata = idata, model = x, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+  out <- output_mbr(x, data = idata, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
 
   return(out)
 }

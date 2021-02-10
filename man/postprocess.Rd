@@ -4,18 +4,16 @@
 \alias{postprocess}
 \title{Post process results from optimization}
 \usage{
-postprocess(data, model, opt.value, arg.optim, arg.ofv)
+postprocess(x, data, opt.value, arg.optim, arg.ofv)
 }
 \arguments{
-\item{data}{data passed through processing}
+\item{x}{the model object}
 
-\item{model}{a compiled mrgsolve_model}
+\item{data}{NMTRAN-like data set}
 
-\item{opt.value}{value obtained by optimization function}
+\item{opt.value}{value returned by optimizer}
 
-\item{arg.optim}{argument passed to optimization function}
-
-\item{arg.ofv}{argument passed to optimization function}
+\item{arg.optim, arg.ofv}{argument passed to optimizer}
 }
 \value{
 a list of post processing values
