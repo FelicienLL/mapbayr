@@ -39,8 +39,7 @@ mbrest <- function(x,
 
   idata <- preprocess.data(data)
 
-  arg.ofv <- idata %>%
-    map(preprocess.ofv, model = x)
+  arg.ofv <-  map(idata, preprocess.ofv, model = x)
 
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
@@ -52,7 +51,9 @@ mbrest <- function(x,
          model = x,
          arg.optim = arg.optim)
 
-  output_mbr(idata = idata, model = x, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+  out <- output_mbr(idata = idata, model = x, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+
+  return(out)
 }
 
 
