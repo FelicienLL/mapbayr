@@ -50,22 +50,18 @@ library(mrgsolve)
 
 ``` r
 code <- "
-$PROB
-- drug: Examplinib
-- model_ref: XXX, J Pharmacokinet, 2020
-
 $PARAM @annotated
-TVCL:  0.5 : Clearance
-TVV1: 20.0 : Central volume
+TVCL:  0.9 : Clearance
+TVV1: 10.0 : Central volume
 V2  : 10.0 : Peripheral volume of distribution
-Q   :  3.0 : Intercompartmental clearance
+Q   :  1.0 : Intercompartmental clearance
 
 ETA1: 0 : Clearance (L/h)
 ETA2: 0 : Central volume (L)
 
-$OMEGA 0.3 0.2
+$OMEGA 0.3 0.3
 $SIGMA
-0.06 // proportional
+0.05 // proportional
 0.1 // additive
 
 $CMT @annotated
@@ -73,7 +69,7 @@ CENT  : Central compartment (mg/L)[ADM, OBS]
 PERIPH: Peripheral compartment ()
 
 $TABLE
-double DV = (CENT/V2) *(1 + EPS(1)) + EPS(2);
+double DV = (CENT/V1) *(1 + EPS(1)) + EPS(2);
 
 $MAIN
 double CL = TVCL * exp(ETA1 + ETA(1)) ;
@@ -93,19 +89,17 @@ $CAPTURE DV
 my_model <- mcode("Example_model", code)
 ```
 
-#### 2\) Build your dataset
+#### 2\) Bring your dataset
 
 ``` r
-my_data <- data.frame(
-  ID = 1, 
-  time = c(0, 6, 20, 24),
-  amt = c(100, NA, NA, NA), 
-  rate = c(20, 0, 0, 0), 
-  DV = c(NA, 5, 2, 4), 
-  cmt = 1, 
-  evid = c(1, 0, 0, 0), 
-  mdv = c(1, 0, 0, 1)
-)
+my_data <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)), 
+                      rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1))
+my_data
+#>   ID time evid cmt amt rate  DV mdv
+#> 1  1    0    1   1 100   20  NA   1
+#> 2  1    6    0   1   0    0 3.9   0
+#> 3  1   15    0   1   0    0 1.1   0
+#> 4  1   24    0   1   0    0 2.0   1
 ```
 
 #### 3\) And estimate \!
@@ -117,15 +111,16 @@ est <- mbrest(my_model, data = my_data)
 ```
 
 As building dataset into a NM-tran format can be painful, you can use
-pipe-friendly functions in order to pass administration and observation
-information, and perform the estimation subsequently.
+pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass
+administration and observation information, and perform the estimation
+subsequently.
 
 ``` r
 est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
-  obs_lines(time = 6, DV = 5) %>% 
-  obs_lines(time = 20, DV = 2) %>% 
-  obs_lines(time = 24, DV = 4, mdv = 1) %>% 
+  obs_lines(time = 6, DV = 3.9) %>% 
+  obs_lines(time = 20, DV = 1.1) %>% 
+  obs_lines(time = 24, DV = 2, mdv = 1) %>% 
   mbrest()
 ```
 
@@ -144,15 +139,15 @@ print(est)
 #> ETA: 2  parameter(s) to estimate.
 #> 
 #> Estimates: 
-#>   ID    ETA1       ETA2
-#> 1  1 0.61803 -0.5424151
+#>   ID      ETA1      ETA2
+#> 1  1 0.6367739 0.1377183
 #> 
 #> Output (4 lines): 
-#>   ID time amt rate DV    IPRED     PRED cmt evid mdv    ETA1       ETA2
-#> 1  1    0 100   20 NA 0.000000 0.000000   1    1   1 0.61803 -0.5424151
-#> 2  1    6  NA    0  5 4.991384 6.946975   1    0   0 0.61803 -0.5424151
-#> 3  1   20  NA    0  2 2.317035 4.819891   1    0   0 0.61803 -0.5424151
-#> 4  1   24  NA    0  4 1.973959 4.513590   1    0   1 0.61803 -0.5424151
+#>   ID time evid cmt amt rate  DV     IPRED     PRED mdv      ETA1      ETA2
+#> 1  1    0    1   1 100   20  NA 0.0000000 0.000000   1 0.6367739 0.1377183
+#> 2  1    6    0   1   0    0 3.9 4.2896334 5.700008   0 0.6367739 0.1377183
+#> 3  1   15    0   1   0    0 1.1 1.1557231 2.210305   0 0.6367739 0.1377183
+#> 4  1   24    0   1   0    0 2.0 0.6021212 1.412358   1 0.6367739 0.1377183
 ```
 
 ``` r
@@ -220,16 +215,15 @@ to be “read” by mapbayr with the subsequent specifications :
 
 ### 1\. `$PARAM` block
 
-#### ETA specifications
+#### 1.1 ETA specifications
 
   - Mandatory:
       - Add as many ETA as there are parameters to estimate (i.e. the
         length of the OMEGA matrix diagonal).
-      - Refer them as ETAn (n being the number of ETA).
+      - Name them as ETAn (n being the N° of ETA).
       - Set 0 as default value.
   - Strongly recommended:
-      - Provide a description as a plain text (will be used as internal
-        “eta names”)
+      - Provide a description as a plain text
 
 <!-- end list -->
 
@@ -242,7 +236,7 @@ ETA3 : 0 : F ()
 //do not write iETA
 ```
 
-#### Covariates
+#### 1.2 Covariates
 
   - Strongly recommended :
       - Use a `@covariates` tag to record covariates in the `$PARAM`
@@ -259,9 +253,6 @@ ETA3 : 0 : F ()
 $PARAM @annotated @covariates
 BW : 70 : Body weight (kg)
 SEX : 0 : Sex (0=Male, 1=Female)
-//do not write
-//$PARAM @annotated
-//BW : 70 : Body weight (kg)
 ```
 
 When time or dose are needed as covariates, an internal routine is
@@ -276,12 +267,13 @@ AOLA : 100 : Amt of last adm (mg)
 
 ### 2\. `$CMT` block
 
-  - Mandatory:
+  - Strongly recommanded…  
+    … yet **mandatory** if you use `obs_lines()` and `adm_lines()` to
+    build your dataset, or if you have multiple types of DV, i.e. parent
+    drug + metabolite:
       - A `@annotated` tag must be used to record compartments.
       - Write OBS in brackets to define the observation compartment(s).
-        This information is **mandatory** for the optimization process.
-        Also used by `obs_lines()` to build your dataset. Strongly
-        recommended:
+        Also used by `obs_lines()` to build your dataset.
       - Write ADM in brackets to define “default” administration
         compartment(s). This information is not used for optimization
         process and the `mbrest()` function. The information is
@@ -310,9 +302,6 @@ CENT_MET : methylexamplinib central [OBS]
       - The order of the omega values must correspond to the order of
         the ETAs provided in `$PARAM`. This cannot be checked by mapbayr
         \!
-  - Optional:
-      - Omega values can be recorded in multiple blocks such as in a
-        regular mrgsolve model code.
 
 <!-- end list -->
 
@@ -322,31 +311,26 @@ $OMEGA
 $OMEGA @block
 0.111 
 0.222 0.333
+// reminder: omega values can be recorded in multiple $OMEGA blocks
 ```
 
 ### 4\. `$SIGMA` block
 
-  - Mandatory :
-      - A pair of two (diagonal) values is expected per dependent
-        variable. The first value represents proportional error, the
-        second is (log) additive error.
-      - The order of the pairs must respect the order of the
-        compartments assigned with \[OBS\] in `$CMT`. This cannot be
-        checked by mapbayr \!
+The definition of the `$SIGMA` block may not be as straightforward as
+other blocks, but we tried to keep it as simple as possible. Keep it
+mind that mapbayr always expect a **pair of sigma values** for each type
+of dependent variable: the **first** value for proportional error, the
+**second** for additive.
 
-To put it more clearly, the sigma matrix will be interpreted as such
-whatever the model :
+Two situations can be distinguished:
 
-| N° in the SIGMA matrix diagonal |                      Associated error                      |
-| :-----------------------------: | :--------------------------------------------------------: |
-|                1                | Proportional on concentrations in the 1st cmt with \[OBS\] |
-|                2                |   Additive on concentrations in the 1st cmt with \[OBS\]   |
-|                3                | Proportional on concentrations in the 2nd cmt with \[OBS\] |
-|                4                |   Additive on concentrations in the 2nd cmt with \[OBS\]   |
-|                …                |                             …                              |
+1.  You only have one type of concentration to fit, and you did not use
+    the \[OBS\] assignment in `$CMT`.
 
-For a model describing the concentrations of a single compound
-(i.e. parent drug only), the error model can be coded as such:
+Simply write **one pair** of sigma values to describe proportional and
+additive error on your concentrations. This error model will be
+automatically applied to compartment where observations were recorded in
+your dataset (i.e. value of CMT when MDV = 0).
 
 ``` c
 $SIGMA 0.111 0 // proportional error 
@@ -360,9 +344,21 @@ $SIGMA 0 0.222 // (log) additive error
 $SIGMA 0.333 0.444 // mixed error
 ```
 
-For a model describing the concentrations of two variables (i.e. parent
-drug and metabolite), four values are expected: a pair of proportional
-and additive error for both compounds.
+2.  You have multiple DV to fit (parent and metabolite), and/or you used
+    the \[OBS\] assignment in `$CMT`.
+
+Write as many **pairs of sigma values** as there are compartments
+assigned with \[OBS\] in `$CMT`. The order of the pair must respect the
+order in which compartments were assigned. To put it more clearly, the
+sigma matrix will be interpreted as such whatever the model :
+
+| N° in the SIGMA matrix diagonal |                      Associated error                      |
+| :-----------------------------: | :--------------------------------------------------------: |
+|                1                | Proportional on concentrations in the 1st cmt with \[OBS\] |
+|                2                |   Additive on concentrations in the 1st cmt with \[OBS\]   |
+|                3                | Proportional on concentrations in the 2nd cmt with \[OBS\] |
+|                4                |   Additive on concentrations in the 2nd cmt with \[OBS\]   |
+|                …                |                             …                              |
 
 ``` c
 //example: correlated proportional error between parent and metabolite
@@ -371,11 +367,8 @@ $SIGMA
 0.000 0.000 // additive error on parent drug
 0.100 0.000 0.200 // proportional error on metabolite
 0.000 0.000 0.000 0.000 // additive error on metabolite
+// reminder: sigma values can be recorded in multiple $SIGMA blocks
 ```
-
-  - Optional:
-      - Sigma values can be recorded in multiple blocks such as in a
-        regular mrgsolve model code.
 
 ### 6\. `$TABLE` block or `$ERROR` block
 
@@ -410,6 +403,13 @@ double DV = PAR ;
 if(self.cmt == 4) DV = MET ; 
 // reminder: use "self.cmt" to internaly refer to a compartment in a mrgsolve model code. 
 ```
+
+Note that mapbayr does not strictly rely on this `$ERROR` block to
+define the residual error internally and compute the objective function
+value, but on information passed in the `$SIGMA` block. However, we
+strongly advise you to properly code your `$ERROR` block with `EPS(1)`,
+`EPS(2)` etc…, if only to use your code as a regular mrgsolve model code
+and simulate random effect.
 
 ### 7\. `$MAIN` block
 
