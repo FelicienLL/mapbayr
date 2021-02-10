@@ -1,6 +1,11 @@
 # mapbayr (Development version)
-* Miscellaneous:
-  - Re-write documentation and arguments of mbrest() and its internal process. #32
+
+# mapbayr 0.2.2
+
+- mbraugment(), mbrplot() and mbrhist() are deleted, and replaced by augment(), plot() and hist() S3 methods.
+- Re-organize internal .R files.
+- Rename post process functions.
+- Re-write documentation and arguments of mbrest() and its internal process. #32
 
 # mapbayr 0.2.1
 * Features: 
