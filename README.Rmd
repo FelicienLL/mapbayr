@@ -120,11 +120,11 @@ print(est)
 ```
 
 ```{r, plot1, fig.height=4, message=FALSE}
-mbrplot(est)
+plot(est)
 ```
 
 ```{r, plot2, fig.height=2.5, message=FALSE}
-mbrdist(est)  
+hist(est)  
 ```
 
 ## Development

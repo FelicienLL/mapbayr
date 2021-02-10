@@ -107,7 +107,7 @@ my_data
 ``` r
 est <- mbrest(my_model, data = my_data)
 #> 
-#> ID 1... done.
+#> ID ... done.
 ```
 
 As building dataset into a NM-tran format can be painful, you can use
@@ -133,7 +133,7 @@ Additional methods are provided, notably to plot the results quickly.
 
 ``` r
 print(est)
-#> Example Model 
+#> Model:  Example_model 
 #> ID : 1  individual(s).
 #> OBS: 2  observation(s).
 #> ETA: 2  parameter(s) to estimate.
@@ -151,13 +151,13 @@ print(est)
 ```
 
 ``` r
-mbrplot(est)
+plot(est)
 ```
 
 ![](man/figures/README-plot1-1.png)<!-- -->
 
 ``` r
-mbrdist(est)  
+hist(est)  
 ```
 
 ![](man/figures/README-plot2-1.png)<!-- -->
