@@ -2,9 +2,31 @@
 #---   Data helpers   ----
 #-------------------------
 
+#' Data helpers
+#'
+#' @name data_helpers
+#' @param x model object
+#' @param ... passed to `mrgsolve::ev()` in `adm_lines()`
+#' @param time,DV,mdv,DVmet passed to `obs_lines()`
+#' @param covariates a list of named covariates, with a single value or same number of lines than data
+#'
+#' @description Helpful functions to pass information about administrations (`adm_lines()`), observations (`obs_lines()`) and covariates (`add_covariates()`).
+#' These functions are passed to a `mrgmod` object (mrgsolve model), and return a `mrgmod` object with a dataset inside, so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
+NULL
+#> NULL
+
+
+
+
+
+
+
+
+#' @rdname data_helpers
+#' @export
 adm_lines <- function(x, ...) UseMethod("adm_lines")
 
-#' Generate Administration lines for a dataset
+#' Add administrations lines to data
 #'
 #' @param x model object
 #' @param ... passed to mrgsolve::ev
@@ -66,20 +88,26 @@ adm_lines.mrgmod <- function(x, ...){
 
 }
 
-obs_lines <- function(x, ...) UseMethod("obs_lines")
 
-#' Generate observation lines for a dataset
+
+
+#' @rdname data_helpers
+#' @export
+obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL, ...) UseMethod("obs_lines")
+
+#' Add observations lines to data
 #'
 #' @param x model object
 #' @param time vector of time
 #' @param DV vector of values to fit
 #' @param mdv should the Dv be ignored (1) or not (0)
 #' @param DVmet optional : metabolite data to fit
+#' @param ... not used
 #' @method obs_lines mrgmod
 #'
 #' @return model object with dataset
 #' @export
-obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL){
+obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL, ...){
 
   if(is.null(x@args$data)){
     d0 <- tibble()
@@ -127,23 +155,25 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL){
 
 }
 
-add_covariates <- function(x, ...) UseMethod("add_covariates")
+#' @rdname data_helpers
+#' @export
+add_covariates <- function(x, covariates, ...) UseMethod("add_covariates")
 
-#' Add covariates to the dataset, as well as TOLA and AOLA
-#'
-#' @param model model object
+#' Add covariates columns to data
+#' @param x model object
 #' @param covariates a list of named covariates, with a single value or exact number of lines than data
+#' @param ... not used
 #' @method add_covariates mrgmod
 #' @return model object with dataset
 #' @export
-add_covariates.mrgmod <- function(model, covariates = list()){
-  if(is.null(model@args$data)) stop("Please provide a dataset")
+add_covariates.mrgmod <- function(x, covariates = list(), ...){
+  if(is.null(x@args$data)) stop("Please provide a dataset")
 
-  d <- model@args$data %>%
+  d <- x@args$data %>%
     arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
     bind_cols(covariates)
 
-  if("AOLA" %in% mbr_cov_names(model)) {
+  if("AOLA" %in% mbr_cov_names(x)) {
     d <- d %>%
       group_by(.data$ID) %>%
       mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
@@ -151,7 +181,7 @@ add_covariates.mrgmod <- function(model, covariates = list()){
       ungroup()
   }
 
-  if("TOLA" %in% mbr_cov_names(model)) {
+  if("TOLA" %in% mbr_cov_names(x)) {
     d <- d %>%
       realize_addl() %>%
       arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
@@ -161,21 +191,26 @@ add_covariates.mrgmod <- function(model, covariates = list()){
       ungroup()
   }
 
-  dd <- model %>%
+  dd <- x %>%
     data_set(d)
 
   return(dd)
 
 }
 
-see_data <- function(x, ...) UseMethod("see_data")
 
-#' Return tibble data
+#' @rdname data_helpers
+#' @export
+see_data <- function(x, ...)UseMethod("see_data")
+
+#' Return data
 #'
 #' @param x model object
+#' @param ... not used
+#'
 #' @method see_data mrgmod
 #' @return a tibble
 #' @export
-see_data.mrgmod <- function(x){
+see_data.mrgmod <- function(x, ...){
   as_tibble(x@args$data)
 }

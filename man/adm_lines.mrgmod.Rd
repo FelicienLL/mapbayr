@@ -2,7 +2,7 @@
 % Please edit documentation in R/mrgmod.R
 \name{adm_lines.mrgmod}
 \alias{adm_lines.mrgmod}
-\title{Generate Administration lines for a dataset}
+\title{Add administrations lines to data}
 \usage{
 \method{adm_lines}{mrgmod}(x, ...)
 }
@@ -15,5 +15,5 @@
 model object with dataset
 }
 \description{
-Generate Administration lines for a dataset
+Add administrations lines to data
 }

@@ -2,18 +2,20 @@
 % Please edit documentation in R/mrgmod.R
 \name{add_covariates.mrgmod}
 \alias{add_covariates.mrgmod}
-\title{Add covariates to the dataset, as well as TOLA and AOLA}
+\title{Add covariates columns to data}
 \usage{
-\method{add_covariates}{mrgmod}(model, covariates = list())
+\method{add_covariates}{mrgmod}(x, covariates = list(), ...)
 }
 \arguments{
-\item{model}{model object}
+\item{x}{model object}
 
 \item{covariates}{a list of named covariates, with a single value or exact number of lines than data}
+
+\item{...}{not used}
 }
 \value{
 model object with dataset
 }
 \description{
-Add covariates to the dataset, as well as TOLA and AOLA
+Add covariates columns to data
 }

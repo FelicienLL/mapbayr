@@ -2,16 +2,18 @@
 % Please edit documentation in R/mrgmod.R
 \name{see_data.mrgmod}
 \alias{see_data.mrgmod}
-\title{Return tibble data}
+\title{Return data}
 \usage{
-\method{see_data}{mrgmod}(x)
+\method{see_data}{mrgmod}(x, ...)
 }
 \arguments{
 \item{x}{model object}
+
+\item{...}{not used}
 }
 \value{
 a tibble
 }
 \description{
-Return tibble data
+Return data
 }

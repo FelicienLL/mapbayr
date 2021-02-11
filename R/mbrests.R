@@ -139,7 +139,10 @@ hist.mbrests <- function(x, ...){
 }
 
 
-
+#' Compute full PK profile prediction from mapbayr estimates.
+#' @param x object to augment
+#' @param ... additional arguments
+#' @export
 augment <- function (x, ...)UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.

@@ -2,9 +2,9 @@
 % Please edit documentation in R/mrgmod.R
 \name{obs_lines.mrgmod}
 \alias{obs_lines.mrgmod}
-\title{Generate observation lines for a dataset}
+\title{Add observations lines to data}
 \usage{
-\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, DVmet = NULL)
+\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, DVmet = NULL, ...)
 }
 \arguments{
 \item{x}{model object}
@@ -16,10 +16,12 @@
 \item{mdv}{should the Dv be ignored (1) or not (0)}
 
 \item{DVmet}{optional : metabolite data to fit}
+
+\item{...}{not used}
 }
 \value{
 model object with dataset
 }
 \description{
-Generate observation lines for a dataset
+Add observations lines to data
 }
