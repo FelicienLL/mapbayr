@@ -107,7 +107,7 @@ my_data
 ``` r
 est <- mbrest(my_model, data = my_data)
 #> 
-#> ID ... done.
+#> ID 1... done.
 ```
 
 As building dataset into a NM-tran format can be painful, you can use

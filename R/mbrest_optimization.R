@@ -2,7 +2,7 @@
 
 do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   RUN <- 1
-  if(verbose) cat(paste0("\nID ", unique(arg.ofv$mrgsolve_model@args$data$ID), "..."))
+  if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   while(reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt))){
