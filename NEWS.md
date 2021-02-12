@@ -1,7 +1,7 @@
 # mapbayr (Development version)
 
 - Data helpers are now 'mrgmod' methods
-- Fix bug #41 #42
+- Fix bugs #41 #42 #37
 
 # mapbayr 0.2.2
 

@@ -77,10 +77,12 @@ adm_lines.mrgmod <- function(x, ...){
     #otherwise: no rate and I'm fine with it
   }
 
-
   #Add these administrations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
   d <- bind_rows(d0, d) %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)
+
+  # If no pre-existing RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
+  d <- NA_filler(d)
 
   dd <- data_set(x, d)
 
@@ -138,22 +140,30 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL, ...){
     select(-any_of("name")) %>%
     mutate(ID = iID, evid = 0, amt = 0)
 
-
-  if(!is.null(d0[["addl"]]))  d <- mutate(d, addl = 0)
-  if(!is.null(d0[["ii"]]))    d <- mutate(d, ii = 0)
-  if(!is.null(d0[["rate"]]))  d <- mutate(d, rate = 0)
-  if(!is.null(d0[["ss"]]))    d <- mutate(d, ss = 0)
-
   #Add these administrations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
   d <- d0 %>%
     bind_rows(d) %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)
+
+  # If no pre-existing RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
+  d <- NA_filler(d)
 
   dd <- data_set(x, d)
 
   return(dd)
 
 }
+
+NA_filler <- function(data){
+  if(!is.null(data[["addl"]]))  data$addl <- ifelse(is.na(data$addl), 0, data$addl)
+  if(!is.null(data[["ii"]]))    data$ii   <- ifelse(is.na(data$ii),   0, data$ii)
+  if(!is.null(data[["rate"]]))  data$rate <- ifelse(is.na(data$rate), 0, data$rate)
+  if(!is.null(data[["ss"]]))    data$ss   <- ifelse(is.na(data$ss),   0, data$ss)
+  return(data)
+}
+
+
+
 
 #' @rdname data_helpers
 #' @export

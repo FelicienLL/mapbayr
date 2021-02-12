@@ -61,3 +61,30 @@ test_that("realize addl works", {
   )
 })
 
+test_that("no NA in SS, ADDL, RATE or II",{
+  data1 <- mod1 %>%
+    adm_lines(time = 0, amt = 10000) %>%
+    adm_lines(time = 72, amt = 10000, addl = 2, ii = 24, realize_addl = TRUE) %>%
+    see_data()
+
+  expect_false(any(is.na(data1$addl)))
+  expect_false(any(is.na(data1$ii)))
+
+  data2 <- mod2 %>%
+    adm_lines(time = 0, amt = 10000, ss = 1, ii = 24) %>%
+    adm_lines(time = 72, amt = 10000) %>%
+    see_data()
+
+  expect_false(any(is.na(data2$ss)))
+  expect_false(any(is.na(data2$ii)))
+
+  data3 <- mod3 %>%
+    adm_lines(time = 0, amt = 100, rate = 20) %>%
+    adm_lines(time = 24, amt = 100) %>%
+    see_data()
+
+  expect_false(any(is.na(data3$rate)))
+
+
+
+})
