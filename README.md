@@ -242,10 +242,9 @@ ETA3 : 0 : F ()
       - Use a `@covariates` tag to record covariates in the `$PARAM`
         block.
       - Set the reference value.
-      - Provide a description as a plain text (will be used as internal
-        “covariate names”)
-      - Provide units in parentheses (description of 0/1 coding is
-        advised for categorical covariates)
+      - Provide a description as a plain text
+      - Provide units in parentheses (or a description of 0/1 coding for
+        categorical covariates)
 
 <!-- end list -->
 
@@ -253,16 +252,6 @@ ETA3 : 0 : F ()
 $PARAM @annotated @covariates
 BW : 70 : Body weight (kg)
 SEX : 0 : Sex (0=Male, 1=Female)
-```
-
-When time or dose are needed as covariates, an internal routine is
-embedded in mapbayr. You can refer them as TOLA and AOLA (i.e. time of
-last administration, amount of last administration).
-
-``` c
-$PARAM @annotated @covariates
-TOLA : 0 : Time of last adm (h)
-AOLA : 100 : Amt of last adm (mg)
 ```
 
 ### 2\. `$CMT` block
@@ -317,7 +306,7 @@ $OMEGA @block
 ### 4\. `$SIGMA` block
 
 The definition of the `$SIGMA` block may not be as straightforward as
-other blocks, but we tried to keep it as simple as possible. Keep it
+other blocks, but we tried to keep it as simple as possible. Keep in
 mind that mapbayr always expect a **pair of sigma values** for each type
 of dependent variable: the **first** value for proportional error, the
 **second** for additive.
@@ -329,8 +318,8 @@ Two situations can be distinguished:
 
 Simply write **one pair** of sigma values to describe proportional and
 additive error on your concentrations. This error model will be
-automatically applied to compartment where observations were recorded in
-your dataset (i.e. value of CMT when MDV = 0).
+automatically applied to the compartment where observations were
+recorded in your dataset (i.e. value of CMT when MDV = 0).
 
 ``` c
 $SIGMA 0.111 0 // proportional error 
@@ -358,7 +347,6 @@ sigma matrix will be interpreted as such whatever the model :
 |                2                |   Additive on concentrations in the 1st cmt with \[OBS\]   |
 |                3                | Proportional on concentrations in the 2nd cmt with \[OBS\] |
 |                4                |   Additive on concentrations in the 2nd cmt with \[OBS\]   |
-|                …                |                             …                              |
 
 ``` c
 //example: correlated proportional error between parent and metabolite
@@ -409,7 +397,7 @@ define the residual error internally and compute the objective function
 value, but on information passed in the `$SIGMA` block. However, we
 strongly advise you to properly code your `$ERROR` block with `EPS(1)`,
 `EPS(2)` etc…, if only to use your code as a regular mrgsolve model code
-and simulate random effect.
+and simulate random effects.
 
 ### 7\. `$MAIN` block
 
