@@ -1,6 +1,7 @@
 # mapbayr (Development version)
 
 - Data helpers are now 'mrgmod' methods
+- Maximum reset = 50
 - Fix bugs #41 #42 #37
 
 # mapbayr 0.2.2

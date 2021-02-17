@@ -5,7 +5,7 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-  while(reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt))){
+  while(RUN <= 50 && reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt))){
     set.seed(123+RUN)
     arg.optim$par <- new_ini(arg.ofv, arg.optim)
 
