@@ -102,7 +102,7 @@ my_data
 ```{r, message=FALSE}
 est <- mbrest(my_model, data = my_data)
 ```
-As building dataset into a NM-tran format can be painful, you can use pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass administration and observation information, and perform the estimation subsequently. 
+As building dataset into a NM-TRAN format can be painful, you can use pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass administration and observation information, and perform the estimation subsequently. 
 ```{r, eval=FALSE}
 est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
@@ -142,7 +142,7 @@ mapbayr is a generalization of the "MAP Bayes estimation" tutorial available on 
 * accepts any kind of models thanks to the flexibility of mrgsolve. 
 * functions to easily pass administration and observation information, as well as plot methods to visualize predictions and parameter distribution.
 * a single output object to ease post-processing, depending on the purpose of the estimation.
-* several optimization algorithm available, such as "L-BFGS-B" (the default) or "NEWUOA".
+* several optimization algorithm available, such as "L-BFGS-B" (the default) or "newuoa".
 
 ## Performance
 

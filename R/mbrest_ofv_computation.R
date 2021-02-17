@@ -49,7 +49,6 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #' @return a single numeric value (the objective function value)
 #' @export
 compute_ofv <- function(eta, mrgsolve_model, data, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
-
   #Update ETA values
   mod <- param(mrgsolve_model, as.list(eta))
 
