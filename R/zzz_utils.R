@@ -4,7 +4,7 @@
 #' @importFrom ggplot2 %+replace% aes element_rect facet_grid geom_hline geom_line geom_point geom_vline ggplot label_both labs theme_bw scale_shape_manual scale_color_manual stat_function theme
 #' @importFrom ggpubr ggarrange
 #' @importFrom magrittr %>%
-#' @importFrom mrgsolve as.list data_set ev is.mrgmod mread mcode mrgsim mrgsim_df mrgsim_q obsaug omat param realize_addl smat zero_re
+#' @importFrom mrgsolve as.list data_set ev is.mrgmod mread mcode mrgsim mrgsim_df mrgsim_q mvgauss obsaug omat param realize_addl smat zero_re
 #' @importFrom optimx optimx
 #' @importFrom purrr map map2 map_dbl map_dfr pmap pmap_dfr quietly simplify transpose
 #' @importFrom rlang .data set_names
