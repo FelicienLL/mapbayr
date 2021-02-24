@@ -89,6 +89,9 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   if(is.null(control$trace)){
     control <- c(control, list(trace = 0))
   }
+  if(is.null(control$maxit)){
+    control <- c(control, list(maxit = 9999))
+  }
   if(is.null(control$kkt)){
     control <- c(control, list(kkt = FALSE))
   }
