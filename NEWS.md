@@ -3,7 +3,7 @@
 - Data helpers are now 'mrgmod' methods
 - Maximum reset = 50
 - Maximum iteration defaults to 9999
-- New ini reset with samples in mvgauss.
+- New ini reset with samples in mvgauss, still respecting l-bfgs-b bounds (testthatted).
 - Fix bugs #41 #42 #37
 
 # mapbayr 0.2.2
