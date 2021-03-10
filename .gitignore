@@ -5,3 +5,4 @@ tests/draft.R
 tests/draftmethod.R
 tests/draft_output.R
 tests/draft_sd.R
+inst/Thumbs.db

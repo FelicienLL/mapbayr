@@ -110,7 +110,7 @@ est <- mbrest(my_model, data = my_data)
 #> ID 1... done.
 ```
 
-As building dataset into a NM-tran format can be painful, you can use
+As building dataset into a NM-TRAN format can be painful, you can use
 pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass
 administration and observation information, and perform the estimation
 subsequently.
@@ -187,7 +187,7 @@ features are:
   - a single output object to ease post-processing, depending on the
     purpose of the estimation.
   - several optimization algorithm available, such as “L-BFGS-B” (the
-    default) or “NEWUOA”.
+    default) or “newuoa”.
 
 ## Performance
 
@@ -350,7 +350,7 @@ sigma matrix will be interpreted as such whatever the model :
 
 ``` c
 //example: correlated proportional error between parent and metabolite
-$SIGMA 
+$SIGMA @block
 0.050 // proportional error on parent drug
 0.000 0.000 // additive error on parent drug
 0.100 0.000 0.200 // proportional error on metabolite

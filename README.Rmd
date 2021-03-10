@@ -250,7 +250,7 @@ Write as many **pairs of sigma values** as there are compartments assigned with 
 
 ```{c, eval = F}
 //example: correlated proportional error between parent and metabolite
-$SIGMA 
+$SIGMA @block
 0.050 // proportional error on parent drug
 0.000 0.000 // additive error on parent drug
 0.100 0.000 0.200 // proportional error on metabolite
