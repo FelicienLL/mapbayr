@@ -1,5 +1,3 @@
-
-
 #' Post-process: derive predictions from optimization
 #'
 #' @inheritParams mbrest
@@ -21,25 +19,33 @@ postprocess.optim <- function(x, data, opt.value, arg.optim, arg.ofv){
     }
   }
 
-  typical_pred <- x %>%
+  reserved_capt <- c("DV", "PAR", "MET")
+  reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
+  other_items <- names(data)[!(names(data) %in% c(reserved_names, mbr_cov_names(x), reserved_capt))]
+  captured_items <- (x@capL)[!(x@capL) %in% reserved_capt]
+
+  col_DV <- data$DV
+  col_PRED <- x %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(end = -1) %>%
-    as_tibble() %>%
+    mrgsim_df(end = -1) %>%
     pull(.data$DV)
 
-  indiv_pred <- x %>%
+  tab <- x %>%
     param(final_eta) %>%
     data_set(data) %>%
     zero_re() %>%
-    mrgsim(end = -1) %>%
-    as_tibble() %>%
-    pull(.data$DV)
-
-  mapbay_tab <- data %>%
-    mutate(IPRED = indiv_pred, PRED = typical_pred, .after = "DV") %>%
+    mrgsim_df(end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
+    rename(IPRED = .data$DV) %>%
     select(-any_of(x@cmtL)) %>%
-    bind_cols(bind_rows(final_eta))
+    mutate(PRED = col_PRED,
+           DV = col_DV)
+
+  missing_cov <- mbr_cov_refvalues(x)[!names(mbr_cov_refvalues(x)) %in% names(data)]
+
+  mapbay_tab <- tab %>%
+    bind_cols(bind_rows(c(missing_cov, final_eta))) %>%
+    relocate(reserved_names, "DV", "IPRED", "PRED", any_of(reserved_capt), captured_items, mbr_cov_names(x), other_items, eta_names(x))
 
   list(
     final_eta = final_eta,
