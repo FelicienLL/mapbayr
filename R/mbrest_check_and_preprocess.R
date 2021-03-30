@@ -121,12 +121,23 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 }
 
 
-#' Pre-process: data into a list of individual data
-#'
-#' @inheritParams mbrest
-#' @return a named list of data set (n individuals)
-#' @export
-preprocess.data <- function(data){
+preprocess.ofv.fix <- function(x){
+  q_model <- zero_re(x)
+  q_model@end <- -1 #Make sure no modif in the time grid
+  q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
+  q_model@Icmt <- integer(0)
+  q_model@Icap <- which(x@capL== "DV") # Only return DV among $captured items
+  q_model@capL <- "DV"
+
+  list(
+    mrgsolve_model = q_model,
+    sigma = smat(x, make = T),
+    log.transformation = log.transformation(x),
+    omega.inv = solve(omat(x, make = T))
+  )
+}
+
+check_mapbayr_data <- function(data){
   if(is.null(data)) stop("No data provided", call. = F)
 
   data <- data %>%
@@ -141,12 +152,16 @@ preprocess.data <- function(data){
   if(is.null(data[["mdv"]])){
     data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
   }
-  if(is.null(data[["mdv"]]))   stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
+  if(is.null(data[["mdv"]]))  stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
 
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
   if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
 
+  return(data)
+}
+
+split_mapbayr_data <- function(data){
   iID <- unique(data$ID)
 
   idata <- data %>%
@@ -158,38 +173,32 @@ preprocess.data <- function(data){
   return(idata)
 }
 
+preprocess.ofv.id <- function(x, data){
 
+  # --- Checks full data vs model
 
-#' Pre-process: model and data for ofv computation
-#' @inheritParams mbrest
-#' @return a list of named arguments passed to optimizer (i.e. arg.ofv)
-#' @export
-preprocess.ofv <- function(x, data){
+  # --- Data split by ID
+  iID <- unique(data$ID)
 
-  #mrgsolve_model
-  q_model <- zero_re(x)
-  q_model@end <- -1 #Make sure no modif in the time grid
-  q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
-  q_model@Icmt <- integer(0)
-  q_model@Icap <- which(x@capL== "DV") # Only return DV among $captured items
-  q_model@capL <- "DV"
+  idata <- data %>%
+    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
+    group_by(.data$split_ID) %>%
+    group_split(.keep = FALSE) %>%
+    set_names(iID)
+  # --- Checks id data vs model
 
-  #DVobs
-  DVobs <- data[data$mdv==0,]$DV #keep observations to fit only
-  if(log.transformation(x)){DVobs <- log(DVobs)}
+  # --- Generate preprocess
 
-  list(
-    mrgsolve_model = q_model, #this model is 'updated' with zero re, end and "Req(DV)"
-    data = data,
-    sigma = smat(x, make = T),
-    log.transformation = log.transformation(x),
-    DVobs = DVobs,
-    omega.inv = solve(omat(x, make = T)),
-    obs_cmt = fit_cmt(x, data)
-  )
+  iDVobs <- map(idata, function(D){
+    DVobs <- D[D$mdv==0,]$DV #keep observations to fit only
+    if(log.transformation(x)){DVobs <- log(DVobs)}
+  } )
+
+  iobs_cmt <- map(idata, fit_cmt, x = x)
+
+  list(data = idata,
+       DVobs = iDVobs,
+       obs_cmt = iobs_cmt
+  ) %>%
+    transpose()
 }
-
-
-
-
-
