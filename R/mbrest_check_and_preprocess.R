@@ -89,6 +89,8 @@ check_mapbayr_modeldata <- function(x, data){
   if(length(commonvar) > 0) stop("These variables cannot be set in both model and data: ", paste(commonvar, collapse = ", "), '.', call. = FALSE)
 
 
+  fit_cmt(x, data)
+
 
   # --- Checks full data vs model
 

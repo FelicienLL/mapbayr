@@ -97,8 +97,12 @@ PERIPH: Peripheral compartment ()
   expect_s3_class(est3 <- mbrest(mod3, data1, verbose = F), "mbrests")
 
   ##3) Only one obs compartment in data
-  data3 <- mutate(data1, cmt = c(1,2,1))
-  mbrest(mod3, data3) %>% expect_error("More than one 'observation compartment' to detect from data. Consider editing model code")
+  data3 <- mutate(data1, cmt = c(1,2,1)) #here multiple cmt in one patient (ID 1, cmt 1 2)
+  expect_error(mbrest(mod3, data3, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
+
+  #also test among two patients (ID 1 cmt 1, ID2 cmt 2) see issue #48
+  data31 <- mutate(data1, cmt = c(1,2,2), ID = 20) %>% bind_rows(data1)
+  expect_error(mbrest(mod3, data31, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
 
   ##4) Compartment must exist in the model
   data4 <- mutate(data1, cmt = c(1,99,99))
