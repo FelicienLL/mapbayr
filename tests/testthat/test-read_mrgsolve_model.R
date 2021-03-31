@@ -169,3 +169,53 @@ $CAPTURE DV
 
 })
 
+test_that("model+data are checked", {
+  code1 <- "
+$PARAM @annotated
+TVCL:  0.5 : Clearance
+TVV1: 20.0 : Central volume
+TVV2: 10.0 : Peripheral volume of distribution
+Q   :  3.0 : Intercompartmental clearance
+
+ETA1: 0 : Clearance (L/h)
+ETA2: 0 : Central volume (L)
+ETA3: 0 : Peripheral volume (L)
+
+$PARAM @annotated @covariates
+BW : 70: Body weight (kg)
+
+$OMEGA 0.3 0.2 0.1
+$SIGMA 0.06 0.1 0.05 0
+$CMT @annotated
+CENT: Central volume [ADM, OBS]
+PERIPH: Periph volume [OBS]
+
+$TABLE
+double PAR = (CENT/V1) *(1 + EPS(1)) + EPS(2) ;
+double MET = (PERIPH/V2) * (1+ EPS(3)) + EPS(4) ;
+double DV = PAR ;
+if(self.cmt == 2) DV = MET ;
+
+$MAIN
+double CL = TVCL * exp(ETA1 + ETA(1)) ;
+double V1 = TVV1 * exp(ETA2 + ETA(2)) * BW/70 ;
+double V2 = TVV1 * exp(ETA3 + ETA(3)) ;
+
+$PKMODEL ncmt = 2, depot = FALSE
+$CAPTURE DV PAR MET CL
+"
+  mod1 <- mcode("mod1", code1)
+
+  data1 <- mod1 %>%
+    adm_lines(amt = 100) %>%
+    obs_lines(time = 5, DV = 2.2, DVmet = 1.1) %>%
+    see_data()
+
+  expect_error(mbrest(mod1, data1, verbose = FALSE), NA)
+  expect_error(mbrest(mod1, mutate(data1, BW = 10), verbose = FALSE), NA)
+  expect_error(mbrest(mod1, mutate(data1, ETA1 = 1), verbose = FALSE), "These variables cannot be set in both model and data: ETA1")
+  expect_error(mbrest(mod1, mutate(data1, TVCL = 10), verbose = FALSE), "These variables cannot be set in both model and data: TVCL")
+  expect_error(mbrest(mod1, mutate(data1, CL = 10), verbose = FALSE), "These variables cannot be set in both model and data: CL")
+  expect_error(mbrest(mod1, mutate(data1, V1 = 99), verbose = FALSE), "These variables cannot be set in both model and data: V1")
+
+})

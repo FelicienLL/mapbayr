@@ -80,6 +80,16 @@ check_mapbayr_data <- function(data){
 
 
 check_mapbayr_modeldata <- function(x, data){
+
+  varinmodel <- c(names(x@param), as.list(x)$cpp_variables$var)
+  varinmodel <- varinmodel[!varinmodel %in% c("DV", mbr_cov_names(x))]
+  varindata <- names(data)
+  commonvar <- varindata[varindata %in% varinmodel]
+
+  if(length(commonvar) > 0) stop("These variables cannot be set in both model and data: ", paste(commonvar, collapse = ", "), '.', call. = FALSE)
+
+
+
   # --- Checks full data vs model
 
 }

@@ -1,6 +1,45 @@
 test_that("MDV == 0 are handled properly", {
-  mod3 <- mread("ex_mbr3", mbrlib())
+ code3 <-  "
+  $PROB
+- drug: Examplinib3
+- model_ref: XXX, J Pharmacokinet, 2020
 
+$PARAM @annotated
+TVCL   : .7 : Clearance (volume/time)
+TVV1   : 20 : Central volume (volume)
+TVV2   : 10 : Peripheral volume of distribution (volume)
+Q      :  3 : Inter-compartmental clearance (volume/time)
+
+ETA1 : 0 : Clearance (L/h)
+ETA2 : 0 : Central volume (L)
+ETA3 : 0 : Peripheral volume (L)
+
+$PARAM @annotated @covariates
+
+COV : 100 : Covariate (unit)
+$OMEGA 0.3 0.2 0.1
+$SIGMA 0.06 0
+
+$CMT @annotated
+CENT   : Central compartment (mg/L)[ADM, OBS]
+PERIPH : Peripheral compartment ()
+
+$TABLE
+double DV = (CENT/V2) *(1 + EPS(1)) ;
+
+$MAIN
+double CL = TVCL * exp(ETA1 + ETA(1)) * (COV/100) ;
+double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
+double V2 = TVV2 * exp(ETA3 + ETA(3)) ;
+
+$PKMODEL ncmt = 2
+
+$CAPTURE @annotated
+DV : Plasma concentration (mass/time)
+  "
+
+
+  mod3 <- mcode("ex_mbr3", code3)
   base_data <- mod3 %>%
     adm_lines(amt = 100) %>%
     obs_lines(time = 11, DV = 3) %>%
@@ -12,7 +51,7 @@ test_that("MDV == 0 are handled properly", {
     mutate(mdv = c(1,1,0,0))  #Two obs taken into account, one ignored (2)
 
   data_MDV1_CL <- data_MDV1 %>%
-    mutate(TVCL = c(.7, 2, .7, .7)) #Still one ignored , but another info on CL (3) :the line must be read by mrgsim, but not for OFV
+    mutate(COV = c(100, 200, 100, 100)) #Still one ignored , but another info on CL (3) :the line must be read by mrgsim, but not for OFV
 
   data_noline_CL <- data_MDV1_CL %>%
     filter(time != 11) #The line is just dropped (4)
