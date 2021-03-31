@@ -166,6 +166,20 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 }
 
 
+#' Preprocess model and data for ofv computation
+#'
+#' @name preprocess.ofv
+#' @param x the model object
+#' @param iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while other are specific of each individual (`preprocess.ofv.id`).
+NULL
+#> NULL
+
+
+
+#' Preprocess fix arguments for ofv computation
+#' @rdname preprocess.ofv
+#' @export
 preprocess.ofv.fix <- function(x){
   q_model <- zero_re(x)
   q_model@end <- -1 #Make sure no modif in the time grid
