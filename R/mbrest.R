@@ -40,10 +40,15 @@ mbrest <- function(x,
       if(any(ok$stop)) stop(paste(ok[ok$stop==T,]$descr, collapse = "\n"), call. = F)
     }
     data <- check_mapbayr_data(data)
+
+    check_mapbayr_modeldata(x, data)
   }
+
+  iddata <- split_mapbayr_data(data)
+
   arg.optim   <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv.fix <- preprocess.ofv.fix(x)
-  arg.ofv.id  <- preprocess.ofv.id(x, data = data)
+  arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
 
   arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 

@@ -171,7 +171,9 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
     select(-any_of(c("ID", "time", "cmt","DV"))) %>%
     names()
 
-  idata <- preprocess.data(data)
+  idata <- data %>%
+    check_mapbayr_data() %>%
+    split_mapbayr_data()
 
   ipred <- list(data = idata,
                 end = end,

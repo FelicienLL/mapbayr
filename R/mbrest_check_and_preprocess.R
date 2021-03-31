@@ -53,6 +53,51 @@ check_mapbayr_model <- function(x){
   return(check)
 }
 
+check_mapbayr_data <- function(data){
+  if(is.null(data)) stop("No data provided", call. = F)
+
+  data <- data %>%
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
+
+  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
+  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
+  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
+  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
+  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
+  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
+  if(is.null(data[["mdv"]])){
+    data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
+  }
+  if(is.null(data[["mdv"]]))  stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
+
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
+  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
+
+  return(data)
+}
+
+
+
+check_mapbayr_modeldata <- function(x, data){
+  # --- Checks full data vs model
+
+}
+
+
+split_mapbayr_data <- function(data){
+  # --- Data split by ID
+
+  iID <- unique(data$ID)
+
+  idata <- data %>%
+    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
+    group_by(.data$split_ID) %>%
+    group_split(.keep = FALSE) %>%
+    set_names(iID)
+
+  return(idata)
+}
 
 
 #' Pre-process: arguments for optimization function
@@ -137,68 +182,23 @@ preprocess.ofv.fix <- function(x){
   )
 }
 
-check_mapbayr_data <- function(data){
-  if(is.null(data)) stop("No data provided", call. = F)
-
-  data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
-
-  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
-  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
-  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
-  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
-  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
-  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
-  if(is.null(data[["mdv"]])){
-    data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
-  }
-  if(is.null(data[["mdv"]]))  stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
-
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
-  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
-
-  return(data)
-}
-
-split_mapbayr_data <- function(data){
-  iID <- unique(data$ID)
-
-  idata <- data %>%
-    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
-    group_by(.data$split_ID) %>%
-    group_split(.keep = FALSE) %>%
-    set_names(iID)
-
-  return(idata)
-}
-
-preprocess.ofv.id <- function(x, data){
-
-  # --- Checks full data vs model
-
-  # --- Data split by ID
-  iID <- unique(data$ID)
-
-  idata <- data %>%
-    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
-    group_by(.data$split_ID) %>%
-    group_split(.keep = FALSE) %>%
-    set_names(iID)
+#' Preprocess individual arguments for ofv computation
+#' @rdname preprocess.ofv
+#' @export
+preprocess.ofv.id <- function(x, iddata){
   # --- Checks id data vs model
+
+  #eg : at least one obs per id
 
   # --- Generate preprocess
 
-  iDVobs <- map(idata, function(D){
-    DVobs <- D[D$mdv==0,]$DV #keep observations to fit only
-    if(log.transformation(x)){DVobs <- log(DVobs)}
-  } )
+  iDVobs <- iddata[iddata$mdv==0,]$DV #keep observations to fit only
+  if(log.transformation(x)) iDVobs <- log(iDVobs)
 
-  iobs_cmt <- map(idata, fit_cmt, x = x)
+  iobs_cmt <- fit_cmt(x, iddata)
 
-  list(data = idata,
+  list(data = iddata,
        DVobs = iDVobs,
        obs_cmt = iobs_cmt
-  ) %>%
-    transpose()
+  )
 }
