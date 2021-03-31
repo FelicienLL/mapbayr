@@ -3,7 +3,7 @@
 #' @name postprocess
 #' @inheritParams mbrest
 #' @param opt.value value returned by optimizer
-#' @param arg.optim,arg.ofv argument passed to optimizer
+#' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
 #' @param post output of the post.process function
 #' @description Functions to generate postprocess after optimization.
 NULL
@@ -66,7 +66,7 @@ postprocess.optim <- function(x, data, opt.value){
 #' Post-process: Build the output (mbrests model object)
 #' @rdname postprocess
 #' @export
-postprocess.output <- function(x, data, arg.optim, arg.ofv, opt.value, post, output){
+postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value, post, output){
 
   if(!is.null(output)){
     if(output == "df") out <- map_dfr(post, "mapbay_tab")
@@ -74,9 +74,10 @@ postprocess.output <- function(x, data, arg.optim, arg.ofv, opt.value, post, out
   } else {
     out <- list(
       model = x,
-      data = bind_rows(unname(data)),
+      data = bind_rows(unname(map(arg.ofv.id, "data"))),
       arg.optim = arg.optim,
-      arg.ofv = arg.ofv,
+      arg.ofv.fix = arg.ofv.fix,
+      arg.ofv.id = arg.ofv.id,
       opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
       final_eta = map(post, "final_eta"),
       mapbay_tab = map_dfr(post, "mapbay_tab")

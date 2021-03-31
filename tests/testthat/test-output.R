@@ -74,3 +74,28 @@ $CAPTURE DV CL
   expect_named(est2, expect_names_2, ignore.order = TRUE)
 
 })
+
+
+test_that("mbrests object `slots` are correct", {
+  mod3 <- mread("ex_mbr3", mbrlib())
+
+  data3 <- bind_rows(
+    mod3 %>%
+      adm_lines(amt = 100) %>%
+      obs_lines(time = 5, DV = 5) %>%
+      see_data(),
+    mod3 %>%
+      adm_lines(amt = 200) %>%
+      obs_lines(time = 6, DV = 8) %>%
+      see_data() %>%
+      mutate(ID = 2)
+  )
+
+  est3 <- mbrest(mod3, data3, verbose = F)
+
+  expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "mapbay_tab"))
+  expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log.transformation", "omega.inv"))
+  expect_length(est3$arg.ofv.id, 2)
+  expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs", "obs_cmt"))
+  expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs", "obs_cmt"))
+})

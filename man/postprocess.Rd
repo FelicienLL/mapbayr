@@ -8,7 +8,15 @@
 \usage{
 postprocess.optim(x, data, opt.value)
 
-postprocess.output(x, data, arg.optim, arg.ofv, opt.value, post, output)
+postprocess.output(
+  x,
+  arg.optim,
+  arg.ofv.fix,
+  arg.ofv.id,
+  opt.value,
+  post,
+  output
+)
 }
 \arguments{
 \item{x}{the model object}
@@ -17,7 +25,7 @@ postprocess.output(x, data, arg.optim, arg.ofv, opt.value, post, output)
 
 \item{opt.value}{value returned by optimizer}
 
-\item{arg.optim, arg.ofv}{argument passed to optimizer}
+\item{arg.optim, arg.ofv.fix, arg.ofv.id}{argument passed to optimizer}
 
 \item{post}{output of the post.process function}
 

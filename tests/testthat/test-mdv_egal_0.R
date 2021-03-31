@@ -23,10 +23,10 @@ test_that("MDV == 0 are handled properly", {
   est4 <- mbrest(mod3, data = data_noline_CL, verbose = F)
 
   #Test number of observation fitted
-  expect_equal(length(est1$arg.ofv[[1]]$DVobs), 3)
-  expect_equal(length(est2$arg.ofv[[1]]$DVobs), 2)
-  expect_equal(length(est3$arg.ofv[[1]]$DVobs), 2)
-  expect_equal(length(est4$arg.ofv[[1]]$DVobs), 2)
+  expect_equal(length(est1$arg.ofv.id[[1]]$DVobs), 3)
+  expect_equal(length(est2$arg.ofv.id[[1]]$DVobs), 2)
+  expect_equal(length(est3$arg.ofv.id[[1]]$DVobs), 2)
+  expect_equal(length(est4$arg.ofv.id[[1]]$DVobs), 2)
 
   #Test different eta are found
   # 1 != 2
