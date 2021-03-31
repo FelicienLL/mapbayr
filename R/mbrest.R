@@ -56,11 +56,10 @@ mbrest <- function(x,
 
   post <- list(
     data = map(arg.ofv.id, "data"),
-    opt.value = opt.value,
-    arg.ofv = arg.ofv) %>%
+    opt.value = opt.value
+    ) %>%
     pmap(postprocess.optim,
-         x = x,
-         arg.optim = arg.optim)
+         x = x)
 
   out <- postprocess.output(x, data = map(arg.ofv.id, "data"), arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
 
