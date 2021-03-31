@@ -55,7 +55,7 @@ mbrest <- function(x,
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
   post <- list(
-    data = map(arg.ofv.id, "data"),
+    data = iddata,
     opt.value = opt.value
     ) %>%
     pmap(postprocess.optim,
