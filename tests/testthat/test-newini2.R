@@ -7,7 +7,8 @@ test_that("new_ini2 works", {
     obs_lines(time = 12, DV = 3) %>%
     see_data()
 
-  argofv <- preprocess.ofv(x = mod, data = data)
+  argofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data))
+
   argopt <- preprocess.optim(x = mod, method = "L-BFGS-B", control = list(), force_initial_eta = NULL,
                              quantile_bound = .4) # !!
 

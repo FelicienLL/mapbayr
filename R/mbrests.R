@@ -9,8 +9,8 @@
 #' @export
 print.mbrests <- function(x, ...){
   NAME <- x$model@model
-  nID <- length(x$arg.ofv)
-  nOBS <- x$arg.ofv %>% map("DVobs") %>% unname() %>% simplify() %>% length()
+  nID <- length(x$arg.ofv.id)
+  nOBS <- x$arg.ofv.id %>% map("DVobs") %>% unname() %>% simplify() %>% length()
   nETA <- n_eta(x$model)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
@@ -89,7 +89,7 @@ plot.mbrests <- function(x, ...){
   #Facetting
 
   one_cmt <- length(obs_cmt(x$model)) == 1
-  one_ID <- length(x$arg.ofv) == 1
+  one_ID <- length(x$arg.ofv.id) == 1
 
   if(all(!one_cmt, !one_ID)) {
     gg <- gg+
@@ -171,7 +171,9 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
     select(-any_of(c("ID", "time", "cmt","DV"))) %>%
     names()
 
-  idata <- preprocess.data(data)
+  idata <- data %>%
+    check_mapbayr_data() %>%
+    split_mapbayr_data()
 
   ipred <- list(data = idata,
                 end = end,

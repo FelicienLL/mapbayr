@@ -1,5 +1,13 @@
-# mapbayr (Development version)
+# mapbayr 0.3
 
+* Users : 
+- Remove arg.ofv from output.
+- Add arg.ofv.fix and arg.ofv.id into output. Avoid redundancy and decrease the weight of the mbrests object.
+- mapbay_tab output improved: return a posteriori captured items and covariates (among other)
+- Variables passed in dataset cannot be defined in model, except if defined with @covariates.
+
+* Internal 
+- Fix and id-varying arguments for ofv processing are dealed separately.
 - Data helpers are now 'mrgmod' methods
 - Maximum reset = 50
 - Maximum iteration defaults to 9999

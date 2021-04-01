@@ -59,6 +59,9 @@ Q   :  1.0 : Intercompartmental clearance
 ETA1: 0 : Clearance (L/h)
 ETA2: 0 : Central volume (L)
 
+$PARAM @annotated @covariates
+BW : 70 : Body weight (kg)
+
 $OMEGA 0.3 0.3
 $SIGMA
 0.05 // proportional
@@ -72,7 +75,7 @@ $TABLE
 double DV = (CENT/V1) *(1 + EPS(1)) + EPS(2);
 
 $MAIN
-double CL = TVCL * exp(ETA1 + ETA(1)) ;
+double CL = TVCL * exp(ETA1 + ETA(1)) * pow(BW / 70, 1.2) ;
 double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
 double K12 = Q / V1  ;
 double K21 = Q / V2  ;
@@ -176,9 +179,10 @@ ETA3 : 0 : F ()
 ```
 
 #### 1.2 Covariates
-* Strongly recommended : 
-  + Use a `@covariates` tag to record covariates in the `$PARAM` block. 
-  + Set the reference value. 
+* Mandatory: 
+  + Use a `@covariates` tag to record covariates in the `$PARAM` block. Otherwise, you will not be allowed to pass a dataset with covariates columns.
+  + Set the reference value.
+* Strongly recommended  
   + Provide a description as a plain text
   + Provide units in parentheses (or a description of 0/1 coding for categorical covariates)
 

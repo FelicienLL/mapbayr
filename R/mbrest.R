@@ -30,35 +30,44 @@ mbrest <- function(x,
                    verbose = TRUE,
                    reset = TRUE,
                    output = NULL
-                   ){
+){
+  if(is.null(data)){
+    data <- x@args$data
+  }
   if(check){
     ok <- check_mapbayr_model(x)
     if(!isTRUE(ok)){
       if(any(ok$stop)) stop(paste(ok[ok$stop==T,]$descr, collapse = "\n"), call. = F)
     }
+    data <- check_mapbayr_data(data)
+
+    check_mapbayr_modeldata(x, data)
   }
 
-  arg.optim <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.optim   <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.ofv.fix <- preprocess.ofv.fix(x, data)
 
-  if(is.null(data)){
-    data <- x@args$data
-  }
+  iddata <- split_mapbayr_data(data)
+  arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
 
-  idata <- preprocess.data(data)
-
-  arg.ofv <-  map(idata, preprocess.ofv, x = x)
+  arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
   post <- list(
-    data = idata,
-    opt.value = opt.value,
-    arg.ofv = arg.ofv) %>%
+    data = iddata,
+    opt.value = opt.value
+    ) %>%
     pmap(postprocess.optim,
-         x = x,
-         arg.optim = arg.optim)
+         x = x)
 
-  out <- postprocess.output(x, data = idata, arg.optim = arg.optim, arg.ofv = arg.ofv, opt.value = opt.value, post = post, output = output)
+  out <- postprocess.output(x,
+                            arg.optim = arg.optim,
+                            arg.ofv.fix = arg.ofv.fix,
+                            arg.ofv.id = arg.ofv.id,
+                            opt.value = opt.value,
+                            post = post,
+                            output = output)
 
   return(out)
 }

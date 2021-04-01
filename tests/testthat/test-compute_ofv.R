@@ -5,7 +5,7 @@ test_that("compute basic ofv", {
     obs_lines(DV = c(.1, .15), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
     see_data()
-  arg.ofv <- preprocess.ofv(mod, data = data1)
+  arg.ofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data1))
   of_value <- compute_ofv(eta = c(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
               mrgsolve_model = arg.ofv$mrgsolve_model,
               data = arg.ofv$data,

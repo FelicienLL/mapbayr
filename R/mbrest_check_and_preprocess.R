@@ -53,6 +53,69 @@ check_mapbayr_model <- function(x){
   return(check)
 }
 
+check_mapbayr_data <- function(data){
+  if(is.null(data)) stop("No data provided", call. = F)
+
+  data <- data %>%
+    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
+
+  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
+  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
+  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
+  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
+  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
+  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
+  if(is.null(data[["mdv"]])){
+    data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
+  }
+  if(is.null(data[["mdv"]]))  stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
+
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
+  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
+  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
+
+  return(data)
+}
+
+
+
+check_mapbayr_modeldata <- function(x, data){
+  # --- Checks full data vs model
+
+  varinmodel <- c(names(x@param), as.list(x)$cpp_variables$var)
+  varinmodel <- varinmodel[!varinmodel %in% c("DV", mbr_cov_names(x))]
+  varindata <- names(data)
+  commonvar <- varindata[varindata %in% varinmodel]
+
+  if(length(commonvar) > 0) stop("These variables cannot be set in both model and data: ", paste(commonvar, collapse = ", "), '.', call. = FALSE)
+
+
+  cmt_data <- obs_cmt_data(data)
+  cmt_model <- obs_cmt(x)
+  if(is.null(cmt_model)){
+    if(length(cmt_data)!=1) stop(paste0("ID =", data$ID[1], "; CMT =", paste(cmt_data, collapse = " "), "\nMore than one 'observation compartment' to detect from data. Consider editing model code with [OBS] in $CMT."), call. = F)
+    if(any(!(cmt_data %in% x@Icmt))) stop(paste0("ID =", data$ID[1], "; CMT =", cmt_data, "\n Compartment number with observation in dataset does not exist in model."))
+  } else {
+    if(any(!cmt_data %in% cmt_model)) stop(paste0("ID =", data$ID[1], "; CMT =", cmt_data, "\n One or more compartment with observation (mdv=0) in data don't match those defined with [OBS] in $CMT."), call. = F)
+  }
+
+
+}
+
+
+split_mapbayr_data <- function(data){
+  # --- Data split by ID
+
+  iID <- unique(data$ID)
+
+  idata <- data %>%
+    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
+    group_by(.data$split_ID) %>%
+    group_split(.keep = FALSE) %>%
+    set_names(iID)
+
+  return(idata)
+}
 
 
 #' Pre-process: arguments for optimization function
@@ -121,52 +184,21 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 }
 
 
-#' Pre-process: data into a list of individual data
+#' Preprocess model and data for ofv computation
 #'
-#' @inheritParams mbrest
-#' @return a named list of data set (n individuals)
+#' @name preprocess.ofv
+#' @param x the model object
+#' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while other are specific of each individual (`preprocess.ofv.id`).
+NULL
+#> NULL
+
+
+
+#' Preprocess fix arguments for ofv computation
+#' @rdname preprocess.ofv
 #' @export
-preprocess.data <- function(data){
-  if(is.null(data)) stop("No data provided", call. = F)
-
-  data <- data %>%
-    rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
-
-  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
-  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
-  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
-  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
-  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
-  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
-  if(is.null(data[["mdv"]])){
-    data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
-  }
-  if(is.null(data[["mdv"]]))   stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
-
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
-  if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
-  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
-
-  iID <- unique(data$ID)
-
-  idata <- data %>%
-    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
-    group_by(.data$split_ID) %>%
-    group_split(.keep = FALSE) %>%
-    set_names(iID)
-
-  return(idata)
-}
-
-
-
-#' Pre-process: model and data for ofv computation
-#' @inheritParams mbrest
-#' @return a list of named arguments passed to optimizer (i.e. arg.ofv)
-#' @export
-preprocess.ofv <- function(x, data){
-
-  #mrgsolve_model
+preprocess.ofv.fix <- function(x, data){
   q_model <- zero_re(x)
   q_model@end <- -1 #Make sure no modif in the time grid
   q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -174,22 +206,29 @@ preprocess.ofv <- function(x, data){
   q_model@Icap <- which(x@capL== "DV") # Only return DV among $captured items
   q_model@capL <- "DV"
 
-  #DVobs
-  DVobs <- data[data$mdv==0,]$DV #keep observations to fit only
-  if(log.transformation(x)){DVobs <- log(DVobs)}
-
   list(
-    mrgsolve_model = q_model, #this model is 'updated' with zero re, end and "Req(DV)"
-    data = data,
+    mrgsolve_model = q_model,
     sigma = smat(x, make = T),
     log.transformation = log.transformation(x),
-    DVobs = DVobs,
     omega.inv = solve(omat(x, make = T)),
-    obs_cmt = fit_cmt(x, data)
+    obs_cmt = fit_cmt(x, data) #on full data
   )
 }
 
+#' Preprocess individual arguments for ofv computation
+#' @rdname preprocess.ofv
+#' @export
+preprocess.ofv.id <- function(x, iddata){
+  # --- Checks id data vs model
 
+  #eg : at least one obs per id
 
+  # --- Generate preprocess
 
+  iDVobs <- iddata[iddata$mdv==0,]$DV #keep observations to fit only
+  if(log.transformation(x)) iDVobs <- log(iDVobs)
 
+  list(data = iddata,
+       DVobs = iDVobs
+  )
+}
