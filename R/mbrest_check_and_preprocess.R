@@ -188,7 +188,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 #'
 #' @name preprocess.ofv
 #' @param x the model object
-#' @param iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
 #' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while other are specific of each individual (`preprocess.ofv.id`).
 NULL
 #> NULL
@@ -198,7 +198,7 @@ NULL
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
-preprocess.ofv.fix <- function(x){
+preprocess.ofv.fix <- function(x, data){
   q_model <- zero_re(x)
   q_model@end <- -1 #Make sure no modif in the time grid
   q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -210,7 +210,8 @@ preprocess.ofv.fix <- function(x){
     mrgsolve_model = q_model,
     sigma = smat(x, make = T),
     log.transformation = log.transformation(x),
-    omega.inv = solve(omat(x, make = T))
+    omega.inv = solve(omat(x, make = T)),
+    obs_cmt = fit_cmt(x, data) #on full data
   )
 }
 
@@ -227,10 +228,7 @@ preprocess.ofv.id <- function(x, iddata){
   iDVobs <- iddata[iddata$mdv==0,]$DV #keep observations to fit only
   if(log.transformation(x)) iDVobs <- log(iDVobs)
 
-  iobs_cmt <- fit_cmt(x, iddata)
-
   list(data = iddata,
-       DVobs = iDVobs,
-       obs_cmt = iobs_cmt
+       DVobs = iDVobs
   )
 }

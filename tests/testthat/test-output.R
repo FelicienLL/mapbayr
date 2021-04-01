@@ -94,8 +94,8 @@ test_that("mbrests object `slots` are correct", {
   est3 <- mbrest(mod3, data3, verbose = F)
 
   expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "mapbay_tab"))
-  expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log.transformation", "omega.inv"))
+  expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log.transformation", "omega.inv", "obs_cmt"))
   expect_length(est3$arg.ofv.id, 2)
-  expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs", "obs_cmt"))
-  expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs", "obs_cmt"))
+  expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
+  expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
 })
