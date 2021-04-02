@@ -1,3 +1,6 @@
+# mapbayr development
+- More features to hist() function
+
 # mapbayr 0.3
 
 * Users : 
