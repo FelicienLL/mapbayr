@@ -16,7 +16,6 @@ RoxygenNote: 7.1.1
 Imports: 
     dplyr,
     ggplot2,
-    ggpubr,
     magrittr,
     mrgsolve,
     optimx,

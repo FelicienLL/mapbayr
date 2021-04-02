@@ -119,23 +119,58 @@ plot.mbrests <- function(x, ...){
 #' @export
 hist.mbrests <- function(x, ...){
 
-  om <- odiag(x$model)
-  eta <- x$final_eta %>%
+  # --- Eta tab
+  eta_tab <- x$final_eta %>%
     bind_rows() %>%
-    as.list() %>%
-    unname()
-  name <- eta_names(x$model)
+    pivot_longer(everything())
 
-  l <- pmap(list(om = om, eta = eta, name = name), function(om, eta, name){
-    tibble(x = c(-3, 3)) %>%
-      ggplot(aes(.data$x))+
-      stat_function(fun = function(x){dnorm(x, 0, sqrt(om))}, geom = "density", fill = "skyblue", alpha = .3)+
-      geom_vline(xintercept = eta, linetype = 2)+
-      labs(x = name, y = NULL)+
-      theme_bw()
-  })
+  # --- Arguments tab
+  arg_tab <- data.frame(
+    om = odiag(x$model),
+    name = eta_names(x$model),
+    descr = eta_descr(x$model),
+    lower = x$arg.optim$lower,
+    upper = x$arg.optim$upper
+  )
 
-  ggarrange(plotlist = l)
+  # --- Density tab
+  minlow <- min(arg_tab$lower)
+  maxup <- max(arg_tab$upper)
+  xvalues <- seq(minlow - 0.01, maxup + 0.01, 0.01)
+
+  density_tab <- arg_tab %>%
+    select(.name = .data$name,.om = .data$om) %>%
+    pmap_dfr(function(.name, .om){
+      data.frame(name = .name,
+                 x = xvalues,
+                 value = dnorm(xvalues, mean = 0, sd = sqrt(.om)))
+    })
+
+  # --- Labels
+  eta_labs <- paste0(arg_tab$descr,
+                     "\nIIV = ", my_percent(sqrt(arg_tab$om)))
+  # --- one ID
+  if(length(x$final_eta) == 1){
+    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), pnorm, mean = 0)
+    eta_labs <- paste0(eta_labs,
+                       "\nID percentile = ", my_percent(percentile))
+  }
+
+  names(eta_labs) <- arg_tab$name
+
+  ggplot() +
+    facet_wrap("name", labeller = labeller(name = eta_labs)) +
+    geom_area(aes(x = .data$x, y = .data$value), data = density_tab, fill = "skyblue", alpha = .3) +
+    geom_line(aes(x = .data$x, y = .data$value), data = density_tab) +
+    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
+    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
+    theme_bw() +
+    theme(strip.background = element_rect(fill = "white"))+
+    scale_y_continuous(name = NULL, breaks = NULL, labels = NULL)+
+    scale_x_continuous(name = NULL, n.breaks = 10)+
+    coord_cartesian(ylim = c(NA, max(density_tab$value)))+
+    geom_rug(aes(x = .data$value), data = eta_tab)+
+    geom_histogram(aes(x = .data$value, y = .data$..density..), data = eta_tab, alpha = .8, col = 'black', bins = 50)
 }
 
 
