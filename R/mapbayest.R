@@ -13,14 +13,14 @@
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print the steps of the estimations to the console (a logical, default is `TRUE`)
 #' @param reset reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is `TRUE`)
-#' @param output if `NULL` (the default) a mbrests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
+#' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
 #'
 #'
-#' @return a mbrests model object
+#' @return a mapbayests model object
 #' @export
 #'
-mbrest <- function(x,
+mapbayest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
                    force_initial_eta = NULL,

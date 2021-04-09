@@ -1,7 +1,7 @@
 #' Postprocess mapbayr
 #'
 #' @name postprocess
-#' @inheritParams mbrest
+#' @inheritParams mapbayest
 #' @param opt.value value returned by optimizer
 #' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
 #' @param post output of the post.process function
@@ -63,7 +63,7 @@ postprocess.optim <- function(x, data, opt.value){
 }
 
 
-#' Post-process: Build the output (mbrests model object)
+#' Post-process: Build the output (mapbayests model object)
 #' @rdname postprocess
 #' @export
 postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value, post, output){
@@ -83,7 +83,7 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
       mapbay_tab = map_dfr(post, "mapbay_tab")
     )
 
-    class(out) <- "mbrests"
+    class(out) <- "mapbayests"
 
   }
   return(out)
