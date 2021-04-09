@@ -271,7 +271,7 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
 use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
   mod <- x$model
 
-  if(length(x$arg.ofv.id) > 1) stop("`use_posterior can be used with one only ID`", call. = FALSE)
+  if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
 
   mod <- switch (.zero_re[1],
     "both" = zero_re(mod),

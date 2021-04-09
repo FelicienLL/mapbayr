@@ -131,3 +131,12 @@ test_that("zero_re in use_posterior", {
   expect_equal(unname(omat(zero_sigma, make = T)), diag(c(0.3,0.3)))
   expect_equal(unname(smat(zero_sigma, make = T)), diag(c(0,0)))
 })
+
+
+test_that("multi ID in use_posterior", {
+
+  data12 <- bind_rows(my_data2, mutate(my_data2, ID = 2))
+  my_est12 <- mbrest(my_model2, data12, verbose = F)
+  expect_error(use_posterior(my_est12), "use_posterior\\(\\) can be used with one only ID")
+
+})
