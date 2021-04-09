@@ -72,3 +72,7 @@ mapbayest <- function(x,
   return(out)
 }
 
+mbrest <- function(...){
+  warning("`mbrest()` is deprecated. Use `mapbayest()` instead !")
+  mapbayest(...)
+}
