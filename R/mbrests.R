@@ -283,6 +283,10 @@ use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
   covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
 
   etas <- x$final_eta[[1]]
+  is_tv <- (map_dbl(covs_name, ~length(unique(x$mapbay_tab[[.x]]))) != 1)
+
+  if(any(is_tv)) warning("Time-varying covariates found. First value used for: ",  paste(covs_name[is_tv], collapse = ", "), ".")
+
   covs <- x$mapbay_tab[1,covs_name, drop = FALSE]
 
   mod %>%

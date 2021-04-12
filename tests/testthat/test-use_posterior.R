@@ -1,5 +1,4 @@
-test_that("use_posterior works with cov", {
-  code1 <- "
+code1 <- "
 $PARAM @annotated
 TVCL:  0.9 : Clearance
 TVV1: 10.0 : Central volume
@@ -37,10 +36,12 @@ dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
 
 $CAPTURE DV
 "
-  my_model1 <- mcode("Example_model", code1)
+my_model1 <- mcode("Example_model", code1)
 
-  my_data1 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
-                         rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 53)
+my_data1 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
+                       rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 53)
+
+test_that("use_posterior works with cov", {
 
   my_est1 <- mbrest(my_model1, my_data1, verbose = F)
 
@@ -138,5 +139,15 @@ test_that("multi ID in use_posterior", {
   data12 <- bind_rows(my_data2, mutate(my_data2, ID = 2))
   my_est12 <- mbrest(my_model2, data12, verbose = F)
   expect_error(use_posterior(my_est12), "use_posterior\\(\\) can be used with one only ID")
+
+})
+
+test_that("warn time-varying cov", {
+  my_data1bis <- mutate(my_data1, BW = c(40, 60, 80, 90))
+
+  my_est1bis <- mbrest(my_model1, my_data1bis, verbose = F)
+
+  expect_warning(  use_posterior(my_est1bis), "Time-varying covariates found. First value used for: BW.")
+
 
 })
