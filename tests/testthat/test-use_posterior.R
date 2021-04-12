@@ -43,7 +43,7 @@ my_data1 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt =
 
 test_that("use_posterior works with cov", {
 
-  my_est1 <- mbrest(my_model1, my_data1, verbose = F)
+  my_est1 <- mapbayest(my_model1, my_data1, verbose = F)
 
   par1 <- my_est1 %>%
     use_posterior() %>%
@@ -97,7 +97,7 @@ my_model2 <- mcode("Example_model2", code2)
 my_data2 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
                        rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1))
 
-my_est2 <- mbrest(my_model2, my_data2, verbose = F)
+my_est2 <- mapbayest(my_model2, my_data2, verbose = F)
 
 test_that("use_posterior works without cov", {
 
@@ -137,7 +137,7 @@ test_that("zero_re in use_posterior", {
 test_that("multi ID in use_posterior", {
 
   data12 <- bind_rows(my_data2, mutate(my_data2, ID = 2))
-  my_est12 <- mbrest(my_model2, data12, verbose = F)
+  my_est12 <- mapbayest(my_model2, data12, verbose = F)
   expect_error(use_posterior(my_est12), "use_posterior\\(\\) can be used with one only ID")
 
 })
@@ -145,7 +145,7 @@ test_that("multi ID in use_posterior", {
 test_that("warn time-varying cov", {
   my_data1bis <- mutate(my_data1, BW = c(40, 60, 80, 90))
 
-  my_est1bis <- mbrest(my_model1, my_data1bis, verbose = F)
+  my_est1bis <- mapbayest(my_model1, my_data1bis, verbose = F)
 
   expect_warning(  use_posterior(my_est1bis), "Time-varying covariates found. First value used for: BW.")
 
