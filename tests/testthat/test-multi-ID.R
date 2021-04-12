@@ -15,9 +15,9 @@ test_that("mapbayr fits multiple ID", {
 
   data12 <- bind_rows(data1, data2)
 
-  expect_error(est <- mbrest(x = mod, data = data12, verbose = F), NA)
+  expect_error(est <- mapbayest(x = mod, data = data12, verbose = F), NA)
   expect_equal(length(est$final_eta), 2)
-  expect_error(esttab <- mbrest(x = mod, data = data12, output = "df", verbose = F), NA)
+  expect_error(esttab <- mapbayest(x = mod, data = data12, output = "df", verbose = F), NA)
   expect_equal(data12$ID,   esttab$ID)
   expect_equal(data12$time, esttab$time  )
   expect_equal(data12$evid, esttab$evid)
@@ -51,11 +51,11 @@ test_that("order of IDs is preserved", {
 
   data_all <- bind_rows(data1, data30, data2)
 
-  est1 <-  mbrest(mod, data1, verbose = F)$final_eta[[1]]
-  est30 <-  mbrest(mod, data30, verbose = F)$final_eta[[1]]
-  est2 <-  mbrest(mod, data2, verbose = F)$final_eta[[1]]
+  est1 <-  mapbayest(mod, data1, verbose = F)$final_eta[[1]]
+  est30 <-  mapbayest(mod, data30, verbose = F)$final_eta[[1]]
+  est2 <-  mapbayest(mod, data2, verbose = F)$final_eta[[1]]
 
-  est_all <- mbrest(mod, data_all, verbose = F)$final_eta
+  est_all <- mapbayest(mod, data_all, verbose = F)$final_eta
 
   est_all_1 <- est_all[[1]]
   est_all_30 <- est_all[[2]]

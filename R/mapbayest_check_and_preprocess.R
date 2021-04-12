@@ -120,7 +120,7 @@ split_mapbayr_data <- function(data){
 
 #' Pre-process: arguments for optimization function
 #'
-#' @inheritParams mbrest
+#' @inheritParams mapbayest
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
 preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){

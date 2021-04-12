@@ -40,7 +40,7 @@ $CAPTURE DV CL
   data1 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
                       rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), BW = 40, DUMMY = 99)
 
-  est1 <- mbrest(mod1, data = data1, output = "df", verbose = F)
+  est1 <- mapbayest(mod1, data = data1, output = "df", verbose = F)
 
   expect_names_1 <- c("ID", "time", "evid", "cmt", "amt", "rate", "DV",
                       "mdv",
@@ -66,7 +66,7 @@ $CAPTURE DV CL
     obs_lines(time = 12, DV = 2.6, DVmet = 1.7) %>%
     see_data()
 
-  est2 <- mbrest(mod2, data2, verbose = F, output = "df")
+  est2 <- mapbayest(mod2, data2, verbose = F, output = "df")
 
   expect_names_2 <- c("ID", "time", "evid", "mdv", "amt", "rate", "cmt", "DV",
                       "PRED", "IPRED", "PAR", "MET", paste0("ETA", 1:5))
@@ -76,7 +76,7 @@ $CAPTURE DV CL
 })
 
 
-test_that("mbrests object `slots` are correct", {
+test_that("mapbayests object `slots` are correct", {
   mod3 <- mread("ex_mbr3", mbrlib())
 
   data3 <- bind_rows(
@@ -91,7 +91,7 @@ test_that("mbrests object `slots` are correct", {
       mutate(ID = 2)
   )
 
-  est3 <- mbrest(mod3, data3, verbose = F)
+  est3 <- mapbayest(mod3, data3, verbose = F)
 
   expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "mapbay_tab"))
   expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log.transformation", "omega.inv", "obs_cmt"))

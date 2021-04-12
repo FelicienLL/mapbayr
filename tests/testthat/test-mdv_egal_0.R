@@ -56,10 +56,10 @@ DV : Plasma concentration (mass/time)
   data_noline_CL <- data_MDV1_CL %>%
     filter(time != 11) #The line is just dropped (4)
 
-  est1 <- mbrest(mod3, data = base_data, verbose = F)
-  est2 <- mbrest(mod3, data = data_MDV1, verbose = F)
-  est3 <- mbrest(mod3, data = data_MDV1_CL, verbose = F)
-  est4 <- mbrest(mod3, data = data_noline_CL, verbose = F)
+  est1 <- mapbayest(mod3, data = base_data, verbose = F)
+  est2 <- mapbayest(mod3, data = data_MDV1, verbose = F)
+  est3 <- mapbayest(mod3, data = data_MDV1_CL, verbose = F)
+  est4 <- mapbayest(mod3, data = data_noline_CL, verbose = F)
 
   #Test number of observation fitted
   expect_equal(length(est1$arg.ofv.id[[1]]$DVobs), 3)

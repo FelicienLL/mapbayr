@@ -22,7 +22,7 @@ test_that("Detection of cmt to fit in data is correct", {
   ##3) If more than one compartment with observation in the dataset (in one individual) : stop, user should use [OBS] if multiple obs compartments are used
   ##4) Compartment must exist in the model
   ##5) Sigma must be equal to 2
-  ##6) mbrests methods must work too
+  ##6) mapbayests methods must work too
 
 
   basecode <- "
@@ -67,7 +67,7 @@ PERIPH: Peripheral compartment ()
     see_data()
 
   #This works
-  expect_s3_class(mbrest(mod1, data1, verbose = F), "mbrests")
+  expect_s3_class(mapbayest(mod1, data1, verbose = F), "mapbayests")
 
   #1 Modified code to test point 1 = the length of sigma matrix diagonal must be 2 x number of compartments
   sigma1 <- "$SIGMA
@@ -76,12 +76,12 @@ PERIPH: Peripheral compartment ()
 0.2
   "
   mcode("mod1", code = paste0(basecode, sigma1, cmt0)) %>%
-    mbrest(data = data1) %>%
+    mapbayest(data = data1) %>%
     expect_error(".*SIGMA: Define one pair of sigma values.*")
 
   #2 Modified data to test point 2 = obs in data must be defined in model
   data2 <- mutate(data1, cmt = c(1, 1, 99))
-  expect_error(mbrest(x = mod1, data2), "ID =1; CMT =99\n One or more compartment with observation .* in data don't match those defined with")
+  expect_error(mapbayest(x = mod1, data2), "ID =1; CMT =99\n One or more compartment with observation .* in data don't match those defined with")
 
   #Other type of model. Here [OBS] is NOT defined in $CMT
   cmt3 <- "$CMT CENT PERIPH"
@@ -94,24 +94,24 @@ PERIPH: Peripheral compartment ()
   expect_null(obs_cmt(mod3))
 
   #This works
-  expect_s3_class(est3 <- mbrest(mod3, data1, verbose = F), "mbrests")
+  expect_s3_class(est3 <- mapbayest(mod3, data1, verbose = F), "mapbayests")
 
   ##3) Only one obs compartment in data
   data3 <- mutate(data1, cmt = c(1,2,1)) #here multiple cmt in one patient (ID 1, cmt 1 2)
-  expect_error(mbrest(mod3, data3, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
+  expect_error(mapbayest(mod3, data3, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
 
   #also test among two patients (ID 1 cmt 1, ID2 cmt 2) see issue #48
   data31 <- mutate(data1, cmt = c(1,2,2), ID = 20) %>% bind_rows(data1)
-  expect_error(mbrest(mod3, data31, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
+  expect_error(mapbayest(mod3, data31, verbose = F), "More than one 'observation compartment' to detect from data. Consider editing model code")
 
   ##4) Compartment must exist in the model
   data4 <- mutate(data1, cmt = c(1,99,99))
-  mbrest(mod3, data4) %>% expect_error("Compartment number with observation in dataset does not exist in model.")
+  mapbayest(mod3, data4) %>% expect_error("Compartment number with observation in dataset does not exist in model.")
 
   ##5) Sigma must be equal to 2
 
   mcode("mod5", code = paste0(basecode, sigma1, cmt3)) %>%
-    mbrest(data = data1) %>%
+    mapbayest(data = data1) %>%
     expect_error(".*Define only one pair of sigma values .* if you do not use .*One observation compartment will be defined from MDV=0 lines in individual data")
 
   ##6) Method
@@ -215,11 +215,11 @@ $CAPTURE DV PAR MET CL
     obs_lines(time = 5, DV = 2.2, DVmet = 1.1) %>%
     see_data()
 
-  expect_error(mbrest(mod1, data1, verbose = FALSE), NA)
-  expect_error(mbrest(mod1, mutate(data1, BW = 10), verbose = FALSE), NA)
-  expect_error(mbrest(mod1, mutate(data1, ETA1 = 1), verbose = FALSE), "These variables cannot be set in both model and data: ETA1")
-  expect_error(mbrest(mod1, mutate(data1, TVCL = 10), verbose = FALSE), "These variables cannot be set in both model and data: TVCL")
-  expect_error(mbrest(mod1, mutate(data1, CL = 10), verbose = FALSE), "These variables cannot be set in both model and data: CL")
-  expect_error(mbrest(mod1, mutate(data1, V1 = 99), verbose = FALSE), "These variables cannot be set in both model and data: V1")
+  expect_error(mapbayest(mod1, data1, verbose = FALSE), NA)
+  expect_error(mapbayest(mod1, mutate(data1, BW = 10), verbose = FALSE), NA)
+  expect_error(mapbayest(mod1, mutate(data1, ETA1 = 1), verbose = FALSE), "These variables cannot be set in both model and data: ETA1")
+  expect_error(mapbayest(mod1, mutate(data1, TVCL = 10), verbose = FALSE), "These variables cannot be set in both model and data: TVCL")
+  expect_error(mapbayest(mod1, mutate(data1, CL = 10), verbose = FALSE), "These variables cannot be set in both model and data: CL")
+  expect_error(mapbayest(mod1, mutate(data1, V1 = 99), verbose = FALSE), "These variables cannot be set in both model and data: V1")
 
 })
