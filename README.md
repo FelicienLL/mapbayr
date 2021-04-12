@@ -10,8 +10,8 @@ status](https://www.r-pkg.org/badges/version/mapbayr)](https://CRAN.R-project.or
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori*
-bayesian estimation in R. Thanks to a single function, `mbrest()`, you
-can estimate individual PK parameters from:
+bayesian estimation in R. Thanks to a single function, `mapbayest()`,
+you can estimate individual PK parameters from:
 
   - a population PK model coded in *mrgsolve*,
   - a data set of concentrations to fit (NM-TRAN format).
@@ -108,7 +108,7 @@ my_data
 #### 3\) And estimate \!
 
 ``` r
-est <- mbrest(my_model, data = my_data)
+est <- mapbayest(my_model, data = my_data)
 #> 
 #> ID 1... done.
 ```
@@ -124,15 +124,16 @@ est <- my_model %>%
   obs_lines(time = 6, DV = 3.9) %>% 
   obs_lines(time = 20, DV = 1.1) %>% 
   obs_lines(time = 24, DV = 2, mdv = 1) %>% 
-  mbrest()
+  mapbayest()
 ```
 
 #### 4\) Then, use the estimations
 
-The results are returned in a single object (“mbrests” S3 class) which
-includes input (model and data), output (etas and tables) and internal
-arguments passed to the internal algorithm (useful for debugging).
-Additional methods are provided, notably to plot the results quickly.
+The results are returned in a single object (“mapbayests” S3 class)
+which includes input (model and data), output (etas and tables) and
+internal arguments passed to the internal algorithm (useful for
+debugging). Additional methods are provided, notably to plot the results
+quickly.
 
 ``` r
 print(est)
@@ -178,7 +179,7 @@ available on the [mrgsolve
 blog](https://mrgsolve.github.io/blog/map_bayes.html). Additional
 features are:
 
-  - a unique function to perform the estimation: `mbrest()`.
+  - a unique function to perform the estimation: `mapbayest()`.
   - handles multiple error models such as additive, proportional, mixed
     or exponential error (without prior log-transformation of data).
   - fit multiple patients stored in a single dataset.
@@ -270,7 +271,7 @@ SEX : 0 : Sex (0=Male, 1=Female)
         Also used by `obs_lines()` to build your dataset.
       - Write ADM in brackets to define “default” administration
         compartment(s). This information is not used for optimization
-        process and the `mbrest()` function. The information is
+        process and the `mapbayest()` function. The information is
         mandatory if you use `adm_lines()` to build your dataset in
         order to automatically set the value of the ‘cmt’ column.
         Especially useful if you use a model with an absorption from

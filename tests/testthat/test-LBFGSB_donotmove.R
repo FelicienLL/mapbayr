@@ -71,16 +71,16 @@ DV : Concentration central
     see_data()
 
   #no problem with newuoa :
-  est_newuoa <- mbrest(model, data739, method = "newuoa", verbose = F)
+  est_newuoa <- mapbayest(model, data739, method = "newuoa", verbose = F)
   expect_equal(unname(round(est_newuoa$final_eta[[1]], 4)), c(0.0477, -0.0314, -0.0007, -0.0738))
 
   #But there is with L-BFGS-B:
-  est_lbfgsb0 <- mbrest(model, data739, method = "L-BFGS-B", verbose = F, reset = F)
+  est_lbfgsb0 <- mapbayest(model, data739, method = "L-BFGS-B", verbose = F, reset = F)
   expect_equal(unname(round(est_lbfgsb0$final_eta[[1]], 4)), c(0, 0, 0, 0))
   #With initial eta = 0, this subject automatically converge to... 0.
 
   #Need a "reset" of the estimation with other values:
-  expect_warning(est_lbfgsb_reset <- mbrest(model, data739, method = "L-BFGS-B", verbose = F, reset = T), "Error in optimization. Reset with initial values:")
+  expect_warning(est_lbfgsb_reset <- mapbayest(model, data739, method = "L-BFGS-B", verbose = F, reset = T), "Error in optimization. Reset with initial values:")
   expect_equal(unname(round(est_lbfgsb_reset$final_eta[[1]], 4)), c(0.0477, -0.0314, -0.0007, -0.0738))
 
 })

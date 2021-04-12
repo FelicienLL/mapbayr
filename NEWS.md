@@ -1,5 +1,6 @@
 # mapbayr development
 - More features to hist() function
+- Use mapbayest() instead of mbrest()
 
 # mapbayr 0.3
 

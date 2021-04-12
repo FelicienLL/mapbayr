@@ -1,13 +1,13 @@
-#S3 Methods for `mbrests` objects.
+#S3 Methods for `mapbayests` objects.
 
-#' Print a mbrests object
+#' Print a mapbayests object
 #'
-#' @param x A \code{mbrests} object.
+#' @param x A \code{mapbayests} object.
 #' @param ... additional arguments
 #'
-#' @method print mbrests
+#' @method print mapbayests
 #' @export
-print.mbrests <- function(x, ...){
+print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
   nOBS <- x$arg.ofv.id %>% map("DVobs") %>% unname() %>% simplify() %>% length()
@@ -31,25 +31,25 @@ print.mbrests <- function(x, ...){
 
 #' Return the mapbay_tab as a data.frame
 #'
-#' @param x A \code{mbrests} object.
+#' @param x A \code{mapbayests} object.
 #' @param row.names,optional,... passed to as.data.frame
 #'
-#' @method as.data.frame mbrests
+#' @method as.data.frame mapbayests
 #' @export
-as.data.frame.mbrests <- function(x, row.names = NULL, optional = FALSE, ...){
+as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...){
   as.data.frame(x$mapbay_tab, ...)
 }
 
 
-#' Plot predictions from mbrests object
+#' Plot predictions from mapbayests object
 #'
-#' @param x A \code{mbrests} object.
+#' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
 #'
-#' @method plot mbrests
+#' @method plot mapbayests
 #' @export
-plot.mbrests <- function(x, ...){
-  #  if(!inherits(x, "mbrests")) stop("Provided object is not a mbrests class object")
+plot.mapbayests <- function(x, ...){
+  #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
     message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
@@ -112,12 +112,12 @@ plot.mbrests <- function(x, ...){
 
 #' Plot posterior distribution of bayesian estimates
 #'
-#' @param x A \code{mbrests} object.
+#' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
 #'
-#' @method hist mbrests
+#' @method hist mapbayests
 #' @export
-hist.mbrests <- function(x, ...){
+hist.mapbayests <- function(x, ...){
 
   # --- Eta tab
   eta_tab <- x$final_eta %>%
@@ -182,15 +182,15 @@ augment <- function (x, ...)UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'
-#' @param x A \code{mbrests} object.
+#' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
 #' @param end end of infusion time (passed to mrgsim)
 #' @param ... additional argument to pass to mrgsim
 #'
-#' @method augment mbrests
-#' @return a `mbrests` object, augmented of an `aug_tab`
+#' @method augment mapbayests
+#' @return a `mapbayests` object, augmented of an `aug_tab`
 #' @export
-augment.mbrests <- function(x, data = NULL, end = NULL, ...){
+augment.mapbayests <- function(x, data = NULL, end = NULL, ...){
   if(is.null(data)){
     data <- x$data
   }
@@ -256,7 +256,7 @@ augment.mbrests <- function(x, data = NULL, end = NULL, ...){
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
   x <- c(x, aug_tab = list(aug_tab))
-  class(x) <- "mbrests"
+  class(x) <- "mapbayests"
   return(x)
 }
 

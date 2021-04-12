@@ -10,9 +10,9 @@ test_that("evid = 2 are handled correctly", {
   data_evid2mdv0 <- base_data %>%
     mutate(evid = c(1,0,2))
 
-  expect_error(mbrest(mod3, data = data_evid2mdv0, verbose = F))
+  expect_error(mapbayest(mod3, data = data_evid2mdv0, verbose = F))
   data_evid2mdv1 <- base_data %>%
     mutate(evid = c(1,0,2),
            mdv = c(1,0,1))
-  expect_equal(length(mbrest(mod3, data_evid2mdv1, verbose = F)$arg.ofv.id[[1]]$DVobs), 1)
+  expect_equal(length(mapbayest(mod3, data_evid2mdv1, verbose = F)$arg.ofv.id[[1]]$DVobs), 1)
 })
