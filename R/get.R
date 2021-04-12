@@ -56,6 +56,18 @@ get_eta <- function(x, ...) UseMethod("get_eta")
 #' @export
 get_eta.mapbayests <- function(x, ..., output = NULL){
 
+  final_eta <- x$final_eta
+  names_final_eta <- names(final_eta[[1]])
+  names_dots <- paste0("ETA", unique(unlist(list(...))))
+
+  ok_names_dots <- names_dots[names_dots %in% names_final_eta]
+
+  if(length(ok_names_dots)==0){
+    selected_eta <- final_eta
+  } else {
+    selected_eta <- map(final_eta, ~.x[ok_names_dots])
+  }
+
   oneID <- (length(x$arg.ofv.id) == 1)
 
   if(is.null(output)){
@@ -73,9 +85,9 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
   if(!oneID & .out == "num") stop("Multiple ID, cannot coerce list to a vector of numeric.")
 
   e <- switch (.out,
-    "num" = x$final_eta[[1]],
-    "list"= x$final_eta,
-    "df" = bind_rows(x$final_eta, .id = "ID")
+    "num" = selected_eta[[1]],
+    "list"= selected_eta,
+    "df" = bind_rows(selected_eta, .id = "ID")
   )
 
   return(e)

@@ -17,10 +17,6 @@ data12 <- bind_rows(data1, data2)
 est1 <- mapbayest(mod, data1, verbose = F)
 est12 <- mapbayest(mod, data12, verbose = F)
 
-get_eta(est1) %>% class()
-get_eta(est12) %>% class()
-
-
 test_that("default get_eta works", {
   e1 <- get_eta(est1)
   e12 <- get_eta(est12)
@@ -76,4 +72,45 @@ test_that("get_eta df works", {
 test_that("get_eta stops if invalid type", {
   expect_error(get_eta(est1, output = "AAA"), "Allowed output are: ")
 
+})
+
+test_that("eta selection works", {
+  e1 <- get_eta(est1, 1)
+  e12 <- get_eta(est12, 1)
+
+  expect_length(e1, 1)
+  expect_type(e1, "double")
+  expect_named(e1, c("ETA1"))
+
+  expect_length(e12, 1+1)
+  expect_s3_class(e12, "data.frame")
+  expect_named(e12, c("ID", "ETA1"))
+
+
+})
+
+test_that("multiple eta selection works", {
+  e1 <- get_eta(est1, 1, 3)
+  e12 <- get_eta(est12, 1, 3)
+
+  expect_length(e1, 2)
+  expect_type(e1, "double")
+  expect_named(e1, c("ETA1", "ETA3"))
+
+  expect_length(e12, 1+2)
+  expect_s3_class(e12, "data.frame")
+  expect_named(e12, c("ID", "ETA1", "ETA3"))
+})
+
+test_that("eta selection works if selected twice", {
+  e1 <- get_eta(est1, 1, 1)
+  expect_length(e1, 1)
+  expect_named(e1, c("ETA1"))
+})
+
+test_that("eta selection works if eta dont exist", {
+  expect_equal(get_eta(est1), get_eta(est1, 4))
+  expect_equal(get_eta(est1), get_eta(est1, "DONTEXIST"))
+  expect_equal(get_eta(est1), get_eta(est1, "DONTEXIST", 4))
+  expect_equal(get_eta(est1, 1), get_eta(est1, "DONTEXIST", 1))
 })
