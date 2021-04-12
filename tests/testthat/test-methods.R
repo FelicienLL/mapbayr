@@ -4,7 +4,7 @@ test_that("newuoa vs nm", {
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
-    see_data()
+    get_data()
   est1_n <- mod %>%
     data_set(data1) %>%
     mapbayest(method = "newuoa", verbose = F)
@@ -17,7 +17,7 @@ test_that("newuoa vs nm", {
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(100, 200), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
-    see_data()
+    get_data()
   est2_n <- mod %>%
     data_set(data2) %>%
     mapbayest(method = "newuoa", verbose = F)

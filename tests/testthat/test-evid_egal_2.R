@@ -5,7 +5,7 @@ test_that("evid = 2 are handled correctly", {
     adm_lines(amt = 100) %>%
     obs_lines(time = 12, DV = 3) %>%
     obs_lines(time = 24, DV = 1) %>%
-    see_data()
+    get_data()
 
   data_evid2mdv0 <- base_data %>%
     mutate(evid = c(1,0,2))
