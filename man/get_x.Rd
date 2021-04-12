@@ -3,9 +3,12 @@
 \name{get_x}
 \alias{get_x}
 \alias{get_data}
+\alias{get_eta}
 \title{Get content from object}
 \usage{
 get_data(x, ...)
+
+get_eta(x, ...)
 }
 \arguments{
 \item{x}{object to get content from}
