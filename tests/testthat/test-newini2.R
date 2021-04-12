@@ -5,7 +5,7 @@ test_that("new_ini2 works", {
   data <- mod %>%
     adm_lines(amt = 100) %>%
     obs_lines(time = 12, DV = 3) %>%
-    see_data()
+    get_data()
 
   argofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data))
 

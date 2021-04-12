@@ -3,7 +3,7 @@ test_that("mapbayest verbose works", {
   data <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
-    see_data()
+    get_data()
 
   expect_output(mapbayest(mod, data))
   expect_output(mapbayest(mod, data, verbose = T))

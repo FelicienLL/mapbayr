@@ -1,6 +1,7 @@
 # mapbayr development
 - More features to hist() function
 - Use mapbayest() instead of mbrest()
+- Use get_data() instead of see_data()
 
 # mapbayr 0.3
 

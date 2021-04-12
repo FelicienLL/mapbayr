@@ -64,7 +64,7 @@ PERIPH: Peripheral compartment ()
     adm_lines(amt = 100) %>%
     obs_lines(time = 24, DV = 6) %>%
     obs_lines(time = 36, DV = 3) %>%
-    see_data()
+    get_data()
 
   #This works
   expect_s3_class(mapbayest(mod1, data1, verbose = F), "mapbayests")
@@ -213,7 +213,7 @@ $CAPTURE DV PAR MET CL
   data1 <- mod1 %>%
     adm_lines(amt = 100) %>%
     obs_lines(time = 5, DV = 2.2, DVmet = 1.1) %>%
-    see_data()
+    get_data()
 
   expect_error(mapbayest(mod1, data1, verbose = FALSE), NA)
   expect_error(mapbayest(mod1, mutate(data1, BW = 10), verbose = FALSE), NA)
