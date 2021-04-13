@@ -3,9 +3,12 @@
 \name{get_x}
 \alias{get_x}
 \alias{get_data}
+\alias{get_param}
 \title{Get content from object}
 \usage{
 get_data(x, ...)
+
+get_param(x, ...)
 }
 \arguments{
 \item{x}{object to get content from}
