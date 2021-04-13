@@ -4,12 +4,14 @@
 \alias{get_param.mapbayests}
 \title{Return a posteriori param from a mapbayests}
 \usage{
-\method{get_param}{mapbayests}(x, ...)
+\method{get_param}{mapbayests}(x, ..., output = NULL)
 }
 \arguments{
 \item{x}{mapbayests object}
 
 \item{...}{passed along}
+
+\item{output}{either a list ("list"), a data.frame ("df") or a vector of numeric ("num"). Default to "num" if only one ID}
 }
 \value{
 a tibble
