@@ -44,12 +44,17 @@ get_param <- function(x, ...) UseMethod("get_param")
 #'
 #' @param x mapbayests object
 #' @param ... passed along
-#' @param output either a list ("list"), a data.frame ("df") or a vector of numeric ("num"). Default to "num" if only one ID
+#' @param output either a data.frame ("df") or a vector of numeric ("num"). Default to "num" if only one ID
+#' @param keep_ID a logical. By default, the ID variable is dropped if one ID in data.
+#' @param keep_names a logical. By default, names are dropped if one parameter is requested, and output is not a data frame.
 #'
 #' @method get_param mapbayests
 #' @return a tibble
 #' @export
-get_param.mapbayests <- function(x, ..., output = NULL){
+get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_names = NULL){
+  #Check Arguments
+  stopifnot((is.logical(keep_ID)|is.null(keep_ID)), (is.logical(keep_names)|is.null(keep_names)))
+
   #Variable selection
 
   selected <- unique(unlist(list(...)))
@@ -64,6 +69,7 @@ get_param.mapbayests <- function(x, ..., output = NULL){
 
   #output selection
   oneID <- (length(x$arg.ofv.id) == 1)
+  onepar <- (length(ok_names) == 1)
 
   if(is.null(output)){
     if(oneID){
@@ -72,12 +78,32 @@ get_param.mapbayests <- function(x, ..., output = NULL){
       .out <- "df"
     }
   } else {
-    okout <- c("num", "list", "df")
+    okout <- c("num", "df")
     if(!output %in% okout) stop('Allowed output are: ', paste(okout, collapse = ", "), ".")
     .out <- output[1]
   }
 
   if(!oneID & .out == "num") stop("Multiple ID, cannot coerce list to a vector of numeric.")
+
+  if(is.null(keep_ID)){
+    if(oneID){
+      .keep_ID <- FALSE
+    } else {
+      .keep_ID <- TRUE
+    }
+  } else {
+    .keep_ID <- keep_ID
+  }
+
+  if(is.null(keep_names)){
+    if(onepar & oneID){
+      .keep_names <- FALSE
+    } else {
+      .keep_names <- TRUE
+    }
+  } else {
+    .keep_names <- keep_names
+  }
 
   par_tab <- x$mapbay_tab %>%
     select(.data$ID, dplyr::any_of(ok_names)) %>%
@@ -85,9 +111,11 @@ get_param.mapbayests <- function(x, ..., output = NULL){
     dplyr::slice(1) %>%
     dplyr::ungroup()
 
+  if(!.keep_ID) par_tab <- select(par_tab, -.data$ID)
+  if(!.keep_names) names(par_tab) <- NULL
+
   par <- switch (.out,
                  "num" = unlist(par_tab),
-                 "list" = map(split_mapbayr_data(par_tab), unlist),
                  "df"= par_tab
   )
 

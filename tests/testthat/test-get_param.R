@@ -42,43 +42,54 @@ data12 <- bind_rows(data1, mutate(data1, ID = 2, BW = 90))
 est1 <- mapbayest(mod1, data = data1, verbose = F)
 est12 <- mapbayest(mod1, data = data12, verbose = F)
 
+CL1 <- est12$mapbay_tab$CL[1]
+CL2 <- est12$mapbay_tab$CL[5]
 
-test_that("get_param works", {
-  get_param(est1)
-  expect_error(get_param(est1, CL))
-  get_param(est1, "CL")
-  get_param(est1, "CL", "CL")
-  get_param(est1, c("CL", "TVCL"))
-  get_param(est1, "FOO", "TVCL", "BAR")
-
-  get_param(est12)
-  expect_error(get_param(est12, CL))
-  get_param(est12, "CL")
-  get_param(est12, "FOO", "CL", "BAR")
-})
 
 test_that("get param output", {
   #Vector of numeric
   expect_type(get_param(est1, output = "num"), "double")
   expect_error(get_param(est12, output = "num"), "Multiple ID, cannot coerce list to a vector of numeric.")
 
-  #List of vector
-  expect_type(get_param(est1, output = "list"), "list")
-  expect_length(get_param(est1, output = "list"), 1)
-  expect_type(get_param(est1, output = "list")[[1]], "double")
-
-  expect_type(get_param(est12, output = "list"), 'list')
-  expect_length(get_param(est12, output = "list"), 2)
-  expect_named(get_param(est12, output = "list"), c("1", "2"))
-
-  #Df
+  #df
   expect_s3_class(get_param(est1, output = "df"), "data.frame")
   expect_s3_class(get_param(est12, output = "df"), "data.frame")
 
 })
 
 
+test_that("get_param obeys to keep_ argument", {
 
+  expect_equal(get_param(est1, "CL"), CL1)
+  expect_equal(get_param(est1, "CL", keep_ID = TRUE), c(1, CL1))
+  expect_equal(get_param(est1, "CL", keep_ID = FALSE), CL1)
+  expect_equal(get_param(est1, "CL", keep_names = TRUE), c(CL = CL1))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE), CL1)
+  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = CL1))
+  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = FALSE), c(CL = CL1))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = TRUE), c(1, CL1))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = FALSE), CL1)
+
+  expect_equal(get_param(est1, "CL", "TVCL"), c(CL = CL1, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_ID = TRUE), c(ID = 1, CL = CL1, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE), c(CL = CL1, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE), c(CL1, 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = CL1, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = FALSE), c(CL = CL1, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = TRUE), c(1, CL1, 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = FALSE), c(CL1, 1))
+
+  expect_equal(get_param(est12, "CL"), tibble(ID = c(1,2), CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_ID = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_ID = FALSE), tibble(CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE), unname(tibble(c(1,2),c(CL1, CL2))))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = FALSE), tibble(CL = c(CL1, CL2)))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = TRUE), unname(tibble(c(1,2),c(CL1, CL2))))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = FALSE), unname(tibble(c(CL1, CL2))))
+
+})
 
 
 
