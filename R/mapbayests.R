@@ -259,3 +259,36 @@ augment.mapbayests <- function(x, data = NULL, end = NULL, ...){
   class(x) <- "mapbayests"
   return(x)
 }
+
+#' Use posterior param and covariates
+#'
+#' @param x A \code{mapbayests} object.
+#' @param .zero_re Default is "both", meaning all matrices are zeroed. Pass "omega" to zero between-subject variability, and keep simulating residual error.
+#'
+#' @details Updates the param values of the model object with the estimated etas, and the covariates of the individual. Returns an updated mrgmod, so that the user can derive simulations from it. Works only with one individual. Does not handle time-varying covariates.
+#' @return a mrgmod
+#' @export
+use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
+  mod <- x$model
+
+  if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
+
+  mod <- switch (.zero_re[1],
+    "both" = zero_re(mod),
+    "omega" = zero_re(mod, "omega"),
+    "sigma" = zero_re(mod, "sigma")
+  )
+
+  covs_name <- mbr_cov_names(mod)
+  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
+
+  etas <- x$final_eta[[1]]
+  is_tv <- (map_dbl(covs_name, ~length(unique(x$mapbay_tab[[.x]]))) != 1)
+
+  if(any(is_tv)) warning("Time-varying covariates found. First value used for: ",  paste(covs_name[is_tv], collapse = ", "), ".")
+
+  covs <- x$mapbay_tab[1,covs_name, drop = FALSE]
+
+  mod %>%
+    param(as.list(c(etas, covs)))
+}

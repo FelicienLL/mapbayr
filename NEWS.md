@@ -4,6 +4,7 @@
 - Use get_data() instead of see_data()
 - Use get_param() to access a posteriori captured parameters
 - Use get_eta() to access eta values
+- Use use_posterior() to update model with posterior parameters, and perform simulations from mapbayests object.
 
 # mapbayr 0.3
 
