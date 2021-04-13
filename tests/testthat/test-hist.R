@@ -4,12 +4,12 @@ test_that("hist.mapbayests works", {
   data1 <- mod3 %>%
     adm_lines(amt = 100, rate = 100) %>%
     obs_lines(time = c(2, 4, 6), DV = c(8.1, 6.2, 4.3)) %>%
-    see_data()
+    get_data()
 
   data2 <- mod3 %>%
     adm_lines(amt = 100, rate = 30) %>%
     obs_lines(time = c(4, 6, 10), DV = c(21.1, 15.2, 10.3)) %>%
-    see_data() %>%
+    get_data() %>%
     mutate(ID = 2)
 
   data12 <- bind_rows(data1, data2)

@@ -68,7 +68,7 @@ DV : Concentration central
     obs_lines(time = 40, DV = 76) %>%
     obs_lines(time = 381, DV = 151) %>%
     obs_lines(time = 528, DV = 94) %>%
-    see_data()
+    get_data()
 
   #no problem with newuoa :
   est_newuoa <- mapbayest(model, data739, method = "newuoa", verbose = F)

@@ -64,7 +64,7 @@ $CAPTURE DV CL
     adm_lines(amt = 100, rate = 20) %>%
     obs_lines(time = 6, DV = 5.4, DVmet = 0.8) %>%
     obs_lines(time = 12, DV = 2.6, DVmet = 1.7) %>%
-    see_data()
+    get_data()
 
   est2 <- mapbayest(mod2, data2, verbose = F, output = "df")
 
@@ -83,11 +83,11 @@ test_that("mapbayests object `slots` are correct", {
     mod3 %>%
       adm_lines(amt = 100) %>%
       obs_lines(time = 5, DV = 5) %>%
-      see_data(),
+      get_data(),
     mod3 %>%
       adm_lines(amt = 200) %>%
       obs_lines(time = 6, DV = 8) %>%
-      see_data() %>%
+      get_data() %>%
       mutate(ID = 2)
   )
 

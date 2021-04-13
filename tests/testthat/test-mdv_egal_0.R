@@ -45,7 +45,7 @@ DV : Plasma concentration (mass/time)
     obs_lines(time = 11, DV = 3) %>%
     obs_lines(time = 12, DV = 3) %>%
     obs_lines(time = 24, DV = 1) %>%
-    see_data() #Three obs taken into account (1)
+    get_data() #Three obs taken into account (1)
 
   data_MDV1 <- base_data %>%
     mutate(mdv = c(1,1,0,0))  #Two obs taken into account, one ignored (2)

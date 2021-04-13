@@ -1,6 +1,9 @@
 # mapbayr development
 - More features to hist() function
 - Use mapbayest() instead of mbrest()
+- Use get_data() instead of see_data()
+- Use get_param() to access a posteriori captured parameters
+- Use get_eta() to access eta values
 
 # mapbayr 0.3
 

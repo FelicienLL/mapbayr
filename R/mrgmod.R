@@ -211,16 +211,7 @@ add_covariates.mrgmod <- function(x, covariates = list(), ...){
 
 #' @rdname data_helpers
 #' @export
-see_data <- function(x, ...)UseMethod("see_data")
-
-#' Return data
-#'
-#' @param x model object
-#' @param ... not used
-#'
-#' @method see_data mrgmod
-#' @return a tibble
-#' @export
-see_data.mrgmod <- function(x, ...){
-  as_tibble(x@args$data)
+see_data <- function(x, ...){
+  warning("see_data() is deprecated. Use get_data() instead.")
+  UseMethod("get_data")
 }

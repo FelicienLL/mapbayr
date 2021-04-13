@@ -4,13 +4,13 @@ test_that("mapbayr fits multiple ID", {
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
-    see_data()
+    get_data()
 
   data2 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.1, .2), time = c(19, 41)) %>%
     add_covariates(list(WT = 70)) %>%
-    see_data() %>%
+    get_data() %>%
     mutate(ID = 2)
 
   data12 <- bind_rows(data1, data2)
@@ -33,20 +33,20 @@ test_that("order of IDs is preserved", {
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
-    see_data()
+    get_data()
 
   data30 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(.5, .6), time = c(19, 41)) %>%
     add_covariates(list(WT = 90)) %>%
-    see_data() %>%
+    get_data() %>%
     mutate(ID = 30)
 
   data2 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
     obs_lines(DV = c(1, 2), time = c(15, 36)) %>%
     add_covariates(list(WT = 50)) %>%
-    see_data() %>%
+    get_data() %>%
     mutate(ID = 2)
 
   data_all <- bind_rows(data1, data30, data2)
