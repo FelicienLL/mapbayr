@@ -89,7 +89,7 @@ $ODE
 dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
 dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
 
-$CAPTURE DV
+$CAPTURE DV CL
 "
 
 
@@ -100,38 +100,54 @@ my_model <- mcode("Example_model", code)
 
 ```{r, echo = T,  message=FALSE}
 my_data <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)), 
-                      rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1))
+                      rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 90)
 my_data
 ```
 
 #### 3) And estimate !
 
 ```{r, message=FALSE}
-est <- mapbayest(my_model, data = my_data)
+my_est <- mapbayest(my_model, data = my_data)
 ```
 As building dataset into a NM-TRAN format can be painful, you can use pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass administration and observation information, and perform the estimation subsequently. 
 ```{r, eval=FALSE}
-est <- my_model %>% 
+my_est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
   obs_lines(time = 6, DV = 3.9) %>% 
   obs_lines(time = 20, DV = 1.1) %>% 
   obs_lines(time = 24, DV = 2, mdv = 1) %>% 
+  add_covariates(list(BW = 90)) %>% 
   mapbayest()
 ```
 
 #### 4) Then, use the estimations
-The results are returned in a single object ("mapbayests" S3 class) which includes input (model and data), output (etas and tables) and internal arguments passed to the internal algorithm (useful for debugging). Additional methods are provided, notably to plot the results quickly. 
+The results are returned in a single object ("mapbayests" S3 class) which includes input (model and data), output (etas and tables) and internal arguments passed to the internal algorithm (useful for debugging). Additional methods are provided to ease visualization and computation of a posteriori outcomes of interest. 
 
 ```{r, message=FALSE}
-print(est)
+print(my_est)
 ```
 
 ```{r, plot1, fig.height=4, message=FALSE}
-plot(est)
+plot(my_est)
 ```
 
 ```{r, plot2, fig.height=2.5, message=FALSE}
-hist(est)  
+hist(my_est)  
+```
+
+```{r, plot3, message = FALSE}
+# Easily extract a posteriori parameter values to compute outcomes of interest
+get_eta(my_est)
+get_param(my_est, "CL")
+
+# The `use_posterior()` functions updates the model object with posterior values and covariates to simulate like with a regular mrgsolve model
+my_est %>% 
+  use_posterior() %>% 
+  data_set(expand.ev(amt = c(50, 100, 200, 500), dur = c(5, 24)) %>% mutate(rate = amt/dur)) %>% 
+  carry_out(dur) %>% 
+  mrgsim() %>% 
+  plot(DV~time|factor(dur), scales = "same")
+
 ```
 
 ## Development
@@ -306,6 +322,10 @@ double CL = TVCL * exp(ETA1 + ETA(1))
 * Mandatory: 
   + DV must be captured
   + For models with parent + metabolite, PAR and MET must be captured too.
+
+* Strongly recommended: 
+  + Capture a posteriori values of parameters you are interested in (e.g. CL)
+  + Do not capture covariates and ETAn (they will be returned by `mapbayest()` anyway)
 
 ```{c, eval = F}
 $CAPTURE DV PAR MET
