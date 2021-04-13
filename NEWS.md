@@ -2,6 +2,7 @@
 - More features to hist() function
 - Use mapbayest() instead of mbrest()
 - Use get_data() instead of see_data()
+- Use get_param() to access a posteriori captured parameters
 
 # mapbayr 0.3
 
