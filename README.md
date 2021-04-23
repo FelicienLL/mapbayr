@@ -85,7 +85,7 @@ $ODE
 dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
 dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
 
-$CAPTURE DV
+$CAPTURE DV CL
 "
 
 
@@ -96,19 +96,19 @@ my_model <- mcode("Example_model", code)
 
 ``` r
 my_data <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)), 
-                      rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1))
+                      rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 90)
 my_data
-#>   ID time evid cmt amt rate  DV mdv
-#> 1  1    0    1   1 100   20  NA   1
-#> 2  1    6    0   1   0    0 3.9   0
-#> 3  1   15    0   1   0    0 1.1   0
-#> 4  1   24    0   1   0    0 2.0   1
+#>   ID time evid cmt amt rate  DV mdv BW
+#> 1  1    0    1   1 100   20  NA   1 90
+#> 2  1    6    0   1   0    0 3.9   0 90
+#> 3  1   15    0   1   0    0 1.1   0 90
+#> 4  1   24    0   1   0    0 2.0   1 90
 ```
 
 #### 3\) And estimate \!
 
 ``` r
-est <- mapbayest(my_model, data = my_data)
+my_est <- mapbayest(my_model, data = my_data)
 #> 
 #> ID 1... done.
 ```
@@ -119,11 +119,12 @@ administration and observation information, and perform the estimation
 subsequently.
 
 ``` r
-est <- my_model %>% 
+my_est <- my_model %>% 
   adm_lines(time = 0, amt = 100, rate = 20) %>% 
   obs_lines(time = 6, DV = 3.9) %>% 
   obs_lines(time = 20, DV = 1.1) %>% 
   obs_lines(time = 24, DV = 2, mdv = 1) %>% 
+  add_covariates(list(BW = 90)) %>% 
   mapbayest()
 ```
 
@@ -132,11 +133,11 @@ est <- my_model %>%
 The results are returned in a single object (“mapbayests” S3 class)
 which includes input (model and data), output (etas and tables) and
 internal arguments passed to the internal algorithm (useful for
-debugging). Additional methods are provided, notably to plot the results
-quickly.
+debugging). Additional methods are provided to ease visualization and
+computation of a posteriori outcomes of interest.
 
 ``` r
-print(est)
+print(my_est)
 #> Model:  Example_model 
 #> ID : 1  individual(s).
 #> OBS: 2  observation(s).
@@ -144,27 +145,51 @@ print(est)
 #> 
 #> Estimates: 
 #>   ID      ETA1      ETA2
-#> 1  1 0.6367739 0.1377183
+#> 1  1 0.3872104 0.1569604
 #> 
 #> Output (4 lines): 
-#>   ID time evid cmt amt rate mdv  DV     IPRED     PRED BW      ETA1      ETA2
-#> 1  1    0    1   1 100   20   1  NA 0.0000000 0.000000 70 0.6367739 0.1377183
-#> 2  1    6    0   1   0    0   0 3.9 4.2896334 5.700008 70 0.6367739 0.1377183
-#> 3  1   15    0   1   0    0   0 1.1 1.1557231 2.210305 70 0.6367739 0.1377183
-#> 4  1   24    0   1   0    0   1 2.0 0.6021212 1.412358 70 0.6367739 0.1377183
+#>   ID time evid cmt amt rate mdv  DV     IPRED      PRED      CL BW      ETA1
+#> 1  1    0    1   1 100   20   1  NA 0.0000000 0.0000000 1.79217 90 0.3872104
+#> 2  1    6    0   1   0    0   0 3.9 4.1621701 5.1739186 1.79217 90 0.3872104
+#> 3  1   15    0   1   0    0   0 1.1 1.0867408 1.6468556 1.79217 90 0.3872104
+#> 4  1   24    0   1   0    0   1 2.0 0.5559693 0.9594398 1.79217 90 0.3872104
+#>        ETA2
+#> 1 0.1569604
+#> 2 0.1569604
+#> 3 0.1569604
+#> 4 0.1569604
 ```
 
 ``` r
-plot(est)
+plot(my_est)
 ```
 
 ![](man/figures/README-plot1-1.png)<!-- -->
 
 ``` r
-hist(est)  
+hist(my_est)  
 ```
 
 ![](man/figures/README-plot2-1.png)<!-- -->
+
+``` r
+# Easily extract a posteriori parameter values to compute outcomes of interest
+get_eta(my_est)
+#>      ETA1      ETA2 
+#> 0.3872104 0.1569604
+get_param(my_est, "CL")
+#> [1] 1.79217
+
+# The `use_posterior()` functions updates the model object with posterior values and covariates to simulate like with a regular mrgsolve model
+my_est %>% 
+  use_posterior() %>% 
+  data_set(expand.ev(amt = c(50, 100, 200, 500), dur = c(5, 24)) %>% mutate(rate = amt/dur)) %>% 
+  carry_out(dur) %>% 
+  mrgsim() %>% 
+  plot(DV~time|factor(dur), scales = "same")
+```
+
+![](man/figures/README-plot3-1.png)<!-- -->
 
 ## Development
 
@@ -429,6 +454,11 @@ double CL = TVCL * exp(ETA1 + ETA(1))
       - DV must be captured
       - For models with parent + metabolite, PAR and MET must be
         captured too.
+  - Strongly recommended:
+      - Capture a posteriori values of parameters you are interested in
+        (e.g. CL)
+      - Do not capture covariates and ETAn (they will be returned by
+        `mapbayest()` anyway)
 
 <!-- end list -->
 
