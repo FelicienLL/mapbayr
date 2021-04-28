@@ -1,5 +1,6 @@
 test_that("L-BFGS-B changes eta values", {
   skip_on_cran()
+  skip_on_os("mac")
   code <- '$PROB Reference model with IIV on 7 parameters
 
 $PARAM @annotated
