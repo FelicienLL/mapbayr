@@ -72,7 +72,11 @@ mapbayest <- function(x,
   return(out)
 }
 
+#' Estimate parameters (maximum a posteriori)
+#' @param ... passed to mapbayest
+#' @export
+#' @rdname mapbayest
 mbrest <- function(...){
-  warning("`mbrest()` is deprecated. Use `mapbayest()` instead !")
+  .Deprecated("mapbayest")
   mapbayest(...)
 }
