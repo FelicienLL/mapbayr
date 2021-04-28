@@ -1,3 +1,6 @@
+# mapbayr 0.4.1
+- Fix bugs (dependency, backward compatibility, checks)
+
 # mapbayr 0.4
 
 - More features to hist() function
