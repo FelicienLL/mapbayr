@@ -17,7 +17,7 @@ Imports:
     dplyr,
     ggplot2,
     magrittr,
-    mrgsolve,
+    mrgsolve (>= 0.10.9),
     optimx,
     purrr,
     rlang,
