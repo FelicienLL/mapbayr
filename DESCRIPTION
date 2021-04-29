@@ -7,7 +7,7 @@ Authors@R:
            role = c("aut", "cre"),
            email = "lelouedec.felicien@iuct-oncopole.fr",
            comment = c(ORCID = "0000-0003-3699-2729"))
-Description: Easy Maximum A Posteriori Bayesian Estimation of PK parameters in R.
+Description: Perform maximum a posteriori Bayesian estimation of individual pharmacokinetic parameters from a model defined in mrgsolve, typically in the context of model-based therapeutic drug monitoring.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
