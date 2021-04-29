@@ -102,7 +102,7 @@ obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL, ...) UseMethod("obs_li
 #' @param x model object
 #' @param time vector of time
 #' @param DV vector of values to fit
-#' @param mdv should the Dv be ignored (1) or not (0)
+#' @param mdv should the DV be ignored (1) or not (0)
 #' @param DVmet optional : metabolite data to fit
 #' @param ... not used
 #' @method obs_lines mrgmod

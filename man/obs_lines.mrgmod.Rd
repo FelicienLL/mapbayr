@@ -13,7 +13,7 @@
 
 \item{DV}{vector of values to fit}
 
-\item{mdv}{should the Dv be ignored (1) or not (0)}
+\item{mdv}{should the DV be ignored (1) or not (0)}
 
 \item{DVmet}{optional : metabolite data to fit}
 

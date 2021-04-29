@@ -287,7 +287,7 @@ SEX : 0 : Sex (0=Male, 1=Female)
 
 ### 2\. `$CMT` block
 
-  - Strongly recommanded…  
+  - Strongly recommended…  
     … yet **mandatory** if you use `obs_lines()` and `adm_lines()` to
     build your dataset, or if you have multiple types of DV, i.e. parent
     drug + metabolite:
