@@ -135,8 +135,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   initial_eta <- force_initial_eta
   if(is.null(initial_eta)){
     if(method == "newuoa"){
-      set.seed(1)
-      initial_eta <- runif(n_eta(x), -0.01, 0.01)
+      initial_eta <- rep_len(0.01, n_eta(x))
       names(initial_eta) <- eta_names(x)
     }
     if(method == "L-BFGS-B"){
