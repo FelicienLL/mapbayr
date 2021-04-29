@@ -1,5 +1,5 @@
 Package: mapbayr
-Title: MAP-Bayesian estimation of PK parameters
+Title: MAP-Bayesian Estimation of PK Parameters
 Version: 0.4.1
 Authors@R: 
     person(given = "Felicien",
@@ -10,7 +10,6 @@ Authors@R:
 Description: Easy Maximum A Posteriori Bayesian Estimation of PK parameters in R.
 License: GPL-3
 Encoding: UTF-8
-LazyData: true
 Roxygen: list(markdown = TRUE)
 RoxygenNote: 7.1.1
 Imports: 
@@ -29,4 +28,3 @@ URL: http://github.com/FelicienLL/mapbayr
 BugReports: http://github.com/FelicienLL/mapbayr/issues
 Suggests: 
     knitr
-VignetteBuilder: knitr
