@@ -18,6 +18,9 @@ get_param(x, ...)
 
 \item{...}{passed along}
 }
+\value{
+the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
+}
 \description{
 Helpful functions to get content from a \code{mrgmod} object (i.e. data) or from a \code{mapbayests} object (data, eta, param).
 }

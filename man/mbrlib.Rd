@@ -6,13 +6,9 @@
 \usage{
 mbrlib()
 }
+\value{
+a character string, the location of the example models.
+}
 \description{
 Internal "mapbayr" model examples
-}
-\examples{
-\dontrun{
-mod <- mrgsolve::mread("ex_mbr1", mbrlib())
-mod <- mrgsolve::mread("ex_mbr2", mbrlib())
-mod <- mrgsolve::mread("ex_mbr3", mbrlib())
-}
 }

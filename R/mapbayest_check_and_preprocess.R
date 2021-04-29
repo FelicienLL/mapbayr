@@ -189,6 +189,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 #' @name preprocess.ofv
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @return a list of arguments use to `compute_ofv()`.
 #' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while other are specific of each individual (`preprocess.ofv.id`).
 NULL
 #> NULL

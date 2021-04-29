@@ -36,6 +36,7 @@ odiag <- function(x){
 #' mod <- mrgsolve::mread("ex_mbr2", mbrlib())
 #' mod <- mrgsolve::mread("ex_mbr3", mbrlib())
 #' }
+#' @return a character string, the location of the example models.
 mbrlib <- function(){
   system.file("models", package = "mapbayr")
 }

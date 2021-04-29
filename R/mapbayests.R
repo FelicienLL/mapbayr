@@ -4,7 +4,7 @@
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments
-#'
+#' @return print the results of the estimation to the console, and returns it invisibly.
 #' @method print mapbayests
 #' @export
 print.mapbayests <- function(x, ...){
@@ -35,6 +35,7 @@ print.mapbayests <- function(x, ...){
 #' @param row.names,optional,... passed to as.data.frame
 #'
 #' @method as.data.frame mapbayests
+#' @return a data.frame (the mapbay_tab from estimation)
 #' @export
 as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...){
   as.data.frame(x$mapbay_tab, ...)
@@ -45,6 +46,7 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
+#' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
 #'
 #' @method plot mapbayests
 #' @export
@@ -114,7 +116,7 @@ plot.mapbayests <- function(x, ...){
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
-#'
+#' @return a `ggplot` object, representing prior parameter density distribution, and a histogram of patients estimates.
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){
@@ -178,6 +180,7 @@ hist.mapbayests <- function(x, ...){
 #' @param x object to augment
 #' @param ... additional arguments
 #' @export
+#' @return an augmented object (depending on the object passed)
 augment <- function (x, ...)UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
