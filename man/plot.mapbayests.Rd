@@ -11,6 +11,9 @@
 
 \item{...}{additional arguments (not used)}
 }
+\value{
+a \code{ggplot} object. Observed and predicted concentration vs time profile for every patients.
+}
 \description{
 Plot predictions from mapbayests object
 }

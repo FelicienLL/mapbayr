@@ -11,6 +11,9 @@
 
 \item{row.names, optional, ...}{passed to as.data.frame}
 }
+\value{
+a data.frame (the mapbay_tab from estimation)
+}
 \description{
 Return the mapbay_tab as a data.frame
 }

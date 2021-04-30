@@ -1,6 +1,6 @@
 #' Compute the derivatives
 #'
-#' @param v_DV vector of concentrations to derivate (typically output$DV)
+#' @param v_DV vector of concentrations to derive (typically output$DV)
 #' @param v_cmt vector of compartment associated to the concentrations (typically output$cmt)
 #' @param cmts numbers of compartment compartment associated with an observations, to derive concentration (typically obs_cmt)
 #'

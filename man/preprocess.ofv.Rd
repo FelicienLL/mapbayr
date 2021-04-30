@@ -15,6 +15,9 @@ preprocess.ofv.id(x, iddata)
 
 \item{data, iddata}{NMTRAN-like data set. iddata is likely a dataset of one individual}
 }
+\value{
+a list of arguments use to \code{compute_ofv()}.
+}
 \description{
 Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (\code{preprocess.ofv.fix}), while other are specific of each individual (\code{preprocess.ofv.id}).
 }

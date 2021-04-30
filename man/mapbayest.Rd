@@ -2,6 +2,7 @@
 % Please edit documentation in R/mapbayest.R
 \name{mapbayest}
 \alias{mapbayest}
+\alias{mbrest}
 \title{Estimate parameters (maximum a posteriori)}
 \usage{
 mapbayest(
@@ -16,6 +17,8 @@ mapbayest(
   reset = TRUE,
   output = NULL
 )
+
+mbrest(...)
 }
 \arguments{
 \item{x}{the model object}
@@ -37,6 +40,8 @@ mapbayest(
 \item{reset}{reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is \code{TRUE})}
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
+
+\item{...}{passed to mapbayest}
 }
 \value{
 a mapbayests model object

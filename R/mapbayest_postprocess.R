@@ -1,6 +1,7 @@
 #' Postprocess mapbayr
 #'
 #' @name postprocess
+#' @return `postprocess.optim()` returns a list with final parameters and `mapbay_tab`. `postprocess.output()` returns a `mapbayests` class object.
 #' @inheritParams mapbayest
 #' @param opt.value value returned by optimizer
 #' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
