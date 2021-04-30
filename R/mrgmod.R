@@ -9,6 +9,7 @@
 #' @param ... passed to `mrgsolve::ev()` in `adm_lines()`
 #' @param time,DV,mdv,DVmet passed to `obs_lines()`
 #' @param covariates a list of named covariates, with a single value or same number of lines than data
+#' @return a `mrgmod` object, with a dataset in the `@args$data` slot.
 #'
 #' @description Helpful functions to pass information about administrations (`adm_lines()`), observations (`obs_lines()`) and covariates (`add_covariates()`).
 #' These functions are passed to a `mrgmod` object (mrgsolve model), and return a `mrgmod` object with a dataset inside, so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
@@ -102,7 +103,7 @@ obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL, ...) UseMethod("obs_li
 #' @param x model object
 #' @param time vector of time
 #' @param DV vector of values to fit
-#' @param mdv should the Dv be ignored (1) or not (0)
+#' @param mdv should the DV be ignored (1) or not (0)
 #' @param DVmet optional : metabolite data to fit
 #' @param ... not used
 #' @method obs_lines mrgmod

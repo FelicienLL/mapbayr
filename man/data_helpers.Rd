@@ -25,6 +25,9 @@ see_data(x, ...)
 
 \item{covariates}{a list of named covariates, with a single value or same number of lines than data}
 }
+\value{
+a \code{mrgmod} object, with a dataset in the \verb{@args$data} slot.
+}
 \description{
 Helpful functions to pass information about administrations (\code{adm_lines()}), observations (\code{obs_lines()}) and covariates (\code{add_covariates()}).
 These functions are passed to a \code{mrgmod} object (mrgsolve model), and return a \code{mrgmod} object with a dataset inside, so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.

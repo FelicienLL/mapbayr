@@ -31,6 +31,9 @@ postprocess.output(
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 }
+\value{
+\code{postprocess.optim()} returns a list with final parameters and \code{mapbay_tab}. \code{postprocess.output()} returns a \code{mapbayests} class object.
+}
 \description{
 Functions to generate postprocess after optimization.
 }

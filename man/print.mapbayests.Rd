@@ -11,6 +11,9 @@
 
 \item{...}{additional arguments}
 }
+\value{
+print the results of the estimation to the console, and returns it invisibly.
+}
 \description{
 Print a mapbayests object
 }

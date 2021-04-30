@@ -11,6 +11,9 @@
 
 \item{...}{additional arguments (not used)}
 }
+\value{
+a \code{ggplot} object, representing prior parameter density distribution, and a histogram of patients estimates.
+}
 \description{
 Plot posterior distribution of bayesian estimates
 }
