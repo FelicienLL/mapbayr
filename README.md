@@ -6,25 +6,27 @@
 <!-- badges: start -->
 
 [![CRAN
-status](https://www.r-pkg.org/badges/version/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
+status](https://www.r-pkg.org/badges/version-last-release/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori*
-bayesian estimation in R. Thanks to a single function, `mapbayest()`,
-you can estimate individual PK parameters from:
+bayesian estimation of PK parameters in R. Thanks to a single function,
+`mapbayest()`, you can estimate individual PK parameters from:
 
   - a population PK model coded in *mrgsolve*,
   - a data set of concentrations to fit (NM-TRAN format).
 
 It was designed to be easily wrapped in [shiny
-apps](https://shiny.rstudio.com/) in order to ease model-based
-therapeutic drug monitoring, also referred to as Model-Informed
-Prediction Dosing (MIPD).
+apps](https://github.com/FelicienLL/mapbayr-shiny) in order to ease
+model-based Therapeutic Drug Monitoring, also referred to as
+Model-Informed Prediction Dosing (MIPD).
 
 ## Installation
 
-mapbayr is not (yet) available on CRAN. You can install it from github
-by executing the following code in R console.
+mapbayr is available on
+[CRAN](https://CRAN.R-project.org/package=mapbayr) You can install the
+development version from github by executing the following code in R
+console.
 
 ``` r
 install.packages("devtools")
@@ -35,9 +37,10 @@ mapbayr relies on
 [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve) for model
 implementation and ordinary differential equation solving which requires
 C++ compilers. If you are a Windows user, you would probably need to
-install Rtools. Please refer to the [installation
-guide](https://github.com/metrumresearchgroup/mrgsolve/wiki/mrgsolve-Installation)
-of mrgsolve for additional information.
+install [Rtools](https://cran.r-project.org/bin/windows/Rtools/). Please
+refer to the [installation guide of
+mrgsolve](https://github.com/metrumresearchgroup/mrgsolve/wiki/mrgsolve-Installation)
+for additional information.
 
 ## Example
 
@@ -114,9 +117,9 @@ my_est <- mapbayest(my_model, data = my_data)
 ```
 
 As building dataset into a NM-TRAN format can be painful, you can use
-pipe-friendly `obs_lines()` and `adm_lines()` functions in order to pass
-administration and observation information, and perform the estimation
-subsequently.
+pipe-friendly `obs_lines()`, `adm_lines()` and `add_covariates()`
+functions in order to pass administration and observation information,
+and perform the estimation subsequently.
 
 ``` r
 my_est <- my_model %>% 
@@ -193,8 +196,8 @@ my_est %>%
 
 ## Development
 
-mapbayr is under development. Your feedback for additional features
-request or bug reporting is welcome. Contact us through the [issue
+mapbayr is under development. Your feedback for additional feature
+requests or bug reporting is welcome. Contact us through the [issue
 tracker](https://github.com/FelicienLL/mapbayr/issues).
 
 ## Features
@@ -238,9 +241,9 @@ with `mbrlib()`
 my_model <- mread("ex_mbr1.cpp", mbrlib())
 ```
 
-The user is invited to perform map-bayesian estimation with his/her own
+The user is invited to perform MAP-Bayesian estimation with his/her own
 mrgsolve models. These model files should be slightly modified in order
-to be “read” by mapbayr with the subsequent specifications :
+to be “read” by mapbayr with the subsequent specifications:
 
 ### 1\. `$PARAM` block
 
