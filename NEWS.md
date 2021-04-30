@@ -1,3 +1,6 @@
+# mapbayr development version
+- Update README since first CRAN release
+
 # mapbayr 0.4.1
 - Fix bugs (dependency, backward compatibility, checks)
 - Remove random initial value for method "NEWUOA". Default to 0.1 for each parameter.

@@ -24,7 +24,7 @@ Model-Informed Prediction Dosing (MIPD).
 ## Installation
 
 mapbayr is available on
-[CRAN](https://CRAN.R-project.org/package=mapbayr) You can install the
+[CRAN](https://CRAN.R-project.org/package=mapbayr). You can install the
 development version from github by executing the following code in R
 console.
 
