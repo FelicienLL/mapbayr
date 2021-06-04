@@ -8,3 +8,4 @@ README.Rmd
 ^tests/draft_sd\.R$
 ^inst/logo\.pptx$
 ^cran-comments\.md$
+^draft_napdelta\.R$

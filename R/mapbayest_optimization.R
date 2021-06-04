@@ -5,7 +5,7 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-  while(RUN <= 50 && reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt))){
+  while(RUN <= 50 && reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt)|check_absolute_eta(opt, arg.ofv))){
     arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
 
     warning("\nError in optimization. Reset with initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
@@ -23,6 +23,13 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
 check_convcode <- function(OPT) OPT$convcode!= 0
 check_etavalue <- function(OPT, arg.ofv, arg.optim)isTRUE(all.equal(OPT$value, initial_ofv(arg.ofv, arg.optim)))
+
+check_absolute_eta <- function(OPT, arg.ofv){
+  #Check if optimization is something like : -0.123 0.123 -0.123
+  nam <- eta_names(arg.ofv$mrgsolve_model)
+  vec <- unlist(OPT[nam])
+  length(unique(abs(vec))) == 1
+}
 
 initial_ofv <- function(arg.ofv, arg.optim){
   do.call(compute_ofv, c(list(eta = arg.optim$par), arg.ofv))
