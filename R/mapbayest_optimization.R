@@ -22,6 +22,19 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
     RUN <- RUN + 1
   }
 
+  # Next chunk comes from the postprocess functions, but it did not belong here
+  # Just check if OFV could be computed, otherwise return ETA = 0
+  # Cannot remember the situation when it happened, and why I implemented this initially, so I cannot test it with a reprex...
+  # I think it comes from a time when there was no "reset" routine, but it is probably irrelevant now because I never see this message in performance tests.
+  # Still keeping it anyway...
+
+  if(!is.null(opt$fevals)){
+    if(is.nan(opt$fevals)) {
+      opt[eta_names(arg.ofv$mrgsolve_model)] <- 0
+      warning("\nCannot compute objective function value ; typical value (ETA = 0) returned")
+    }
+  }
+
   opt$run <- RUN
 
   if(verbose) cat(" done.\n")
