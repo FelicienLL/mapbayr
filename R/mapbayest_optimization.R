@@ -5,13 +5,13 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-  while(RUN <= 50 && reset && (check_etavalue(opt, arg.ofv, arg.optim)|check_convcode(OPT = opt)|check_absolute_eta(opt, arg.ofv))){
+  while(RUN <= 50 && reset == T && check_need_reset(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)){
     arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
 
     warning("\nError in optimization. Reset with initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-    RUN <- RUN+1
+    RUN <- RUN + 1
 
   }
   opt$run <- RUN
@@ -20,15 +20,32 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   return(opt)
 }
 
+check_need_reset <- function(OPT, arg.ofv, arg.optim){
+  #If not all conditions TRUE = a reset is needed
+  !all(
+      check_convcode(OPT),
+      check_finalofv(OPT, arg.ofv, arg.optim),
+      check_absolute_eta(OPT = OPT, arg.ofv)
+    )
+}
 
-check_convcode <- function(OPT) OPT$convcode!= 0
-check_etavalue <- function(OPT, arg.ofv, arg.optim)isTRUE(all.equal(OPT$value, initial_ofv(arg.ofv, arg.optim)))
+check_convcode <- function(OPT){
+  #Success condition: `convcode` variable is 0 (meaning no error returned by optim).
+  OPT$convcode == 0
+}
+
+check_finalofv <- function(OPT, arg.ofv, arg.optim){
+  #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
+  ini <- initial_ofv(arg.ofv, arg.optim)
+  fin <- OPT$value
+  !isTRUE(all.equal(ini, fin))
+}
 
 check_absolute_eta <- function(OPT, arg.ofv){
-  #Check if optimization is something like : -0.123 0.123 -0.123
+  #Success condition: final absolute values of etas are not identical
   nam <- eta_names(arg.ofv$mrgsolve_model)
   vec <- unlist(OPT[nam])
-  length(unique(abs(vec))) == 1
+  length(unique(abs(vec))) != 1
 }
 
 initial_ofv <- function(arg.ofv, arg.optim){
