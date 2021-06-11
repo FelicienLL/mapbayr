@@ -6,20 +6,19 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
   # First the optimization is done once.
 
-  RUN <- 1
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
-
+  opt$run <- 1
 
   # Secondly, if conditions for a reset are met, a new optimization from initial eta values is done until reset is not needed.
 
-  while(RUN <= 50 && reset == T && check_need_reset(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)){
-    arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
+  while(opt$run <= 50 && reset == T && check_need_reset(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)){
+    arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = opt$run)
 
     warning("\nError in optimization. Reset with initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-    RUN <- RUN + 1
+    opt$run <- opt$run + 1
   }
 
   # Next chunk comes from the postprocess functions, but it did not belong here
@@ -38,8 +37,6 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
       warning("\nCannot minimize objective function value ; typical value (ETA = 0) returned")
     }
   }
-
-  opt$run <- RUN
 
   if(verbose) cat(" done.\n")
   return(opt)
