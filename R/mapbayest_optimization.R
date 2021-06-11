@@ -8,20 +8,37 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
-  opt$run <- 1
 
-  # Secondly, if conditions for a reset are met, a new optimization from initial eta values is done until reset is not needed.
+  RUN <- 1
+  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)
+  need_new_bounds <- !check_new_bounds(OPT = opt, arg.optim)
 
-  while(opt$run <= 50 && reset == T && check_need_reset(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)){
-    arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = opt$run)
+  # Secondly, if conditions for a reset are met, a new optimization is done until reset is not needed.
+ # browser()
 
-    warning("\nError in optimization. Reset with initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
+  while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
+
+    if(need_new_ini){
+      arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
+      warning("\nError in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
+    }
+
+    if(need_new_bounds){
+      arg.optim$lower <- new_bounds(arg.ofv, arg.optim)
+      arg.optim$upper <- -arg.optim$lower
+      warning("\nError in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
+    }
+
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
-    opt$run <- opt$run + 1
+    # Re-check if an additional reset is needed
+    RUN <- RUN + 1
+    need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)
+    need_new_bounds <- !check_new_bounds(OPT = opt, arg.optim)
+
   }
 
-  # Next chunk comes from the postprocess functions, but it did not belong here
+  # Next chunk comes from the postprocess functions, but it did not belong there
   # Just check if OFV could be computed, otherwise return ETA = 0
   # Cannot remember the situation when it happened, and why I implemented this initially, so I cannot test it with a reprex...
   # I think it comes from a time when there was no "reset" routine, but it is probably irrelevant now because I never see this message in performance tests.
@@ -38,6 +55,7 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
     }
   }
 
+  opt$run <- RUN
   if(verbose) cat(" done.\n")
   return(opt)
 }
@@ -46,18 +64,19 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
 
 #### check results of optimization ####
-# 1 -  One function to test all the reset conditions
+# All the functions return TRUE if there is no problem
+# 1.1 -  One function to test all conditions for new initial values.
 
-check_need_reset <- function(OPT, arg.ofv, arg.optim){
-  #If not all conditions TRUE = a reset is needed
-  !all(
-      check_convcode(OPT),
-      check_finalofv(OPT, arg.ofv, arg.optim),
-      check_absolute_eta(OPT = OPT, arg.ofv)
-    )
+check_new_ini <- function(OPT, arg.ofv, arg.optim){
+  #If not all conditions TRUE, will return FALSE
+  all(
+    check_convcode(OPT),
+    check_finalofv(OPT, arg.ofv, arg.optim),
+    check_absolute_eta(OPT = OPT)
+  )
 }
 
-# 2 -  Unit functions that test a particular reset condition
+# 1.2 -  Unit functions that test a particular condition for new initial values
 check_convcode <- function(OPT){
   #Success condition: `convcode` variable is 0 (meaning no error returned by optim).
   OPT$convcode == 0
@@ -70,17 +89,24 @@ check_finalofv <- function(OPT, arg.ofv, arg.optim){
   !isTRUE(all.equal(ini, fin))
 }
 
-check_absolute_eta <- function(OPT, arg.ofv){
+check_absolute_eta <- function(OPT){
   #Success condition: final absolute values of etas are not identical
-  nam <- eta_names(arg.ofv$mrgsolve_model)
-  vec <- unlist(OPT[nam])
+  vec <- eta_from_opt(OPT)
   length(unique(abs(vec))) != 1
 }
 
+# 2.1 One function to test condition for new bounds.
+check_new_bounds <- function(OPT, arg.optim){
+  #Success condition : no eta equal to a bound
+  if(arg.optim$method != "L-BFGS-B") return(TRUE)
+  vec <- eta_from_opt(OPT)
+  !any(vec == arg.optim$lower,
+       vec == arg.optim$upper)
+}
 
 
-#### Reset initial value of ETA ####
-# Returns a vector of ETA to start the new estimation from:
+#### Generate new arguments for the reset  ####
+# 1 Returns a vector of ETA to start the new estimation from:
 
 new_ini2 <- function(arg.ofv, arg.optim, run){
   mvgauss(solve(arg.ofv$omega.inv), n = 1+n_eta(arg.ofv$mrgsolve_model)^2, seed = 1+run) %>% #Sample 1+(Neta x Neta) vectors from prior MVN distribution
@@ -99,6 +125,21 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
     unlist() %>%
     round(6)
 }
+
+# 2 Returns a vector of lower bounds
+
+new_bounds <- function(arg.ofv, arg.optim){
+  vec_SE <- sqrt(diag(solve(arg.ofv$omega.inv)))
+  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = pnorm, mean = 0)
+  P <- P[1]
+  new_P <- P/10
+  map_dbl(vec_SE, qnorm, p = new_P, mean = 0)
+}
+
+
+
+
+
 
 
 #### Helpers ####

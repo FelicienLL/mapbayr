@@ -167,7 +167,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   #lower, upper
   bound = Inf
   if(method == "L-BFGS-B"){
-    bound <- map_dbl(sqrt(odiag(x)), qnorm, p = quantile_bound, mean = 0)
+     bound <- get_quantile(x, .p = quantile_bound)
   }
 
   arg <- list(

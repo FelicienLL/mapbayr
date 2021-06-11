@@ -23,7 +23,7 @@ test_that("newuoa vs nm", {
     mapbayest(method = "newuoa", verbose = F)
   est2_l <- mod %>%
     data_set(data2) %>%
-    mapbayest(method = "L-BFGS-B", verbose = F)
+    mapbayest(method = "L-BFGS-B", verbose = F, reset = F)
   expect_false(isTRUE(all.equal(est2_n$final_eta[[1]], est2_l$final_eta[[1]], tolerance = 0.1)))
   expect_equal(unname(est2_l$final_eta[[1]][2:3]), est2_l$arg.optim$lower[2:3], tolerance = 0.001)
 })
