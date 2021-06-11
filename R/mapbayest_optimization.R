@@ -33,6 +33,10 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
       opt[eta_names(arg.ofv$mrgsolve_model)] <- 0
       warning("\nCannot compute objective function value ; typical value (ETA = 0) returned")
     }
+    if(is.na(opt$fevals)) {
+      opt[eta_names(arg.ofv$mrgsolve_model)] <- 0
+      warning("\nCannot minimize objective function value ; typical value (ETA = 0) returned")
+    }
   }
 
   opt$run <- RUN
