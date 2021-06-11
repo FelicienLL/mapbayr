@@ -100,6 +100,7 @@ check_new_bounds <- function(OPT, arg.optim){
   #Success condition : no eta equal to a bound
   if(arg.optim$method != "L-BFGS-B") return(TRUE)
   vec <- eta_from_opt(OPT)
+  if(any(is.na(vec))) return(TRUE)
   !any(vec == arg.optim$lower,
        vec == arg.optim$upper)
 }
