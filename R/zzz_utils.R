@@ -26,6 +26,19 @@ odiag <- function(x){
   diag(omat(x, make = T))
 }
 
+
+#' Get quantile from omega diag and a probability
+#'
+#' @param x model object
+#' @param .p percentile
+#'
+#' @return a vector of numeric
+#' @noRd
+get_quantile <- function(x, .p){
+  if(!is.mrgmod(x)) stop("the first argument to lowbounds must be a model object", call. = F)
+  map_dbl(sqrt(odiag(x)), qnorm, p = .p, mean = 0)
+}
+
 #' Internal "mapbayr" model examples
 #'
 #' @export
@@ -37,4 +50,9 @@ mbrlib <- function(){
 my_percent <- function(x){
   stopifnot(is.numeric(x))
   paste0(round(x * 100, 0), "%")
+}
+
+eta_from_opt <- function(x){
+  stopifnot(is.data.frame(x))
+  unlist(x[,grepl("ETA", names(x))])
 }

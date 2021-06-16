@@ -1,5 +1,6 @@
 # mapbayr development version
 - Update README since first CRAN release
+- Add new reset conditions: with new initial values if same absolute value for every etas, with larger bound if estimation at bound. Additional refactoring about reset as well. see #75
 
 # mapbayr 0.4.1
 - Fix bugs (dependency, backward compatibility, checks)

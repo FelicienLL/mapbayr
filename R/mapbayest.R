@@ -12,7 +12,7 @@
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print the steps of the estimations to the console (a logical, default is `TRUE`)
-#' @param reset reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is `TRUE`)
+#' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
 #'

@@ -21,13 +21,6 @@ postprocess.optim <- function(x, data, opt.value){
     as.double() %>%
     set_names(eta_names(x))
 
-  if(!is.null(opt.value$fevals)){
-    if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, n_eta(x)) %>% set_names(eta_names(x))
-      warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
-    }
-  }
-
   reserved_capt <- c("DV", "PAR", "MET")
   reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
   other_items <- names(data)[!(names(data) %in% c(reserved_names, mbr_cov_names(x), reserved_capt))]
