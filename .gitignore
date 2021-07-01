@@ -8,4 +8,3 @@ tests/draft_sd.R
 inst/Thumbs.db
 inst/logo.pptx
 draft_napdelta.R
-tests/testthat/test-annotated.R
