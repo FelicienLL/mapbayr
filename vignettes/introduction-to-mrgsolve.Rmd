@@ -1,0 +1,350 @@
+---
+title: "Introduction to mrgsolve"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Introduction to mrgsolve}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>", 
+  fig.height=3.5,
+  fig.width=5,
+  fig.align = "center"
+)
+```
+
+## Summary
+
+mapbayr is meant to be used with models coded with mrgsolve. If you are not familiar with it, the objective of this vignette is to introduce mrgsolve: what is it, how does it work, and on what does mapbayr rely on to estimate parameters ?
+
+```{r setup, message = FALSE, warning = FALSE}
+library(mrgsolve)
+```
+## 1) What is it ?
+
+mrgsolve is a free and open-source R package which performs simulations from user-defined PK, PK/PD and QSP models. See the [official website](https://mrgsolve.github.io/) and [github.com](https://github.com/metrumresearchgroup/mrgsolve) for additional information.
+
+## 2) How does it work ?
+#### The basics
+mrgsolve needs a model object written in an hybrid R/C++ code. It is structured in terms of blocks (*e.g.* `$PARAM`, `$CMT`, `$MAIN`, `$ODE`, `$TABLE`, `$CAPTURE`, etc ...), which are pretty similar to NONMEM's (if ever the user is familiar with it). It can be stored in a dedicated `.cpp` file and imported with `mread()`, or it can be written as a character string in your R script, and read with `mcode()`. Let's take an example of a simple bicompartmental linear PK model.
+
+```{r}
+code_1 <- "
+$PARAM @annotated
+CL :  0.9 : Clearance (L/h)
+V1 : 10.0 : Central volume (L)
+V2 : 10.0 : Peripheral volume of distribution (L)
+Q  :  1.0 : Intercompartmental clearance (L/h)
+
+$CMT @annotated
+CENT   : Central compartment 
+PERIPH : Peripheral compartment
+
+$MAIN
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$TABLE
+double CONC = CENT / V1 ;
+
+$CAPTURE CONC
+"
+
+model_1 <- mcode("model_1", code_1)
+
+```
+
+Once the model is built, simulations can be performed: from `model_1`, what concentrations are predicted at times 6-12-18-24h after a bolus administration of 100 mg? By default, mrgsolve returns, at each time point, quantities in every compartment (`CENT`, `PERIPH`) and variables that were captured in model code (i.e. `CONC`). 
+
+```{r}
+sims_1 <- model_1 %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 6, end = 24, delta = 6)
+print(sims_1)
+```
+
+#### Update parameters
+A very useful feature of mrgsolve is that parameter values defined in `$PARAM` can be accessed and updated from R without modifying the model code itself, thanks to the `param()` function. This ability is of major importance for mapbayr's work. Little example, let's run the same simulation with a higher clearance (CL), and see the impact on concentrations (spoiler alert: these will be lower than before). 
+
+```{r}
+model_1$CL
+model_1b <- param(model_1, CL = 1.5)
+model_1b$CL
+sims_1b <- model_1b %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 6, end = 24, delta = 6)
+as.data.frame(sims_1b)
+```
+
+#### Inter-individual variability
+
+mrgsolve also offers the possibility to simulate random effects on parameters, which is referred to as inter-individual variability (IIV) in population PK or PK/PD models. Let's modify our code to create a new model (`model_2`) with variability on CL and central volume (V1). 
+
+```{r}
+code_2 <- "
+$PARAM @annotated
+TVCL :  0.9 : Clearance (L/h)
+TVV1 : 10.0 : Central volume (L)
+V2 : 10.0 : Peripheral volume of distribution (L)
+Q  :  1.0 : Intercompartmental clearance (L/h)
+
+$CMT @annotated
+CENT   : Central compartment 
+PERIPH : Peripheral compartment
+
+$OMEGA 0.3 0.3
+
+$MAIN
+double CL = TVCL * exp(ETA(1)) ; 
+double V1 = TVV1 * exp(ETA(2)) ; 
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$TABLE
+double CONC = CENT / V1 ;
+
+$CAPTURE CONC
+"
+
+model_2 <- mcode("model_2", code_2)
+```
+
+Three modifications were done. In `$PARAM`, `CL` and `V1` were changed for `TVCL` and `TVV1`. A `$OMEGA` was added with two values of variance. In `$MAIN`, `CL` and `V1` were defined as function of `ETA(1)` and `ETA(2)`. These are the random effects terms. For each simulated individual, a value will be sampled from the multivariate normal distribution of mean 0 and covariance matrix defined in `$OMEGA`. (N.B.: Take a look to the syntax: "ETA" is capitalized and the numbers are in parentheses. This will be important to remember when using mapbayr). Let's run a simulation with seven individuals (`nid = 7` argument) to see the impact on concentrations.
+
+
+```{r}
+set.seed(1234) #for reproducibility
+sims_2 <- model_2 %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 1, end = 24, delta = 1, nid = 7)
+plot_sims(sims_2, CONC)
+```
+
+See how concentrations differs between individuals because there is now IIV on CL and V1. Note that, identically to parameters, the omega matrix can be accessed and updated from R with the function `omat()` instead of modifying model code. Especially, random effects can be set to zero in order to simulate typical profiles with the `zero_re()` function. 
+
+```{r}
+omat(model_2)
+model_2b <- zero_re(model_2)
+omat(model_2b)
+set.seed(1234) #for reproducibility
+sims_2b <- model_2b %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 1, end = 24, delta = 1, nid = 7)
+plot_sims(sims_2b, CONC)
+```
+
+
+The seven PK profiles overlay because the individuals have the same parameters.
+
+#### Residual variability
+
+In addition to IIV, mrgsolve also handle simulations with random effects on concentrations, also known as residual error or residual variability. Let's modify our code to create a new model (`model_3`) with combined error (proportional + additive) on concentrations.
+
+
+```{r}
+code_3 <- "
+$PARAM @annotated
+TVCL :  0.9 : Clearance (L/h)
+TVV1 : 10.0 : Central volume (L)
+V2 : 10.0 : Peripheral volume of distribution (L)
+Q  :  1.0 : Intercompartmental clearance (L/h)
+
+$CMT @annotated
+CENT   : Central compartment 
+PERIPH : Peripheral compartment
+
+$OMEGA 0.3 0.3
+$SIGMA 0.05 0.1
+
+$MAIN
+double CL = TVCL * exp(ETA(1)) ; 
+double V1 = TVV1 * exp(ETA(2)) ; 
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$TABLE
+double CONC = (CENT / V1) * (1 + EPS(1)) + EPS(2) ;
+
+$CAPTURE CONC
+"
+
+model_3 <- mcode("model_3", code_3)
+```
+
+Two modifications were done. A `$SIGMA` was added with two values, the first for proportional error (variance 0.05, i.e. CV: 22%) and the second for additive error (variance 0.1, i.e. SE 0.32 mg/L). In `$TABLE`, `CONC` was defined as function of `EPS(1)` and `EPS(2)`. For each simulated concentration time-point, a value will be sampled from the multivariate normal distribution of mean 0 and covariance matrix defined in `$SIGMA`. (N.B.: Note that we defined proportional error with the first term of the `$SIGMA`, and additive with the second term. It doesn't matter for mrgsolve, but will be mandatory for mapbayr). Let's run a simulation to see the impact of residual error on concentration profiles. 
+
+```{r}
+set.seed(1234) #for reproducibility
+sims_3 <- model_3 %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 1, end = 24, delta = 1, nid = 7)
+plot_sims(sims_3, CONC)
+```
+
+Note that, identically to parameters and omega matrix, the sigma matrix can be accessed and updated from R with the function `smat()` instead of modifying model code. By default, the `zero_re()` function will nullify both the omega and sigma matrices, but we can chose to set to zero only one of the two by naming it in the `zero_re()` function.
+
+```{r}
+smat(model_3)
+model_3b <- zero_re(model_3, "sigma")
+smat(model_3b)
+omat(model_3b)
+set.seed(1234) #for reproducibility
+sims_3b <- model_3b %>% 
+  ev(amt = 100) %>% 
+  mrgsim(start = 1, end = 24, delta = 1, nid = 7)
+plot_sims(sims_3b, CONC)
+```
+
+No more residual error, but IIV is still here because `zero_re()` only nullified the `$SIGMA` matrix thanks to "sigma" argument. The `$OMEGA` matrix is intact.
+
+#### Pass data
+
+The last point we wish to introduce about mrgsolve is how information (data) is passed to the solver. You can see that, until now, information about administration and observation were passed separately. The first was passed through an event function `ev()`, and the time grid of observations was set by using the `start`, `end`, and `delta` arguments of `mrgsim()`. This coding is super-powerful to perform simulation studies. However, it is not suitable in order to perform estimations, basically because the times of administration and observation can be erratic and must correspond to "real" times of administration and sampling. Thus, information should be passed as a NM-TRAN like dataset. This is typically the format used by NONMEM. Let's simulate one patient profile with `model_3` and information passed as a dataset.
+
+
+```{r}
+data_3 <- data.frame(ID = 1, time = c(0, 6, 12, 18, 24), cmt = 1, 
+                     evid = c(1, rep(0,4)), amt = c(100, rep(0,4)))
+print(data_3)
+
+ #Use either:
+sims_3c <- mrgsim(model_3, data = data_3)
+ 
+ #Or: 
+sims_3c <- model_3 %>% 
+  data_set(data_3) %>% 
+  mrgsim()
+print(sims_3c)
+```
+
+
+## 3) On what does mapbayr rely on ?
+#### MAP estimation
+
+So far, we've only simulated from a model we previously defined thanks to mrgsolve. Now, imagine we actually measured concentrations in a patient and stored information into an NM-TRAN dataset. 
+
+```{r}
+data_4 <- data.frame(ID = 1, time = c(0, 6.1, 12.05, 17.97, 23.1),  evid = c(1, rep(0,4)), 
+                     cmt = 1, amt = c(100, rep(0,4)), DV = c(NA, 5.4, 3.5, 2.6, 2.2))
+print(data_4)
+```
+
+We want to find *maximum a posteriori* Bayesian estimates (MAP-BE) of PK parameters from the model we previously defined (`model_3`) thanks to mapbayr. Remember that MAP-BE are the most likely values of "ETA" for a patient, given a set of observed concentrations and history of administrations, and an *a priori* distribution of parameters. In order to find MAP estimates with mapbayr, and exploit them subsequently, the model code must be slightly modified. Especially, **"ETA" must be added as fixed effects parameters in** `$PARAM`. See the following code: 
+
+
+```{r}
+code_4 <- "
+$PARAM @annotated
+TVCL :  0.9 : Clearance (L/h)
+TVV1 : 10.0 : Central volume (L)
+V2 : 10.0 : Peripheral volume of distribution (L)
+Q  :  1.0 : Intercompartmental clearance (L/h)
+
+ETA1 : 0 : Clearance
+ETA2 : 0 : Central volume
+
+$CMT @annotated
+CENT   : Central compartment 
+PERIPH : Peripheral compartment
+
+$OMEGA 0.3 0.3
+$SIGMA 0.05 0.1
+
+$MAIN
+double CL = TVCL * exp(ETA(1) + ETA1) ; 
+double V1 = TVV1 * exp(ETA(2) + ETA2) ; 
+double K12 = Q / V1  ;
+double K21 = Q / V2  ;
+double K10 = CL / V1 ;
+
+$ODE
+dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
+dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
+
+$TABLE
+double CONC = (CENT / V1) * (1 + EPS(1)) + EPS(2) ;
+
+$CAPTURE DV = CONC
+"
+
+model_4 <- mcode("model_4", code_4)
+```
+
+What changed? First, minor change, we captured a variable called `DV` instead if `CONC`. More importantly, parameters `ETA1` and `ETA2` were added in `$PARAM`, with a default value to zero. In `$MAIN`, `ETA1` and `ETA2` were added as duplicates of `ETA(1)` and `ETA(2)`, in order to influence `CL` and `V1`, respectively. What's the point of doing that? If we want to predict concentrations for a specific set of "ETA" values, we can just update `ETA1` and `ETA2` with `param()`, and set `ETA(1)` and `ETA(2)` to zero with `zero_re()`. See the example below
+
+
+```{r}
+model_4 %>% #ETA1 and ETA2 are equal to 0, ETA(1) and ETA(2) will be sampled from a distribution of variance 0.3
+  zero_re() %>%  #omega (and sigma) matrices are now full of zero, so ETA(1) = ETA(2) = 0
+  param(ETA1 = -0.123, ETA2 = 0.456) %>%  #set the values of ETA1 and ETA2 we want, so that CL = TVCL * exp(-0.123) etc...
+  data_set(data_4) %>% 
+  mrgsim() %>% 
+  as.data.frame()
+
+#What if we choose different values of ETA ? 
+
+model_4 %>% 
+  zero_re() %>% 
+  param(ETA1 = 0.789, ETA2 = 1.23) %>%
+  data_set(data_4) %>% 
+  mrgsim() %>% 
+  as.data.frame()
+
+```
+
+See how predicted concentrations (`DV`) vary depending on the values set to `ETA1` and `ETA2`. We could compare these predicted concentrations to observed ones, and see that some values of `ETA1` and `ETA2` return predictions closer to observations than some others, which would indicate that these values of `ETA1` and `ETA2` are more likely to correspond to the patient's parameters. This is exactly what mapbayr does internally when we use the `mapbayest()` function. An algorithm tests values of `ETA1` and `ETA2`, compares the predicted concentrations to the observed ones (i.e. it computes the objective function value), and iteratively choses another set of `ETA1` and `ETA2` to see if the goodness of fit is improved, etc...
+
+
+
+```{r, warning=FALSE, message=FALSE}
+library(mapbayr)
+est_4 <- mapbayest(model_4, data_4)
+print(est_4)
+plot(est_4)
+```
+
+Note that objective function value computation not only requires predicted and observed concentration, but also omega and sigma matrices. These are stored in the model.
+
+#### a posteriori simulation
+
+Now that we estimated the PK parameters of the patient, we want to perform simulations that correpond to our patient, with the objective to estimate a concentration at a specific time, or in order to test alternative dose regimen. The function `use_posterior()` in mapbayr is meant to do that. It accepts the results of the estimation, and returns a mrgsolve model object, with updated the values of ETA, and nullified random effects matrices. 
+
+```{r}
+model_4_updated <- use_posterior(est_4)
+omat(model_4_updated)
+smat(model_4_updated)
+model_4_updated$ETA1
+model_4_updated$ETA2
+```
+
+Thus, it is feasible to perform simulations with the "regular" mrgsolve framework. In the following example, we simulate administrations ranging from 100 to 500 mg.
+
+```{r}
+schedule <- expand.ev(amt = seq(100, 500, 100))
+print(schedule)
+model_4_updated %>% 
+  ev(schedule) %>% 
+  mrgsim(start = 0, end = 24, delta = 1) %>% 
+  plot_sims(DV)
+```
+
+

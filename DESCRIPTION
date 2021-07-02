@@ -27,4 +27,6 @@ Imports:
 URL: https://github.com/FelicienLL/mapbayr
 BugReports: https://github.com/FelicienLL/mapbayr/issues
 Suggests: 
+    rmarkdown,
     knitr
+VignetteBuilder: knitr
