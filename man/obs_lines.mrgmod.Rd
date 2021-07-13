@@ -4,7 +4,7 @@
 \alias{obs_lines.mrgmod}
 \title{Add observations lines to data}
 \usage{
-\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, DVmet = NULL, ...)
+\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
 }
 \arguments{
 \item{x}{model object}
@@ -13,7 +13,9 @@
 
 \item{DV}{vector of values to fit}
 
-\item{mdv}{should the DV be ignored (1) or not (0)}
+\item{mdv}{optional should the DV be ignored (1) or not (0)}
+
+\item{cmt}{an integer. Optional, cmt where observation is measured}
 
 \item{DVmet}{optional : metabolite data to fit}
 

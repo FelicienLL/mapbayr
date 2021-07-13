@@ -1,4 +1,18 @@
 test_that("multiplication works", {
+  code00 <- "
+$PROB Demo MAP BAY
+$PARAM TVKA = .5, TVCL = 2, TVV = 100
+$OMEGA 0.1 0.2 0.15
+$SIGMA .05 .1
+$CMT DEPOT CENTRAL
+$ERROR double DV = (CENTRAL / V) * (1 + EPS(1)) ;
+$PK
+double KA = TVKA * exp(ETA(1));
+double CL = TVCL * exp(ETA(2));
+double V  = TVV  * exp(ETA(3));
+$CAPTURE DV
+$PKMODEL ncmt = 1, depot = TRUE
+"
   code0 <- "
 $PROB Demo MAP BAY
 $PARAM TVKA = .5, TVCL = 2, TVV = 100, ETA1 = 0, ETA2 = 0, ETA3 = 0
@@ -13,25 +27,21 @@ double V  = TVV  * exp(ETA(3) + ETA3);
 $CAPTURE DV
 $PKMODEL ncmt = 1, depot = TRUE
 "
-  mod0 <- mcode("mod0", code0)
-  mod0 %>%
-    as.list()
-
-  as.list(mod0)$param
-
-  all(as.list(house())$pars == names(as.list(house())$param))
-  all(as.list(mod0)$pars == names(as.list(mod0)$param))
-
-
-  code2 <- "
+  code1 <- "
 $PROB Demo MAP BAY
-$PARAM TVKA = .5, TVCL = 2, TVV = 100, ETA1 = 0, ETA2 = 0, ETA3 = 0
-$PARAM @covariates
-BW = 90
+$PARAM @annotated
+TVKA : .5 : Typ value KA
+TVCL : 2 : Typ value CL
+TVV : 100 : Typ value V
+ETA1 : 0 : ind value KA
+ETA2 : 0 : ind value CL
+ETA3 : 0 : ind value V
+
 $OMEGA 0.1 0.2 0.15
 $SIGMA .05 .1
-$CMT DEPOT
-$INIT CENTRAL = 1000
+$CMT @annotated
+DEPOT : Depot [ADM]
+CENTRAL : Central [OBS]
 $ERROR double DV = (CENTRAL / V) * (1 + EPS(1)) ;
 $PK
 double KA = TVKA * exp(ETA(1) + ETA1);
@@ -40,12 +50,123 @@ double V  = TVV  * exp(ETA(3) + ETA3);
 $CAPTURE DV
 $PKMODEL ncmt = 1, depot = TRUE
 "
-  mod2 <- mcode("mod2", code2)
-  mod0 %>%
-    as.list()
+  code2 <- "
+$PROB Demo MAP BAY
+$PARAM @annotated
+TVKA : .5 : Typ value KA
+TVCL : 2 : Typ value CL
+TVV : 100 : Typ value V
+ETA1 : 0 : ind value KA
+ETA2 : 0 : ind value CL
+ETA3 : 0 : ind value V
 
+$OMEGA 0.1 0.2 0.15
+$SIGMA .05 .1
+$CMT @annotated
+DEPOT : Depot []
+CENTRAL : Central []
+$INIT @annotated
+PD: 123 : pharmacodynamics [OBS]
+$ERROR double DV = (CENTRAL / V) * (1 + EPS(1)) ;
+$PK
+double KA = TVKA * exp(ETA(1) + ETA1);
+double CL = TVCL * exp(ETA(2) + ETA2);
+double V  = TVV  * exp(ETA(3) + ETA3);
+$CAPTURE DV
+$ODE
+dxdt_DEPOT = - KA * DEPOT ;
+dxdt_CENTRAL = KA * DEPOT - (CL/V) * CENTRAL ;
+dxdt_PD = PD ;
+"
+  code3 <- "
+$PROB Demo MAP BAY
+$PARAM @annotated
+TVKA : .5 : Typ value KA
+TVCL : 2 : Typ value CL
+TVV : 100 : Typ value V
+ETA1 : 0 : ind value KA
+ETA3 : 0 : ind value V
+ETA2 : 0 : ind value CL
 
-  see(modlib('popex'))
+$OMEGA 0.1 0.2 0.15
+$SIGMA .05 .1
+$CMT @annotated
+DEPOT : Depot [ADM]
+CENTRAL : Central [OBS]
+$ERROR double DV = (CENTRAL / V) * (1 + EPS(1)) ;
+$PK
+double KA = TVKA * exp(ETA(1) + ETA1);
+double CL = TVCL * exp(ETA(2) + ETA2);
+double V  = TVV  * exp(ETA(3) + ETA3);
+$CAPTURE DV
+$PKMODEL ncmt = 1, depot = TRUE
+"
 
+  data0 <- data.frame(ID = 1, time = c(0,150), amt = c(100, 0), addl = c(24, 0), ii = c(7, 0), cmt = c(1, 2), DV = c(NA_real_, 1.6), evid = c(1,0), mdv = c(1,0))
 
+  mod00 <- mcode("mod00", code00)
+  mod0  <- mcode("mod0", code0)
+  mod1  <- mcode("mod1", code1)
+  mod2  <- mcode("mod2", code2)
+  mod3  <- mcode("mod3", code3)
+
+  #Model 00 : no ETA defined in $PARAM
+  #Model 0 : no annotation
+  #Model 1 : annotation with ADM and OBS
+  #Model 2 : annotation, but no ADM, just one OBS defined
+  #Model 3 : Order switched between ETAs
+
+  # ADM tag
+  expect_null(adm_cmt(mod00))
+  expect_null(adm_cmt(mod0))
+  expect_equal(adm_cmt(mod1), 1)
+  expect_null(adm_cmt(mod2))
+
+  # OBS tag
+  expect_null(obs_cmt(mod00))
+  expect_null(obs_cmt(mod0))
+  expect_equal(obs_cmt(mod1), 2)
+  expect_equal(obs_cmt(mod2), 3)
+
+  # names eta
+  expect_null(eta_names(mod00))
+  expect_equal(eta_names(mod0), c("ETA1", "ETA2", "ETA3"))
+  expect_equal(eta_names(mod1), c("ETA1", "ETA2", "ETA3"))
+  expect_equal(eta_names(mod2), c("ETA1", "ETA2", "ETA3"))
+  expect_equal(eta_names(mod3), c("ETA1", "ETA3", "ETA2"))
+
+  # description eta
+  expect_null(eta_descr(mod00))
+  expect_null(eta_descr(mod0))
+  expect_equal(eta_descr(mod1), c("ind value KA", "ind value CL", "ind value V"))
+  expect_equal(eta_descr(mod2), c("ind value KA", "ind value CL", "ind value V"))
+  expect_equal(eta_descr(mod3), c("ind value KA", "ind value V", "ind value CL"))
+
+  # model check ok ?
+  expect_s3_class(check_mapbayr_model(mod00), "data.frame")
+  expect_s3_class(check_mapbayr_model(mod0), "data.frame")
+  expect_true(check_mapbayr_model(mod1))
+  expect_s3_class(check_mapbayr_model(mod2), "data.frame")
+  expect_s3_class(check_mapbayr_model(mod3), "data.frame")
+
+  # model check ok ?
+  expect_error(mapbayest(mod00, data0, check = T, verbose = F))
+  expect_error(mapbayest(mod0, data0, check = T, verbose = F), NA)
+  expect_error(mapbayest(mod1, data0, check = T, verbose = F), NA)
+  expect_error(mapbayest(mod2, data0, check = T, verbose = F))
+  expect_error(mapbayest(mod2, data0, check = T, verbose = F))
+
+  #adm_lines
+  expect_error(adm_lines(mod00, amt = 100),"Define administration compartment .*")
+  expect_error(adm_lines(mod00, amt = 100, cmt = 1), NA)
+  expect_error(adm_lines(mod0, amt = 100), "Define administration compartment .*")
+  expect_error(adm_lines(mod0, amt = 100, cmt = 1), NA)
+  expect_error(adm_lines(mod1, amt = 100), NA)
+  expect_error(adm_lines(mod2, amt = 100), "Define administration compartment .*")
+  expect_error(adm_lines(mod2, amt = 100, cmt = 1), NA)
+
+  expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0), "Define observation compartment .*")
+  expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 2), NA)
+  expect_error(mapbayest(adm_lines(mod1, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 9), verbose = F), ".*One or more compartment with observation.*")
 })
+
