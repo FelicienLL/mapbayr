@@ -146,9 +146,9 @@ n_eta <- function(x){
 eta_descr <- function(x){
   dat <- as.list(x)$details$data
 
-  if(is.null(dat[["block"]])){ # Is it annotated ?
-    v <- NULL
-  } else { # If it is annotated, find where "OBS" is set
+  if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
+    v <- eta_names(x)
+  } else { # If it is annotated, take names
     datpar <- filter(dat, .data$block=="PARAM")
     v <- datpar$descr[datpar$name %in% eta_names(x)]
   }

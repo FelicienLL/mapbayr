@@ -137,7 +137,7 @@ $PKMODEL ncmt = 1, depot = TRUE
 
   # description eta
   expect_null(eta_descr(mod00))
-  expect_null(eta_descr(mod0))
+  expect_equal(eta_descr(mod0), c("ETA1", "ETA2", "ETA3"))
   expect_equal(eta_descr(mod1), c("ind value KA", "ind value CL", "ind value V"))
   expect_equal(eta_descr(mod2), c("ind value KA", "ind value CL", "ind value V"))
   expect_equal(eta_descr(mod3), c("ind value KA", "ind value V", "ind value CL"))
