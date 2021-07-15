@@ -10,7 +10,7 @@
 \usage{
 adm_lines(x, ...)
 
-obs_lines(x, time, DV, mdv = 0, DVmet = NULL, ...)
+obs_lines(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
 
 add_covariates(x, covariates, ...)
 
@@ -21,7 +21,7 @@ see_data(x, ...)
 
 \item{...}{passed to \code{mrgsolve::ev()} in \code{adm_lines()}}
 
-\item{time, DV, mdv, DVmet}{passed to \code{obs_lines()}}
+\item{time, DV, mdv, cmt, DVmet}{passed to \code{obs_lines()}}
 
 \item{covariates}{a list of named covariates, with a single value or same number of lines than data}
 }

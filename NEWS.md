@@ -1,6 +1,9 @@
 # mapbayr development version
 - Update README since first CRAN release
 - Add new reset conditions: with new initial values if same absolute value for every etas, with larger bound if estimation at bound. Additional refactoring about reset as well. see #75
+- Remove dependency to the `@annotated` tag in model code, especially for `$PARAM` and `$CMT` blocks. #73
+- As a consequence, `adm_lines()` and `obs_lines()` don't need the [ADM] and [OBS] tags in model code anymore (yet strongly recommended).
+
 
 # mapbayr 0.4.1
 - Fix bugs (dependency, backward compatibility, checks)
