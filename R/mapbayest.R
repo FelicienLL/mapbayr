@@ -33,6 +33,10 @@ mapbayest <- function(x,
                    reset = TRUE,
                    output = NULL
 ){
+
+  # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
+  t1 <- Sys.time()
+
   if(is.null(data)){
     data <- x@args$data
   }
@@ -51,11 +55,18 @@ mapbayest <- function(x,
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
-
   arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 
+  # End checks and pre-processing
+  t2 <- Sys.time()
+
+  # Start optimization
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
+  # End optimization
+  t3 <- Sys.time()
+
+  # Start post-processing (i.e. generating output files)
   post <- list(
     data = iddata,
     opt.value = opt.value
@@ -69,7 +80,9 @@ mapbayest <- function(x,
                             arg.ofv.id = arg.ofv.id,
                             opt.value = opt.value,
                             post = post,
-                            output = output)
+                            output = output,
+                            times = c(t1, t2, t3)
+                            )
 
   return(out)
 }

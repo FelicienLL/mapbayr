@@ -54,7 +54,7 @@ plot.mapbayests <- function(x, ...){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-    message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
+  #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
     x <- augment(x)
   }
 
