@@ -4,7 +4,14 @@
 \alias{preprocess.optim}
 \title{Pre-process: arguments for optimization function}
 \usage{
-preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
+preprocess.optim(
+  x,
+  method,
+  control,
+  force_initial_eta,
+  quantile_bound,
+  standard_error
+)
 }
 \arguments{
 \item{x}{the model object}
@@ -16,6 +23,8 @@ preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
 \item{quantile_bound}{a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1\%)}
+
+\item{standard_error}{a logical. If TRUE, will return standard errors around the estimate and the Fisher Information Matrix (FIM)}
 }
 \value{
 a list of named arguments passed to optimizer (i.e. arg.optim)

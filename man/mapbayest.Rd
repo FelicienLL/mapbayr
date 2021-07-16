@@ -9,6 +9,7 @@ mapbayest(
   x,
   data = NULL,
   method = "L-BFGS-B",
+  standard_error = FALSE,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -26,6 +27,8 @@ mbrest(...)
 \item{data}{NMTRAN-like data set}
 
 \item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
+
+\item{standard_error}{a logical. If TRUE, will return standard errors around the estimate and the Fisher Information Matrix (FIM)}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 

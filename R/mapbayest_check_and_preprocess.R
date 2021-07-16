@@ -129,7 +129,7 @@ split_mapbayr_data <- function(data){
 #' @inheritParams mapbayest
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
-preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){
+preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound, standard_error){
   #Checks argument
 
   #method
@@ -176,13 +176,18 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
      bound <- get_quantile(x, .p = quantile_bound)
   }
 
+  #hessian
+  hess <- FALSE
+  if(isTRUE(standard_error)) hess <- standard_error
+
   arg <- list(
     par = initial_eta,
     fn = compute_ofv,
     method = method,
     control = control,
     lower = bound,
-    upper = -bound
+    upper = -bound,
+    hessian = hess
   )
 
   return(arg)

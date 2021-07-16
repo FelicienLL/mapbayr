@@ -98,4 +98,14 @@ test_that("mapbayests object `slots` are correct", {
   expect_length(est3$arg.ofv.id, 2)
   expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
   expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
+
+  expect_null(est3$fisher_information_matrix)
+  expect_null(est3$standard_error)
+
+  #With Hessian and SE
+  est3b <- mapbayest(mod3, data3, verbose = F, standard_error = TRUE)
+  expect_named(est3b, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "fisher_information_matrix", "standard_error", "mapbay_tab"))
+  expect_true(is.matrix(est3b$fisher_information_matrix[[1]]))
+  expect_length(est3b$fisher_information_matrix, 2)
+  expect_length(est3b$standard_error, 2)
 })
