@@ -103,7 +103,7 @@ adm_0_cmt <- function(x){
 #'
 #' @return a logical
 #' @noRd
-log.transformation <- function(x){
+log_transformation <- function(x){
   x@code %>%
     str_subset("EPS") %>%
     str_detect("exp *\\(.*EPS") %>%

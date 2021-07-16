@@ -209,7 +209,7 @@ preprocess.ofv.fix <- function(x, data){
   list(
     mrgsolve_model = q_model,
     sigma = smat(x, make = T),
-    log.transformation = log.transformation(x),
+    log_transformation = log_transformation(x),
     omega.inv = solve(omat(x, make = T)),
     obs_cmt = fit_cmt(x, data) #on full data
   )
@@ -226,7 +226,7 @@ preprocess.ofv.id <- function(x, iddata){
   # --- Generate preprocess
 
   iDVobs <- iddata[iddata$mdv==0,]$DV #keep observations to fit only
-  if(log.transformation(x)) iDVobs <- log(iDVobs)
+  if(log_transformation(x)) iDVobs <- log(iDVobs)
 
   list(data = iddata,
        DVobs = iDVobs
