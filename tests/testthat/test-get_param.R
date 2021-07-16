@@ -60,39 +60,34 @@ test_that("get param output", {
 
 test_that("get_param obeys to keep_ argument", {
 
-  expect_equal(get_param(est1, "CL"), CL1)
-  expect_equal(get_param(est1, "CL", keep_ID = TRUE), c(1, CL1))
-  expect_equal(get_param(est1, "CL", keep_ID = FALSE), CL1)
-  expect_equal(get_param(est1, "CL", keep_names = TRUE), c(CL = CL1))
-  expect_equal(get_param(est1, "CL", keep_names = FALSE), CL1)
-  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = CL1))
-  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = FALSE), c(CL = CL1))
-  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = TRUE), c(1, CL1))
-  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = FALSE), CL1)
+  expect_equal(get_param(est1, "CL"), 0.78314152)
+  expect_equal(get_param(est1, "CL", keep_ID = TRUE), c(1, 0.78314152))
+  expect_equal(get_param(est1, "CL", keep_ID = FALSE), 0.78314152)
+  expect_equal(get_param(est1, "CL", keep_names = TRUE), c(CL = 0.78314152))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE), 0.78314152)
+  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = 0.78314152))
+  expect_equal(get_param(est1, "CL", keep_names = TRUE, keep_ID = FALSE), c(CL = 0.78314152))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = TRUE), c(1, 0.78314152))
+  expect_equal(get_param(est1, "CL", keep_names = FALSE, keep_ID = FALSE), 0.78314152)
 
-  expect_equal(get_param(est1, "CL", "TVCL"), c(CL = CL1, TVCL = 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_ID = TRUE), c(ID = 1, CL = CL1, TVCL = 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE), c(CL = CL1, TVCL = 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE), c(CL1, 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = CL1, TVCL = 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = FALSE), c(CL = CL1, TVCL = 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = TRUE), c(1, CL1, 1))
-  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = FALSE), c(CL1, 1))
+  expect_equal(get_param(est1, "CL", "TVCL"), c(CL = 0.78314152, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_ID = TRUE), c(ID = 1, CL = 0.78314152, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE), c(CL = 0.78314152, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE), c(0.78314152, 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = TRUE), c(ID = 1, CL = 0.78314152, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = TRUE, keep_ID = FALSE), c(CL = 0.78314152, TVCL = 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = TRUE), c(1, 0.78314152, 1))
+  expect_equal(get_param(est1, "CL", "TVCL", keep_names = FALSE, keep_ID = FALSE), c(0.78314152, 1))
 
-  expect_equal(get_param(est12, "CL"), tibble(ID = c(1,2), CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_ID = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_ID = FALSE), tibble(CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_names = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_names = FALSE), unname(tibble(c(1,2),c(CL1, CL2))))
-  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = TRUE), tibble(ID = c(1,2), CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = FALSE), tibble(CL = c(CL1, CL2)))
-  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = TRUE), unname(tibble(c(1,2),c(CL1, CL2))))
-  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = FALSE), unname(tibble(c(CL1, CL2))))
+  expect_equal(get_param(est12, "CL"), tibble(ID = c(1,2), CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_ID = TRUE), tibble(ID = c(1,2), CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_ID = FALSE), tibble(CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE), tibble(ID = c(1,2), CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE), unname(tibble(c(1,2),c(0.78314152, 0.99682399))))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = TRUE), tibble(ID = c(1,2), CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_names = TRUE, keep_ID = FALSE), tibble(CL = c(0.78314152, 0.99682399)))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = TRUE), unname(tibble(c(1,2),c(0.78314152, 0.99682399))))
+  expect_equal(get_param(est12, "CL", keep_names = FALSE, keep_ID = FALSE), unname(tibble(c(0.78314152, 0.99682399))))
 
 })
-
-
-
-
-
 
