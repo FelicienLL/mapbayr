@@ -165,7 +165,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   }
 
   #lower, upper
-  bound = Inf
+  bound = -Inf
   if(method == "L-BFGS-B"){
      bound <- get_quantile(x, .p = quantile_bound)
   }
