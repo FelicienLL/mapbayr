@@ -38,7 +38,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #' @param mrgsolve_model model object (updated for purpose)
 #' @param data NMTRAN-like data (of one individual)
 #' @param sigma matrix
-#' @param log.transformation logical. If `TRUE`, prediction will be log-transformed to compute ofv (useful for log-additive model)
+#' @param log_transformation logical. If `TRUE`, prediction will be log-transformed to compute ofv (useful for log-additive model)
 #' @param DVobs vector of observation to fit
 #' @param omega.inv inverse of omega matrix
 #' @param obs_cmt vector of compartments with observations to fit
@@ -48,7 +48,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
 #'
 #' @return a single numeric value (the objective function value)
 #' @export
-compute_ofv <- function(eta, mrgsolve_model, data, sigma, log.transformation, DVobs, omega.inv, obs_cmt){
+compute_ofv <- function(eta, mrgsolve_model, data, sigma, log_transformation, DVobs, omega.inv, obs_cmt){
   #Update ETA values
   mod <- param(mrgsolve_model, as.list(eta))
 
@@ -63,7 +63,7 @@ compute_ofv <- function(eta, mrgsolve_model, data, sigma, log.transformation, DV
 
   #Get DVpred
   DVpred <- output$DV
-  if(log.transformation){DVpred <- log(DVpred)}
+  if(log_transformation){DVpred <- log(DVpred)}
 
   #Compute H matrix
   H <- derivatives(v_DV = DVpred, v_cmt = output$cmt, cmts = obs_cmt)

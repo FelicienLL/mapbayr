@@ -9,7 +9,7 @@ compute_ofv(
   mrgsolve_model,
   data,
   sigma,
-  log.transformation,
+  log_transformation,
   DVobs,
   omega.inv,
   obs_cmt
@@ -24,7 +24,7 @@ compute_ofv(
 
 \item{sigma}{matrix}
 
-\item{log.transformation}{logical. If \code{TRUE}, prediction will be log-transformed to compute ofv (useful for log-additive model)}
+\item{log_transformation}{logical. If \code{TRUE}, prediction will be log-transformed to compute ofv (useful for log-additive model)}
 
 \item{DVobs}{vector of observation to fit}
 

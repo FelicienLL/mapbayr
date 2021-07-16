@@ -163,10 +163,11 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
     select(.data$ID, dplyr::any_of(ok_names)) %>%
     group_by(.data$ID) %>%
     dplyr::slice(1) %>%
-    dplyr::ungroup()
+    dplyr::ungroup() %>%
+    as.data.frame()
 
   if(!.keep_ID) par_tab <- select(par_tab, -.data$ID)
-  if(!.keep_names) names(par_tab) <- NULL
+  if(!.keep_names) par_tab <- unname(par_tab)
 
   par <- switch (.out,
                  "num" = unlist(par_tab),

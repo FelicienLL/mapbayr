@@ -223,3 +223,62 @@ $CAPTURE DV PAR MET CL
   expect_error(mapbayest(mod1, mutate(data1, V1 = 99), verbose = FALSE), "These variables cannot be set in both model and data: V1")
 
 })
+
+
+
+test_that("log apply on additive error",{
+  code1 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
+$OMEGA 0.3
+$SIGMA 0 0.01
+$CMT CENT
+$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
+$TABLE capture DV = CENT/V * exp(EPS(2)) ;
+$PKMODEL ncmt = 1, depot = FALSE
+"
+  code2 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
+$OMEGA 0.3
+$SIGMA 0.01 0
+$CMT CENT
+$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
+$TABLE capture DV = CENT/V * exp(EPS(2)) ;
+$PKMODEL ncmt = 1, depot = FALSE
+"
+  code3 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
+$OMEGA 0.3
+$SIGMA 0.01 0.01
+$CMT CENT
+$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
+$TABLE capture DV = CENT/V * exp(EPS(2)) ;
+$PKMODEL ncmt = 1, depot = FALSE
+"
+  code4 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
+$OMEGA 0.3
+$SIGMA 0 0
+$CMT CENT
+$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
+$TABLE capture DV = CENT/V * exp(EPS(2)) ;
+$PKMODEL ncmt = 1, depot = FALSE
+"
+  mod1 <- mcode("mod1", code1, compile = FALSE)
+  mod2 <- mcode("mod2", code2, compile = FALSE)
+  mod3 <- mcode("mod3", code3, compile = FALSE)
+  mod4 <- mcode("mod4", code4, compile = FALSE)
+
+  descr1 <- check_mapbayr_model(mod1)$descr
+  descr2 <- check_mapbayr_model(mod2)$descr
+  descr3 <- check_mapbayr_model(mod3)$descr
+  descr4 <- check_mapbayr_model(mod4)$descr
+
+  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr1)
+  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr1)
+
+  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr2)
+  expect_true("$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr2)
+
+  expect_true("$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr3)
+  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr3)
+
+  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr4)
+  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr4)
+
+})

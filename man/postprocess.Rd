@@ -15,7 +15,8 @@ postprocess.output(
   arg.ofv.id,
   opt.value,
   post,
-  output
+  output,
+  times
 )
 }
 \arguments{
@@ -27,7 +28,7 @@ postprocess.output(
 
 \item{arg.optim, arg.ofv.fix, arg.ofv.id}{argument passed to optimizer}
 
-\item{post}{output of the post.process function}
+\item{post, times}{output of the post.process function}
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 }

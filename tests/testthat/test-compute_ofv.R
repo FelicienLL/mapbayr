@@ -10,7 +10,7 @@ test_that("compute basic ofv", {
               mrgsolve_model = arg.ofv$mrgsolve_model,
               data = arg.ofv$data,
               sigma = arg.ofv$sigma,
-              log.transformation = arg.ofv$log.transformation,
+              log_transformation = arg.ofv$log_transformation,
               DVobs = arg.ofv$DVobs,
               omega.inv = arg.ofv$omega.inv,
               obs_cmt = arg.ofv$obs_cmt)
