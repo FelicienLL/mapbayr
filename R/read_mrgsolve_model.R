@@ -9,16 +9,18 @@
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' adm_cmt(model)
 adm_cmt <- function(x){
-  v <- as.list(x)$details$data %>%
-    filter(.data$block %in%c("CMT", "INIT")) %>%
-    select(all_of('options')) %>%
-    pull() %>%
-    tolower() %>%
-    str_which("adm") %>%
-    as.integer()
+  dat <- as.list(x)$details$data
 
-  if(length(v)== 0){
+  if(is.null(dat[["block"]])){ # Is it annotated ?
     v <- NULL
+  } else { # If it is annotated, find where "ADM" is set
+    datcmt <- dat[dat$block %in% c("CMT", "INIT"),]
+    admcmtname <- datcmt$name[str_detect(tolower(datcmt$options), "adm")]
+    v <- x@Icmt[x@cmtL %in% admcmtname]
+
+    if(length(v)== 0){ # If not found, return NULL
+      v <- NULL
+    }
   }
 
   return(v)
@@ -35,20 +37,21 @@ adm_cmt <- function(x){
 #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
 #' obs_cmt(model)
 obs_cmt <- function(x){
-  v <- as.list(x)$details$data %>%
-    filter(.data$block %in%c("CMT", "INIT")) %>%
-    select(all_of('options')) %>%
-    pull() %>%
-    tolower() %>%
-    str_which("obs") %>%
-    as.integer()
+  dat <- as.list(x)$details$data
 
-  if(length(v)== 0){
+  if(is.null(dat[["block"]])){ # Is it annotated ?
     v <- NULL
+  } else { # If it is annotated, find where "OBS" is set
+    datcmt <- dat[dat$block %in% c("CMT", "INIT"),]
+    obscmtname <- datcmt$name[str_detect(tolower(datcmt$options), "obs")]
+    v <- x@Icmt[x@cmtL %in% obscmtname]
+
+    if(length(v)== 0){ # If not found, return NULL
+      v <- NULL
+    }
   }
 
   return(v)
-
 }
 
 obs_cmt_data <- function(data){
@@ -116,8 +119,12 @@ log.transformation <- function(x){
 #' @return a vector of character
 #' @noRd
 eta_names <- function(x){
-  ((as.list(x))$details$data %>%
-     filter(.data$block=="PARAM", str_detect(.data$name, "^ETA\\d+$")))$name
+  parnames <- names(param(x))
+  v <- parnames[grepl("^ETA\\d+$", parnames)]
+  if(length(v)== 0){
+    v <- NULL
+  }
+  return(v)
 }
 
 #' Number of ETA to estimate
@@ -137,8 +144,17 @@ n_eta <- function(x){
 #' @return a vector of character
 #' @noRd
 eta_descr <- function(x){
-  ((as.list(x))$details$data %>%
-     filter(.data$block=="PARAM", str_detect(.data$name, "^ETA\\d+$")))$descr
+  dat <- as.list(x)$details$data
+
+  if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
+    v <- eta_names(x)
+  } else { # If it is annotated, take names
+    datpar <- filter(dat, .data$block=="PARAM")
+    v <- datpar$descr[datpar$name %in% eta_names(x)]
+  }
+
+  return(v)
+
 }
 
 
