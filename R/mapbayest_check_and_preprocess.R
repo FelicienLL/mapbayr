@@ -44,6 +44,12 @@ check_mapbayr_model <- function(x){
       if(ncmt != nsig/2) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."))
     }
 
+    if(log_transformation(x)){
+      dsig <- diag(smat(x, make = T))
+      if(any(which(dsig==0)%%2 == 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0."))
+      if(any(which(dsig!=0)%%2 != 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0."))
+    }
+
     # $CAPTURE
     if(!"DV" %in% x@capL) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE: DV must be captured."))
     if(any(!(c("PAR", "MET") %in% x@capL)) & nsig > 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE PAR and MET must be captured if multiple types of DV are fitted (more than one pair of sigma provided in $SIGMA)"))
