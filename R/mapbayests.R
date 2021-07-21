@@ -72,7 +72,8 @@ plot.mapbayests <- function(x, ...){
     ggplot(aes(.data$time, .data$value)) +
     geom_line(aes(col = .data$PREDICTION, linetype = .data$PREDICTION)) +
     theme_custom()+
-    scale_color_manual(values= c(PRED = "deepskyblue1", IPRED = "black"))
+    scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
+    scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
 
   observations <- x$mapbay_tab %>%
     filter(.data$evid==0) %>%
