@@ -54,7 +54,7 @@ plot.mapbayests <- function(x, ...){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-    message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
+  #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
     x <- augment(x)
   }
 
@@ -72,7 +72,8 @@ plot.mapbayests <- function(x, ...){
     ggplot(aes(.data$time, .data$value)) +
     geom_line(aes(col = .data$PREDICTION, linetype = .data$PREDICTION)) +
     theme_custom()+
-    scale_color_manual(values= c(PRED = "deepskyblue1", IPRED = "black"))
+    scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
+    scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
 
   observations <- x$mapbay_tab %>%
     filter(.data$evid==0) %>%

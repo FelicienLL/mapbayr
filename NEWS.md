@@ -1,3 +1,21 @@
+# mapbayr 0.5
+* Important
+
+- Add new reset conditions: with new initial values if same absolute value for every etas, with larger bounds if estimation at bound. Additional refactoring about reset as well. see #75
+- Add an "information" slot to the output, with time records and package version #69
+- Remove dependency to the `@annotated` tag in model code, especially for `$PARAM` and `$CMT` blocks. #73
+- As a consequence, `adm_lines()` and `obs_lines()` don't need the [ADM] and [OBS] tags in model code anymore (yet strongly recommended, otherwise it errors cleanly).
+
+* Others
+- Update README since first CRAN release
+- Check where sigma is equal to zero if error is exponential #45
+- Use log_transformation() instead of log.transformation() #24
+- Use unnamed data.frame instead of tibble in get_param() #77
+- Remove the message when a mapbayests object was passed to plot() without augment() before. #80
+- Don't stop if no observation in data (no fix, just a test actually) #23
+- Fix minor `testthat` bugs due to upgrade of R and French translation of warnings.
+- Fix bug in `plot()` legend, due to new version of `ggplot2` 3.3.4 #82
+
 # mapbayr 0.4.1
 - Fix bugs (dependency, backward compatibility, checks)
 - Remove random initial value for method "NEWUOA". Default to 0.1 for each parameter.

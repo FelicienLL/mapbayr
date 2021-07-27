@@ -7,7 +7,7 @@
 #' @name data_helpers
 #' @param x model object
 #' @param ... passed to `mrgsolve::ev()` in `adm_lines()`
-#' @param time,DV,mdv,DVmet passed to `obs_lines()`
+#' @param time,DV,mdv,cmt,DVmet passed to `obs_lines()`
 #' @param covariates a list of named covariates, with a single value or same number of lines than data
 #' @return a `mrgmod` object, with a dataset in the `@args$data` slot.
 #'
@@ -64,6 +64,9 @@ adm_lines.mrgmod <- function(x, ...){
   #CMT
   #If cmt not explicitly provided in ..., set it to adm_cmt from model cod
   if(is.null((list(...)[["cmt"]]))){
+    if(is.null(adm_cmt(x))){ #No [ADM] set in the model
+      stop("Define administration compartment (with adm_lines(cmt = ...)) or in model code with the [ADM] tag in $CMT")
+    }
     d <- d %>%
       select(-.data$cmt) %>% #if not supplied in ..., cmt is set by ev() with cmt = 1
       expand_grid(cmt = adm_cmt(x))
@@ -96,21 +99,22 @@ adm_lines.mrgmod <- function(x, ...){
 
 #' @rdname data_helpers
 #' @export
-obs_lines <- function(x, time, DV, mdv = 0, DVmet = NULL, ...) UseMethod("obs_lines")
+obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMethod("obs_lines")
 
 #' Add observations lines to data
 #'
 #' @param x model object
 #' @param time vector of time
 #' @param DV vector of values to fit
-#' @param mdv should the DV be ignored (1) or not (0)
+#' @param mdv optional should the DV be ignored (1) or not (0)
 #' @param DVmet optional : metabolite data to fit
+#' @param cmt an integer. Optional, cmt where observation is measured
 #' @param ... not used
 #' @method obs_lines mrgmod
 #'
 #' @return model object with dataset
 #' @export
-obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL, ...){
+obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...){
 
   if(is.null(x@args$data)){
     d0 <- tibble()
@@ -129,14 +133,22 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, DVmet = NULL, ...){
     DV   = DV,
     mdv = mdv)
 
+  # What cmt ?
+  .cmt <- cmt
+  if(is.null(.cmt)) .cmt <- (obs_cmt(x))
+  if(is.null(.cmt))
+    stop("Define observation compartment (with obs_lines(cmt = ...)) or in model code with the [OBS] tag in $CMT")
+
   if(!is.null(DVmet)){
+    if(length(.cmt)!=2)
+      stop("Define 2 observation compartments with the [OBS] tags in model code")
     d <- d %>%
       mutate(DVmet = DVmet)
   }
 
   d <- d %>%
     pivot_longer(starts_with("DV"), values_to = "DV") %>%
-    mutate(cmt = ifelse(.data$name == "DV", (obs_cmt(x))[1], (obs_cmt(x))[2])) %>%
+    mutate(cmt = ifelse(.data$name == "DV", as.integer(.cmt[1]), as.integer(.cmt[2]))) %>%
     filter(!is.na(.data$cmt)) %>%
     select(-any_of("name")) %>%
     mutate(ID = iID, evid = 0, amt = 0)

@@ -37,7 +37,7 @@ mbrest(...)
 
 \item{verbose}{print the steps of the estimations to the console (a logical, default is \code{TRUE})}
 
-\item{reset}{reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is \code{TRUE})}
+\item{reset}{reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is \code{TRUE})}
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 

@@ -5,7 +5,7 @@
 #' @inheritParams mapbayest
 #' @param opt.value value returned by optimizer
 #' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
-#' @param post output of the post.process function
+#' @param post,times output of the post.process function
 #' @description Functions to generate postprocess after optimization.
 NULL
 #> NULL
@@ -20,13 +20,6 @@ postprocess.optim <- function(x, data, opt.value){
   final_eta <- opt.value[eta_names(x)] %>%
     as.double() %>%
     set_names(eta_names(x))
-
-  if(!is.null(opt.value$fevals)){
-    if(is.nan(opt.value$fevals)) {
-      final_eta <- rep(0, n_eta(x)) %>% set_names(eta_names(x))
-      warning("Cannot compute objective function value ; typical value (ETA = 0) returned")
-    }
-  }
 
   reserved_capt <- c("DV", "PAR", "MET")
   reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
@@ -67,7 +60,7 @@ postprocess.optim <- function(x, data, opt.value){
 #' Post-process: Build the output (mapbayests model object)
 #' @rdname postprocess
 #' @export
-postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value, post, output){
+postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value, post, output, times){
 
   if(!is.null(output)){
     if(output == "df") out <- map_dfr(post, "mapbay_tab")
@@ -81,7 +74,8 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
       arg.ofv.id = arg.ofv.id,
       opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
       final_eta = map(post, "final_eta"),
-      mapbay_tab = map_dfr(post, "mapbay_tab")
+      mapbay_tab = map_dfr(post, "mapbay_tab"),
+      information = generate_information(times)
     )
 
     class(out) <- "mapbayests"
@@ -89,4 +83,23 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
   }
   return(out)
 
+}
+
+generate_information <- function(times){
+  times[4] <- Sys.time()
+  list(
+    start = times[1],
+    end = times[4],
+    duration = as.double.difftime(times[4]-times[1], units = "secs"),
+    details = c(
+      preprocessing = as.double.difftime(times[2]-times[1], units = "secs"),
+      optimization = as.double.difftime(times[3]-times[2], units = "secs"),
+      postprocessing = as.double.difftime(times[4]-times[3], units = "secs")
+    ),
+    version = c(
+      mapbayr = as.character(utils::packageVersion("mapbayr")),
+      mrgsolve = as.character(utils::packageVersion("mrgsolve")),
+      optimx = as.character(utils::packageVersion("optimx"))
+    )
+  )
 }

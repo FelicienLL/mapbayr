@@ -12,7 +12,7 @@
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print the steps of the estimations to the console (a logical, default is `TRUE`)
-#' @param reset reset to different initial eta values if L-BFGS-B converges at initial values (a logical, default is `TRUE`)
+#' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
 #'
@@ -31,6 +31,10 @@ mapbayest <- function(x,
                    reset = TRUE,
                    output = NULL
 ){
+
+  # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
+  t1 <- Sys.time()
+
   if(is.null(data)){
     data <- x@args$data
   }
@@ -49,11 +53,18 @@ mapbayest <- function(x,
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
-
   arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 
+  # End checks and pre-processing
+  t2 <- Sys.time()
+
+  # Start optimization
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
+  # End optimization
+  t3 <- Sys.time()
+
+  # Start post-processing (i.e. generating output files)
   post <- list(
     data = iddata,
     opt.value = opt.value
@@ -67,7 +78,9 @@ mapbayest <- function(x,
                             arg.ofv.id = arg.ofv.id,
                             opt.value = opt.value,
                             post = post,
-                            output = output)
+                            output = output,
+                            times = c(t1, t2, t3)
+                            )
 
   return(out)
 }

@@ -31,20 +31,20 @@ test_that("order of IDs is preserved", {
   mod <- mread('ex_mbr1', mbrlib())
   data1 <- mod %>%
     adm_lines(amt = 10, addl = 2, ii = 12) %>%
-    obs_lines(DV = c(.1, .2), time = c(18, 40)) %>%
+    obs_lines(DV = c(0.08, .1), time = c(18, 40)) %>%
     add_covariates(list(WT = 70)) %>%
     get_data()
 
   data30 <- mod %>%
-    adm_lines(amt = 10, addl = 2, ii = 12) %>%
-    obs_lines(DV = c(.5, .6), time = c(19, 41)) %>%
+    adm_lines(amt = 100, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.8, 1), time = c(19, 41)) %>%
     add_covariates(list(WT = 90)) %>%
     get_data() %>%
     mutate(ID = 30)
 
   data2 <- mod %>%
-    adm_lines(amt = 10, addl = 2, ii = 12) %>%
-    obs_lines(DV = c(1, 2), time = c(15, 36)) %>%
+    adm_lines(amt = 100, addl = 2, ii = 12) %>%
+    obs_lines(DV = c(.9, 1.1), time = c(15, 36)) %>%
     add_covariates(list(WT = 50)) %>%
     get_data() %>%
     mutate(ID = 2)
