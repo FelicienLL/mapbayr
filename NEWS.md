@@ -13,8 +13,8 @@
 - Use unnamed data.frame instead of tibble in get_param() #77
 - Remove the message when a mapbayests object was passed to plot() without augment() before. #80
 - Don't stop if no observation in data (no fix, just a test actually) #23
-- Fix minor "testthat" bugs due to upgrade of R and French translation of warnings.
-- Fix bug in `plot()` legend, due to new version of ggplot2 3.3.4 #82
+- Fix minor `testthat` bugs due to upgrade of R and French translation of warnings.
+- Fix bug in `plot()` legend, due to new version of `ggplot2` 3.3.4 #82
 
 # mapbayr 0.4.1
 - Fix bugs (dependency, backward compatibility, checks)

@@ -1,6 +1,6 @@
 Package: mapbayr
 Title: MAP-Bayesian Estimation of PK Parameters
-Version: 0.5
+Version: 0.5.0
 Authors@R: 
     person(given = "Felicien",
            family = "Le Louedec",
