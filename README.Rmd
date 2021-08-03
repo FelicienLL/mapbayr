@@ -20,12 +20,13 @@ library(knitr)
 
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version-last-release/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
+[![](https://img.shields.io/badge/Citation-CPT:PSP-blue.svg)](https://doi.org/10.1002/psp4.12689)
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori* bayesian estimation of PK parameters in R. Thanks to a single function, `mapbayest()`, you can estimate individual PK parameters from: 
 
-* a population PK model coded in *mrgsolve*,
-* a data set of concentrations to fit (NM-TRAN format).
+* a population PK model (coded in [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve)),
+* a data set with concentrations (NM-TRAN format).
 
 It was designed to be easily wrapped in [shiny apps](https://github.com/FelicienLL/mapbayr-shiny) in order to ease model-based Therapeutic Drug Monitoring, also referred to as Model-Informed Prediction Dosing (MIPD).
 
@@ -91,7 +92,6 @@ dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
 
 $CAPTURE DV CL
 "
-
 
 my_model <- mcode("Example_model", code)
 ```
@@ -159,17 +159,18 @@ mapbayr is under development. Your feedback for additional feature requests or b
 mapbayr is a generalization of the "MAP Bayes estimation" tutorial available on the [mrgsolve blog](https://mrgsolve.github.io/blog/map_bayes.html). Additional features are: 
 
 * a unique function to perform the estimation: `mapbayest()`.
-* handles multiple error models such as additive, proportional, mixed or exponential error (without prior log-transformation of data).
+* accepts a large variety of structural models thanks to the flexibility of mrgsolve
+* flexibility with random effects on parameters, accepting both inter-individual and inter-occasion variability.
+* additive, proportional, mixed or exponential (without prior log-transformation of data) residual error models.
+* estimate from both parent drug and metabolite simultaneously.
 * fit multiple patients stored in a single dataset. 
-* fit both parent drug and metabolite simultaneously.
-* accepts any kind of models thanks to the flexibility of mrgsolve. 
 * functions to easily pass administration and observation information, as well as plot methods to visualize predictions and parameter distribution.
 * a single output object to ease post-processing, depending on the purpose of the estimation.
 * several optimization algorithm available, such as "L-BFGS-B" (the default) or "newuoa".
 
 ## Performance
 
-Performance, in terms of quality of parameter predictions, was validated against NONMEM for a wide variety of models and data. However predictions might differ depending on the complexity of the user's data or model, or as function of the number of parameter to estimate. The user is invited to investigate if discrepancies come from the prediction of the concentrations (i.e. mrgsolve) or from the optimization process *per se* (i.e. mapbayr). Feel free to contact us through the [issue tracker](https://github.com/FelicienLL/mapbayr/issues).
+Reliability of parameter estimation against NONMEM was assessed for a wide variety of models and data. The results of this validation study were published in [CPT:PSP](https://doi.org/10.1002/psp4.12689), and materials are available in [a dedicated repository](https://github.com/FelicienLL/mapbayr-CPTPSP-2021). If you observe some discrepancies between mapbayr and NONMEM on your own model and data, feel free to contact us through the [issue tracker](https://github.com/FelicienLL/mapbayr/issues).
 
 ## *mrgsolve* model specification
 
@@ -178,7 +179,7 @@ mapbayr contains a library of example model files (.cpp), accessible with `mbrli
 my_model <- mread("ex_mbr1.cpp", mbrlib())
 ```
 
-The user is invited to perform MAP-Bayesian estimation with his/her own mrgsolve models. These model files should be slightly modified in order to be "read" by mapbayr with the subsequent specifications: 
+You are invited to perform MAP-Bayesian estimation with your own models. These model files should be slightly modified in order to be "read" by mapbayr with the subsequent specifications: 
 
 ### 1.  `$PARAM` block
 #### 1.1 ETA specifications
@@ -214,9 +215,9 @@ SEX : 0 : Sex (0=Male, 1=Female)
 
 ### 2.  `$CMT` block
 * Strongly recommended...  
-... yet **mandatory** if you use `obs_lines()` and `adm_lines()` to build your dataset, or if you have multiple types of DV, i.e. parent drug + metabolite: 
+... yet **mandatory** if you have multiple types of DV, i.e. parent drug + metabolite: 
   + A `@annotated` tag must be used to record compartments.
-  + Write OBS in brackets to define the observation compartment(s). Also used by `obs_lines()` to build your dataset. 
+  + Write OBS in brackets to define the observation compartment(s). Also used by `obs_lines()` to fill the 'cmt' column in your dataset. 
   + Write ADM in brackets to define "default" administration compartment(s). This information is not used for optimization process and the `mapbayest()` function. The information is mandatory if you use `adm_lines()` to build your dataset in order to automatically set the value of the 'cmt' column. Especially useful if you use a model with an absorption from several depot compartment requiring to duplicate administrations lines in the data set. 
 
 ```{c, eval = F}
@@ -261,7 +262,7 @@ $SIGMA 0 0.222 // (log) additive error
 $SIGMA 0.333 0.444 // mixed error
 ```
 
-2. You have multiple DV to fit (parent and metabolite), and/or you used the [OBS] assignment in `$CMT`.  
+2. You have multiple types of DV (parent and metabolite), and/or you used the [OBS] assignment in `$CMT`.  
 
 Write as many **pairs of sigma values** as there are compartments assigned with [OBS] in `$CMT`. The order of the pair must respect the order in which compartments were assigned. To put it more clearly, the sigma matrix will be interpreted as such whatever the model : 
 
@@ -287,7 +288,7 @@ $SIGMA @block
 
 * Mandatory: 
   + Refer the concentration variable to fit as `DV`. Mind the code, especially if concentrations are observed in multiple compartments. 
-  + Express log-additive error models as exponential. This way, concentrations will automatically log-transformed during the optimization process, with no necessity to prior log-transform your concentration. 
+  + Express log-additive error models as exponential. This way, concentrations will automatically be log-transformed during the optimization process, with no necessity to prior log-transform your concentration. 
 ```{c, eval = F}
 $TABLE
 double DV  = (CENTRAL / VC) * exp(EPS(2)) ;
@@ -328,7 +329,7 @@ double CL = TVCL * exp(ETA1 + ETA(1))
   + Do not capture covariates and ETAn (they will be returned by `mapbayest()` anyway)
 
 ```{c, eval = F}
-$CAPTURE DV PAR MET
+$CAPTURE DV PAR MET CL
 ```
 
 

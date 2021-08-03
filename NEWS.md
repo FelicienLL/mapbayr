@@ -1,4 +1,7 @@
-# mapbayr 0.5
+# mapbayr development version
+- Update README since article publication
+
+# mapbayr 0.5.0
 * Important
 
 - Add new reset conditions: with new initial values if same absolute value for every etas, with larger bounds if estimation at bound. Additional refactoring about reset as well. see #75
