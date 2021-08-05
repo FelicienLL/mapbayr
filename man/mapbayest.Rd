@@ -44,8 +44,50 @@ mbrest(...)
 \item{...}{passed to mapbayest}
 }
 \value{
-a mapbayests model object
+a mapbayests object. Basically a list containing:
+\itemize{
+\item model: the model object
+\item data: the analyzed dataset (might slightly differ from the one you passed, with an \code{mdv} column and some lower-case names).
+\item arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage.
+\item opt.value: the original output of the optimization function
+\item final_eta: a list of individual vectors of final estimates. Access it with \code{x$final_eta} or \code{get_eta(x)}.
+\item mapbay_tab: an output table containing the results of your estimations (data, IPRED, PRED, covariates, captured items, ETA etc...). Access it with \code{x$mapbay_tab}, \code{as.data.frame(x)} or \code{as_tibble(x)}.
+\item information: run times and package versions.
+}
 }
 \description{
 The main function of the mapbayr package. Performs a \emph{maximum a posteriori} Bayesian estimation of parameters, from a mrgsolve model object and a dataset containing information about administrations and observed concentrations.
+}
+\examples{
+# First, code a model
+code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
+KA = 0.5, TVCL = 1.1, TVV = 23.3
+$OMEGA 0.41 0.32
+$SIGMA 0.04 0
+$CMT DEPOT CENT
+$PK
+double CL=TVCL*exp(ETA1+ETA(1));
+double V=TVV*exp(ETA2+ETA(2)) ;
+$ERROR
+double DV=CENT/V*(1+EPS(1))+EPS(2);
+$PKMODEL ncmt = 1, depot = TRUE
+$CAPTURE DV CL
+"
+
+my_model <- mrgsolve::mcode("my_model", code1)
+# Then, import your data
+my_data <- data.frame(ID = 1, TIME = c(0, 1.1, 5.2, 12.3), EVID = c(1,0,0,0), AMT = c(500, 0,0,0),
+ CMT = c(1,2,2,2), DV = c(0, 15.1, 29.5, 22.3))
+print(my_data)
+
+# And estimate
+my_est <- mapbayest(x = my_model, data = my_data)
+print(my_est)
+# see also plot(my_est) and hist(my_est)
+
+# Use your estimation
+get_eta(my_est)
+get_param(my_est)
+as.data.frame(my_est)
+
 }

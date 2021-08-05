@@ -1,5 +1,6 @@
 # mapbayr development version
 - Update README since article publication
+- Update documentation
 
 # mapbayr 0.5.0
 * Important
