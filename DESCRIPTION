@@ -22,7 +22,6 @@ Imports:
     optimx,
     purrr,
     rlang,
-    stats,
     stringr,
     tibble,
     tidyr

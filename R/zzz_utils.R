@@ -7,7 +7,6 @@
 #' @importFrom optimx optimx
 #' @importFrom purrr map map2 map_dbl map2_dbl map_dfr pmap pmap_dfr quietly simplify transpose
 #' @importFrom rlang .data set_names
-#' @importFrom stats runif dnorm pnorm qnorm
 #' @importFrom stringr str_subset str_detect str_which str_replace
 #' @importFrom tibble tibble rownames_to_column
 #' @importFrom tidyr expand_grid fill pivot_longer
@@ -36,7 +35,7 @@ odiag <- function(x){
 #' @noRd
 get_quantile <- function(x, .p){
   if(!is.mrgmod(x)) stop("the first argument to lowbounds must be a model object", call. = F)
-  map_dbl(sqrt(odiag(x)), qnorm, p = .p, mean = 0)
+  map_dbl(sqrt(odiag(x)), stats::qnorm, p = .p, mean = 0)
 }
 
 #' Internal "mapbayr" model examples

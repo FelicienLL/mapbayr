@@ -146,7 +146,7 @@ hist.mapbayests <- function(x, ...){
     pmap_dfr(function(.name, .om){
       data.frame(name = .name,
                  x = xvalues,
-                 value = dnorm(xvalues, mean = 0, sd = sqrt(.om)))
+                 value = stats::dnorm(xvalues, mean = 0, sd = sqrt(.om)))
     })
 
   # --- Labels
@@ -154,7 +154,7 @@ hist.mapbayests <- function(x, ...){
                      "\nIIV = ", my_percent(sqrt(arg_tab$om)))
   # --- one ID
   if(length(x$final_eta) == 1){
-    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), pnorm, mean = 0)
+    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), stats::pnorm, mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
   }

@@ -1,4 +1,5 @@
 # mapbayr development version
+- Remove stats from dependancies.
 - Add Kyle Baron as ctb
 - Refactor `augment()`. Automatically chose the time grid for simulations, and use recsort=3 to deal with steady-state administrations. See #85
 - Update README since article publication

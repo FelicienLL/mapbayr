@@ -131,10 +131,10 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 
 new_bounds <- function(arg.ofv, arg.optim){
   vec_SE <- sqrt(diag(solve(arg.ofv$omega.inv)))
-  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = pnorm, mean = 0)
+  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
-  map_dbl(vec_SE, qnorm, p = new_P, mean = 0)
+  map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
 
