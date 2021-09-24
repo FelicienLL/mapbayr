@@ -238,7 +238,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%
@@ -254,7 +254,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%

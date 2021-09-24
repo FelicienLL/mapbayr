@@ -65,5 +65,10 @@ test_that("delta argument works", {
   expect_lt(nrow(a3$aug_tab), 4000) #auto delta = 100
 })
 
-
-
+test_that("first prediction is not null if SS=0", {
+  est1 <- mod %>%
+    adm_lines(amt = 10, ss = 1, ii = 24) %>%
+    obs_lines(time = 12, DV = 1.1) %>%
+    mapbayest(verbose = F)
+  expect_true(all(filter(augment(est1)$aug_tab, time == 0)$value != 0))
+})
