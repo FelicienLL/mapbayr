@@ -1,5 +1,6 @@
 # mapbayr development version
-- Remove stats from dependancies.
+- Detect non-numeric column(s). Stop and inform the user if any. See #86 #88 (thanks @jkamp91)
+- Remove stats from dependencies.
 - Add Kyle Baron as ctb
 - Refactor `augment()`. Automatically chose the time grid for simulations, and use recsort=3 to deal with steady-state administrations. See #85
 - Update README since article publication

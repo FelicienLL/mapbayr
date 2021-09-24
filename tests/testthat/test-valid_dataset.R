@@ -3,15 +3,14 @@ data1 <- mod1 %>%
   adm_lines(time = 0, amt = 100) %>%
   obs_lines(time = 20, DV = 1.5) %>%
   get_data()
-data1
-test_that("Dataset check is correct", {
-  expect_error(mapbayest(mod1, data = select(data1, -ID)), "ID column is missing")
-  expect_error(mapbayest(mod1, data = select(data1, -time)), "time column is missing")
-  expect_error(mapbayest(mod1, data = select(data1, -evid)), "evid column is missing")
-  expect_error(mapbayest(mod1, data = select(data1, -cmt)), "cmt column is missing")
-  expect_error(mapbayest(mod1, data = select(data1, -amt)), "amt column is missing")
 
+test_that("NM-TRAN items are specified", {
+  expect_error(mapbayest(mod1, data = select(data1, -ID, -time)), "Missing column: ID time")
+  expect_error(mapbayest(mod1, data = select(data1, -time, -evid, -cmt, -amt)), "Missing column: time evid cmt amt")
+})
 
+test_that("stops if non-numeric columns", {
+  expect_error(mapbayest(mod1, data = mutate(data1, hello = "world", foo = "bar")), "Non-numeric column found: hello foo")
 })
 
 test_that("auto-supply of MDV if missing", {
@@ -37,3 +36,5 @@ test_that("misspecification of evid/mdv are checked", {
 
   expect_error(mapbayest(mod1, data3))
 })
+
+
