@@ -2,11 +2,13 @@ Package: mapbayr
 Title: MAP-Bayesian Estimation of PK Parameters
 Version: 0.5.0.9002
 Authors@R: 
-    person(given = "Felicien",
-           family = "Le Louedec",
-           role = c("aut", "cre"),
-           email = "lelouedec.felicien@iuct-oncopole.fr",
-           comment = c(ORCID = "0000-0003-3699-2729"))
+    c(person(given = "Felicien", family = "Le Louedec", 
+             role = c("aut", "cre"), 
+             email = "lelouedec.felicien@iuct-oncopole.fr",
+             comment = c(ORCID = "0000-0003-3699-2729")),
+      person(given = "Kyle T", family = "Baron", 
+             role = "ctb", 
+             comment = c(ORCID = "0000-0001-7252-5656")))
 Description: Performs maximum a posteriori Bayesian estimation of individual pharmacokinetic parameters from a model defined in `mrgsolve`, typically for model-based therapeutic drug monitoring. Internally computes an objective function value from model and data, performs optimization and returns predictions in a convenient format.
 License: GPL-3
 Encoding: UTF-8
