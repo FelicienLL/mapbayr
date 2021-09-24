@@ -54,7 +54,7 @@ plot.mapbayests <- function(x, ...){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-  #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
+    #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
     x <- augment(x)
   }
 
@@ -181,49 +181,76 @@ hist.mapbayests <- function(x, ...){
 #' @param x object to augment
 #' @param ... additional arguments
 #' @export
-#' @return an augmented object (depending on the object passed)
+#' @return an augmented object (depending on the object passed).
 augment <- function (x, ...)UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'
 #' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
-#' @param end end of infusion time (passed to mrgsim)
-#' @param ... additional argument to pass to mrgsim
+#' @param start,end,delta start, end and delta of simulation time passed to `mrgsim()` (see details)
+#' @param ... additional arguments passed to `mrgsim()`
 #'
 #' @method augment mapbayests
-#' @return a `mapbayests` object, augmented of an `aug_tab`
+#' @return a `mapbayests` object, augmented of an `aug_tab` data.frame.
+#' @details
+#' This function is called in the background by `plot()` in order to simulate the full PK profile, and return a `mapbayests` object with an additional `aug_tab` data.frame inside. The latter is used with by the plot method.
+#' The time grid, for each PK profile (i.e. patient) is defaulted with the minimum time in the dataset for `start` and the maximum time in the dataset +20% for `end`. `delta` is a power of 10 (e.g. 0.1, 1, 10 etc...), automatically chosen to render visually appealing graphs with a reasonable computing time (about 200 time points).
+#' Additional arguments can be passed to `mrgsim()` through `...`. Note that `recsort` is set to 3 (see mrgsolve documentation for more details).
+#'
+#' @examples
+#' #x is the result of `mapbayest()`.
+#' #Default plot is returned by:
+#' #plot(x)
+#' #Access to more details with:
+#' #x %>%
+#' #  augment(end = 240) %>%
+#' #  plot()
+#'
 #' @export
-augment.mapbayests <- function(x, data = NULL, end = NULL, ...){
+augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...){
   if(is.null(data)){
-    data <- x$data
-  }
-  if(is.null(end)){
-    end <- data %>%
-      group_by(.data$ID) %>%
-      slice_max(.data$time, with_ties = F) %>%
-      pull(.data$time)
-    end <- end+24
+    idata <- map(x$arg.ofv.id, "data")
+  } else {
+    idata <- data %>%
+      check_mapbayr_data() %>%
+      split_mapbayr_data()
   }
 
-  carry <- data %>%
+  if(is.null(start)){
+    start <- unname(map_dbl(idata, ~ min(.x$time)))
+    #A vector. For each ID, possibly a different start time.
+  }
+
+  if(is.null(end)){
+    end <- unname(map_dbl(idata, ~ max(.x$time)))
+    #A vector. For each ID, possibly a different end time.
+    end <- end * 1.2
+    #By default, +20% of last obs or dosing.
+  }
+
+  if(is.null(delta)){
+    .delta <- (end - start)/200 #approximately 200 points per graph
+    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    #A vector. For each ID, possibly a different delta.
+  }
+
+  carry <- idata[[1]] %>%
     select(-any_of(c("ID", "time", "cmt","DV"))) %>%
     names()
 
-  idata <- data %>%
-    check_mapbayr_data() %>%
-    split_mapbayr_data()
-
   ipred <- list(data = idata,
+                start = start,
                 end = end,
+                delta = delta,
                 eta = x$final_eta) %>%
-    pmap_dfr(function(data, end, eta, ...){
+    pmap_dfr(function(data, start, end, delta, eta, ...){
       x$model %>%
         param(eta) %>%
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%
@@ -231,13 +258,15 @@ augment.mapbayests <- function(x, data = NULL, end = NULL, ...){
     }, ... = ...)
 
   pred <- list(data = idata,
-               end = end) %>%
-    pmap_dfr(function(data, end, eta, ...){
+               start = start,
+               end = end,
+               delta = delta) %>%
+    pmap_dfr(function(data, start, end, delta, eta, ...){
       x$model %>%
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%
@@ -278,9 +307,9 @@ use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
   if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
 
   mod <- switch (.zero_re[1],
-    "both" = zero_re(mod),
-    "omega" = zero_re(mod, "omega"),
-    "sigma" = zero_re(mod, "sigma")
+                 "both" = zero_re(mod),
+                 "omega" = zero_re(mod, "omega"),
+                 "sigma" = zero_re(mod, "sigma")
   )
 
   covs_name <- mbr_cov_names(mod)
