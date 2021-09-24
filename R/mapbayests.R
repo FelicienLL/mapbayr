@@ -181,20 +181,32 @@ hist.mapbayests <- function(x, ...){
 #' @param x object to augment
 #' @param ... additional arguments
 #' @export
-#' @return an augmented object (depending on the object passed)
+#' @return an augmented object (depending on the object passed).
 augment <- function (x, ...)UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'
 #' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
-#' @param start start of simulation time (passed to mrgsim)
-#' @param end end of simulation time (passed to mrgsim)
-#' @param delta delta of simulation time (passed to mrgsim)
-#' @param ... additional argument to pass to mrgsim
+#' @param start,end,delta start, end and delta of simulation time passed to `mrgsim()` (see details)
+#' @param ... additional arguments passed to `mrgsim()`
 #'
 #' @method augment mapbayests
-#' @return a `mapbayests` object, augmented of an `aug_tab`
+#' @return a `mapbayests` object, augmented of an `aug_tab` data.frame.
+#' @details
+#' This function is called in the background by `plot()` in order to simulate the full PK profile, and return a `mapbayests` object with an additional `aug_tab` data.frame inside. The latter is used with by the plot method.
+#' The time grid, for each PK profile (i.e. patient) is defaulted with the minimum time in the dataset for `start` and the maximum time in the dataset +20% for `end`. `delta` is a power of 10 (e.g. 0.1, 1, 10 etc...), automatically chosen to render visually appealing graphs with a reasonable computing time (about 200 time points).
+#' Additional arguments can be passed to `mrgsim()` through `...`. Note that `recsort` is set to 3 (see mrgsolve documentation for more details).
+#'
+#' @examples
+#' #x is the result of `mapbayest()`.
+#' #Default plot is returned by:
+#' #plot(x)
+#' #Access to more details with:
+#' #x %>%
+#' #  augment(end = 240) %>%
+#' #  plot()
+#'
 #' @export
 augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...){
   if(is.null(data)){
