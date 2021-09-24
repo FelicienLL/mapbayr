@@ -15,6 +15,7 @@ data2 <- mod %>%
 data12 <- bind_rows(data1, data2)
 est <- mapbayest(x = mod, data = data12, verbose = F)
 
+
 test_that("data argument works", {
   a1 <- augment(est)
   #even if no eta in data, does it predict individual ?
@@ -26,6 +27,18 @@ test_that("data argument works", {
   a3 <- augment(est, data = data12b, delta = .1)
   expect_equal(filter(a3$aug_tab, time<41), filter(a2$aug_tab, time<41))
   #after t=41, mdv = 1 in a3 because of the last line (an administration) that is locf-ed.
+
+})
+
+test_that("start argument works", {
+  a1 <- augment(est)
+  a2 <- augment(est, start = 0)
+  expect_equal(a1, a2)
+
+  a3 <- augment(est, start = 10)
+  expect_equal(min(filter(a3$aug_tab, ID == 1)$time), 10)
+  expect_equal(min(filter(a3$aug_tab, ID == 2)$time), 10)
+
 })
 
 test_that("end argument works", {
@@ -36,6 +49,8 @@ test_that("end argument works", {
   a3 <- augment(est, end = 400)
   expect_equal(max(filter(a3$aug_tab, ID == 1)$time), 400)
   expect_equal(max(filter(a3$aug_tab, ID == 2)$time), 400)
+
+  expect_error(augment(est, start = c(0, 100), end = c(100, 200)), NA)
 
 })
 

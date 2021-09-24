@@ -4,12 +4,14 @@
 \alias{augment.mapbayests}
 \title{Compute full PK profile prediction from mapbayr estimates.}
 \usage{
-\method{augment}{mapbayests}(x, data = NULL, end = NULL, delta = NULL, ...)
+\method{augment}{mapbayests}(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
 \item{data}{dataset to pass to mrgsolve for simulation (default is dataset used for estimation)}
+
+\item{start}{start of simulation time (passed to mrgsim)}
 
 \item{end}{end of simulation time (passed to mrgsim)}
 

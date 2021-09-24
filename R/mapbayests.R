@@ -188,6 +188,7 @@ augment <- function (x, ...)UseMethod("augment")
 #'
 #' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
+#' @param start start of simulation time (passed to mrgsim)
 #' @param end end of simulation time (passed to mrgsim)
 #' @param delta delta of simulation time (passed to mrgsim)
 #' @param ... additional argument to pass to mrgsim
@@ -195,44 +196,49 @@ augment <- function (x, ...)UseMethod("augment")
 #' @method augment mapbayests
 #' @return a `mapbayests` object, augmented of an `aug_tab`
 #' @export
-augment.mapbayests <- function(x, data = NULL, end = NULL, delta = NULL,...){
+augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...){
   if(is.null(data)){
-    data <- x$data
-  }
-  if(is.null(end)){
-    end <- data %>%
-      group_by(.data$ID) %>%
-      slice_max(.data$time, with_ties = F) %>%
-      pull(.data$time)
-    #for each ID, a different end time. By default, +20% of last obs or dosing.
-    end <- end * 1.2
-    #end is then a vector of numeric
-  }
-  if(is.null(delta)){
-    .min <- min(data$time)
-    .max <- max(end)
-    .delta <- (.max - .min)/200 #approximately 200 points per graph
-    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    idata <- map(x$arg.ofv.id, "data")
+  } else {
+    idata <- data %>%
+      check_mapbayr_data() %>%
+      split_mapbayr_data()
   }
 
-  carry <- data %>%
+  if(is.null(start)){
+    start <- unname(map_dbl(idata, ~ min(.x$time)))
+    #A vector. For each ID, possibly a different start time.
+  }
+
+  if(is.null(end)){
+    end <- unname(map_dbl(idata, ~ max(.x$time)))
+    #A vector. For each ID, possibly a different end time.
+    end <- end * 1.2
+    #By default, +20% of last obs or dosing.
+  }
+
+  if(is.null(delta)){
+    .delta <- (end - start)/200 #approximately 200 points per graph
+    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    #A vector. For each ID, possibly a different delta.
+  }
+
+  carry <- idata[[1]] %>%
     select(-any_of(c("ID", "time", "cmt","DV"))) %>%
     names()
 
-  idata <- data %>%
-    check_mapbayr_data() %>%
-    split_mapbayr_data()
-
   ipred <- list(data = idata,
+                start = start,
                 end = end,
+                delta = delta,
                 eta = x$final_eta) %>%
-    pmap_dfr(function(data, end, eta, ...){
+    pmap_dfr(function(data, start, end, delta, eta, ...){
       x$model %>%
         param(eta) %>%
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, delta = delta, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%
@@ -240,13 +246,15 @@ augment.mapbayests <- function(x, data = NULL, end = NULL, delta = NULL,...){
     }, ... = ...)
 
   pred <- list(data = idata,
-               end = end) %>%
-    pmap_dfr(function(data, end, eta, ...){
+               start = start,
+               end = end,
+               delta = delta) %>%
+    pmap_dfr(function(data, start, end, delta, eta, ...){
       x$model %>%
         zero_re() %>%
         data_set(data) %>%
         obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, delta = delta, ...) %>%
+        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, ...) %>%
         as_tibble() %>%
         filter(.data$evid %in% c(0,2)) %>%
         select(-any_of(x$model@cmtL)) %>%
