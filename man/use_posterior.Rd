@@ -2,21 +2,29 @@
 % Please edit documentation in R/mapbayests.R
 \name{use_posterior}
 \alias{use_posterior}
-\title{Use posterior param and covariates}
+\title{Use posterior estimation}
 \usage{
-use_posterior(x, .zero_re = c("both", "omega", "sigma"))
+use_posterior(x, covariance = FALSE, .zero_re = NULL)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
-\item{.zero_re}{Default is "both", meaning all matrices are zeroed. Pass "omega" to zero between-subject variability, and keep simulating residual error.}
+\item{covariance}{Update the OMEGA matrix with the variance-covariance matrix of estimation (a logical, default is \code{FALSE}).}
+
+\item{.zero_re}{Set all elements of the OMEGA or SIGMA matrix to zero. Default is "both" if \code{covariance} is FALSE, "sigma" otherwise. (possible values are "both", "sigma", "omega", "none")}
 }
 \value{
 a mrgmod
 }
 \description{
-Use posterior param and covariates
+Use posterior estimation
 }
 \details{
-Updates the param values of the model object with the estimated etas, and the covariates of the individual. Returns an updated mrgmod, so that the user can derive simulations from it. Works only with one individual. Does not handle time-varying covariates.
+This function takes the results of an estimation (i.e. a \code{mapbayests} object) and return a modified \code{mrgmod} in order to perform \emph{a posteriori} simulations. Modifications are:
+\itemize{
+\item In $PARAM, the values of ETA are updated to the estimated values (instead of 0) and the covariates values are updated to the values of the individual (instead of default values)
+\item If \code{covariance} is \code{TRUE}, the values of OMEGA are updated with the variance-covariance matrix of estimation (i.e. an approximation of the \emph{a posteriori} distribution) instead of the inter-individual variability (i.e. the \emph{a priori} distribution). Use this command in order to derive a confidence interval of concentrations that reflects the uncertainty about parameter estimation when a large number of profiles are simulated. Note that if inter-individual variability was initially defined in multiple $OMEGA blocks in the model, they will be collapsed to a single full matrix (this is irreversible).
+\item Depending on the values of \code{.zero_re}, the elements of $OMEGA or $SIGMA can be set to zero, whether you want to simulate one profile, or several in order to derive confidence/prediction intervals.
+This function works if there is only one individual in the dataset. It does not handle time-varying covariates.
+}
 }

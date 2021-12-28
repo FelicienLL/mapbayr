@@ -293,23 +293,47 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   return(x)
 }
 
-#' Use posterior param and covariates
+#' Use posterior estimation
 #'
 #' @param x A \code{mapbayests} object.
-#' @param .zero_re Default is "both", meaning all matrices are zeroed. Pass "omega" to zero between-subject variability, and keep simulating residual error.
+#' @param covariance Update the OMEGA matrix with the variance-covariance matrix of estimation (a logical, default is `FALSE`).
+#' @param .zero_re Set all elements of the OMEGA or SIGMA matrix to zero. Default is "both" if `covariance` is FALSE, "sigma" otherwise. (possible values are "both", "sigma", "omega", "none")
 #'
-#' @details Updates the param values of the model object with the estimated etas, and the covariates of the individual. Returns an updated mrgmod, so that the user can derive simulations from it. Works only with one individual. Does not handle time-varying covariates.
+#' @details This function takes the results of an estimation (i.e. a \code{mapbayests} object) and return a modified \code{mrgmod} in order to perform \emph{a posteriori} simulations. Modifications are:
+#' - In $PARAM, the values of ETA are updated to the estimated values (instead of 0) and the covariates values are updated to the values of the individual (instead of default values)
+#' - If `covariance` is `TRUE`, the values of OMEGA are updated with the variance-covariance matrix of estimation (i.e. an approximation of the \emph{a posteriori} distribution) instead of the inter-individual variability (i.e. the \emph{a priori} distribution). Use this command in order to derive a confidence interval of concentrations that reflects the uncertainty about parameter estimation when a large number of profiles are simulated. Note that if inter-individual variability was initially defined in multiple $OMEGA blocks in the model, they will be collapsed to a single full matrix (this is irreversible).
+#' - Depending on the values of `.zero_re`, the elements of $OMEGA or $SIGMA can be set to zero, whether you want to simulate one profile, or several in order to derive confidence/prediction intervals.
+#' This function works if there is only one individual in the dataset. It does not handle time-varying covariates.
 #' @return a mrgmod
 #' @export
-use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
+use_posterior <- function(x, covariance = FALSE, .zero_re = NULL){
   mod <- x$model
 
   if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
 
+  if(isTRUE(covariance)){
+    covariance_matrix <- get_cov(x)
+    if(!any(is.na(covariance_matrix))){
+      mod <- mod %>%
+        mrgsolve:::collapse_omega() %>% #TO DO ; when the new version of mrgsolve will be on CRAN, use the exported collapse_omega function.
+        # For now it "notes" in R CMD check because cannot use unexported functions
+        # Also: use the new 'name' argument to name it 'covariance matrix of estimation' or something
+        omat(covariance_matrix)
+    }
+  }
+
+  if(is.null(.zero_re)){
+    if(isTRUE(covariance)){
+      .zero_re <- "sigma"
+    } else {
+      .zero_re <- "both"
+    }
+  }
   mod <- switch (.zero_re[1],
                  "both" = zero_re(mod),
                  "omega" = zero_re(mod, "omega"),
-                 "sigma" = zero_re(mod, "sigma")
+                 "sigma" = zero_re(mod, "sigma"),
+                 "none" = (mod)
   )
 
   covs_name <- mbr_cov_names(mod)

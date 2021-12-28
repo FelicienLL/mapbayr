@@ -66,7 +66,8 @@ Q   :  1.0 : Intercompartmental clearance
 ETA1: 0 : Clearance (L/h)
 ETA2: 0 : Central volume (L)
 
-$OMEGA 0.3 0.3
+$OMEGA 0.3
+$OMEGA 0.3
 $SIGMA
 0.05 // proportional
 0.1 // additive
@@ -131,8 +132,20 @@ test_that("zero_re in use_posterior", {
 
   expect_equal(unname(omat(zero_sigma, make = T)), diag(c(0.3,0.3)))
   expect_equal(unname(smat(zero_sigma, make = T)), diag(c(0,0)))
-})
 
+  zero_none <- my_est2 %>%
+    use_posterior(.zero_re = "none")
+
+  expect_equal(unname(omat(zero_none, make = T)), diag(c(0.3,0.3)))
+  expect_equal(unname(smat(zero_none, make = T)), diag(c(0.05,0.1)))
+
+  zero_covariance <- my_est2 %>%
+    use_posterior(covariance = TRUE)
+
+  expect_equal(unname(omat(zero_covariance, make = T)), get_cov(my_est2))
+  expect_equal(unname(smat(zero_covariance, make = T)), diag(c(0,0)))
+
+})
 
 test_that("multi ID in use_posterior", {
 
