@@ -140,7 +140,7 @@ test_that("zero_re in use_posterior", {
   expect_equal(unname(smat(zero_none, make = T)), diag(c(0.05,0.1)))
 
   zero_covariance <- my_est2 %>%
-    use_posterior(covariance = TRUE)
+    use_posterior(update_omega = TRUE)
 
   expect_equal(unname(omat(zero_covariance, make = T)), get_cov(my_est2))
   expect_equal(unname(smat(zero_covariance, make = T)), diag(c(0,0)))
