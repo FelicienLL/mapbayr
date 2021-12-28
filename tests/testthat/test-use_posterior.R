@@ -97,6 +97,9 @@ Q   :  1.0 : Intercompartmental clearance
 ETA1: 0 : Clearance (L/h)
 ETA2: 0 : Central volume (L)
 
+$PARAM @covariates
+BW = 70
+
 $OMEGA 0.3
 $OMEGA 0.3
 $SIGMA
@@ -111,7 +114,7 @@ $TABLE
 double DV = (CENT/V1) *(1 + EPS(1)) + EPS(2);
 
 $MAIN
-double CL = TVCL * exp(ETA1 + ETA(1)) ;
+double CL = TVCL * exp(ETA1 + ETA(1)) * (BW/70.0) ;
 double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
 double K12 = Q / V1  ;
 double K21 = Q / V2  ;
@@ -127,7 +130,7 @@ my_model2 <- mcode("Example_model2", code2)
 
 
 my_data2 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
-                       rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1))
+                       rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 35)
 
 my_est2 <- mapbayest(my_model2, my_data2, verbose = F)
 
@@ -178,11 +181,22 @@ test_that("zero_re in use_posterior", {
 
 })
 
-test_that("multi ID in use_posterior", {
+test_that("multi ID", {
 
-  data12 <- bind_rows(my_data2, mutate(my_data2, ID = 2))
+  data12 <- bind_rows(my_data2, mutate(my_data2, ID = 2, BW = 150))
   my_est12 <- mapbayest(my_model2, data12, verbose = F)
-  expect_error(use_posterior(my_est12), "use_posterior\\(\\) can be used with one only ID")
+  post12 <- my_est12 %>% use_posterior(update_omega = TRUE)
+
+  expect_length(post12, 2)
+
+  expect_equal(omat(post12[[1]], make = TRUE), matrix(c(0.069320257, -0.003361061, -0.003361061, 0.258101901), nrow = 2))
+  expect_equal(omat(post12[[2]], make = TRUE), matrix(c(0.04727953, 0.02075817, 0.02075817, 0.15242651), nrow = 2))
+
+  expect_equal(post12[[1]]$ETA1, 1.192502)
+  expect_equal(post12[[2]]$ETA1, 0.001407662)
+
+  expect_equal(post12[[1]]$BW, 35)
+  expect_equal(post12[[2]]$BW, 150)
 
 })
 
@@ -195,3 +209,4 @@ test_that("warn time-varying cov", {
 
 
 })
+

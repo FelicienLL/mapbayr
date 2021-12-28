@@ -9,7 +9,8 @@ use_posterior(
   update_omega = FALSE,
   update_cov = TRUE,
   update_eta = TRUE,
-  .zero_re = NULL
+  .zero_re = NULL,
+  simplify = TRUE
 )
 }
 \arguments{
@@ -22,9 +23,11 @@ use_posterior(
 \item{update_eta}{Update the values of ETA with the final estimates (a logical, default is \code{TRUE}).}
 
 \item{.zero_re}{Set all elements of the OMEGA or SIGMA matrix to zero. Default is "both" if \code{update_omega} is FALSE, "sigma" otherwise. (possible values are "both", "sigma", "omega", "none")}
+
+\item{simplify}{a logical. If TRUE (the default) and only one ID, one mrgmod is returned instead of a list of length 1}
 }
 \value{
-a mrgmod
+a mrgmod, or a list of mrgmod if there is more than 1 ID
 }
 \description{
 Use posterior estimation
@@ -36,6 +39,6 @@ This function takes the results of an estimation (i.e. a \code{mapbayests} objec
 \item If \code{update_cov} is \code{TRUE}, the covariates values are updated to the values of the individual (instead of default model values) in $PARAM.
 \item If \code{update_omega} is \code{TRUE}, the values of OMEGA are updated with the variance-covariance matrix of estimation (i.e. an approximation of the \emph{a posteriori} distribution) instead of the inter-individual variability (i.e. the \emph{a priori} distribution). Use this command in order to derive a confidence interval of concentrations that reflects the uncertainty about parameter estimation when a large number of profiles are simulated. Note that if inter-individual variability was initially defined in multiple $OMEGA blocks in the model, they will be collapsed to a single full matrix (this is irreversible).
 \item Depending on the values of \code{.zero_re}, the elements of $OMEGA or $SIGMA can be set to zero, whether you want to simulate one profile, or several in order to derive confidence/prediction intervals.
-This function works if there is only one individual in the dataset. It does not handle time-varying covariates.
+It does not handle time-varying covariates: only the first value will be used as the individual value.
 }
 }

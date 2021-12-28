@@ -4,12 +4,14 @@
 \alias{get_cov.mapbayests}
 \title{Return covariance matrix from a mapbayests}
 \usage{
-\method{get_cov}{mapbayests}(x, ...)
+\method{get_cov}{mapbayests}(x, ..., simplify = TRUE)
 }
 \arguments{
 \item{x}{mapbayests object}
 
 \item{...}{not used}
+
+\item{simplify}{a logical. If TRUE (the default) and only one ID, one matrix is returned instead of a list of length 1}
 }
 \value{
 a tibble
