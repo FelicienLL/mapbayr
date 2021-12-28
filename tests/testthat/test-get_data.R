@@ -12,6 +12,10 @@ test_that("get_data.mrgmod works", {
 test_that("get_data.mapbayests works", {
   expect_s3_class(get_data(est1), "tbl_df")
   expect_named(get_data(est1), c("ID", "time", "evid", "mdv", "amt", "cmt", "rate", "DV"))
+
+  #can return list (one element per ID)
+  expect_length(data_list <- get_data(est1, output = "list"), 1)
+  expect_equal(data_list[[1]], get_data(est1, output = "df"))
 })
 
 test_that("see_data is deprecated", {

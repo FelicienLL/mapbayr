@@ -29,12 +29,15 @@ get_data.mrgmod <- function(x, ...){
 #'
 #' @param x mapbayests object
 #' @param ... not used
+#' @param output either a single data.frame ("df", the default) or a list ("list") of individual data sets
 #'
 #' @method get_data mapbayests
 #' @return a tibble
 #' @export
-get_data.mapbayests <- function(x, ...){
-  as_tibble(x$data)
+get_data.mapbayests <- function(x, ..., output = "df"){
+  if(output == "df") return(map_dfr(x$arg.ofv.id , "data"))
+  if(output == "list") return(map(x$arg.ofv.id , "data"))
+  if(!output %in% c("df", "list")) stop("output type must be 'df' or 'list'", call. = FALSE)
 }
 
 #' @rdname get_x
