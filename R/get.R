@@ -102,13 +102,14 @@ get_cov <- function(x, ...) UseMethod("get_cov")
 #'
 #' @param x mapbayests object
 #' @param ... not used
+#' @param simplify a logical. If TRUE (the default) and only one ID, one matrix is returned instead of a list of length 1
 #'
 #' @method get_cov mapbayests
 #' @return a tibble
 #' @export
-get_cov.mapbayests <- function(x, ...){
+get_cov.mapbayests <- function(x, ..., simplify = TRUE){
   ans <- x$covariance
-  if(length(ans)==1) return(ans[[1]])
+  if(length(ans)==1 && isTRUE(simplify)) return(ans[[1]])
   ans
 }
 

@@ -70,4 +70,6 @@ $CAPTURE DV
   expect_equal(get_cov(est2), list(`1` = est2$covariance[[1]],
                                    `99`= est2$covariance[[2]]))
 
+  expect_equal(get_cov(est1, simplify = FALSE), list(`1` = est2$covariance[[1]]))
+
 })
