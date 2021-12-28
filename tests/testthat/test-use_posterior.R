@@ -41,10 +41,9 @@ my_model1 <- mcode("Example_model", code1)
 my_data1 <- data.frame(ID = 1, time = c(0,6,15,24), evid = c(1, rep(0,3)), cmt = 1, amt = c(100, rep(0,3)),
                        rate = c(20, rep(0,3)), DV = c(NA, 3.9, 1.1, 2), mdv = c(1,0,0,1), BW = 53)
 
+my_est1 <- mapbayest(my_model1, my_data1, verbose = F)
+
 test_that("use_posterior works with cov", {
-
-  my_est1 <- mapbayest(my_model1, my_data1, verbose = F)
-
   par1 <- my_est1 %>%
     use_posterior() %>%
     param() %>%
@@ -55,6 +54,38 @@ test_that("use_posterior works with cov", {
   expect_equal(par1$BW, 53)
 
 })
+
+
+test_that("use_posterior obeys to update_x arguments", {
+
+  defaultposterior <- use_posterior(my_est1, .zero_re = "none")
+
+  expect_equal(defaultposterior$ETA1, 0.90870594)
+  expect_equal(defaultposterior$BW, 53)
+  defaultposterior %>%
+    omat(make = TRUE) %>%
+    expect_equal(diag(c(0.3,0.3)))
+
+  my_est1 %>%
+    use_posterior(update_omega = FALSE, .zero_re = "none") %>%
+    omat(make = TRUE) %>%
+    expect_equal(diag(c(0.3,0.3)))
+
+  my_est1 %>%
+    use_posterior(update_omega = TRUE, .zero_re = "none") %>%
+    omat(make = TRUE) %>%
+    expect_equal(matrix(c(0.05838635, 0.01262452, 0.01262452, 0.21315263), nrow = 2))
+
+  expect_equal(use_posterior(my_est1, update_cov = FALSE)$BW, 70)
+  expect_equal(use_posterior(my_est1, update_cov = TRUE)$BW, 53)
+
+  expect_equal(use_posterior(my_est1, update_eta = FALSE)$ETA1, 0)
+  expect_equal(use_posterior(my_est1, update_eta = TRUE)$ETA1, 0.90870594)
+
+})
+
+
+
 
 code2 <- "
 $PARAM @annotated
