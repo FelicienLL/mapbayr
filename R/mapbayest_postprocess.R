@@ -17,10 +17,16 @@ NULL
 #' @export
 postprocess.optim <- function(x, data, opt.value){
 
+  #Final eta
   final_eta <- opt.value[eta_names(x)] %>%
     as.double() %>%
     set_names(eta_names(x))
 
+  #Variance Covariance Matrix
+  hess <- attr(opt.value, "details")[1,]$nhatend
+  covariance <- 2 * solve(hess)
+
+  #Mapbay Tab
   reserved_capt <- c("DV", "PAR", "MET")
   reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
   other_items <- names(data)[!(names(data) %in% c(reserved_names, mbr_cov_names(x), reserved_capt))]
@@ -51,6 +57,7 @@ postprocess.optim <- function(x, data, opt.value){
 
   list(
     final_eta = final_eta,
+    covariance = covariance,
     mapbay_tab = mapbay_tab
   )
 
@@ -74,6 +81,7 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
       arg.ofv.id = arg.ofv.id,
       opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
       final_eta = map(post, "final_eta"),
+      covariance = map(post, "covariance"),
       mapbay_tab = map_dfr(post, "mapbay_tab"),
       information = generate_information(times)
     )

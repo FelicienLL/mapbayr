@@ -4,7 +4,14 @@
 \alias{preprocess.optim}
 \title{Pre-process: arguments for optimization function}
 \usage{
-preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
+preprocess.optim(
+  x,
+  method,
+  control,
+  hessian,
+  force_initial_eta,
+  quantile_bound
+)
 }
 \arguments{
 \item{x}{the model object}
@@ -12,6 +19,8 @@ preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
 \item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
 
 \item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
+
+\item{hessian}{compute the hessian and return the variance-covariance matrix of estimation of etas (a logical, default is \code{TRUE})}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 

@@ -5,7 +5,7 @@
 #' @param ... passed along
 #' @return the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 #'
-#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (data, eta, param).
+#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (data, eta, cov, param).
 NULL
 #> NULL
 
@@ -88,6 +88,25 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
   )
 
   return(e)
+}
+
+
+#' @rdname get_x
+#' @export
+get_cov <- function(x, ...) UseMethod("get_cov")
+
+#' Return covariance matrix from a mapbayests
+#'
+#' @param x mapbayests object
+#' @param ... not used
+#'
+#' @method get_cov mapbayests
+#' @return a tibble
+#' @export
+get_cov.mapbayests <- function(x, ...){
+  ans <- x$covariance
+  if(length(ans)==1) return(ans[[1]])
+  ans
 }
 
 #' @rdname get_x

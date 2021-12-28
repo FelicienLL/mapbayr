@@ -4,12 +4,15 @@
 \alias{get_x}
 \alias{get_data}
 \alias{get_eta}
+\alias{get_cov}
 \alias{get_param}
 \title{Get content from object}
 \usage{
 get_data(x, ...)
 
 get_eta(x, ...)
+
+get_cov(x, ...)
 
 get_param(x, ...)
 }
@@ -22,5 +25,5 @@ get_param(x, ...)
 the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 }
 \description{
-Helpful functions to get content from a \code{mrgmod} object (i.e. data) or from a \code{mapbayests} object (data, eta, param).
+Helpful functions to get content from a \code{mrgmod} object (i.e. data) or from a \code{mapbayests} object (data, eta, cov, param).
 }
