@@ -239,41 +239,22 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
     select(-any_of(c("ID", "time", "cmt","DV"))) %>%
     names()
 
-  ipred <- list(data = idata,
-                start = start,
-                end = end,
-                delta = delta,
-                eta = x$final_eta) %>%
-    pmap_dfr(function(data, start, end, delta, eta, ...){
-      x$model %>%
-        param(eta) %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "IPRED")
-    }, ... = ...)
+  ipred <- list(
+    x = use_posterior(x, update_cov = FALSE, simplify = FALSE),
+    data = idata, start = start, end = end, delta = delta
+  ) %>%
+    pmap_dfr(mrgsim_df, carry_out = carry, recsort = 3, obsaug = TRUE, ... = ...)
 
-  pred <- list(data = idata,
-               start = start,
-               end = end,
-               delta = delta) %>%
-    pmap_dfr(function(data, start, end, delta, eta, ...){
-      x$model %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "PRED")
-    }, ... = ...)
+  pred <- list(
+    x = use_posterior(x, update_eta = FALSE, update_cov = FALSE, simplify = FALSE),
+    data = idata, start = start, end = end, delta = delta
+  ) %>%
+    pmap_dfr(mrgsim_df, carry_out = carry, recsort = 3, obsaug = TRUE, ... = ...)
 
-  aug_tab <- bind_rows(ipred, pred)
+  aug_tab <- bind_rows(list(IPRED = ipred, PRED = pred), .id = "type") %>%
+    as_tibble() %>%
+    filter(.data$evid %in% c(0,2)) %>%
+    select(-any_of(x$model@cmtL))
 
   fitcmt <- fit_cmt(x$model, idata[[1]])
 
@@ -288,7 +269,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
     mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2]))%>%
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
-  x <- c(x, aug_tab = list(aug_tab))
+  x$aug_tab <- aug_tab
   class(x) <- "mapbayests"
   return(x)
 }
