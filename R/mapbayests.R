@@ -248,18 +248,30 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
     #A vector. For each ID, possibly a different delta.
   }
 
-  carry <- idata[[1]] %>%
-    select(-any_of(c("ID", "time", "cmt","DV"))) %>%
-    names()
+  fitcmt <- fit_cmt(x$model, get_data(x))
 
-  fitcmt <- fit_cmt(x$model, idata[[1]])
+  if(length(fitcmt) > 1){
+    toreq <- "PAR,MET"
+  } else {
+    toreq <- "DV"
+  }
+
+  tocarry <- c("evid")
 
   do_sims <- function(mods, data = idata, ...){
-    list(
+    sims <- list(
       x = mods,
       data = data, start = start, end = end, delta = delta
     ) %>%
-      pmap(mrgsim_df, carry_out = carry, recsort = 3, obsaug = TRUE, ... = ...)
+      pmap(mrgsim_df, carry_out = tocarry, Request = toreq, recsort = 3, obsaug = TRUE, ... = ...)
+
+    map(sims, ~ .x %>%
+      filter(.data$evid %in% c(0,2)) %>%
+      select(-any_of("cmt")) %>% #should not be carried normally but who knows...
+      pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
+      mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2])) %>%
+      arrange(.data$ID, .data$time, .data$cmt)
+      )
   }
 
   do_augment <- function(x, type, ...){
@@ -283,20 +295,20 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% purrr::transpose() #1 item = 1 indiv
         jacobians <- list(new_preds, dsteps, initpreds) %>% #1 item = 1 indiv
           pmap(function(new, step, ini){
-            purrr::map2_dfc(new, step, ~(.x[["DV"]]-ini[["DV"]])/.y) %>% as.matrix()
+            purrr::map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
           })
         varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
         errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
         initpreds <- map2(initpreds, errors, ~mutate(.x,
-                                                     value_low = .data[["DV"]] - .y,
-                                                     value_up = .data[["DV"]] + .y))
+                                                     value_low = .data[["value"]] - .y,
+                                                     value_up = .data[["value"]] + .y))
       }
 
       if(ci_method == "simulations"){
         new_idatas <- map(idata, data_nid, n = ci_sims)
         new_sims <- do_sims(mods, data = new_idatas, ... = ...)
-        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$DV, ci2q(ci_width))) %>% pull("v"))
-        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$DV, 1-ci2q(ci_width))) %>% pull("v"))
+        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
+        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
         initpreds <- pmap(list(initpreds, LOW, UP), function(ini, low, up){
           mutate(ini, value_low = low, value_up = up)
         })
@@ -308,28 +320,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   ipred <- do_augment(x, type = "ipred", ... = ...) %>% bind_rows()
   pred  <- do_augment(x, type = "pred", ... = ...) %>% bind_rows()
 
-  x$aug_tab <- reshape_augtab(x = x, .ipred = ipred, .pred = pred, .fitcmt = fitcmt)
-  class(x) <- "mapbayests"
-  return(x)
-}
-
-reshape_augtab <- function(x, .ipred, .pred, .fitcmt){
-  aug_tab <- bind_rows(list(IPRED = .ipred, PRED = .pred), .id = "type") %>%
+  x$aug_tab <- bind_rows(list(IPRED = ipred, PRED = pred), .id = "type") %>%
     as_tibble() %>%
-    filter(.data$evid %in% c(0,2)) %>%
-    select(-any_of(x$model@cmtL))
-
-  if(length(.fitcmt)>1){
-    aug_tab <- select(aug_tab, -any_of(c("DV")))
-  } else{
-    aug_tab <- select(aug_tab, -any_of(c("PAR", "MET")))
-  }
-
-  aug_tab <- aug_tab %>%
-    pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
-    mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), .fitcmt[1], .fitcmt[2])) %>%
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
+  class(x) <- "mapbayests"
+  return(x)
 }
 
 data_nid <- function(data, n){

@@ -37,7 +37,7 @@ test_that("start argument works", {
 
   a3 <- augment(est, start = 10)
   expect_equal(min(filter(a3$aug_tab, ID == 1)$time), 10)
-  expect_equal(min(filter(a3$aug_tab, ID == 2)$time), 10)
+  expect_equal(min(filter(a3$aug_tab, ID == 3)$time), 10)
 
 })
 
@@ -48,7 +48,7 @@ test_that("end argument works", {
 
   a3 <- augment(est, end = 400)
   expect_equal(max(filter(a3$aug_tab, ID == 1)$time), 400)
-  expect_equal(max(filter(a3$aug_tab, ID == 2)$time), 400)
+  expect_equal(max(filter(a3$aug_tab, ID == 3)$time), 400)
 
   expect_error(augment(est, start = c(0, 100), end = c(100, 200)), NA)
 
@@ -104,9 +104,9 @@ test_that("confidence interval works", {
   expect_true(all((A95[["value_up"]] >= A1a[["value_up"]])))
 })
 
-# test_that("CI with multiple types of DV", {
-#   A1a <- augment(est, delta = 1, ci = TRUE)$aug_tab
-#   expect_length(unique(A1a$ID), 2)
-#   expect_true(all(A1a$DV <= A1a$value_up))
-#   expect_true(all(A1a$DV >= A1a$value_low))
-# })
+test_that("CI with multiple types of DV", {
+  A1a <- augment(est, delta = 1, ci = TRUE)$aug_tab
+  expect_length(unique(A1a$ID), 2)
+  expect_true(all(A1a$value <= A1a$value_up))
+  expect_true(all(A1a$value >= A1a$value_low))
+})
