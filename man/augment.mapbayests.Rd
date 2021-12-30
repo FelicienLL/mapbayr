@@ -4,7 +4,18 @@
 \alias{augment.mapbayests}
 \title{Compute full PK profile prediction from mapbayr estimates.}
 \usage{
-\method{augment}{mapbayests}(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...)
+\method{augment}{mapbayests}(
+  x,
+  data = NULL,
+  start = NULL,
+  end = NULL,
+  delta = NULL,
+  ci = FALSE,
+  ci_width = 90,
+  ci_method = "delta",
+  ci_sims = 500,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
@@ -12,6 +23,14 @@
 \item{data}{dataset to pass to mrgsolve for simulation (default is dataset used for estimation)}
 
 \item{start, end, delta}{start, end and delta of simulation time passed to \code{mrgsim()} (see details)}
+
+\item{ci}{a logical. If TRUE, compute a confidence interval around the prediction (default is FALSE)}
+
+\item{ci_width}{a number between 0 and 100, width of the confidence interval (default is "90" for a 90\%CI)}
+
+\item{ci_method}{method to compute the confidence interval. Can be "delta" (the default) to use the Delta approximation. Alternatively "simulations" for a more accurate approach, but also more time-consuming.}
+
+\item{ci_sims}{number of replicates to simulate in order to derive the confidence interval (default is 500)}
 
 \item{...}{additional arguments passed to \code{mrgsim()}}
 }

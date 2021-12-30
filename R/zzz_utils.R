@@ -55,3 +55,11 @@ eta_from_opt <- function(x){
   stopifnot(is.data.frame(x))
   unlist(x[,grepl("ETA", names(x))])
 }
+
+ci2q <- function(ci) (1-(ci/100))/2
+znorm <- function(ci){
+  stopifnot(is.numeric(ci), ci > 0, ci < 100)
+  stats::qnorm(1-ci2q(ci))
+}
+
+
