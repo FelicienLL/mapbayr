@@ -9,7 +9,7 @@ test_that("new_ini2 works", {
 
   argofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data))
 
-  argopt <- preprocess.optim(x = mod, method = "L-BFGS-B", control = list(), force_initial_eta = NULL,
+  argopt <- preprocess.optim(x = mod, method = "L-BFGS-B", control = list(), force_initial_eta = NULL, hessian = F,
                              quantile_bound = .4) # !!
 
   ini <- new_ini2(arg.ofv = argofv, arg.optim = argopt, run = 1)

@@ -200,13 +200,14 @@ test_that("multi ID", {
 
 })
 
-test_that("warn time-varying cov", {
-  my_data1bis <- mutate(my_data1, BW = c(40, 60, 80, 90))
-
-  my_est1bis <- mapbayest(my_model1, my_data1bis, verbose = F)
-
-  expect_warning(  use_posterior(my_est1bis), "Time-varying covariates found. First value used for: BW.")
-
-
-})
+# Do not warn systematically since use_posterior is also internal now...
+# test_that("warn time-varying cov", {
+#   my_data1bis <- mutate(my_data1, BW = c(40, 60, 80, 90))
+#
+#   my_est1bis <- mapbayest(my_model1, my_data1bis, verbose = F)
+#
+#   expect_warning(  use_posterior(my_est1bis), "Time-varying covariates found. First value used for: BW.")
+#
+#
+# })
 

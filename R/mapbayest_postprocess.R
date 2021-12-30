@@ -24,7 +24,8 @@ postprocess.optim <- function(x, data, opt.value){
 
   #Variance Covariance Matrix
   hess <- attr(opt.value, "details")[1,]$nhatend
-  covariance <- 2 * solve(hess)
+  safe_solve <- purrr::safely(solve, otherwise = NA_real_)
+  covariance <- 2 * safe_solve(hess)$result
 
   #Mapbay Tab
   reserved_capt <- c("DV", "PAR", "MET")
