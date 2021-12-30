@@ -45,17 +45,18 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' Plot predictions from mapbayests object
 #'
 #' @param x A \code{mapbayests} object.
+#' @param ci print confidence interval (see `augment` documentation for more details)
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
 #'
 #' @method plot mapbayests
 #' @export
-plot.mapbayests <- function(x, ...){
+plot.mapbayests <- function(x, ..., ci = FALSE){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
     #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
-    x <- augment(x)
+    x <- augment(x, ci = ci)
   }
 
   theme_custom <- function(...) {
