@@ -44,19 +44,21 @@ $CAPTURE DV
   model1 <- mcode("model1", code1)
   data1 <- model1 %>%
     adm_lines(amt = 10000) %>%
-    obs_lines(time = c(1.5, 4.4, 7.1, 24.6), DV = c(91.2904, 110.826, 79.324,20.6671)) %>%
+    obs_lines(time = c(1.5, 4.4, 7.1, 24.6), DV = c(91.2904, 110.826, 79.384,20.6671)) %>%
     get_data()
 
   est0 <- mapbayest(model1, data1, hessian = FALSE, verbose = FALSE)
   expect_true(is.na(est0$covariance))
 
-  est1 <- mapbayest(model1, data1, verbose = FALSE) #Default: hessian = TRUE
+  est1 <- mapbayest(model1, data1, verbose = FALSE, hessian = "optimHess")
+  est1b <- mapbayest(model1, data1, verbose = FALSE, hessian = "nlmixrHess")
 
   nmphi <- matrix(c(1.28120118E-002, 5.40868557E-003, 4.69547364E-004,
                     5.40868557E-003, 2.31664035E-002, 2.19133609E-002,
                     4.69547364E-004, 2.19133609E-002, 1.25252672E-001), nrow = 3, ncol = 3)
 
   expect_equal(est1$covariance[[1]], nmphi, tolerance = 0.01)
+  expect_equal(est1b$covariance[[1]], nmphi, tolerance = 0.01)
 
 
   #get_cov method

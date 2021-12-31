@@ -7,7 +7,7 @@
 #' @param x the model object
 #' @param data NMTRAN-like data set
 #' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
-#' @param hessian compute the hessian and return the variance-covariance matrix of estimation of etas (a logical, default is `TRUE`)
+#' @param hessian a function to compute the Hessian and variance-covariance matrix. Default is "optimHess", alternatively "nlmixrHess".
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
@@ -61,7 +61,7 @@
 mapbayest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
-                   hessian = TRUE,
+                   hessian = c("optimHess", "nlmixrHess"),
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
                    control = list(),
@@ -87,7 +87,7 @@ mapbayest <- function(x,
     check_mapbayr_modeldata(x, data)
   }
 
-  arg.optim   <- preprocess.optim(x, method = method, control = control, hessian = hessian, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.optim   <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv.fix <- preprocess.ofv.fix(x, data)
 
   iddata <- split_mapbayr_data(data)
@@ -106,10 +106,13 @@ mapbayest <- function(x,
   # Start post-processing (i.e. generating output files)
   post <- list(
     data = iddata,
-    opt.value = opt.value
+    opt.value = opt.value,
+    arg.ofv = arg.ofv
     ) %>%
     pmap(postprocess.optim,
-         x = x)
+         x = x,
+         hessian = hessian,
+         arg.optim = arg.optim)
 
   out <- postprocess.output(x,
                             arg.optim = arg.optim,

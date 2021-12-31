@@ -74,7 +74,7 @@ test_that("use_posterior obeys to update_x arguments", {
   my_est1 %>%
     use_posterior(update_omega = TRUE, .zero_re = "none") %>%
     omat(make = TRUE) %>%
-    expect_equal(matrix(c(0.05838635, 0.01262452, 0.01262452, 0.21315263), nrow = 2))
+    expect_equal(matrix(c(0.05838635, 0.01262452, 0.01262452, 0.21315263), nrow = 2), tolerance = 1e-6)
 
   expect_equal(use_posterior(my_est1, update_cov = FALSE)$BW, 70)
   expect_equal(use_posterior(my_est1, update_cov = TRUE)$BW, 53)
@@ -189,8 +189,8 @@ test_that("multi ID", {
 
   expect_length(post12, 2)
 
-  expect_equal(omat(post12[[1]], make = TRUE), matrix(c(0.069320257, -0.003361061, -0.003361061, 0.258101901), nrow = 2))
-  expect_equal(omat(post12[[2]], make = TRUE), matrix(c(0.04727953, 0.02075817, 0.02075817, 0.15242651), nrow = 2))
+  expect_equal(omat(post12[[1]], make = TRUE), matrix(c(0.069320257, -0.003361061, -0.003361061, 0.258101901), nrow = 2), tolerance = 1e-6)
+  expect_equal(omat(post12[[2]], make = TRUE), matrix(c(0.04727953, 0.02075817, 0.02075817, 0.15242651), nrow = 2), tolerance = 1e-6)
 
   expect_equal(post12[[1]]$ETA1, 1.192502)
   expect_equal(post12[[2]]$ETA1, 0.001407662)

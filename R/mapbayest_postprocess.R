@@ -4,7 +4,7 @@
 #' @return `postprocess.optim()` returns a list with final parameters and `mapbay_tab`. `postprocess.output()` returns a `mapbayests` class object.
 #' @inheritParams mapbayest
 #' @param opt.value value returned by optimizer
-#' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
+#' @param arg.optim,arg.ofv,arg.ofv.fix,arg.ofv.id argument passed to optimizer
 #' @param post,times output of the post.process function
 #' @description Functions to generate postprocess after optimization.
 NULL
@@ -15,7 +15,7 @@ NULL
 #' Post-process: derive predictions from optimization
 #' @rdname postprocess
 #' @export
-postprocess.optim <- function(x, data, opt.value){
+postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
 
   #Final eta
   final_eta <- opt.value[eta_names(x)] %>%
@@ -23,9 +23,27 @@ postprocess.optim <- function(x, data, opt.value){
     set_names(eta_names(x))
 
   #Variance Covariance Matrix
-  hess <- attr(opt.value, "details")[1,]$nhatend
-  safe_solve <- purrr::safely(solve, otherwise = NA_real_)
-  covariance <- 2 * safe_solve(hess)$result
+  fp <- function(p){ #obj fun value as function of param
+    arg <- arg.ofv
+    eta <- p
+    names(eta) <- eta_names(x)
+    arg$eta <- eta
+    do.call(compute_ofv, arg)
+  }
+
+  safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
+
+  if(hessian[1] %in% c("optimHess", "nlmixrHess")){
+    if(hessian[1] == "optimHess"){
+      hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
+    }
+    if(hessian[1] == "nlmixrHess"){
+      hess <- do.call(nlmixr::nlmixrHess, args = list(par = final_eta, fn = fp))
+    }
+    covariance <- unname(2 * safe_solve(hess)$result)
+  } else {
+    covariance <- matrix(NA_real_)
+  }
 
   #Mapbay Tab
   reserved_capt <- c("DV", "PAR", "MET")

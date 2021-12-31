@@ -9,7 +9,7 @@ mapbayest(
   x,
   data = NULL,
   method = "L-BFGS-B",
-  hessian = TRUE,
+  hessian = c("optimHess", "nlmixrHess"),
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -28,7 +28,7 @@ mbrest(...)
 
 \item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
 
-\item{hessian}{compute the hessian and return the variance-covariance matrix of estimation of etas (a logical, default is \code{TRUE})}
+\item{hessian}{a function to compute the Hessian and variance-covariance matrix. Default is "optimHess", alternatively "nlmixrHess".}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
