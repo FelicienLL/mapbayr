@@ -5,7 +5,7 @@
 #' @param ... passed along
 #' @return the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 #'
-#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (data, eta, cov, param).
+#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (data, eta, cov, param, phi).
 NULL
 #> NULL
 
@@ -199,3 +199,27 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
 
   return(par)
 }
+
+
+#' @rdname get_x
+#' @export
+get_phi <- function(x, ...) UseMethod("get_phi")
+
+#' Return "NONMEM phi"-like file from a mapbayests
+#'
+#' @param x mapbayests object
+#' @param ... not used
+#' @method get_phi mapbayests
+#' @return a tibble
+#' @export
+get_phi.mapbayests <- function(x, ...){
+  namcov <- namephicov(n_eta(x$model))
+  covphi <- x %>% get_cov(output = "list", simplify = FALSE) %>% map(~ set_names(.x[upper.tri(.x, diag = TRUE)], namcov)) %>% bind_rows()
+  x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
+    bind_cols(covphi) %>%
+    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
+    mutate(SUBJECT_NO = dplyr::row_number(), .before = 1) %>%
+    as_tibble()
+}
+
+

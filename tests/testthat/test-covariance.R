@@ -1,4 +1,3 @@
-test_that("covariance matrix is correct", {
   code1 <-  "$PROB Reference model
 
 $PARAM @annotated
@@ -46,11 +45,14 @@ $CAPTURE DV
     adm_lines(amt = 10000) %>%
     obs_lines(time = c(1.5, 4.4, 7.1, 24.6), DV = c(91.2904, 110.826, 79.384,20.6671)) %>%
     get_data()
+  data2 <- bind_rows(data1, mutate(data1, ID = 99, DV = 0.8*DV))
+  est1 <- mapbayest(model1, data1, verbose = FALSE, hessian = "optimHess")
+  est2 <- mapbayest(model1, data2, verbose = FALSE)
 
+test_that("covariance matrix is correct", {
   est0 <- mapbayest(model1, data1, hessian = FALSE, verbose = FALSE)
   expect_true(is.na(est0$covariance))
 
-  est1 <- mapbayest(model1, data1, verbose = FALSE, hessian = "optimHess")
   est1b <- mapbayest(model1, data1, verbose = FALSE, hessian = "nlmixrHess")
 
   nmphi <- matrix(c(1.28120118E-002, 5.40868557E-003, 4.69547364E-004,
@@ -59,19 +61,18 @@ $CAPTURE DV
 
   expect_equal(est1$covariance[[1]], nmphi, tolerance = 0.01)
   expect_equal(est1b$covariance[[1]], nmphi, tolerance = 0.01)
+})
 
-
-  #get_cov method
-
+test_that("get_cov method is correct", {
   expect_equal(get_cov(est1), est1$covariance[[1]])
-
-  data2 <- bind_rows(data1, mutate(data1, ID = 99))
   expect_length(unique(data2$ID), 2)
-  est2 <- mapbayest(model1, data2, verbose = FALSE)
-
-  expect_equal(get_cov(est2), list(`1` = est2$covariance[[1]],
-                                   `99`= est2$covariance[[2]]))
-
+  expect_equal(get_cov(est2), list(`1` = est2$covariance[[1]], `99`= est2$covariance[[2]]))
   expect_equal(get_cov(est1, simplify = FALSE), list(`1` = est2$covariance[[1]]))
+})
 
+test_that("get_phi works", {
+  expect_named(phi1 <- get_phi(est1), c("SUBJECT_NO", "ID", "ETA1", "ETA2", "ETA3", "ETC1_1", "ETC2_1", "ETC2_2", "ETC3_1", "ETC3_2", "ETC3_3", "OBJ"))
+  phi2 <- get_phi(est2)
+  expect_equal(nrow(phi2), 2)
+  expect_equal(phi1, phi2[1,])
 })

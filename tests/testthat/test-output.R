@@ -98,4 +98,5 @@ test_that("mapbayests object `slots` are correct", {
   expect_length(est3$arg.ofv.id, 2)
   expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
   expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
+  expect_false(any(attributes(est3$opt.value) %in% "optimx"))
 })

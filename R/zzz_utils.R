@@ -62,4 +62,6 @@ znorm <- function(ci){
   stats::qnorm(1-ci2q(ci))
 }
 
-
+namephicov <- function(n){
+  unlist(map(seq_len(n), ~ paste0("ETC",.x,"_",unlist(combn(.x, 1, simplify = FALSE)))))
+}
