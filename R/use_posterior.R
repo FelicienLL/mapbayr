@@ -22,17 +22,14 @@ use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta
   mod <- x$model
 
   if(isTRUE(update_omega)){
-    mod <- mod %>%
-      mrgsolve:::collapse_omega() #TO DO ; when the new version of mrgsolve will be on CRAN, use the exported collapse_omega function.
-    # For now it "notes" in R CMD check because cannot use unexported functions
-    # Also: use the new 'name' argument to name it 'covariance matrix of estimation' or something
+    mod <- collapse_omega(mod)
   }
 
   L_mod <- map(seq_along(x$arg.ofv.id), ~mod) %>% set_names(names(x$arg.ofv.id))
 
   if(isTRUE(update_omega)){
     covariance_matrices <- get_cov(x, simplify = FALSE)
-    if(!any(is.na(covariance_matrices))){
+   if(!any(is.na(covariance_matrices))){
       L_mod <- map2(L_mod, covariance_matrices, omat)
     }
   }
