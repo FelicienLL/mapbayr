@@ -48,10 +48,11 @@ Additional arguments can be passed to \code{mrgsim()} through \code{...}. Note t
 \examples{
 #x is the result of `mapbayest()`.
 #Default plot is returned by:
-#plot(x)
-#Access to more details with:
-#x \%>\%
-#  augment(end = 240) \%>\%
-#  plot()
+# plot(x)
+#Argument passed to `plot()` are passed to `augment()` in the background:
+# plot(x, end = 240, ci = TRUE)
+#Save the augmented object if simulation time is long
+# x2 <- augment(x, ci = TRUE, ci_method = "simulations", ci_sims = 10000) \%>\%
+# plot(x2)
 
 }

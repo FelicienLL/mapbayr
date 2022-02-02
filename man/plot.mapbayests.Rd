@@ -4,14 +4,12 @@
 \alias{plot.mapbayests}
 \title{Plot predictions from mapbayests object}
 \usage{
-\method{plot}{mapbayests}(x, ..., ci = FALSE)
+\method{plot}{mapbayests}(x, ...)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
-\item{...}{additional arguments (not used)}
-
-\item{ci}{print confidence interval (see \code{augment} documentation for more details)}
+\item{...}{additional arguments (passed to \code{augment.mapbayests()})}
 }
 \value{
 a \code{ggplot} object. Observed and predicted concentration vs time profile for every patients.

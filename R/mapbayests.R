@@ -45,18 +45,17 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' Plot predictions from mapbayests object
 #'
 #' @param x A \code{mapbayests} object.
-#' @param ci print confidence interval (see `augment` documentation for more details)
-#' @param ... additional arguments (not used)
+#' @param ... additional arguments (passed to `augment.mapbayests()`)
 #' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
 #'
 #' @method plot mapbayests
 #' @export
-plot.mapbayests <- function(x, ..., ci = FALSE){
+plot.mapbayests <- function(x, ...){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
     #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
-    x <- augment(x, ci = ci)
+    x <- augment(x, ...)
   }
 
   theme_custom <- function(...) {
@@ -215,11 +214,12 @@ augment <- function (x, ...)UseMethod("augment")
 #' @examples
 #' #x is the result of `mapbayest()`.
 #' #Default plot is returned by:
-#' #plot(x)
-#' #Access to more details with:
-#' #x %>%
-#' #  augment(end = 240) %>%
-#' #  plot()
+#' # plot(x)
+#' #Argument passed to `plot()` are passed to `augment()` in the background:
+#' # plot(x, end = 240, ci = TRUE)
+#' #Save the augmented object if simulation time is long
+#' # x2 <- augment(x, ci = TRUE, ci_method = "simulations", ci_sims = 10000) %>%
+#' # plot(x2)
 #'
 #' @export
 augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
