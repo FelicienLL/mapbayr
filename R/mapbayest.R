@@ -7,7 +7,7 @@
 #' @param x the model object
 #' @param data NMTRAN-like data set
 #' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
-#' @param hessian a function to compute the Hessian and variance-covariance matrix. Default is "optimHess", alternatively "nlmixrHess".
+#' @param hessian compute the Hessian and variance-covariance matrix with "optimHess" (a logical, default is `TRUE`)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
@@ -61,7 +61,7 @@
 mapbayest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
-                   hessian = c("optimHess", "nlmixrHess"),
+                   hessian = TRUE,
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
                    control = list(),

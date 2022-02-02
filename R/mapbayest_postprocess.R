@@ -33,13 +33,15 @@ postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
 
   safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
 
-  if(hessian[1] %in% c("optimHess", "nlmixrHess")){
-    if(hessian[1] == "optimHess"){
-      hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
-    }
-    if(hessian[1] == "nlmixrHess"){
-      hess <- do.call(nlmixr::nlmixrHess, args = list(par = final_eta, fn = fp))
-    }
+  if(hessian){
+  #if(hessian[1] %in% c("optimHess", "nlmixrHess")){
+  #  if(hessian[1] == "optimHess"){
+  #    hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
+  #  }
+  #  if(hessian[1] == "nlmixrHess"){
+  #    hess <- do.call(nlmixr::nlmixrHess, args = list(par = final_eta, fn = fp))
+  #  }
+    hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
     covariance <- unname(2 * safe_solve(hess)$result)
   } else {
     covariance <- matrix(NA_real_)

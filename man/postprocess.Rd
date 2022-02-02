@@ -28,7 +28,7 @@ postprocess.output(
 
 \item{arg.optim, arg.ofv, arg.ofv.fix, arg.ofv.id}{argument passed to optimizer}
 
-\item{hessian}{a function to compute the Hessian and variance-covariance matrix. Default is "optimHess", alternatively "nlmixrHess".}
+\item{hessian}{compute the Hessian and variance-covariance matrix with "optimHess" (a logical, default is \code{TRUE})}
 
 \item{post, times}{output of the post.process function}
 
