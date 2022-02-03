@@ -18,13 +18,13 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
     if(need_new_ini){
       arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
-      if(verbose) warning("\nDifficulty in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("\nDifficulty in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
     }
 
     if(need_new_bounds){
       arg.optim$lower <- new_bounds(arg.ofv, arg.optim)
       arg.optim$upper <- -arg.optim$lower
-      if(verbose) warning("\nDifficulty in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("\nDifficulty in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
     }
 
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result

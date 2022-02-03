@@ -1,4 +1,5 @@
 # mapbayr development version
+- Print a message indicating a difficulty when there is a reset during optimization, instead of a warning indicating an error. Obeys to `verbose` argument.
 - Detect non-numeric column(s). Stop and inform the user if any. See #86 #88 (thanks @jkamp91)
 - Remove stats from dependencies.
 - Add Kyle Baron as ctb

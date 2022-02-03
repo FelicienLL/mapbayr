@@ -17,6 +17,6 @@ test_that("verbose works on difficulty warning", {
     obs_lines(DV = c(5, 10), time = c(18, 40)) %>%
     get_data()
 
-  invisible(capture.output(expect_warning(mapbayest(mod, data), "Difficulty")))
+  invisible(capture.output(expect_message(mapbayest(mod, data), "Difficulty")))
   expect_warning(mapbayest(mod, data, verbose = FALSE), NA)
 })
