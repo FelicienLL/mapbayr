@@ -55,16 +55,14 @@ postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
 
   col_DV <- data$DV
   col_PRED <- x %>%
-    data_set(data) %>%
     zero_re() %>%
-    mrgsim_df(end = -1) %>%
+    mrgsim_df(data = data, end = -1) %>%
     pull(.data$DV)
 
   tab <- x %>%
     param(final_eta) %>%
-    data_set(data) %>%
     zero_re() %>%
-    mrgsim_df(end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
+    mrgsim_df(data = data, end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
     rename(IPRED = .data$DV) %>%
     select(-any_of(x@cmtL)) %>%
     mutate(PRED = col_PRED,
