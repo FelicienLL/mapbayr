@@ -75,7 +75,7 @@ merge_phi <- function(mapbayr_phi, nonmem_phi){
     pivot_longer(nonmem_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "nonmem"),
     by = c("SUBJECT_NO", "ID", "variable")
   ) %>%
-    mutate(type = dplyr::case_when(
+    mutate(type = case_when(
       str_detect(variable, "ETA") ~ "ETA",
       str_detect(variable, "OBJ") ~ "OBJ",
       is.variance(variable) ~ "VARIANCE",

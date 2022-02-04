@@ -12,6 +12,21 @@ test_that("merge_phi works", {
   expect_equal(nrow(merged), 11*(3+6+1))
   expect_equal(unique(merged$type), c("ETA", "VARIANCE", "COVARIANCE", "OBJ"))
   expect_named(merged, c("SUBJECT_NO", "ID", "variable", "type", "mapbayr", "nonmem", "adiff"))
+
+  expect_equal(merged$type[merged$variable=="ETA1"], rep("ETA", 11))
+  expect_equal(merged$type[merged$variable=="ETA2"], rep("ETA", 11))
+  expect_equal(merged$type[merged$variable=="ETA3"], rep("ETA", 11))
+
+  expect_equal(merged$type[merged$variable=="ETC1_1"], rep("VARIANCE", 11))
+  expect_equal(merged$type[merged$variable=="ETC2_2"], rep("VARIANCE", 11))
+  expect_equal(merged$type[merged$variable=="ETC3_3"], rep("VARIANCE", 11))
+
+  expect_equal(merged$type[merged$variable=="ETC2_1"], rep("COVARIANCE", 11))
+  expect_equal(merged$type[merged$variable=="ETC3_1"], rep("COVARIANCE", 11))
+  expect_equal(merged$type[merged$variable=="ETC3_2"], rep("COVARIANCE", 11))
+
+  expect_equal(merged$type[merged$variable=="OBJ"], rep("OBJ", 11))
+
 })
 
 test_that("is.variance works", {
