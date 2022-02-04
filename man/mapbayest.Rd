@@ -50,8 +50,7 @@ mbrest(...)
 a mapbayests object. Basically a list containing:
 \itemize{
 \item model: the model object
-\item data: the analyzed dataset (might slightly differ from the one you passed, with an \code{mdv} column and some lower-case names).
-\item arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage.
+\item arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage. Access to the data with \code{get_data(x)}
 \item opt.value: the original output of the optimization function
 \item final_eta: a list of individual vectors of final estimates. Access it with \code{x$final_eta} or \code{get_eta(x)}.
 \item covariance: a list of individual variance-covariance matrix of estimation. Access it with \code{x$covariance} or \code{get_cov(x)}.

@@ -99,7 +99,6 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
   } else {
     out <- list(
       model = x,
-      data = bind_rows(unname(map(arg.ofv.id, "data"))),
       arg.optim = arg.optim,
       arg.ofv.fix = arg.ofv.fix,
       arg.ofv.id = arg.ofv.id,
