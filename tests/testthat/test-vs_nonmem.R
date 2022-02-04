@@ -1,5 +1,4 @@
 nmphi <- read_nmphi(system.file("nm001", "run001.phi", package = "mapbayr"))
-mbrphi <- get_phi(est001)
 merged <- merge_phi(mapbayr_phi = get_phi(est001), nonmem_phi = nmphi)
 
 test_that("read_nmphi works", {

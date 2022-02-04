@@ -52,13 +52,13 @@ read_nmphi <- function(x){
     as_tibble() %>%
     rename_with(gsub, pattern = "[()]", replacement = "") %>%
     rename_with(gsub, pattern = ",", replacement = "_") %>%
-    mutate(dplyr::across(everything(), as.double))
+    mutate(across(everything(), as.double))
   tab
 }
 
 is.variance <- function(x){
-  stringr::str_extract_all(x, "\\d+") %>%
-    purrr::map_lgl(~ .x[1]==.x[2])
+  str_extract_all(x, "\\d+") %>%
+    map_lgl(~ .x[1]==.x[2])
 }
 
 #' @rdname vs_nonmem
@@ -70,7 +70,7 @@ merge_phi <- function(mapbayr_phi, nonmem_phi){
     names(mapbayr_phi) == names(nonmem_phi)
   )
 
-  dplyr::full_join(
+  full_join(
     pivot_longer(mapbayr_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "mapbayr"),
     pivot_longer(nonmem_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "nonmem"),
     by = c("SUBJECT_NO", "ID", "variable")
@@ -94,5 +94,5 @@ plot_phi <- function(merged_phi, only_ETA = TRUE){
   dat %>%
     ggplot(aes(.data$variable, .data$adiff, group = .data$ID)) +
     geom_line() +
-    ggplot2::scale_y_log10(name = "absolute difference")
+    scale_y_log10(name = "absolute difference")
 }

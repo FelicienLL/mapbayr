@@ -64,7 +64,7 @@ check_mapbayr_data <- function(data){
   if(is.null(data)) stop("No data provided", call. = F)
 
   # Are all column numerics
-  non_num <- names(data)[!purrr::map_lgl(data, is.numeric)]
+  non_num <- names(data)[!map_lgl(data, is.numeric)]
   if(length(non_num)) stop(paste("Non-numeric column found:", paste(non_num, collapse = " ")), call. = F)
 
   # Are required items present?

@@ -80,8 +80,8 @@ plot.mapbayests <- function(x, ...){
       filter(!(is.na(.data$value_low) & is.na(.data$value_up)))
 
     gg <- gg +
-      ggplot2::geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
-      ggplot2::scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
+      geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
+      scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
   }
 
   observations <- x$mapbay_tab %>%
@@ -292,11 +292,11 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         new_etas <- map2(init_etas, dsteps, ~.x+.y)
         new_models_etas <- map2(mods, new_etas, function(M,E){
           map(seq_along(E), ~zero_re(param(M, E[.x]))) %>% set_names(etanames)
-        }) %>% purrr::transpose()
-        new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% purrr::transpose() #1 item = 1 indiv
+        }) %>% transpose()
+        new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% transpose() #1 item = 1 indiv
         jacobians <- list(new_preds, dsteps, initpreds) %>% #1 item = 1 indiv
           pmap(function(new, step, ini){
-            purrr::map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
+            map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
           })
         varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
         errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
@@ -308,8 +308,8 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
       if(ci_method == "simulations"){
         new_idatas <- map(idata, data_nid, n = ci_sims)
         new_sims <- do_sims(mods, data = new_idatas, ... = ...)
-        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
-        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
+        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
+        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
         initpreds <- pmap(list(initpreds, LOW, UP), function(ini, low, up){
           mutate(ini, value_low = low, value_up = up)
         })
@@ -336,6 +336,6 @@ data_nid <- function(data, n){
 prepare_summarise <- function(data){
   data %>%
     group_by(.data$ID) %>%
-    mutate(rowID = dplyr::row_number()) %>%
+    mutate(rowID = row_number()) %>%
     group_by(.data$rowID)
 }
