@@ -45,7 +45,7 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' Plot predictions from mapbayests object
 #'
 #' @param x A \code{mapbayests} object.
-#' @param ... additional arguments (not used)
+#' @param ... additional arguments (passed to `augment.mapbayests()`)
 #' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
 #'
 #' @method plot mapbayests
@@ -55,7 +55,7 @@ plot.mapbayests <- function(x, ...){
 
   if(is.null(x$aug_tab)){
     #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
-    x <- augment(x)
+    x <- augment(x, ...)
   }
 
   theme_custom <- function(...) {
@@ -74,6 +74,15 @@ plot.mapbayests <- function(x, ...){
     theme_custom()+
     scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
     scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
+
+  if(!is.null(predictions[["value_low"]]) & !is.null(predictions[["value_up"]])){
+    data_ribbon <- predictions %>%
+      filter(!(is.na(.data$value_low) & is.na(.data$value_up)))
+
+    gg <- gg +
+      ggplot2::geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
+      ggplot2::scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
+  }
 
   observations <- x$mapbay_tab %>%
     filter(.data$evid==0) %>%
@@ -189,6 +198,10 @@ augment <- function (x, ...)UseMethod("augment")
 #' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
 #' @param start,end,delta start, end and delta of simulation time passed to `mrgsim()` (see details)
+#' @param ci a logical. If TRUE, compute a confidence interval around the prediction (default is FALSE)
+#' @param ci_width a number between 0 and 100, width of the confidence interval (default is "90" for a 90%CI)
+#' @param ci_method method to compute the confidence interval. Can be "delta" (the default) to use the Delta approximation. Alternatively "simulations" for a more accurate approach, but also more time-consuming.
+#' @param ci_sims number of replicates to simulate in order to derive the confidence interval (default is 500)
 #' @param ... additional arguments passed to `mrgsim()`
 #'
 #' @method augment mapbayests
@@ -201,14 +214,15 @@ augment <- function (x, ...)UseMethod("augment")
 #' @examples
 #' #x is the result of `mapbayest()`.
 #' #Default plot is returned by:
-#' #plot(x)
-#' #Access to more details with:
-#' #x %>%
-#' #  augment(end = 240) %>%
-#' #  plot()
+#' # plot(x)
+#' #Argument passed to `plot()` are passed to `augment()` in the background:
+#' # plot(x, end = 240, ci = TRUE)
+#' #Save the augmented object if simulation time is long
+#' # x2 <- augment(x, ci = TRUE, ci_method = "simulations", ci_sims = 10000) %>%
+#' # plot(x2)
 #'
 #' @export
-augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ...){
+augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
   if(is.null(data)){
     idata <- map(x$arg.ofv.id, "data")
   } else {
@@ -235,93 +249,93 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
     #A vector. For each ID, possibly a different delta.
   }
 
-  carry <- idata[[1]] %>%
-    select(-any_of(c("ID", "time", "cmt","DV"))) %>%
-    names()
+  fitcmt <- fit_cmt(x$model, get_data(x))
 
-  ipred <- list(data = idata,
-                start = start,
-                end = end,
-                delta = delta,
-                eta = x$final_eta) %>%
-    pmap_dfr(function(data, start, end, delta, eta, ...){
-      x$model %>%
-        param(eta) %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "IPRED")
-    }, ... = ...)
-
-  pred <- list(data = idata,
-               start = start,
-               end = end,
-               delta = delta) %>%
-    pmap_dfr(function(data, start, end, delta, eta, ...){
-      x$model %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, start = start, end = end, delta = delta, recsort = 3, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "PRED")
-    }, ... = ...)
-
-  aug_tab <- bind_rows(ipred, pred)
-
-  fitcmt <- fit_cmt(x$model, idata[[1]])
-
-  if(length(fitcmt)>1){
-    aug_tab <- select(aug_tab, -any_of(c("DV")))
-  } else{
-    aug_tab <- select(aug_tab, -any_of(c("PAR", "MET")))
+  if(length(fitcmt) > 1){
+    toreq <- "PAR,MET"
+  } else {
+    toreq <- "DV"
   }
 
-  aug_tab <- aug_tab %>%
-    pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
-    mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2]))%>%
+  tocarry <- c("evid")
+
+  do_sims <- function(mods, data = idata, ...){
+    sims <- list(
+      x = mods,
+      data = data, start = start, end = end, delta = delta
+    ) %>%
+      pmap(mrgsim_df, carry_out = tocarry, Request = toreq, recsort = 3, obsaug = TRUE, ... = ...)
+
+    map(sims, ~ .x %>%
+      filter(.data$evid %in% c(0,2)) %>%
+      select(-any_of("cmt")) %>% #should not be carried normally but who knows...
+      pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
+      mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2])) %>%
+      arrange(.data$ID, .data$time, .data$cmt)
+      )
+  }
+
+  do_augment <- function(x, type, ...){
+    stopifnot(type %in% c("ipred", "pred"))
+
+    mods <- switch(type,
+                   "ipred" = use_posterior(x, update_eta = TRUE, update_omega = TRUE, update_cov = FALSE, simplify = FALSE),
+                   "pred" = use_posterior(x, update_eta = FALSE, update_omega = FALSE, update_cov = FALSE, simplify = FALSE, .zero_re = "sigma"))
+
+    initpreds <- do_sims(map(mods, zero_re), ... = ...)
+
+    if(ci){
+      if(ci_method == "delta"){
+        etanames <- eta_names(mods[[1]])
+        init_etas <- map(mods, ~unlist(param(.x)[etanames]))
+        dsteps <- log(1+1e-8) #directly add 1e-8 because working on eta so will return into a multiplicative effect on parameter scale
+        new_etas <- map2(init_etas, dsteps, ~.x+.y)
+        new_models_etas <- map2(mods, new_etas, function(M,E){
+          map(seq_along(E), ~zero_re(param(M, E[.x]))) %>% set_names(etanames)
+        }) %>% purrr::transpose()
+        new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% purrr::transpose() #1 item = 1 indiv
+        jacobians <- list(new_preds, dsteps, initpreds) %>% #1 item = 1 indiv
+          pmap(function(new, step, ini){
+            purrr::map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
+          })
+        varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
+        errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
+        initpreds <- map2(initpreds, errors, ~mutate(.x,
+                                                     value_low = .data[["value"]] - .y,
+                                                     value_up = .data[["value"]] + .y))
+      }
+
+      if(ci_method == "simulations"){
+        new_idatas <- map(idata, data_nid, n = ci_sims)
+        new_sims <- do_sims(mods, data = new_idatas, ... = ...)
+        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
+        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% dplyr::summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
+        initpreds <- pmap(list(initpreds, LOW, UP), function(ini, low, up){
+          mutate(ini, value_low = low, value_up = up)
+        })
+      }
+    }
+    initpreds
+  }
+
+  ipred <- do_augment(x, type = "ipred", ... = ...) %>% bind_rows()
+  pred  <- do_augment(x, type = "pred", ... = ...) %>% bind_rows()
+
+  x$aug_tab <- bind_rows(list(IPRED = ipred, PRED = pred), .id = "type") %>%
+    as_tibble() %>%
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
-  x <- c(x, aug_tab = list(aug_tab))
   class(x) <- "mapbayests"
   return(x)
 }
 
-#' Use posterior param and covariates
-#'
-#' @param x A \code{mapbayests} object.
-#' @param .zero_re Default is "both", meaning all matrices are zeroed. Pass "omega" to zero between-subject variability, and keep simulating residual error.
-#'
-#' @details Updates the param values of the model object with the estimated etas, and the covariates of the individual. Returns an updated mrgmod, so that the user can derive simulations from it. Works only with one individual. Does not handle time-varying covariates.
-#' @return a mrgmod
-#' @export
-use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
-  mod <- x$model
+data_nid <- function(data, n){
+  map_dfr(.x = seq_len(n), ~mutate(data, ID = .x))
+}
 
-  if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
-
-  mod <- switch (.zero_re[1],
-                 "both" = zero_re(mod),
-                 "omega" = zero_re(mod, "omega"),
-                 "sigma" = zero_re(mod, "sigma")
-  )
-
-  covs_name <- mbr_cov_names(mod)
-  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
-
-  etas <- x$final_eta[[1]]
-  is_tv <- (map_dbl(covs_name, ~length(unique(x$mapbay_tab[[.x]]))) != 1)
-
-  if(any(is_tv)) warning("Time-varying covariates found. First value used for: ",  paste(covs_name[is_tv], collapse = ", "), ".")
-
-  covs <- x$mapbay_tab[1,covs_name, drop = FALSE]
-
-  mod %>%
-    param(as.list(c(etas, covs)))
+prepare_summarise <- function(data){
+  data %>%
+    group_by(.data$ID) %>%
+    mutate(rowID = dplyr::row_number()) %>%
+    group_by(.data$rowID)
 }

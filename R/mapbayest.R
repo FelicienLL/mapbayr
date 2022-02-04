@@ -7,6 +7,7 @@
 #' @param x the model object
 #' @param data NMTRAN-like data set
 #' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
+#' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
@@ -21,6 +22,7 @@
 #'  - arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage.
 #'  - opt.value: the original output of the optimization function
 #'  - final_eta: a list of individual vectors of final estimates. Access it with `x$final_eta` or `get_eta(x)`.
+#'  - covariance: a list of individual variance-covariance matrix of estimation. Access it with `x$covariance` or `get_cov(x)`.
 #'  - mapbay_tab: an output table containing the results of your estimations (data, IPRED, PRED, covariates, captured items, ETA etc...). Access it with `x$mapbay_tab`, `as.data.frame(x)` or `as_tibble(x)`.
 #'  - information: run times and package versions.
 #' @export
@@ -59,6 +61,7 @@
 mapbayest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
+                   hessian = stats::optimHess,
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
                    control = list(),
@@ -103,10 +106,13 @@ mapbayest <- function(x,
   # Start post-processing (i.e. generating output files)
   post <- list(
     data = iddata,
-    opt.value = opt.value
+    opt.value = opt.value,
+    arg.ofv = arg.ofv
     ) %>%
     pmap(postprocess.optim,
-         x = x)
+         x = x,
+         hessian = hessian,
+         arg.optim = arg.optim)
 
   out <- postprocess.output(x,
                             arg.optim = arg.optim,
