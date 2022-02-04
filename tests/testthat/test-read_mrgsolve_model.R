@@ -278,7 +278,47 @@ $PKMODEL ncmt = 1, depot = FALSE
   expect_true("$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr3)
   expect_true(!"$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr3)
 
-  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr4)
-  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr4)
+ # expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr4)
+#  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr4)
+
+})
+
+
+test_that("deals with zero in OMEGA/SIGMA matrices", {
+  code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
+KA = 0.5, TVCL = 1.1, TVV = 23.3
+$OMEGA 0.41 0
+$SIGMA 0.04 0
+$CMT DEPOT CENT
+$PK
+double CL=TVCL*exp(ETA1+ETA(1));
+double V=TVV*exp(ETA2+ETA(2)) ;
+$ERROR
+double DV=CENT/V*(1+EPS(1))+EPS(2);
+$PKMODEL ncmt = 1, depot = TRUE
+$CAPTURE DV CL
+"
+
+  mod1 <- mcode('mod1', code1)
+  data1 <- data.frame(ID = 1, TIME = c(0, 1.1, 5.2, 12.3), EVID = c(1,0,0,0), AMT = c(500, 0,0,0), CMT = c(1,2,2,2), DV = c(0, 15.1, 29.5, 22.3))
+
+  expect_error(mapbayest(mod1, data1), "Cannot be equal to zero")
+
+  code2 <- "$PARAM ETA1 = 0, ETA2 = 0,
+KA = 0.5, TVCL = 1.1, TVV = 23.3
+$OMEGA 0.41 0.32
+$SIGMA 0 0
+$CMT DEPOT CENT
+$PK
+double CL=TVCL*exp(ETA1+ETA(1));
+double V=TVV*exp(ETA2+ETA(2)) ;
+$ERROR
+double DV=CENT/V*(1+EPS(1))+EPS(2);
+$PKMODEL ncmt = 1, depot = TRUE
+$CAPTURE DV CL
+"
+  mod2 <- mcode('mod2', code2)
+  expect_error(mapbayest(mod2, data1), "SIGMA are equal to zero")
+
 
 })
