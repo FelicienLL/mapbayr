@@ -9,6 +9,7 @@ mapbayest(
   x,
   data = NULL,
   method = "L-BFGS-B",
+  hessian = stats::optimHess,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -26,6 +27,8 @@ mbrest(...)
 \item{data}{NMTRAN-like data set}
 
 \item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
+
+\item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
@@ -51,6 +54,7 @@ a mapbayests object. Basically a list containing:
 \item arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage.
 \item opt.value: the original output of the optimization function
 \item final_eta: a list of individual vectors of final estimates. Access it with \code{x$final_eta} or \code{get_eta(x)}.
+\item covariance: a list of individual variance-covariance matrix of estimation. Access it with \code{x$covariance} or \code{get_cov(x)}.
 \item mapbay_tab: an output table containing the results of your estimations (data, IPRED, PRED, covariates, captured items, ETA etc...). Access it with \code{x$mapbay_tab}, \code{as.data.frame(x)} or \code{as_tibble(x)}.
 \item information: run times and package versions.
 }

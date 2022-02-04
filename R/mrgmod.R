@@ -214,8 +214,7 @@ add_covariates.mrgmod <- function(x, covariates = list(), ...){
       ungroup()
   }
 
-  dd <- x %>%
-    data_set(d)
+  dd <- data_set(x, d)
 
   return(dd)
 

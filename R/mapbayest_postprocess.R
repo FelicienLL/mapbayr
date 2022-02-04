@@ -4,23 +4,55 @@
 #' @return `postprocess.optim()` returns a list with final parameters and `mapbay_tab`. `postprocess.output()` returns a `mapbayests` class object.
 #' @inheritParams mapbayest
 #' @param opt.value value returned by optimizer
-#' @param arg.optim,arg.ofv.fix,arg.ofv.id argument passed to optimizer
+#' @param arg.optim,arg.ofv,arg.ofv.fix,arg.ofv.id argument passed to optimizer
 #' @param post,times output of the post.process function
 #' @description Functions to generate postprocess after optimization.
 NULL
 #> NULL
 
-
+#Variance Covariance Matrix
+safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
 
 #' Post-process: derive predictions from optimization
 #' @rdname postprocess
 #' @export
-postprocess.optim <- function(x, data, opt.value){
+postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
 
+  #Final eta
   final_eta <- opt.value[eta_names(x)] %>%
     as.double() %>%
     set_names(eta_names(x))
 
+  #Variance Covariance Matrix
+  if(is.function(hessian)){
+
+    accepted_args <- names(formals(hessian))
+
+    if(all(c("par", "fn") %in% accepted_args)){
+
+      fp <- function(p){ #obj fun value as function of param
+        arg <- arg.ofv
+        eta <- p
+        names(eta) <- eta_names(x)
+        arg$eta <- eta
+        do.call(compute_ofv, arg)
+      }
+
+      all_args_to_pass <- list(par = final_eta,
+                               fn = fp,
+                               control = arg.optim$control)
+      actual_args <- all_args_to_pass[intersect(names(all_args_to_pass), accepted_args)]
+      hess <- do.call(hessian, args = actual_args)
+      covariance <- unname(2 * safe_solve(hess)$result)
+
+    } else {
+      covariance <- matrix(NA_real_)
+    }
+  } else {
+    covariance <- matrix(NA_real_)
+  }
+
+  #Mapbay Tab
   reserved_capt <- c("DV", "PAR", "MET")
   reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
   other_items <- names(data)[!(names(data) %in% c(reserved_names, mbr_cov_names(x), reserved_capt))]
@@ -28,16 +60,14 @@ postprocess.optim <- function(x, data, opt.value){
 
   col_DV <- data$DV
   col_PRED <- x %>%
-    data_set(data) %>%
     zero_re() %>%
-    mrgsim_df(end = -1) %>%
+    mrgsim_df(data = data, end = -1) %>%
     pull(.data$DV)
 
   tab <- x %>%
     param(final_eta) %>%
-    data_set(data) %>%
     zero_re() %>%
-    mrgsim_df(end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
+    mrgsim_df(data = data, end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
     rename(IPRED = .data$DV) %>%
     select(-any_of(x@cmtL)) %>%
     mutate(PRED = col_PRED,
@@ -51,6 +81,7 @@ postprocess.optim <- function(x, data, opt.value){
 
   list(
     final_eta = final_eta,
+    covariance = covariance,
     mapbay_tab = mapbay_tab
   )
 
@@ -72,8 +103,9 @@ postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value,
       arg.optim = arg.optim,
       arg.ofv.fix = arg.ofv.fix,
       arg.ofv.id = arg.ofv.id,
-      opt.value = map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID"),
+      opt.value = as.data.frame(map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID")),
       final_eta = map(post, "final_eta"),
+      covariance = map(post, "covariance"),
       mapbay_tab = map_dfr(post, "mapbay_tab"),
       information = generate_information(times)
     )

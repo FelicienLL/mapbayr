@@ -10,7 +10,7 @@ data2 <- mod %>%
   obs_lines(DV = c(.45, .35), time = c(19, 41), DVmet = c(.15, .25)) %>%
   add_covariates(list(WT = 70)) %>%
   get_data() %>%
-  mutate(ID = 2)
+  mutate(ID = 3)
 
 data12 <- bind_rows(data1, data2)
 est <- mapbayest(x = mod, data = data12, verbose = F)
@@ -37,7 +37,7 @@ test_that("start argument works", {
 
   a3 <- augment(est, start = 10)
   expect_equal(min(filter(a3$aug_tab, ID == 1)$time), 10)
-  expect_equal(min(filter(a3$aug_tab, ID == 2)$time), 10)
+  expect_equal(min(filter(a3$aug_tab, ID == 3)$time), 10)
 
 })
 
@@ -48,7 +48,7 @@ test_that("end argument works", {
 
   a3 <- augment(est, end = 400)
   expect_equal(max(filter(a3$aug_tab, ID == 1)$time), 400)
-  expect_equal(max(filter(a3$aug_tab, ID == 2)$time), 400)
+  expect_equal(max(filter(a3$aug_tab, ID == 3)$time), 400)
 
   expect_error(augment(est, start = c(0, 100), end = c(100, 200)), NA)
 
@@ -71,4 +71,42 @@ test_that("first prediction is not null if SS=0", {
     obs_lines(time = 12, DV = 1.1) %>%
     mapbayest(verbose = F)
   expect_true(all(filter(augment(est1)$aug_tab, time == 0)$value != 0))
+})
+
+test_that("confidence interval works", {
+  A0 <- augment(est, delta = 1)$aug_tab #default : no conf interval
+  expect_null(A0[["value_up"]])
+  expect_null(A0[["value_low"]])
+
+  #Default CI method
+  set.seed(1)
+  A1a <- augment(est, delta = 1, ci = TRUE)$aug_tab
+  set.seed(2)
+  A1b <- augment(est, delta = 1, ci = TRUE)$aug_tab
+
+  expect_type(A1a[["value_low"]], "double")
+  expect_equal(A1a, A1b)
+
+  #Simulations = different results unless seed is fixed
+  set.seed(1)
+  A2a <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+  set.seed(2)
+  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+
+  expect_true(all(filter(A2a, time != 0)$value_low != filter(A2b, time != 0)$value_low))
+
+  set.seed(2)
+  A2c <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+  expect_equal(A2b, A2c)
+
+  # Increased width of CI
+  A95 <- augment(est, delta = 1, ci = TRUE, ci_width = 95)$aug_tab
+  expect_true(all((A95[["value_up"]] >= A1a[["value_up"]])))
+})
+
+test_that("CI with multiple types of DV", {
+  A1a <- augment(est, delta = 1, ci = TRUE)$aug_tab
+  expect_length(unique(A1a$ID), 2)
+  expect_true(all(A1a$value <= A1a$value_up))
+  expect_true(all(A1a$value >= A1a$value_low))
 })

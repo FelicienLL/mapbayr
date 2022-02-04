@@ -93,9 +93,10 @@ test_that("mapbayests object `slots` are correct", {
 
   est3 <- mapbayest(mod3, data3, verbose = F)
 
-  expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "mapbay_tab", "information"))
+  expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "covariance", "mapbay_tab", "information"))
   expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log_transformation", "omega.inv", "obs_cmt"))
   expect_length(est3$arg.ofv.id, 2)
   expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
   expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
+  expect_false(any(attributes(est3$opt.value) %in% "optimx"))
 })

@@ -4,12 +4,14 @@
 \alias{get_data.mapbayests}
 \title{Return data from a mapbayests}
 \usage{
-\method{get_data}{mapbayests}(x, ...)
+\method{get_data}{mapbayests}(x, ..., output = "df")
 }
 \arguments{
 \item{x}{mapbayests object}
 
 \item{...}{not used}
+
+\item{output}{either a single data.frame ("df", the default) or a list ("list") of individual data sets}
 }
 \value{
 a tibble
