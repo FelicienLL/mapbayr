@@ -4,3 +4,4 @@ README.Rmd
 ^man/figures/README-.*\.png$
 ^inst/logo\.pptx$
 ^cran-comments\.md$
+^data-raw$

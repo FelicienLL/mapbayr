@@ -183,10 +183,10 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
   }
 
   par_tab <- x$mapbay_tab %>%
-    select(.data$ID, dplyr::any_of(ok_names)) %>%
+    select(.data$ID, any_of(ok_names)) %>%
     group_by(.data$ID) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
+    slice(1) %>%
+    ungroup() %>%
     as.data.frame()
 
   if(!.keep_ID) par_tab <- select(par_tab, -.data$ID)
@@ -218,7 +218,7 @@ get_phi.mapbayests <- function(x, ...){
   x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
     bind_cols(covphi) %>%
     select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
-    mutate(SUBJECT_NO = as.double(dplyr::row_number()), .before = 1) %>%
+    mutate(SUBJECT_NO = as.double(row_number()), .before = 1) %>%
     mutate(ID = as.double(.data$ID)) %>%
     as_tibble()
 }
