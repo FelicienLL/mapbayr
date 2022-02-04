@@ -52,6 +52,8 @@ $CAPTURE DV
 test_that("covariance matrix is correct", {
   est0 <- mapbayest(model1, data1, hessian = FALSE, verbose = FALSE)
   expect_true(is.na(est0$covariance))
+  expect_error(est0b <- mapbayest(model1, data1, hessian = any, verbose = FALSE), NA)
+  expect_true(is.na(est0b$covariance))
 
  # est1b <- mapbayest(model1, data1, verbose = FALSE, hessian = "nlmixrHess")
 

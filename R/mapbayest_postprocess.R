@@ -10,7 +10,8 @@
 NULL
 #> NULL
 
-
+#Variance Covariance Matrix
+safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
 
 #' Post-process: derive predictions from optimization
 #' @rdname postprocess
@@ -23,26 +24,30 @@ postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
     set_names(eta_names(x))
 
   #Variance Covariance Matrix
-  fp <- function(p){ #obj fun value as function of param
-    arg <- arg.ofv
-    eta <- p
-    names(eta) <- eta_names(x)
-    arg$eta <- eta
-    do.call(compute_ofv, arg)
-  }
+  if(is.function(hessian)){
 
-  safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
+    accepted_args <- names(formals(hessian))
 
-  if(hessian){
-  #if(hessian[1] %in% c("optimHess", "nlmixrHess")){
-  #  if(hessian[1] == "optimHess"){
-  #    hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
-  #  }
-  #  if(hessian[1] == "nlmixrHess"){
-  #    hess <- do.call(nlmixr::nlmixrHess, args = list(par = final_eta, fn = fp))
-  #  }
-    hess <- do.call(stats::optimHess, args = list(par = final_eta, fn = fp, control = arg.optim$control))
-    covariance <- unname(2 * safe_solve(hess)$result)
+    if(all(c("par", "fn") %in% accepted_args)){
+
+      fp <- function(p){ #obj fun value as function of param
+        arg <- arg.ofv
+        eta <- p
+        names(eta) <- eta_names(x)
+        arg$eta <- eta
+        do.call(compute_ofv, arg)
+      }
+
+      all_args_to_pass <- list(par = final_eta,
+                               fn = fp,
+                               control = arg.optim$control)
+      actual_args <- all_args_to_pass[intersect(names(all_args_to_pass), accepted_args)]
+      hess <- do.call(hessian, args = actual_args)
+      covariance <- unname(2 * safe_solve(hess)$result)
+
+    } else {
+      covariance <- matrix(NA_real_)
+    }
   } else {
     covariance <- matrix(NA_real_)
   }
