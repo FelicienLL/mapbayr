@@ -25,7 +25,7 @@ derivatives <- function(v_DV, v_cmt, cmts){
     LIST[[col_add]]  <- rep.int(1, length(v_DV))
     LIST[[col_add]][!condcmts]  <- 0
   }
-  return(as.matrix(as.data.frame(LIST)))
+  return(do.call(cbind, LIST))
 }
 
 
