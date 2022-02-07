@@ -9,11 +9,24 @@
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
-\item{...}{additional arguments (passed to \code{augment.mapbayests()})}
+\item{...}{additional arguments (passed to \code{\link{augment.mapbayests}})}
 }
 \value{
-a \code{ggplot} object. Observed and predicted concentration vs time profile for every patients.
+a \code{ggplot} object.
 }
 \description{
 Plot predictions from mapbayests object
+}
+\details{
+Use this function to plot the results of the estimations, in the form of concentration vs time profiles for every patient of the data set.
+For additional modifications, you can:
+\itemize{
+\item see \code{\link{augment.mapbayests}} to modify the simulation output.
+\item add extra \verb{+function(...)} in order to modify the plot as a regular \code{ggplot2} object.
+}
+}
+\examples{
+plot(est001, delta = 1) +
+  ggplot2::labs(title = "Awesome predictions")
+
 }

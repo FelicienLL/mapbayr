@@ -25,3 +25,4 @@ test_that("see_data is deprecated", {
   expect_warning(see_est1 <- see_data(est1), "see_data\\(\\) is deprecated. Use get_data\\(\\) instead.")
   expect_equal(see_est1, get_data(est1))
 })
+

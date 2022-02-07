@@ -18,8 +18,7 @@
 #'
 #' @return a mapbayests object. Basically a list containing:
 #'  - model: the model object
-#'  - data: the analyzed dataset (might slightly differ from the one you passed, with an `mdv` column and some lower-case names).
-#'  - arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage.
+#'  - arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage. Access to the data with `get_data(x)`
 #'  - opt.value: the original output of the optimization function
 #'  - final_eta: a list of individual vectors of final estimates. Access it with `x$final_eta` or `get_eta(x)`.
 #'  - covariance: a list of individual variance-covariance matrix of estimation. Access it with `x$covariance` or `get_cov(x)`.
@@ -57,6 +56,11 @@
 #' get_eta(my_est)
 #' get_param(my_est)
 #' as.data.frame(my_est)
+#' use_posterior(my_est)
+#'
+#'@seealso \code{\link{hist.mapbayests}}
+#'@seealso \code{\link{plot.mapbayests}}
+#'@seealso \code{\link{use_posterior}}
 #'
 mapbayest <- function(x,
                    data = NULL,
@@ -77,6 +81,8 @@ mapbayest <- function(x,
   if(is.null(data)){
     data <- x@args$data
   }
+  x@args$data <- NULL #empty the data slot in model object
+
   if(check){
     ok <- check_mapbayr_model(x)
     if(!isTRUE(ok)){

@@ -45,8 +45,18 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' Plot predictions from mapbayests object
 #'
 #' @param x A \code{mapbayests} object.
-#' @param ... additional arguments (passed to `augment.mapbayests()`)
-#' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
+#' @param ... additional arguments (passed to \code{\link{augment.mapbayests}})
+#' @return a `ggplot` object.
+#'
+#' @details
+#' Use this function to plot the results of the estimations, in the form of concentration vs time profiles for every patient of the data set.
+#' For additional modifications, you can:
+#'  - see \code{\link{augment.mapbayests}} to modify the simulation output.
+#'  - add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
+#'
+#' @examples
+#' plot(est001, delta = 1) +
+#'   ggplot2::labs(title = "Awesome predictions")
 #'
 #' @method plot mapbayests
 #' @export
@@ -126,7 +136,15 @@ plot.mapbayests <- function(x, ...){
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
-#' @return a `ggplot` object, representing prior parameter density distribution, and a histogram of patients estimates.
+#' @return a `ggplot` object.
+#'
+#' @details
+#' Use this function to plot the results of the estimations, in the form of histograms with the *a priori* distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding distribution (if n = 1 patient).
+#' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
+#'
+#' @examples
+#' hist(est001) +
+#'   ggplot2::labs(title = "Awesome predictions")
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){
@@ -191,7 +209,7 @@ hist.mapbayests <- function(x, ...){
 #' @param ... additional arguments
 #' @export
 #' @return an augmented object (depending on the object passed).
-augment <- function (x, ...)UseMethod("augment")
+augment <- function (x, ...) UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'

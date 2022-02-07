@@ -12,8 +12,16 @@
 \item{...}{additional arguments (not used)}
 }
 \value{
-a \code{ggplot} object, representing prior parameter density distribution, and a histogram of patients estimates.
+a \code{ggplot} object.
 }
 \description{
 Plot posterior distribution of bayesian estimates
+}
+\details{
+Use this function to plot the results of the estimations, in the form of histograms with the \emph{a priori} distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding distribution (if n = 1 patient).
+For additional modifications, you can add extra \verb{+function(...)} in order to modify the plot as a regular \code{ggplot2} object.
+}
+\examples{
+hist(est001) +
+  ggplot2::labs(title = "Awesome predictions")
 }

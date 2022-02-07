@@ -1,4 +1,6 @@
 # mapbayr development version
+- Check for undesirable zero in OMEGA/SIGMA matrices instead of crashing. See #44
+- Remove the `$data` in estimation object. Access it with `get_data()` instead. See #64
 - Print a message indicating a difficulty when there is a reset during optimization, instead of a warning indicating an error. Obeys to `verbose` argument.
 - Detect non-numeric column(s). Stop and inform the user if any. See #86 #88 (thanks @jkamp91)
 - Remove stats from dependencies.

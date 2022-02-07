@@ -34,6 +34,10 @@ check_mapbayr_model <- function(x){
     nomega <- length(diag(omat(x, make = T)))
     if(nomega != neta) check <- bind_rows(check, list(stop = TRUE, descr = "$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM."))
 
+    # OMEGA : no value = 0.
+    omega0 <- which(odiag(x) == 0)
+    if(length(omega0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$OMEGA: ", paste0(omega0, collapse = "-"), " is (are) equal to 0. Cannot be equal to zero.")))
+
     # $SIGMA
     nsig <- length(diag(smat(x, make = T)))
     if(nsig%%2 !=0) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: A pair number of sigma values is expected (", nsig, " values found).")))
@@ -44,8 +48,10 @@ check_mapbayr_model <- function(x){
       if(ncmt != nsig/2) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."))
     }
 
+    dsig <- diag(smat(x, make = T))
+    if(all(dsig == 0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: All the values of SIGMA are equal to zero, which is not allowed.")))
+
     if(log_transformation(x)){
-      dsig <- diag(smat(x, make = T))
       if(any(which(dsig==0)%%2 == 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0."))
       if(any(which(dsig!=0)%%2 != 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0."))
     }
