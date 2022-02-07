@@ -18,7 +18,7 @@ a \code{ggplot} object.
 Plot predictions from mapbayests object
 }
 \details{
-Use this function to plot the results of the estimations, in the form of concentration vs time profile for every patients of the data set.
+Use this function to plot the results of the estimations, in the form of concentration vs time profiles for every patient of the data set.
 For additional modifications, you can:
 \itemize{
 \item see \code{\link{augment.mapbayests}} to modify the simulation output.

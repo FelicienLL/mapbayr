@@ -18,7 +18,7 @@ a \code{ggplot} object.
 Plot posterior distribution of bayesian estimates
 }
 \details{
-Use this function to plot the results of the estimations, in the form of an histogram with the a priori distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding a priori distribution (if n = 1 patient).
+Use this function to plot the results of the estimations, in the form of histograms with the \emph{a priori} distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding distribution (if n = 1 patient).
 For additional modifications, you can add extra \verb{+function(...)} in order to modify the plot as a regular \code{ggplot2} object.
 }
 \examples{

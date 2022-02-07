@@ -49,7 +49,7 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' @return a `ggplot` object.
 #'
 #' @details
-#' Use this function to plot the results of the estimations, in the form of concentration vs time profile for every patients of the data set.
+#' Use this function to plot the results of the estimations, in the form of concentration vs time profiles for every patient of the data set.
 #' For additional modifications, you can:
 #'  - see \code{\link{augment.mapbayests}} to modify the simulation output.
 #'  - add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
@@ -139,7 +139,7 @@ plot.mapbayests <- function(x, ...){
 #' @return a `ggplot` object.
 #'
 #' @details
-#' Use this function to plot the results of the estimations, in the form of an histogram with the a priori distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding a priori distribution (if n = 1 patient).
+#' Use this function to plot the results of the estimations, in the form of histograms with the *a priori* distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding distribution (if n = 1 patient).
 #' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
@@ -209,7 +209,7 @@ hist.mapbayests <- function(x, ...){
 #' @param ... additional arguments
 #' @export
 #' @return an augmented object (depending on the object passed).
-augment <- function (x, ...)UseMethod("augment")
+augment <- function (x, ...) UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'

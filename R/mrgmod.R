@@ -22,7 +22,7 @@
 #'
 #' These functions are passed to a `mrgmod` object (mrgsolve model), and return a `mrgmod` object with a data set inside with the correct formatting (so-called NM-TRAN format), so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
 #'
-#' These functions are meant to be use for one single patient at a time. Multiple ID is accepted, but the user is ask to check if the output is acceptable.
+#' These functions are meant to be used for one single patient at a time. Multiple ID is accepted, but the user is asked to check if the output is acceptable.
 #'
 #' @examples
 #' library(magrittr)
