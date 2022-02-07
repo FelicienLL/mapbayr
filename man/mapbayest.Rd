@@ -92,5 +92,13 @@ print(my_est)
 get_eta(my_est)
 get_param(my_est)
 as.data.frame(my_est)
+use_posterior(my_est)
 
+}
+\seealso{
+\code{\link{hist.mapbayests}}
+
+\code{\link{plot.mapbayests}}
+
+\code{\link{use_posterior}}
 }
