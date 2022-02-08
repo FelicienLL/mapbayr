@@ -205,8 +205,8 @@ tracker](https://github.com/FelicienLL/mapbayr/issues).
 
 mapbayr is a generalization of the “MAP Bayes estimation” tutorial
 available on the [mrgsolve
-blog](https://mrgsolve.github.io/blog/map_bayes.html). Additional
-features are:
+blog](https://mrgsolve.org/blog/map_bayes.html). Additional features
+are:
 
 -   a unique function to perform the estimation: `mapbayest()`.
 -   accepts a large variety of structural models thanks to the
