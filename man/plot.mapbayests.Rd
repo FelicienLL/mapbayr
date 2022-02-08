@@ -26,7 +26,7 @@ For additional modifications, you can:
 }
 }
 \examples{
-plot(est001, delta = 1) +
-  ggplot2::labs(title = "Awesome predictions")
+#plot(est001, delta = 1) +
+#  ggplot2::labs(title = "Awesome predictions")
 
 }

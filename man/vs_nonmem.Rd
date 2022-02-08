@@ -18,7 +18,7 @@ plot_phi(merged_phi, only_ETA = TRUE)
 
 \item{mapbayr_phi}{results of mapbayr estimations, in the form of a tibble data.frame, typically obtained from \code{get_phi()}}
 
-\item{nonmem_phi}{results of nonmem estimations, in the form of a tibble data.frame, typically obtained from \code{read_nmphi()}}
+\item{nonmem_phi}{results of NONMEM estimations, in the form of a tibble data.frame, typically obtained from \code{read_nmphi()}}
 
 \item{merged_phi}{merged results of estimations, typically obtained from \code{merge_phi()}}
 
@@ -28,7 +28,7 @@ plot_phi(merged_phi, only_ETA = TRUE)
 \itemize{
 \item read_nmphi: a tibble data.frame with a format close to the original .phi file
 \item merge_phi: a long-form tibble data.frame with results of mapbayr and NONMEM
-\item plot_phi: a ggplot2 object
+\item plot_phi: a \code{ggplot2} object
 }
 }
 \description{

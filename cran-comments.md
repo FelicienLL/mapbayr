@@ -1,8 +1,7 @@
 ## Test environment
-local Mac OS (Big Sur 11.2.3), R 4.0.5
-local Windows 10, R 4.1
+local Windows 10, R 4.1.2
 
 ## R CMD check results
 This is an update of a package already on CRAN. 
 
-There were no ERRORs, no WARNINGs in checks.
+There were no ERRORs, no WARNINGs, no NOTEs in checks.

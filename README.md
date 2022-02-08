@@ -229,8 +229,9 @@ features are:
 
 Reliability of parameter estimation against NONMEM was assessed for a
 wide variety of models and data. The results of this validation study
-were published in [CPT:PSP](https://doi.org/10.1002/psp4.12689), and
-materials are available in [a dedicated
+were published in [CPT:Pharmacometrics & System
+Pharmacology](https://doi.org/10.1002/psp4.12689), and materials are
+available in [a dedicated
 repository](https://github.com/FelicienLL/mapbayr-CPTPSP-2021). If you
 observe some discrepancies between mapbayr and NONMEM on your own model
 and data, feel free to contact us through the [issue
