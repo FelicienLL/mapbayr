@@ -29,6 +29,43 @@ see_data(x, ...)
 a \code{mrgmod} object, with a dataset in the \verb{@args$data} slot.
 }
 \description{
-Helpful functions to pass information about administrations (\code{adm_lines()}), observations (\code{obs_lines()}) and covariates (\code{add_covariates()}).
-These functions are passed to a \code{mrgmod} object (mrgsolve model), and return a \code{mrgmod} object with a dataset inside, so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
+Helpers to build data set.
+}
+\details{
+Helpful functions build the data set. Instead of painfully build a data set and mind how to format the data, you can pass information about :
+\itemize{
+\item administrations with \code{adm_lines()},
+\item observations with \code{obs_lines()}
+\item covariates with \code{add_covariates()}.
+}
+
+These functions are passed to a \code{mrgmod} object (mrgsolve model), and return a \code{mrgmod} object with a data set inside with the correct formatting (so-called NM-TRAN format), so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
+
+These functions are meant to be used for one single patient at a time. Multiple ID is accepted, but the user is asked to check if the output is acceptable.
+}
+\examples{
+library(magrittr)
+# First, code a model
+code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
+KA = 0.5, TVCL = 1.1, TVV = 23.3
+$OMEGA 0.41 0.32
+$SIGMA 0.04 0
+$CMT DEPOT CENT
+$PK
+double CL=TVCL*exp(ETA1+ETA(1));
+double V=TVV*exp(ETA2+ETA(2)) ;
+$ERROR
+double DV=CENT/V*(1+EPS(1))+EPS(2);
+$PKMODEL ncmt = 1, depot = TRUE
+$CAPTURE DV CL"
+my_model <- mrgsolve::mcode("my_model", code1)
+
+my_model \%>\%
+  adm_lines(amt = 500, cmt = 1) \%>\%
+  obs_lines(time = c(1.1, 5.2), DV = c(15.1, 29.5), cmt = 2) \%>\%
+  # get_data() # for curiosity, you can extract the data set at this step
+  mapbayest()
+
+# If `[ADM]` or `[OBS]` are set in `$CMT` in model code, the `cmt =` argument are superfluous.
+
 }

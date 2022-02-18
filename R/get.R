@@ -5,7 +5,7 @@
 #' @param ... passed along
 #' @return the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 #'
-#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (data, eta, param).
+#' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (`data`, `eta`, `cov`, `param`, `phi`).
 NULL
 #> NULL
 
@@ -29,12 +29,15 @@ get_data.mrgmod <- function(x, ...){
 #'
 #' @param x mapbayests object
 #' @param ... not used
+#' @param output either a single data.frame ("df", the default) or a list ("list") of individual data sets
 #'
 #' @method get_data mapbayests
 #' @return a tibble
 #' @export
-get_data.mapbayests <- function(x, ...){
-  as_tibble(x$data)
+get_data.mapbayests <- function(x, ..., output = "df"){
+  if(output == "df") return(map_dfr(x$arg.ofv.id , "data"))
+  if(output == "list") return(map(x$arg.ofv.id , "data"))
+  if(!output %in% c("df", "list")) stop("output type must be 'df' or 'list'", call. = FALSE)
 }
 
 #' @rdname get_x
@@ -88,6 +91,26 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
   )
 
   return(e)
+}
+
+
+#' @rdname get_x
+#' @export
+get_cov <- function(x, ...) UseMethod("get_cov")
+
+#' Return covariance matrix from a mapbayests
+#'
+#' @param x mapbayests object
+#' @param ... not used
+#' @param simplify a logical. If TRUE (the default) and only one ID, one matrix is returned instead of a list of length 1
+#'
+#' @method get_cov mapbayests
+#' @return a tibble
+#' @export
+get_cov.mapbayests <- function(x, ..., simplify = TRUE){
+  ans <- x$covariance
+  if(length(ans)==1 && isTRUE(simplify)) return(ans[[1]])
+  ans
 }
 
 #' @rdname get_x
@@ -160,10 +183,10 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
   }
 
   par_tab <- x$mapbay_tab %>%
-    select(.data$ID, dplyr::any_of(ok_names)) %>%
+    select(.data$ID, any_of(ok_names)) %>%
     group_by(.data$ID) %>%
-    dplyr::slice(1) %>%
-    dplyr::ungroup() %>%
+    slice(1) %>%
+    ungroup() %>%
     as.data.frame()
 
   if(!.keep_ID) par_tab <- select(par_tab, -.data$ID)
@@ -176,3 +199,28 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
 
   return(par)
 }
+
+
+#' @rdname get_x
+#' @export
+get_phi <- function(x, ...) UseMethod("get_phi")
+
+#' Return "NONMEM phi"-like file from a mapbayests
+#'
+#' @param x mapbayests object
+#' @param ... not used
+#' @method get_phi mapbayests
+#' @return a tibble
+#' @export
+get_phi.mapbayests <- function(x, ...){
+  namcov <- namephicov(n_eta(x$model))
+  covphi <- x %>% get_cov(output = "list", simplify = FALSE) %>% map(~ set_names(.x[upper.tri(.x, diag = TRUE)], namcov)) %>% bind_rows()
+  x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
+    bind_cols(covphi) %>%
+    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
+    mutate(SUBJECT_NO = as.double(row_number()), .before = 1) %>%
+    mutate(ID = as.double(.data$ID)) %>%
+    as_tibble()
+}
+
+

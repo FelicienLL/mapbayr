@@ -34,6 +34,10 @@ check_mapbayr_model <- function(x){
     nomega <- length(diag(omat(x, make = T)))
     if(nomega != neta) check <- bind_rows(check, list(stop = TRUE, descr = "$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM."))
 
+    # OMEGA : no value = 0.
+    omega0 <- which(odiag(x) == 0)
+    if(length(omega0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$OMEGA: ", paste0(omega0, collapse = "-"), " is (are) equal to 0. Cannot be equal to zero.")))
+
     # $SIGMA
     nsig <- length(diag(smat(x, make = T)))
     if(nsig%%2 !=0) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: A pair number of sigma values is expected (", nsig, " values found).")))
@@ -44,8 +48,10 @@ check_mapbayr_model <- function(x){
       if(ncmt != nsig/2) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."))
     }
 
+    dsig <- diag(smat(x, make = T))
+    if(all(dsig == 0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: All the values of SIGMA are equal to zero, which is not allowed.")))
+
     if(log_transformation(x)){
-      dsig <- diag(smat(x, make = T))
       if(any(which(dsig==0)%%2 == 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0."))
       if(any(which(dsig!=0)%%2 != 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0."))
     }
@@ -60,21 +66,26 @@ check_mapbayr_model <- function(x){
 }
 
 check_mapbayr_data <- function(data){
+  # Is there any data?
   if(is.null(data)) stop("No data provided", call. = F)
 
+  # Are all column numerics
+  non_num <- names(data)[!map_lgl(data, is.numeric)]
+  if(length(non_num)) stop(paste("Non-numeric column found:", paste(non_num, collapse = " ")), call. = F)
+
+  # Are required items present?
   data <- data %>%
     rename_with(tolower, any_of(c("TIME", "AMT", "MDV", "CMT", "EVID", "II", "ADDL", "SS", "RATE")))
 
-  if(is.null(data[["ID"]]))   stop('ID column is missing', call. = F)
-  if(is.null(data[["time"]])) stop('time column is missing', call. = F)
-  if(is.null(data[["evid"]])) stop('evid column is missing', call. = F)
-  if(is.null(data[["cmt"]]))  stop('cmt column is missing', call. = F)
-  if(is.null(data[["amt"]]))  stop('amt column is missing', call. = F)
-  if(is.null(data[["DV"]]))   stop('DV column is missing', call. = F)
+  required_nmtran_item <- c("ID", "time", "evid", "cmt", "amt", "DV")
+  miss_item <- required_nmtran_item[!(required_nmtran_item %in% names(data))]
+  if(length(miss_item)) stop(paste("Missing column:", paste(miss_item, collapse = " ")), call. = F)
   if(is.null(data[["mdv"]])){
     data[["mdv"]] <- ifelse(data[["evid"]] %in% c(1,2,4), 1, 0)
   }
   if(is.null(data[["mdv"]]))  stop('mdv column is missing', call. = F) #Cannot happen obviously... but who knows
+
+  # Are MDV/EVID requirements respected?
 
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)

@@ -14,19 +14,17 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   need_new_bounds <- !check_new_bounds(OPT = opt, arg.optim)
 
   # Secondly, if conditions for a reset are met, a new optimization is done until reset is not needed.
- # browser()
-
   while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
 
     if(need_new_ini){
       arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
-      warning("\nError in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("\nDifficulty in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
     }
 
     if(need_new_bounds){
       arg.optim$lower <- new_bounds(arg.ofv, arg.optim)
       arg.optim$upper <- -arg.optim$lower
-      warning("\nError in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("\nDifficulty in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
     }
 
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
@@ -131,10 +129,10 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 
 new_bounds <- function(arg.ofv, arg.optim){
   vec_SE <- sqrt(diag(solve(arg.ofv$omega.inv)))
-  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = pnorm, mean = 0)
+  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
-  map_dbl(vec_SE, qnorm, p = new_P, mean = 0)
+  map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
 

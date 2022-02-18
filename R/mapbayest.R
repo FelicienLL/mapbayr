@@ -7,6 +7,7 @@
 #' @param x the model object
 #' @param data NMTRAN-like data set
 #' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
+#' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
@@ -15,14 +16,56 @@
 #' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
-#'
-#'
-#' @return a mapbayests model object
+#' @return a mapbayests object. Basically a list containing:
+#'  - model: the model object
+#'  - arg.ofv.optim, arg.ofv.fix, arg.ofv.id: arguments passed to the optimization function. Useful for debugging but not relevant for a basic usage. Access to the data with `get_data(x)`
+#'  - opt.value: the original output of the optimization function
+#'  - final_eta: a list of individual vectors of final estimates. Access it with `x$final_eta` or `get_eta(x)`.
+#'  - covariance: a list of individual variance-covariance matrix of estimation. Access it with `x$covariance` or `get_cov(x)`.
+#'  - mapbay_tab: an output table containing the results of your estimations (data, IPRED, PRED, covariates, captured items, ETA etc...). Access it with `x$mapbay_tab`, `as.data.frame(x)` or `as_tibble(x)`.
+#'  - information: run times and package versions.
 #' @export
+#' @examples
+#' # First, code a model
+#' code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
+#' KA = 0.5, TVCL = 1.1, TVV = 23.3
+#' $OMEGA 0.41 0.32
+#' $SIGMA 0.04 0
+#' $CMT DEPOT CENT
+#' $PK
+#' double CL=TVCL*exp(ETA1+ETA(1));
+#' double V=TVV*exp(ETA2+ETA(2)) ;
+#' $ERROR
+#' double DV=CENT/V*(1+EPS(1))+EPS(2);
+#' $PKMODEL ncmt = 1, depot = TRUE
+#' $CAPTURE DV CL
+#' "
+#'
+#' my_model <- mrgsolve::mcode("my_model", code1)
+#' # Then, import your data
+#' my_data <- data.frame(ID = 1, TIME = c(0, 1.1, 5.2, 12.3), EVID = c(1,0,0,0), AMT = c(500, 0,0,0),
+#'  CMT = c(1,2,2,2), DV = c(0, 15.1, 29.5, 22.3))
+#' print(my_data)
+#'
+#' # And estimate
+#' my_est <- mapbayest(x = my_model, data = my_data)
+#' print(my_est)
+#' # see also plot(my_est) and hist(my_est)
+#'
+#' # Use your estimation
+#' get_eta(my_est)
+#' get_param(my_est)
+#' as.data.frame(my_est)
+#' use_posterior(my_est)
+#'
+#'@seealso \code{\link{hist.mapbayests}}
+#'@seealso \code{\link{plot.mapbayests}}
+#'@seealso \code{\link{use_posterior}}
 #'
 mapbayest <- function(x,
                    data = NULL,
                    method = "L-BFGS-B",
+                   hessian = stats::optimHess,
                    force_initial_eta = NULL,
                    quantile_bound = 0.001,
                    control = list(),
@@ -38,6 +81,8 @@ mapbayest <- function(x,
   if(is.null(data)){
     data <- x@args$data
   }
+  x@args$data <- NULL #empty the data slot in model object
+
   if(check){
     ok <- check_mapbayr_model(x)
     if(!isTRUE(ok)){
@@ -67,10 +112,13 @@ mapbayest <- function(x,
   # Start post-processing (i.e. generating output files)
   post <- list(
     data = iddata,
-    opt.value = opt.value
+    opt.value = opt.value,
+    arg.ofv = arg.ofv
     ) %>%
     pmap(postprocess.optim,
-         x = x)
+         x = x,
+         hessian = hessian,
+         arg.optim = arg.optim)
 
   out <- postprocess.output(x,
                             arg.optim = arg.optim,

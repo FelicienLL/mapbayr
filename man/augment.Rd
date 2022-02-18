@@ -12,7 +12,7 @@ augment(x, ...)
 \item{...}{additional arguments}
 }
 \value{
-an augmented object (depending on the object passed)
+an augmented object (depending on the object passed).
 }
 \description{
 Compute full PK profile prediction from mapbayr estimates.

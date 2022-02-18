@@ -4,20 +4,55 @@
 \alias{augment.mapbayests}
 \title{Compute full PK profile prediction from mapbayr estimates.}
 \usage{
-\method{augment}{mapbayests}(x, data = NULL, end = NULL, ...)
+\method{augment}{mapbayests}(
+  x,
+  data = NULL,
+  start = NULL,
+  end = NULL,
+  delta = NULL,
+  ci = FALSE,
+  ci_width = 90,
+  ci_method = "delta",
+  ci_sims = 500,
+  ...
+)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
 \item{data}{dataset to pass to mrgsolve for simulation (default is dataset used for estimation)}
 
-\item{end}{end of infusion time (passed to mrgsim)}
+\item{start, end, delta}{start, end and delta of simulation time passed to \code{mrgsim()} (see details)}
 
-\item{...}{additional argument to pass to mrgsim}
+\item{ci}{a logical. If TRUE, compute a confidence interval around the prediction (default is FALSE)}
+
+\item{ci_width}{a number between 0 and 100, width of the confidence interval (default is "90" for a 90\%CI)}
+
+\item{ci_method}{method to compute the confidence interval. Can be "delta" (the default) to use the Delta approximation. Alternatively "simulations" for a more accurate approach, but also more time-consuming.}
+
+\item{ci_sims}{number of replicates to simulate in order to derive the confidence interval (default is 500)}
+
+\item{...}{additional arguments passed to \code{mrgsim()}}
 }
 \value{
-a \code{mapbayests} object, augmented of an \code{aug_tab}
+a \code{mapbayests} object, augmented of an \code{aug_tab} data.frame.
 }
 \description{
 Compute full PK profile prediction from mapbayr estimates.
+}
+\details{
+This function is called in the background by \code{plot()} in order to simulate the full PK profile, and return a \code{mapbayests} object with an additional \code{aug_tab} data.frame inside. The latter is used with by the plot method.
+The time grid, for each PK profile (i.e. patient) is defaulted with the minimum time in the dataset for \code{start} and the maximum time in the dataset +20\% for \code{end}. \code{delta} is a power of 10 (e.g. 0.1, 1, 10 etc...), automatically chosen to render visually appealing graphs with a reasonable computing time (about 200 time points).
+Additional arguments can be passed to \code{mrgsim()} through \code{...}. Note that \code{recsort} is set to 3 (see mrgsolve documentation for more details).
+}
+\examples{
+#x is the result of `mapbayest()`.
+#Default plot is returned by:
+# plot(x)
+#Argument passed to `plot()` are passed to `augment()` in the background:
+# plot(x, end = 240, ci = TRUE)
+#Save the augmented object if simulation time is long
+# x2 <- augment(x, ci = TRUE, ci_method = "simulations", ci_sims = 10000) \%>\%
+# plot(x2)
+
 }

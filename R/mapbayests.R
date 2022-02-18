@@ -45,8 +45,18 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' Plot predictions from mapbayests object
 #'
 #' @param x A \code{mapbayests} object.
-#' @param ... additional arguments (not used)
-#' @return a `ggplot` object. Observed and predicted concentration vs time profile for every patients.
+#' @param ... additional arguments (passed to \code{\link{augment.mapbayests}})
+#' @return a `ggplot` object.
+#'
+#' @details
+#' Use this function to plot the results of the estimations, in the form of concentration vs time profiles for every patient of the data set.
+#' For additional modifications, you can:
+#'  - see \code{\link{augment.mapbayests}} to modify the simulation output.
+#'  - add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
+#'
+#' @examples
+#' #plot(est001, delta = 1) +
+#' #  ggplot2::labs(title = "Awesome predictions")
 #'
 #' @method plot mapbayests
 #' @export
@@ -54,8 +64,8 @@ plot.mapbayests <- function(x, ...){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-  #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
-    x <- augment(x)
+    #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
+    x <- augment(x, ...)
   }
 
   theme_custom <- function(...) {
@@ -74,6 +84,15 @@ plot.mapbayests <- function(x, ...){
     theme_custom()+
     scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
     scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
+
+  if(!is.null(predictions[["value_low"]]) & !is.null(predictions[["value_up"]])){
+    data_ribbon <- predictions %>%
+      filter(!(is.na(.data$value_low) & is.na(.data$value_up)))
+
+    gg <- gg +
+      geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
+      scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
+  }
 
   observations <- x$mapbay_tab %>%
     filter(.data$evid==0) %>%
@@ -117,7 +136,15 @@ plot.mapbayests <- function(x, ...){
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (not used)
-#' @return a `ggplot` object, representing prior parameter density distribution, and a histogram of patients estimates.
+#' @return a `ggplot` object.
+#'
+#' @details
+#' Use this function to plot the results of the estimations, in the form of histograms with the *a priori* distribution in the background. For every parameter, the inter-individual variability is displayed, as well as the percentile of the patient in the corresponding distribution (if n = 1 patient).
+#' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
+#'
+#' @examples
+#' #hist(est001) +
+#' #  ggplot2::labs(title = "Awesome predictions")
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){
@@ -146,7 +173,7 @@ hist.mapbayests <- function(x, ...){
     pmap_dfr(function(.name, .om){
       data.frame(name = .name,
                  x = xvalues,
-                 value = dnorm(xvalues, mean = 0, sd = sqrt(.om)))
+                 value = stats::dnorm(xvalues, mean = 0, sd = sqrt(.om)))
     })
 
   # --- Labels
@@ -154,7 +181,7 @@ hist.mapbayests <- function(x, ...){
                      "\nIIV = ", my_percent(sqrt(arg_tab$om)))
   # --- one ID
   if(length(x$final_eta) == 1){
-    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), pnorm, mean = 0)
+    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), stats::pnorm, mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
   }
@@ -181,118 +208,152 @@ hist.mapbayests <- function(x, ...){
 #' @param x object to augment
 #' @param ... additional arguments
 #' @export
-#' @return an augmented object (depending on the object passed)
-augment <- function (x, ...)UseMethod("augment")
+#' @return an augmented object (depending on the object passed).
+augment <- function (x, ...) UseMethod("augment")
 
 #' Compute full PK profile prediction from mapbayr estimates.
 #'
 #' @param x A \code{mapbayests} object.
 #' @param data dataset to pass to mrgsolve for simulation (default is dataset used for estimation)
-#' @param end end of infusion time (passed to mrgsim)
-#' @param ... additional argument to pass to mrgsim
+#' @param start,end,delta start, end and delta of simulation time passed to `mrgsim()` (see details)
+#' @param ci a logical. If TRUE, compute a confidence interval around the prediction (default is FALSE)
+#' @param ci_width a number between 0 and 100, width of the confidence interval (default is "90" for a 90%CI)
+#' @param ci_method method to compute the confidence interval. Can be "delta" (the default) to use the Delta approximation. Alternatively "simulations" for a more accurate approach, but also more time-consuming.
+#' @param ci_sims number of replicates to simulate in order to derive the confidence interval (default is 500)
+#' @param ... additional arguments passed to `mrgsim()`
 #'
 #' @method augment mapbayests
-#' @return a `mapbayests` object, augmented of an `aug_tab`
+#' @return a `mapbayests` object, augmented of an `aug_tab` data.frame.
+#' @details
+#' This function is called in the background by `plot()` in order to simulate the full PK profile, and return a `mapbayests` object with an additional `aug_tab` data.frame inside. The latter is used with by the plot method.
+#' The time grid, for each PK profile (i.e. patient) is defaulted with the minimum time in the dataset for `start` and the maximum time in the dataset +20% for `end`. `delta` is a power of 10 (e.g. 0.1, 1, 10 etc...), automatically chosen to render visually appealing graphs with a reasonable computing time (about 200 time points).
+#' Additional arguments can be passed to `mrgsim()` through `...`. Note that `recsort` is set to 3 (see mrgsolve documentation for more details).
+#'
+#' @examples
+#' #x is the result of `mapbayest()`.
+#' #Default plot is returned by:
+#' # plot(x)
+#' #Argument passed to `plot()` are passed to `augment()` in the background:
+#' # plot(x, end = 240, ci = TRUE)
+#' #Save the augmented object if simulation time is long
+#' # x2 <- augment(x, ci = TRUE, ci_method = "simulations", ci_sims = 10000) %>%
+#' # plot(x2)
+#'
 #' @export
-augment.mapbayests <- function(x, data = NULL, end = NULL, ...){
+augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
   if(is.null(data)){
-    data <- x$data
+    idata <- map(x$arg.ofv.id, "data")
+  } else {
+    idata <- data %>%
+      check_mapbayr_data() %>%
+      split_mapbayr_data()
   }
+
+  if(is.null(start)){
+    start <- unname(map_dbl(idata, ~ min(.x$time)))
+    #A vector. For each ID, possibly a different start time.
+  }
+
   if(is.null(end)){
-    end <- data %>%
-      group_by(.data$ID) %>%
-      slice_max(.data$time, with_ties = F) %>%
-      pull(.data$time)
-    end <- end+24
+    end <- unname(map_dbl(idata, ~ max(.x$time)))
+    #A vector. For each ID, possibly a different end time.
+    end <- end * 1.2
+    #By default, +20% of last obs or dosing.
   }
 
-  carry <- data %>%
-    select(-any_of(c("ID", "time", "cmt","DV"))) %>%
-    names()
-
-  idata <- data %>%
-    check_mapbayr_data() %>%
-    split_mapbayr_data()
-
-  ipred <- list(data = idata,
-                end = end,
-                eta = x$final_eta) %>%
-    pmap_dfr(function(data, end, eta, ...){
-      x$model %>%
-        param(eta) %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "IPRED")
-    }, ... = ...)
-
-  pred <- list(data = idata,
-               end = end) %>%
-    pmap_dfr(function(data, end, eta, ...){
-      x$model %>%
-        zero_re() %>%
-        data_set(data) %>%
-        obsaug() %>%
-        mrgsim_df(carry_out = carry, end = end, ...) %>%
-        as_tibble() %>%
-        filter(.data$evid %in% c(0,2)) %>%
-        select(-any_of(x$model@cmtL)) %>%
-        mutate(type = "PRED")
-    }, ... = ...)
-
-  aug_tab <- bind_rows(ipred, pred)
-
-  fitcmt <- fit_cmt(x$model, idata[[1]])
-
-  if(length(fitcmt)>1){
-    aug_tab <- select(aug_tab, -any_of(c("DV")))
-  } else{
-    aug_tab <- select(aug_tab, -any_of(c("PAR", "MET")))
+  if(is.null(delta)){
+    .delta <- (end - start)/200 #approximately 200 points per graph
+    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    #A vector. For each ID, possibly a different delta.
   }
 
-  aug_tab <- aug_tab %>%
-    pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
-    mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2]))%>%
+  fitcmt <- fit_cmt(x$model, get_data(x))
+
+  if(length(fitcmt) > 1){
+    toreq <- "PAR,MET"
+  } else {
+    toreq <- "DV"
+  }
+
+  tocarry <- c("evid")
+
+  do_sims <- function(mods, data = idata, ...){
+    sims <- list(
+      x = mods,
+      data = data, start = start, end = end, delta = delta
+    ) %>%
+      pmap(mrgsim_df, carry_out = tocarry, Request = toreq, recsort = 3, obsaug = TRUE, ... = ...)
+
+    map(sims, ~ .x %>%
+      filter(.data$evid %in% c(0,2)) %>%
+      select(-any_of("cmt")) %>% #should not be carried normally but who knows...
+      pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
+      mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2])) %>%
+      arrange(.data$ID, .data$time, .data$cmt)
+      )
+  }
+
+  do_augment <- function(x, type, ...){
+    stopifnot(type %in% c("ipred", "pred"))
+
+    mods <- switch(type,
+                   "ipred" = use_posterior(x, update_eta = TRUE, update_omega = TRUE, update_cov = FALSE, simplify = FALSE),
+                   "pred" = use_posterior(x, update_eta = FALSE, update_omega = FALSE, update_cov = FALSE, simplify = FALSE, .zero_re = "sigma"))
+
+    initpreds <- do_sims(map(mods, zero_re), ... = ...)
+
+    if(ci){
+      if(ci_method == "delta"){
+        etanames <- eta_names(mods[[1]])
+        init_etas <- map(mods, ~unlist(param(.x)[etanames]))
+        dsteps <- log(1+1e-8) #directly add 1e-8 because working on eta so will return into a multiplicative effect on parameter scale
+        new_etas <- map2(init_etas, dsteps, ~.x+.y)
+        new_models_etas <- map2(mods, new_etas, function(M,E){
+          map(seq_along(E), ~zero_re(param(M, E[.x]))) %>% set_names(etanames)
+        }) %>% transpose()
+        new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% transpose() #1 item = 1 indiv
+        jacobians <- list(new_preds, dsteps, initpreds) %>% #1 item = 1 indiv
+          pmap(function(new, step, ini){
+            map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
+          })
+        varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
+        errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
+        initpreds <- map2(initpreds, errors, ~mutate(.x,
+                                                     value_low = .data[["value"]] - .y,
+                                                     value_up = .data[["value"]] + .y))
+      }
+
+      if(ci_method == "simulations"){
+        new_idatas <- map(idata, data_nid, n = ci_sims)
+        new_sims <- do_sims(mods, data = new_idatas, ... = ...)
+        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
+        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
+        initpreds <- pmap(list(initpreds, LOW, UP), function(ini, low, up){
+          mutate(ini, value_low = low, value_up = up)
+        })
+      }
+    }
+    initpreds
+  }
+
+  ipred <- do_augment(x, type = "ipred", ... = ...) %>% bind_rows()
+  pred  <- do_augment(x, type = "pred", ... = ...) %>% bind_rows()
+
+  x$aug_tab <- bind_rows(list(IPRED = ipred, PRED = pred), .id = "type") %>%
+    as_tibble() %>%
     arrange(.data$ID, .data$time, .data$cmt, .data$type)
 
-  x <- c(x, aug_tab = list(aug_tab))
   class(x) <- "mapbayests"
   return(x)
 }
 
-#' Use posterior param and covariates
-#'
-#' @param x A \code{mapbayests} object.
-#' @param .zero_re Default is "both", meaning all matrices are zeroed. Pass "omega" to zero between-subject variability, and keep simulating residual error.
-#'
-#' @details Updates the param values of the model object with the estimated etas, and the covariates of the individual. Returns an updated mrgmod, so that the user can derive simulations from it. Works only with one individual. Does not handle time-varying covariates.
-#' @return a mrgmod
-#' @export
-use_posterior <- function(x, .zero_re = c("both", "omega", "sigma")){
-  mod <- x$model
+data_nid <- function(data, n){
+  map_dfr(.x = seq_len(n), ~mutate(data, ID = .x))
+}
 
-  if(length(x$arg.ofv.id) > 1) stop("use_posterior() can be used with one only ID", call. = FALSE)
-
-  mod <- switch (.zero_re[1],
-    "both" = zero_re(mod),
-    "omega" = zero_re(mod, "omega"),
-    "sigma" = zero_re(mod, "sigma")
-  )
-
-  covs_name <- mbr_cov_names(mod)
-  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
-
-  etas <- x$final_eta[[1]]
-  is_tv <- (map_dbl(covs_name, ~length(unique(x$mapbay_tab[[.x]]))) != 1)
-
-  if(any(is_tv)) warning("Time-varying covariates found. First value used for: ",  paste(covs_name[is_tv], collapse = ", "), ".")
-
-  covs <- x$mapbay_tab[1,covs_name, drop = FALSE]
-
-  mod %>%
-    param(as.list(c(etas, covs)))
+prepare_summarise <- function(data){
+  data %>%
+    group_by(.data$ID) %>%
+    mutate(rowID = row_number()) %>%
+    group_by(.data$rowID)
 }

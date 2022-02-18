@@ -75,27 +75,38 @@ $CAPTURE DV CL
 
 })
 
+mod3 <- mread("ex_mbr3", mbrlib())
+
+data3 <- bind_rows(
+  mod3 %>%
+    adm_lines(amt = 100) %>%
+    obs_lines(time = 5, DV = 5) %>%
+    get_data(),
+  mod3 %>%
+    adm_lines(amt = 200) %>%
+    obs_lines(time = 6, DV = 8) %>%
+    get_data() %>%
+    mutate(ID = 2)
+)
+
+est3 <- mod3 %>%
+  mrgsolve::data_set(data3) %>% #data_set() function matters for the test, do not simplify
+  mapbayest(verbose = FALSE)
+
 
 test_that("mapbayests object `slots` are correct", {
-  mod3 <- mread("ex_mbr3", mbrlib())
 
-  data3 <- bind_rows(
-    mod3 %>%
-      adm_lines(amt = 100) %>%
-      obs_lines(time = 5, DV = 5) %>%
-      get_data(),
-    mod3 %>%
-      adm_lines(amt = 200) %>%
-      obs_lines(time = 6, DV = 8) %>%
-      get_data() %>%
-      mutate(ID = 2)
-  )
-
-  est3 <- mapbayest(mod3, data3, verbose = F)
-
-  expect_named(est3, c("model", "data", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "mapbay_tab", "information"))
+  expect_named(est3, c("model", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "covariance", "mapbay_tab", "information"))
   expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log_transformation", "omega.inv", "obs_cmt"))
   expect_length(est3$arg.ofv.id, 2)
   expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
   expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
+  expect_false(any(attributes(est3$opt.value) %in% "optimx"))
+
+  expect_null(est3$data)
+
+})
+
+test_that("dataset is not carried with model object", {
+  expect_null(est3$model@args$data)
 })

@@ -1,12 +1,50 @@
-# mapbayr 0.5
-* Important
+# mapbayr 0.6.0
+This version of mapbayr introduces several features that aim to express uncertainty around the point estimate. Please note that the results of these functions were not validated *vs* a gold-standard software such as NONMEM. This is why they are referred as "experimental features" in the following subsections. They are exported with the objective to ease their future validation, and to provide a very rough idea of the estimation uncertainty.
+
+## Breaking changes
+- Remove `data` slot in estimation object. Use `get_data()` instead. #64
+- The `$model@args$data` is now always `NULL` in the estimation object. It was carried out if the data was initially passed with `data_set()` or built with `adm_lines()`/`obs_lines()`. #64
+- The time grid used to plot the results is now adapted as function of data, and not fixed (refactor of `augment`). Also use `recsort=3` to deal with steady-state administrations. #85
+- Argument passed to `plot()` are now directly passed to `augment()`.
+- Depends on mrgsolve >= 1.0.0 to use the newly exported `collapse_omega()` function. (thanks @kylebaron)
+
+## Experimental features
+- Compute and use a normal approximation of conditional distribution. The function called in `mapbayest(hessian = )` is used to compute the hessian with `stats::optimHess()` by default. The variance-covariance matrix is returned in a `covariance` slot in the estimation object, and can be accessed with `get_cov()`. 
+- Simulate with uncertainty. `use_posterior(update_omega = TRUE)` update the OMEGA matrix with the covariance matrix, in order to simulate with uncertainty and derive confidence intervals.
+- Plot confidence interval. `plot(ci = TRUE)` displays approximate confidence intervals on predicted concentrations. Parameter uncertainty is approximated with the covariance matrix. Confidence interval computation relies on the delta approximation (`ci_method = "delta"`), but can also be computed thanks to simulations (see `augment()` documentation).
+
+## New exports
+- `get_cov()`: function to get the covariance matrix of estimation. #43
+- `get_phi()`, `read_nmphi()`, `merge_phi()` and `plot_phi()`: functions to compare the estimations *vs* NONMEM. #55
+- `est001`: an example `mapbayests` estimation object. #94
+
+## use_posterior()
+- add `update_omega`, `update_cov`, and `update_eta` arguments to control what to update. 
+- `.zero_re` default behavior now depends on `update_` arguments values. 
+- no longer warns if time-varying covariates are used. The first value will be used by default.
+- now works on multiple individuals: a list of mrgsolve models will be returned if multiple individuals found.
+
+## Miscellaneous
+- Print a message indicating a difficulty when there is a reset during optimization, instead of a warning indicating an error. #96
+- `mapbayest(verbose = )` now mutes the message that indicates a reset during optimization. #96
+- Remove the attributes of `opt.value` inherited from `optimx`. #95
+- Detect non-numeric column(s). Stop and inform the user if any. #86 #88 (thanks @jkamp91)
+- `get_data()` can now return a list of individual data sets with `output = "list"`. #64
+- Check for undesirable zero in OMEGA/SIGMA matrices instead of crashing. #44
+- Remove stats from dependencies.
+- Add Kyle Baron as contributor.
+- Update README since article publication.
+- Update documentation.
+
+# mapbayr 0.5.0
+## Important
 
 - Add new reset conditions: with new initial values if same absolute value for every etas, with larger bounds if estimation at bound. Additional refactoring about reset as well. see #75
 - Add an "information" slot to the output, with time records and package version #69
 - Remove dependency to the `@annotated` tag in model code, especially for `$PARAM` and `$CMT` blocks. #73
 - As a consequence, `adm_lines()` and `obs_lines()` don't need the [ADM] and [OBS] tags in model code anymore (yet strongly recommended, otherwise it errors cleanly).
 
-* Others
+## Others
 - Update README since first CRAN release
 - Check where sigma is equal to zero if error is exponential #45
 - Use log_transformation() instead of log.transformation() #24
@@ -31,13 +69,13 @@
 
 # mapbayr 0.3
 
-* Users : 
+## Users : 
 - Remove arg.ofv from output.
 - Add arg.ofv.fix and arg.ofv.id into output. Avoid redundancy and decrease the weight of the mbrests object.
 - mapbay_tab output improved: return a posteriori captured items and covariates (among other)
 - Variables passed in dataset cannot be defined in model, except if defined with @covariates.
 
-* Internal 
+## Internal 
 - Fix and id-varying arguments for ofv processing are dealed separately.
 - Data helpers are now 'mrgmod' methods
 - Maximum reset = 50

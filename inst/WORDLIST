@@ -6,6 +6,7 @@ benchmarked
 bfgs
 cmt
 CMT
+CPT
 cmt'
 cpp
 dealed
@@ -17,6 +18,7 @@ ev
 github
 iddata
 ini
+IPRED
 iteratively
 mapbay
 mapbayest
@@ -34,6 +36,7 @@ mrgsolve
 mvgauss
 nd
 newuoa
+nmphi
 NMTRAN
 NONMEM
 num
@@ -41,13 +44,16 @@ ofv
 optim
 param
 pharmacokinetic
+Pharmacometrics
 posteriori
 Posteriori
 postprocess
 Postprocess
 pre
 Pre
+PRED
 Preprocess
+priori
 README
 Rtools
 se
