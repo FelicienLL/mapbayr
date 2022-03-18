@@ -5,7 +5,6 @@
 do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
   # First the optimization is done once.
-
   if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
@@ -44,11 +43,11 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
   if(!is.null(opt$fevals)){
     if(is.nan(opt$fevals)) {
-      opt[eta_names(arg.ofv$mrgsolve_model)] <- 0
+      opt[eta_names(arg.ofv$qmod)] <- 0
       warning("\nCannot compute objective function value ; typical value (ETA = 0) returned")
     }
     if(is.na(opt$fevals)) {
-      opt[eta_names(arg.ofv$mrgsolve_model)] <- 0
+      opt[eta_names(arg.ofv$qmod)] <- 0
       warning("\nCannot minimize objective function value ; typical value (ETA = 0) returned")
     }
   }
@@ -82,7 +81,7 @@ check_convcode <- function(OPT){
 
 check_finalofv <- function(OPT, arg.ofv, arg.optim){
   #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
-  ini <- initial_ofv(arg.ofv, arg.optim)
+  ini <- do_compute_ofv(eta = arg.optim$par, argofv = arg.ofv)
   fin <- OPT$value
   !isTRUE(all.equal(ini, fin))
 }
@@ -108,7 +107,7 @@ check_new_bounds <- function(OPT, arg.optim){
 # 1 Returns a vector of ETA to start the new estimation from:
 
 new_ini2 <- function(arg.ofv, arg.optim, run){
-  mvgauss(solve(arg.ofv$omega.inv), n = 1+n_eta(arg.ofv$mrgsolve_model)^2, seed = 1+run) %>% #Sample 1+(Neta x Neta) vectors from prior MVN distribution
+  mvgauss(solve(arg.ofv$omega_inv), n = 1+n_eta(arg.ofv$qmod)^2, seed = 1+run) %>% #Sample 1+(Neta x Neta) vectors from prior MVN distribution
     as.data.frame() %>%
     rename_with(str_replace, everything(), "V","ETA") %>%
     map(unlist) %>%
@@ -128,22 +127,32 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 # 2 Returns a vector of lower bounds
 
 new_bounds <- function(arg.ofv, arg.optim){
-  vec_SE <- sqrt(diag(solve(arg.ofv$omega.inv)))
+  vec_SE <- sqrt(diag(solve(arg.ofv$omega_inv)))
   P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
   map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
+new_ini3 <- function(arg.ofv, arg.optim, run){
+  neta <- n_eta(arg.ofv$qmod)
+  nsim <- 1 + neta ^ 2
 
+  # Sample eta from prior distribution
+  simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+run)
 
+  # Set Out-of-bound etas to 0
+  bound <- arg.optim$upper
+  for(i in seq_len(neta)){
+    vals <- simmat[,i]
+    simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
+  }
 
+  # Compute OFV for each vector of eta
+  colnames(simmat) <- paste0("ETA", seq_len(neta))
+  list_etas <- apply(simmat, 1, as.list)
+  ofvs <- sapply(list_etas, do_compute_ofv, argofv = arg.ofv)
 
-
-
-#### Helpers ####
-# Compute the initial value of OFV #maybe delete it ? only used in `check_final_ofv()` ?
-initial_ofv <- function(arg.ofv, arg.optim){
-  do.call(compute_ofv, c(list(eta = arg.optim$par), arg.ofv))
+  # Return etas with lowest OFV
+  round(simmat[which.min(ofvs),], 6)
 }
-

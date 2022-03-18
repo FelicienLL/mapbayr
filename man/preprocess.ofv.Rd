@@ -16,8 +16,24 @@ preprocess.ofv.id(x, iddata)
 \item{data, iddata}{NMTRAN-like data set. iddata is likely a dataset of one individual}
 }
 \value{
-a list of arguments use to \code{compute_ofv()}.
+A list of arguments used to compute the objective function value.
+
+The following arguments are fixed between individuals:
+\itemize{
+\item \code{qmod}: model object, modified to simulate without random effects and with controlled outputs
+\item \code{sigma}: a single matrix object
+\item \code{log_transformation}: a logical, whether predictions need to be log-transformed for ofv computation
+\item \code{omega_inv}: a single matrix object
+\item \code{all_cmt}: a vector of compartment numbers where observations can be expected
+}
+
+The following arguments differs between individuals:
+\itemize{
+\item \code{iddata}: individual data set (with administrations and covariates)
+\item \code{idDV}: a vector of (possibly log-transformed) observations
+\item \code{idcmt}: a vector of compartments where observations belong to
+}
 }
 \description{
-Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (\code{preprocess.ofv.fix}), while other are specific of each individual (\code{preprocess.ofv.id}).
+Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (\code{preprocess.ofv.fix}), while others are specific of each individual (\code{preprocess.ofv.id}).
 }

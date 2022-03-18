@@ -65,3 +65,9 @@ znorm <- function(ci){
 namephicov <- function(n){
   unlist(map(seq_len(n), ~ paste0("ETC",.x,"_",unlist(combn(.x, 1, simplify = FALSE)))))
 }
+
+rename_as_eta <- function(x){
+  names(x) <- paste0("ETA", seq_along(x))
+  x
+}
+#rename_as_eta(c(0.1, 0.2, 0.3))
