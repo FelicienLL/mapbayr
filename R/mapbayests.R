@@ -10,7 +10,7 @@
 print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
-  nOBS <- x$arg.ofv.id %>% map("DVobs") %>% unname() %>% simplify() %>% length()
+  nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
   nETA <- n_eta(x$model)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
@@ -242,7 +242,7 @@ augment <- function (x, ...) UseMethod("augment")
 #' @export
 augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
   if(is.null(data)){
-    idata <- map(x$arg.ofv.id, "data")
+    idata <- get_data.mapbayests(x, output = "list")
   } else {
     idata <- data %>%
       check_mapbayr_data() %>%

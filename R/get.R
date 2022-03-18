@@ -35,8 +35,8 @@ get_data.mrgmod <- function(x, ...){
 #' @return a tibble
 #' @export
 get_data.mapbayests <- function(x, ..., output = "df"){
-  if(output == "df") return(map_dfr(x$arg.ofv.id , "data"))
-  if(output == "list") return(map(x$arg.ofv.id , "data"))
+  if(output == "df") return(map_dfr(x$arg.ofv.id , "iddata"))
+  if(output == "list") return(map(x$arg.ofv.id , "iddata"))
   if(!output %in% c("df", "list")) stop("output type must be 'df' or 'list'", call. = FALSE)
 }
 
