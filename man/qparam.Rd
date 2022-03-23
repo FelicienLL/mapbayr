@@ -24,9 +24,7 @@ Faster update of parameters inside the model object. Useful in the context of pa
 library(mrgsolve)
 ho <- house()
 \dontrun{
-microbenchmark::microbenchmark(
-  param(ho, c(CL = .1, VC = 1)),
-  qparam(ho, c(CL = .1, VC = 1))
-)
+system.time(replicate(1000, param(ho, c(CL = .1, VC = 1))))
+system.time(replicate(1000, qparam(ho, c(CL = .1, VC = 1))))
 }
 }

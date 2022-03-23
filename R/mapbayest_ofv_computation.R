@@ -12,16 +12,12 @@
 #' library(mrgsolve)
 #' ho <- house()
 #' \dontrun{
-#' microbenchmark::microbenchmark(
-#'   param(ho, c(CL = .1, VC = 1)),
-#'   qparam(ho, c(CL = .1, VC = 1))
-#' )
+#' system.time(replicate(1000, param(ho, c(CL = .1, VC = 1))))
+#' system.time(replicate(1000, qparam(ho, c(CL = .1, VC = 1))))
 #' }
 qparam <- function(x, p){
-  nam <- names(p)
-  val <- as.double(p)
-  x@param@data[nam] <- (val)
-  x
+  x@param@data[names(p)] <- as.double(p)
+  return(x)
 }
 
 #' Compute the H matrix
