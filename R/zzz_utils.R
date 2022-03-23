@@ -67,7 +67,11 @@ namephicov <- function(n){
 }
 
 rename_as_eta <- function(x){
+  if(is.matrix(x)){
+    colnames(x) <- paste0("ETA", seq_len(ncol(x)))
+    return(x)
+  }
   names(x) <- paste0("ETA", seq_along(x))
   x
 }
-#rename_as_eta(c(0.1, 0.2, 0.3))
+

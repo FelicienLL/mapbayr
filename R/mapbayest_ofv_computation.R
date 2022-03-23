@@ -42,6 +42,7 @@ qparam <- function(x, p){
 #' all_cmt = c(2, 3)
 #' )
 h <- function(pred, cmt, all_cmt, ...){
+  pred[pred==0] <- 1 #Avoid division by zero for proportional error
   m <- matrix(nrow = length(pred), ncol = 0)
   for(i in all_cmt){
     add <- as.double(cmt == i)
