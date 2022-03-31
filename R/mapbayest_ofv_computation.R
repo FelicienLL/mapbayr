@@ -49,7 +49,7 @@ h <- function(pred, cmt, all_cmt, ...){
 
 f <- function(qmod, iddata){
   output <- mrgsim_q(x = qmod, data = iddata, output = "df")
-  output$DV[iddata$mdv==0]
+  output$DV[iddata[,"mdv"]==0]
 }
 
 ofv_kang <- function(obs, pred, eta, var, omega_inv){

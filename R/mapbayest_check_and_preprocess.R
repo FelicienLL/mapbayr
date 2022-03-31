@@ -260,7 +260,8 @@ preprocess.ofv.id <- function(x, iddata){
   idcmt <- iddata$cmt[iddata$mdv==0]
 
   list(iddata = iddata,
-       idDV   = idDV,
-       idcmt  = idcmt
+       idvaliddata = mrgsolve::valid_data_set(iddata, x),
+       idDV = idDV,
+       idcmt = idcmt
   )
 }
