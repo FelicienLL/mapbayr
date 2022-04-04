@@ -16,6 +16,12 @@ check_mapbayr_model <- function(x){
   }else{
     check <- tibble(stop = logical(0), descr = character(0))
 
+    # Structure
+
+    if(!is.list(x@param@data)){
+      stop("mod@param@data is not a list")
+    }
+
     # $PARAM
     neta <- length(eta_names(x))
     if(neta == 0) {
