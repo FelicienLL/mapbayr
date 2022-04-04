@@ -62,10 +62,10 @@ DV : Plasma concentration (mass/time)
   est4 <- mapbayest(mod3, data = data_noline_CL, verbose = F)
 
   #Test number of observation fitted
-  expect_equal(length(est1$arg.ofv.id[[1]]$DVobs), 3)
-  expect_equal(length(est2$arg.ofv.id[[1]]$DVobs), 2)
-  expect_equal(length(est3$arg.ofv.id[[1]]$DVobs), 2)
-  expect_equal(length(est4$arg.ofv.id[[1]]$DVobs), 2)
+  expect_equal(length(est1$arg.ofv.id[[1]]$idDV), 3)
+  expect_equal(length(est2$arg.ofv.id[[1]]$idDV), 2)
+  expect_equal(length(est3$arg.ofv.id[[1]]$idDV), 2)
+  expect_equal(length(est4$arg.ofv.id[[1]]$idDV), 2)
 
   #Test different eta are found
   # 1 != 2

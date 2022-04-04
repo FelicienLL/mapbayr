@@ -9,6 +9,12 @@ test_that("get_data.mrgmod works", {
   expect_named(get_data(moddata1), c("ID", "time", "evid", "mdv", "amt", "cmt", "rate", "DV"))
 })
 
+data1 <- get_data.mrgmod(moddata1)
+
+test_that("devalid_data_set works", {
+  expect_equal(devalid_data_set(mrgsolve::valid_data_set(data1, mod1)), data1)
+})
+
 test_that("get_data.mapbayests works", {
   expect_s3_class(get_data(est1), "tbl_df")
   expect_named(get_data(est1), c("ID", "time", "evid", "mdv", "amt", "cmt", "rate", "DV"))

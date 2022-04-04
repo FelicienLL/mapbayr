@@ -5,3 +5,4 @@ README.Rmd
 ^inst/logo\.pptx$
 ^cran-comments\.md$
 ^data-raw$
+^sandbox\.R$

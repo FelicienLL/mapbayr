@@ -97,10 +97,10 @@ est3 <- mod3 %>%
 test_that("mapbayests object `slots` are correct", {
 
   expect_named(est3, c("model", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "covariance", "mapbay_tab", "information"))
-  expect_named(est3$arg.ofv.fix, c("mrgsolve_model", "sigma", "log_transformation", "omega.inv", "obs_cmt"))
+  expect_named(est3$arg.ofv.fix, c("qmod", "sigma", "log_transformation", "omega_inv", "all_cmt"))
   expect_length(est3$arg.ofv.id, 2)
-  expect_named(est3$arg.ofv.id[[1]], c("data", "DVobs"))
-  expect_named(est3$arg.ofv.id[[2]], c("data", "DVobs"))
+  expect_named(est3$arg.ofv.id[[1]], c("idvaliddata", "idDV", "idcmt"))
+  expect_named(est3$arg.ofv.id[[2]], c("idvaliddata", "idDV", "idcmt"))
   expect_false(any(attributes(est3$opt.value) %in% "optimx"))
 
   expect_null(est3$data)
