@@ -16,7 +16,7 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
 
     if(need_new_ini){
-      arg.optim$par <- new_ini2(arg.ofv, arg.optim, run = RUN)
+      arg.optim$par <- new_ini3(arg.ofv, arg.optim, run = RUN)
       if(verbose) message("\nDifficulty in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
     }
 
