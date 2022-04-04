@@ -217,7 +217,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 #'
 #' The following arguments differs between individuals:
 #'
-#'  - `iddata`: individual data set (with administrations and covariates)
+#'  - `idvaliddata`: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 #'  - `idDV`: a vector of (possibly log-transformed) observations
 #'  - `idcmt`: a vector of compartments where observations belong to
 #'

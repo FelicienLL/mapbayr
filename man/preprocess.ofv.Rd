@@ -29,7 +29,7 @@ The following arguments are fixed between individuals:
 
 The following arguments differs between individuals:
 \itemize{
-\item \code{iddata}: individual data set (with administrations and covariates)
+\item \code{idvaliddata}: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 \item \code{idDV}: a vector of (possibly log-transformed) observations
 \item \code{idcmt}: a vector of compartments where observations belong to
 }
