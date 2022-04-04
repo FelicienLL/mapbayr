@@ -75,3 +75,6 @@ rename_as_eta <- function(x){
   x
 }
 
+devalid_data_set <- function(x){
+  as_tibble(x[,colnames(x)!="..zeros.."])
+}

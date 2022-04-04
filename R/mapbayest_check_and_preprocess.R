@@ -259,7 +259,7 @@ preprocess.ofv.id <- function(x, iddata){
   if(log_transformation(x)) idDV <- log(idDV)
   idcmt <- iddata$cmt[iddata$mdv==0]
 
-  list(iddata = iddata,
+  list(#iddata = iddata,
        idvaliddata = mrgsolve::valid_data_set(iddata, x),
        idDV = idDV,
        idcmt = idcmt

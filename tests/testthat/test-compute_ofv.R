@@ -11,7 +11,7 @@ test_that("compute basic ofv", {
 
   of_value1 <- compute_ofv(eta = c(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
                           qmod = arg.ofv$qmod,
-                          iddata = arg.ofv$iddata,
+                          idvaliddata = arg.ofv$idvaliddata,
                           sigma = arg.ofv$sigma,
                           log_transformation = arg.ofv$log_transformation,
                           idDV = arg.ofv$idDV,
@@ -24,7 +24,7 @@ test_that("compute basic ofv", {
 
   of_value2 <- compute_ofv(eta = list(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
                           qmod = arg.ofv$qmod,
-                          iddata = arg.ofv$iddata,
+                          idvaliddata = arg.ofv$idvaliddata,
                           sigma = arg.ofv$sigma,
                           log_transformation = arg.ofv$log_transformation,
                           idDV = arg.ofv$idDV,
