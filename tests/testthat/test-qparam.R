@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("qparam works", {
   ho <- mrgsolve::house()
 
   expectparam <- param(ho, c(CL = .1, VC = 1))
