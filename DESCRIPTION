@@ -19,6 +19,7 @@ Imports:
     ggplot2,
     magrittr,
     mrgsolve (>= 1.0.0),
+    mvtnorm,
     optimx,
     purrr,
     rlang,
