@@ -143,6 +143,31 @@ $CAPTURE DV
 
 })
 
+test_that("check_absolute_eta() works if one ETA only",{
+  code1 <- "$PARAM ETA1 = 0,
+KA = 0.5, V = 23.3
+$OMEGA 0.41
+$SIGMA 0.04 0
+$CMT DEPOT CENT
+$PK
+double CL=1.1*exp(ETA1+ETA(1)) ;
+$ERROR
+double DV=CENT/V*(1+EPS(1))+EPS(2);
+$PKMODEL ncmt = 1, depot = TRUE
+$CAPTURE DV CL
+"
+
+  mod1 <- mcode("mod1", code1)
+  est1 <- mod1 %>%
+    adm_lines(amt = 100, cmt = 1) %>%
+    obs_lines(time = c(1, 6), DV = c(1.095, 1.643), cmt = 2) %>%
+    mapbayest(verbose = FALSE)
+
+  expect_equal(est1$opt.value$run, 1)
+}
+)
+
+
 test_that("check bounds", {
   skip_on_cran()
   code1 <- "
