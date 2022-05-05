@@ -89,7 +89,11 @@ check_finalofv <- function(OPT, arg.ofv, arg.optim){
 check_absolute_eta <- function(OPT){
   #Success condition: final absolute values of etas are not identical
   vec <- eta_from_opt(OPT)
-  length(unique(abs(vec))) != 1
+  if(length(vec)==1){
+    return(TRUE)
+  } else {
+    return(length(unique(abs(vec))) != 1 )
+  }
 }
 
 # 2.1 One function to test condition for new bounds.
