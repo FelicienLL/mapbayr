@@ -144,6 +144,8 @@ $CAPTURE DV
 })
 
 test_that("check_absolute_eta() works if one ETA only",{
+  #Fix 116
+
   code1 <- "$PARAM ETA1 = 0,
 KA = 0.5, V = 23.3
 $OMEGA 0.41
