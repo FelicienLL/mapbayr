@@ -78,3 +78,10 @@ rename_as_eta <- function(x){
 devalid_data_set <- function(x){
   as_tibble(x[,colnames(x)!="..zeros.."])
 }
+
+eta <- function(n){
+  x <- rep(0, n)
+  names(x) <- paste0("ETA", seq_len(n))
+  x
+}
+

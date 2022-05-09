@@ -69,7 +69,7 @@ ofv_kang <- function(obs, pred, eta, var, omega_inv){
 #'
 #' @return a single numeric value (the objective function value)
 #' @export
-compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation, idvaliddata, idDV, idcmt, ...){
+compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation, idvaliddata, idDV, idcmt, eta0 = eta(n = length(eta)), ...){
   #Update ETA values
   qmod <- qparam(x = qmod, p = eta)
 
@@ -82,7 +82,9 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
   g2 <- diag(H %*% sigma %*% t(H))
 
   #Compute the objective function value per se
-  ofv_kang(obs = idDV, pred = pred, eta = eta, var = g2, omega_inv = omega_inv)
+  ofv_kang(obs = idDV, pred = pred,
+           eta = (eta - eta0), # center on prior estimate of eta
+           var = g2, omega_inv = omega_inv)
 }
 
 #' @rdname compute_ofv
