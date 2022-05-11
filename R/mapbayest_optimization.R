@@ -3,9 +3,9 @@
 # This is the function that realize optimization from the argument arg.ofv, arg.optim etc...
 
 do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
+  try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
 
   # First the optimization is done once.
-  if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   RUN <- 1
@@ -53,7 +53,6 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   }
 
   opt$run <- RUN
-  if(verbose) cat(" done.\n")
   return(opt)
 }
 
