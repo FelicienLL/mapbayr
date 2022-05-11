@@ -1,6 +1,6 @@
 test_that("progress bar works", {
   testthat::skip("cannot test progress bar")
-
+# works manually, but not through automatic testing procedures
   code1 <- "$PARAM ETA1 = 0, ETA2 = 0, KA = 0.5, TVCL = 1.1, TVV = 23.3
  $OMEGA 0.41 0.32
  $SIGMA 0.04 0
