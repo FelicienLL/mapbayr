@@ -3,9 +3,9 @@
 # This is the function that realize optimization from the argument arg.ofv, arg.optim etc...
 
 do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
+  try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
 
   # First the optimization is done once.
-  if(verbose) cat(paste0("\nID ", unique(arg.ofv$data$ID), "..."))
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   RUN <- 1
@@ -17,13 +17,13 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
     if(need_new_ini){
       arg.optim$par <- new_ini3(arg.ofv, arg.optim, run = RUN)
-      if(verbose) message("\nDifficulty in optimization. Reset with new initial values: ", paste(arg.optim$par, collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("Reset with new initial values: ", paste(arg.optim$par, collapse = ' '))
     }
 
     if(need_new_bounds){
       arg.optim$lower <- new_bounds(arg.ofv, arg.optim)
       arg.optim$upper <- -arg.optim$lower
-      if(verbose) message("\nDifficulty in optimization. Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '), call. = F, immediate. = T)
+      if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '))
     }
 
     opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
@@ -53,7 +53,6 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   }
 
   opt$run <- RUN
-  if(verbose) cat(" done.\n")
   return(opt)
 }
 

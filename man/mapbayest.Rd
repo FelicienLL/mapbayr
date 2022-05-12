@@ -15,6 +15,7 @@ mapbayest(
   control = list(),
   check = TRUE,
   verbose = TRUE,
+  progress = TRUE,
   reset = TRUE,
   output = NULL
 )
@@ -38,7 +39,9 @@ mbrest(...)
 
 \item{check}{check model code for mapbayr specification (a logical, default is \code{TRUE})}
 
-\item{verbose}{print the steps of the estimations to the console (a logical, default is \code{TRUE})}
+\item{verbose}{print a message whenever optimization is reset (a logical, default is \code{TRUE})}
+
+\item{progress}{print a progress bar (a logical, default is \code{TRUE})}
 
 \item{reset}{reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is \code{TRUE})}
 

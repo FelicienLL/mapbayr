@@ -12,7 +12,8 @@
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
-#' @param verbose print the steps of the estimations to the console (a logical, default is `TRUE`)
+#' @param verbose print a message whenever optimization is reset (a logical, default is `TRUE`)
+#' @param progress print a progress bar (a logical, default is `TRUE`)
 #' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
@@ -63,16 +64,17 @@
 #'@seealso \code{\link{use_posterior}}
 #'
 mapbayest <- function(x,
-                   data = NULL,
-                   method = "L-BFGS-B",
-                   hessian = stats::optimHess,
-                   force_initial_eta = NULL,
-                   quantile_bound = 0.001,
-                   control = list(),
-                   check = TRUE,
-                   verbose = TRUE,
-                   reset = TRUE,
-                   output = NULL
+                      data = NULL,
+                      method = "L-BFGS-B",
+                      hessian = stats::optimHess,
+                      force_initial_eta = NULL,
+                      quantile_bound = 0.001,
+                      control = list(),
+                      check = TRUE,
+                      verbose = TRUE,
+                      progress = TRUE,
+                      reset = TRUE,
+                      output = NULL
 ){
 
   # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
@@ -103,6 +105,10 @@ mapbayest <- function(x,
   # End checks and pre-processing
   t2 <- Sys.time()
 
+  if(progress){
+    pb <- progress::progress_bar$new(format = "[:bar] ID :current/:total (:percent)", total = length(arg.ofv.id))
+  }
+
   # Start optimization
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
@@ -114,7 +120,7 @@ mapbayest <- function(x,
     data = iddata,
     opt.value = opt.value,
     arg.ofv = arg.ofv
-    ) %>%
+  ) %>%
     pmap(postprocess.optim,
          x = x,
          hessian = hessian,
@@ -128,7 +134,7 @@ mapbayest <- function(x,
                             post = post,
                             output = output,
                             times = c(t1, t2, t3)
-                            )
+  )
 
   return(out)
 }
