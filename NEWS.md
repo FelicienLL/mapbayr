@@ -9,6 +9,7 @@
 - Change behaviour of the `verbose` argument: now only controls the messages related to optimization reset, and not the progression of ID being optimized.
 - Implement a progress bar for long-time computation. Can be turned-off with `progress = FALSE`. Displays the number of the ID being optimized. #118 #28
 - add dependency: {progress} package.
+- add Suggestion: {minqa} package. #120
 
 # mapbayr 0.6.0
 This version of mapbayr introduces several features that aim to express uncertainty around the point estimate. Please note that the results of these functions were not validated *vs* a gold-standard software such as NONMEM. This is why they are referred as "experimental features" in the following subsections. They are exported with the objective to ease their future validation, and to provide a very rough idea of the estimation uncertainty.
