@@ -146,9 +146,11 @@ new_ini3 <- function(arg.ofv, arg.optim, run){
 
   # Set Out-of-bound etas to 0
   bound <- arg.optim$upper
-  for(i in seq_len(neta)){
-    vals <- simmat[,i]
-    simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
+  if(!(length(bound) == 1 && !is.finite(bound))){ #prevent fail if bound = Inf with newuoa
+    for(i in seq_len(neta)){
+      vals <- simmat[,i]
+      simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
+    }
   }
 
   # Compute OFV for each vector of eta
