@@ -154,6 +154,15 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   method <- method[1]
 
+  if(method == "newuoa"){
+    if(!requireNamespace("minqa", quietly = TRUE)) {
+      stop(
+        "Package \"minqa\" must be installed to use method = \"newuoa\" ",
+        call. = FALSE
+      )
+    }
+  }
+
   #par
   initial_eta <- force_initial_eta
   if(is.null(initial_eta)){
