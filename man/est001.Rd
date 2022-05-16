@@ -5,7 +5,7 @@
 \alias{est001}
 \title{Estimation object 001}
 \format{
-An object of class \code{mapbayests} of length 10.
+An object of class \code{mapbayests} of length 9.
 }
 \source{
 \url{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}
