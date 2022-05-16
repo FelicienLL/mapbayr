@@ -102,13 +102,21 @@ $CAPTURE DV
 $PKMODEL ncmt = 1, depot = TRUE
 "
 
-  data0 <- data.frame(ID = 1, time = c(0,150), amt = c(100, 0), addl = c(24, 0), ii = c(7, 0), cmt = c(1, 2), DV = c(NA_real_, 1.6), evid = c(1,0), mdv = c(1,0))
+  data0 <- data.frame(ID = 1,
+                      time = c(0, 150),
+                      amt = c(100, 0),
+                      addl = c(24, 0),
+                      ii = c(7, 0),
+                      cmt = c(1, 2),
+                      DV = c(NA_real_, 1.6),
+                      evid = c(1,0),
+                      mdv = c(1,0))
 
-  mod00 <- mcode("mod00", code00)
-  mod0  <- mcode("mod0", code0)
-  mod1  <- mcode("mod1", code1)
-  mod2  <- mcode("mod2", code2)
-  mod3  <- mcode("mod3", code3)
+  mod00 <- mcode("mod00", code00, compile = FALSE)
+  mod0  <- mcode("mod0", code0, compile = FALSE)
+  mod1  <- mcode("mod1", code1, compile = FALSE)
+  mod2  <- mcode("mod2", code2, compile = FALSE)
+  mod3  <- mcode("mod3", code3, compile = FALSE)
 
   #Model 00 : no ETA defined in $PARAM
   #Model 0 : no annotation
@@ -143,18 +151,22 @@ $PKMODEL ncmt = 1, depot = TRUE
   expect_equal(eta_descr(mod3), c("ind value KA", "ind value V", "ind value CL"))
 
   # model check ok ?
-  expect_s3_class(check_mapbayr_model(mod00), "data.frame")
-  expect_s3_class(check_mapbayr_model(mod0), "data.frame")
-  expect_true(check_mapbayr_model(mod1))
-  expect_s3_class(check_mapbayr_model(mod2), "data.frame")
-  expect_s3_class(check_mapbayr_model(mod3), "data.frame")
+  expect_s3_class(check_mapbayr_model(mod00, check_compile = FALSE), "data.frame")
+  expect_s3_class(check_mapbayr_model(mod0, check_compile = FALSE), "data.frame")
+  expect_true(check_mapbayr_model(mod1, check_compile = FALSE))
+  expect_s3_class(check_mapbayr_model(mod2, check_compile = FALSE), "data.frame")
+  expect_s3_class(check_mapbayr_model(mod3, check_compile = FALSE), "data.frame")
 
-  # model check ok ?
-  expect_error(mapbayest(mod00, data0, check = T, verbose = F))
-  expect_error(mapbayest(mod0, data0, check = T, verbose = F), NA)
-  expect_error(mapbayest(mod1, data0, check = T, verbose = F), NA)
-  expect_error(mapbayest(mod2, data0, check = T, verbose = F))
-  expect_error(mapbayest(mod2, data0, check = T, verbose = F))
+  # model check send stop ?
+  sendstop <- function(x) any(TRUE %in% check_mapbayr_model(x, check_compile = FALSE)$stop)
+  expect_true(sendstop(mod00))
+  expect_false(sendstop(mod0))
+  expect_false(sendstop(mod2))
+  expect_true(sendstop(mod3))
+
+  # model + data check for model that do not return STOP
+  expect_error(check_mapbayr_modeldata(mod0, data0), NA)
+  expect_error(check_mapbayr_modeldata(mod2, data0), "One or more compartment with observation")
 
   #adm_lines
   expect_error(adm_lines(mod00, amt = 100),"Define administration compartment .*")
@@ -167,6 +179,8 @@ $PKMODEL ncmt = 1, depot = TRUE
 
   expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0), "Define observation compartment .*")
   expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 2), NA)
-  expect_error(mapbayest(adm_lines(mod1, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 9), verbose = F), ".*One or more compartment with observation.*")
+  dat1 <- get_data(mod1 %>% adm_lines(amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 9))
+
+  expect_error(check_mapbayr_modeldata(mod1, dat1), ".*One or more compartment with observation.*")
 })
 

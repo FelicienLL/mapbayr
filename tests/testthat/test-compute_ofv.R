@@ -1,29 +1,25 @@
-mod <- mread('ex_mbr1', mbrlib())
-data1 <- mod %>%
-  adm_lines(amt = 10, addl = 2, ii = 12) %>%
-  obs_lines(DV = c(.1, .15), time = c(18, 40)) %>%
-  add_covariates(list(WT = 70)) %>%
-  get_data()
-arg.ofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data1))
+est <- mapbayest(exmodel())
+dat <- get_data(est)
+arg.ofv <- c(est$arg.ofv.fix, est$arg.ofv.id[[1]])
 
 test_that("f works", {
 
   #on validated data
-  expect_length(f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata), 2)
+  expect_length(f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata), 4)
 
   #on non-validated data
-  expect_length(f(qmod = arg.ofv$qmod, data = data1), 2)
+  expect_length(f(qmod = arg.ofv$qmod, data = dat), 4)
   expect_equal(
     f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata),
-    f(qmod = arg.ofv$qmod, data = data1)
+    f(qmod = arg.ofv$qmod, data = dat)
   )
 
   #mdv != 0 are dealed ok
   validddatabis <- arg.ofv$idvaliddata
   validddatabis[5,"mdv"] <- 1
-  expect_length(f(qmod = arg.ofv$qmod, data = validddatabis), 1)
+  expect_length(f(qmod = arg.ofv$qmod, data = validddatabis), 4-1)
   expect_equal(
-    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata)[2],
+    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata)[1:3],
     f(qmod = arg.ofv$qmod, data = validddatabis)
   )
 })
@@ -40,35 +36,38 @@ test_that("h matrix computation works", {
 
 
 test_that("compute basic ofv", {
-  expectofv <- 0.433564742656389
+  expecteta <- c(
+    ETA1 = 0.4050570108131819058,
+    ETA2 = 0.07285029212110255559,
+    ETA3 = -0.07495339444174362042
+    )
 
-  of_value1 <- compute_ofv(eta = c(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
-                          qmod = arg.ofv$qmod,
-                          idvaliddata = arg.ofv$idvaliddata,
-                          sigma = arg.ofv$sigma,
-                          log_transformation = arg.ofv$log_transformation,
-                          idDV = arg.ofv$idDV,
-                          idcmt = arg.ofv$idcmt,
-                          omega_inv = arg.ofv$omega_inv,
-                          all_cmt = arg.ofv$all_cmt)
+  expectofv <- 22.29351276398179493
+
+  of_value1 <- compute_ofv(
+    eta = expecteta,
+
+    qmod = arg.ofv$qmod, idvaliddata = arg.ofv$idvaliddata,
+    sigma = arg.ofv$sigma, log_transformation = arg.ofv$log_transformation,
+    idDV = arg.ofv$idDV, idcmt = arg.ofv$idcmt,
+    omega_inv = arg.ofv$omega_inv, all_cmt = arg.ofv$all_cmt)
 
   expect_equal(of_value1, expectofv)
 
-  of_value2 <- compute_ofv(eta = list(ETA1 = -.2, ETA2 = .1, ETA3 = .2),
-                          qmod = arg.ofv$qmod,
-                          idvaliddata = arg.ofv$idvaliddata,
-                          sigma = arg.ofv$sigma,
-                          log_transformation = arg.ofv$log_transformation,
-                          idDV = arg.ofv$idDV,
-                          idcmt = arg.ofv$idcmt,
-                          omega_inv = arg.ofv$omega_inv,
-                          all_cmt = arg.ofv$all_cmt)
+  of_value2 <- compute_ofv(
+    eta = as.list(expecteta),
+
+    qmod = arg.ofv$qmod, idvaliddata = arg.ofv$idvaliddata,
+    sigma = arg.ofv$sigma, log_transformation = arg.ofv$log_transformation,
+    idDV = arg.ofv$idDV, idcmt = arg.ofv$idcmt,
+    omega_inv = arg.ofv$omega_inv, all_cmt = arg.ofv$all_cmt)
+
   expect_equal(of_value2, expectofv)
 
-  do_ofv1 <- do_compute_ofv(eta = c(ETA1 = -.2, ETA2 = .1, ETA3 = .2), argofv = arg.ofv)
+  do_ofv1 <- do_compute_ofv(eta = expecteta, argofv = arg.ofv)
   expect_equal(do_ofv1, expectofv)
 
-  do_ofv2 <- do_compute_ofv(eta = list(ETA1 = -.2, ETA2 = .1, ETA3 = .2), argofv = arg.ofv)
+  do_ofv2 <- do_compute_ofv(eta = expecteta, argofv = arg.ofv)
   expect_equal(do_ofv2, expectofv)
 
 })

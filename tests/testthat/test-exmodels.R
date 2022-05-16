@@ -43,16 +43,17 @@ test_that("exdata works", {
 })
 
 test_that("exmodel works", {
-  mod1 <- exmodel()
+  mod1 <- exmodel(compile = FALSE)
   expect_s4_class(mod1, "mrgmod")
   expect_s3_class(get_data(mod1), "data.frame")
   expect_equal(get_data(mod1)$ID, rep(1, 5)) #6 lines initially, 1 removed with cleaning
 
-  mod2 <- exmodel(num = 6, ID = 2, clean_data = FALSE)
+  mod2 <- exmodel(num = 6, ID = 2, clean_data = FALSE, compile = FALSE)
   expect_equal(names(mod2)$param, c("TVCL", "TVVC", "TVKA", "TVD2", "FR",  "ETA1", "ETA2", "ETA3", "ETA4"))
   expect_equal(get_data(mod2)$ID, rep(2, 5)) #5 lines
 
-  expect_equal(dim(get_data(exmodel(add_exdata = FALSE))), c(0,0))
+  expect_equal(dim(get_data(exmodel(add_exdata = FALSE, compile = FALSE))), c(0,0))
 
   expect_false(mrgsolve:::compiled.mrgmod(exmodel(compile = FALSE)))
+  expect_true(mrgsolve:::compiled.mrgmod(exmodel()))
 })

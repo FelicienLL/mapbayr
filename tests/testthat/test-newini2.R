@@ -1,18 +1,15 @@
 test_that("new_ini2 works", {
 
-  mod <- mread("ex_mbr3", mbrlib())
+  mod <- exmodel(ID = 1)
+  dat <- get_data(mod)
 
-  data <- mod %>%
-    adm_lines(amt = 100) %>%
-    obs_lines(time = 12, DV = 3) %>%
-    obs_lines(time = 24, DV = 1) %>%
-    get_data()
-
-  argofv <- c(preprocess.ofv.fix(x = mod), preprocess.ofv.id(x = mod, iddata = data))
+  argofv <- c(
+    preprocess.ofv.fix(x = mod),
+    preprocess.ofv.id(x = mod, iddata = dat)
+    )
 
   argopt <- preprocess.optim(x = mod, method = "L-BFGS-B", control = list(), force_initial_eta = NULL,
                              quantile_bound = .4) # !!
-
 
   ini2 <- new_ini2(arg.ofv = argofv, arg.optim = argopt, run = 1)
 
