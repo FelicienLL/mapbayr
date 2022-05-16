@@ -1,6 +1,7 @@
 #' Check if model is valid for mapbayr
 #'
 #' @param x model file
+#' @param check_compile check if model is compiled (used internally)
 #'
 #' @return TRUE value if check is passed, a vector of character with errors otherwise.
 #' @export
@@ -9,7 +10,7 @@
 #' library(mapbayr)
 #' library(mrgsolve)
 #' check_mapbayr_model(house())
-check_mapbayr_model <- function(x){
+check_mapbayr_model <- function(x, check_compile = TRUE){
   # browser()
   if(!is.mrgmod(x)){
     stop("the first argument must be a model object", call. = F)
@@ -20,6 +21,12 @@ check_mapbayr_model <- function(x){
 
     if(!is.list(x@param@data)){
       stop("mod@param@data is not a list")
+    }
+
+    if(check_compile){
+      if(!x@shlib$compiled){
+        stop('model object is not compiled')
+      }
     }
 
     # $PARAM
