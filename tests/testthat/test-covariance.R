@@ -12,7 +12,7 @@ test_that("covariance matrix is correct", {
                     5.40868557E-003, 2.31664035E-002, 2.19133609E-002,
                     4.69547364E-004, 2.19133609E-002, 1.25252672E-001), nrow = 3, ncol = 3)
 
-  expect_equal(est001$covariance[[1]], nmphi, tolerance = 0.01)
+  expect_equal(est001$covariance[[1]], nmphi, tolerance = 0.03)
 })
 
 test_that("get_cov method is correct", {
