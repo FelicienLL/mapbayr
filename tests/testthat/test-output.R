@@ -28,7 +28,7 @@ test_that("output tab is correct if single type of DV and covariate", {
 
   expect_equal(as.data.frame(est1)[1,"SEX"], 0)
   expect_equal(as.data.frame(est1)[1,"BW"], 77)
-  expect_equal(as.data.frame(est1)[1,"CL"], 5.08330165)
+  expect_equal(as.data.frame(est1)[1,"CL"], 5.08330165, tolerance = 0.0001)
 
 })
 
@@ -43,8 +43,3 @@ test_that("output tab is correct if model with metabolite", {
 test_that("dataset is not carried with model object", {
   expect_null(est1$model@args$data)
 })
-
-
- #data_set() function matters for the test, do not simplify
-
-
