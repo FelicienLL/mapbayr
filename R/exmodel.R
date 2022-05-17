@@ -4,10 +4,11 @@
 #' @description A collection of example models and corresponding data to test and explore `mapbayr`.
 #' @param num model number (see details)
 #' @param add_exdata should data be automatically loaded with the model
-#' @param ... passed to `mrgsolve::mread()`
+#' @param cache read the model with `mrgsolve::mread_cache()`
+#' @param quiet don't print messages when compiling
+#' @param ... passed to `mrgsolve::mread()` or `mrgsolve::mread_cache()`
 #' @param ID individual number to include in the data (from 1 to 8)
 #' @param clean_data remove useless columns and raws from the original data
-#'
 #' @details
 #' Available models are:
 #'
@@ -20,11 +21,8 @@
 #'
 #' These models and data were created for the validation study of `mapbayr` published in \href{https://ascpt.onlinelibrary.wiley.com/doi/10.1002/psp4.12689}{CPT:Pharmacometrics & System Pharmacology}. More models and full datasets can be accessed \href{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}{in a dedicated repository}
 #'
-#' @source
-#'
 #' @return `exmodel()` reads and compiles code, and returns a (`mrgmod`) model object. `exdata()` returns a data.frame.
 #' @export
-#'
 #' @examples
 #' # Save the model object once and for all to avoid to call of `mread()`
 #' mod <- exmodel()
@@ -35,14 +33,24 @@
 #' # Number of subject in dataset can be chosen up to 8 individuals
 #' exdata(301, ID = c(5,8))
 #' @source \url{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}
-
+#'
 #' @rdname exmodel_exdata
 #' @export
-exmodel <- function(num = 1, add_exdata = TRUE, ..., ID = 1, clean_data = TRUE){
+exmodel <- function(num = 1, add_exdata = TRUE, cache = TRUE, quiet = getOption("mrgsolve_mread_quiet", TRUE), ..., ID = 1, clean_data = TRUE){
   num <- as.double(num)
   check_num(num = num)
+  model_name <- make_model_name(x = num, cache = cache)
 
-  model <- mread(make_model_name(num), ...)
+  if(cache){
+    model <- mrgsolve::mread_cache(model_name,
+                                   project = system.file("exmodel", package = "mapbayr"),
+                                   quiet = quiet,
+                                   ...)
+  } else {
+    model <- mrgsolve::mread(model_name,
+                             quiet = quiet,
+                             ...)
+  }
 
   if(add_exdata){
     dat <- exdata(num = num, ID = ID, clean_data = clean_data)
@@ -65,10 +73,12 @@ exdata <- function(num = 1, ID = 1, clean_data = TRUE){
   dat
 }
 
-make_model_name <- function(x){
+make_model_name <- function(x, cache = TRUE){
   num <- stringr::str_pad(x, 3, pad = 0)
-  nam <- paste0("mrg_", num, ".cpp")
-  system.file("exmodel", nam, package = "mapbayr")
+  nam <- paste0("mrg_", num)
+  if(cache) return(nam)
+
+  system.file("exmodel", paste0(nam, ".cpp"), package = "mapbayr")
 }
 
 make_data_name <- function(x){

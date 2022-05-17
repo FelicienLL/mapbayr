@@ -1,3 +1,4 @@
+options(mrgsolve_mread_quiet = TRUE)
 test_that("check final vs initial OFV", {
   skip_on_cran()
   skip_on_os("mac")

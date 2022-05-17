@@ -1,4 +1,4 @@
-mod <- exmodel(capture = c("CL", "TVCL"), add_exdata = FALSE)
+mod <- exmodel(capture = c("CL", "TVCL"), add_exdata = FALSE, cache = FALSE)
 dat <- exdata(ID = 1:2)
 est1 <- mapbayest(mod, dat[dat$ID==1,])
 est12 <- mapbayest(mod, dat)

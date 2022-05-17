@@ -5,9 +5,12 @@ test_that("check_num works", {
 })
 
 test_that("make_model_name works", {
-  expect_match(make_model_name(1), "mrg_001.cpp")
-  expect_match(make_model_name("1"), "mrg_001.cpp")
-  expect_match(make_model_name("001"), "mrg_001.cpp")
+  expect_match(make_model_name(1, cache = FALSE), "mrg_001.cpp")
+  expect_match(make_model_name("1", cache = FALSE), "mrg_001.cpp")
+  expect_match(make_model_name("001", cache = FALSE), "mrg_001.cpp")
+
+  expect_equal(make_model_name(1, cache = TRUE), "mrg_001")
+
 })
 
 test_that("make_data_name works", {
@@ -38,22 +41,23 @@ test_that("exdata works", {
   expect_equal(unique(exdata(ID = 1:2)$ID), c(1,2))
   expect_equal(nrow(exdata(ID = 99)), 0)
   expect_equal(exdata(clean_data = FALSE)$s2_sampling, rep(1, 6))
-
-
 })
 
 test_that("exmodel works", {
-  mod1 <- exmodel(compile = FALSE)
+  mod1 <- exmodel()
   expect_s4_class(mod1, "mrgmod")
   expect_s3_class(get_data(mod1), "data.frame")
   expect_equal(get_data(mod1)$ID, rep(1, 5)) #6 lines initially, 1 removed with cleaning
 
-  mod2 <- exmodel(num = 6, ID = 2, clean_data = FALSE, compile = FALSE)
+  mod2 <- exmodel(num = 6, ID = 2, clean_data = FALSE)
   expect_equal(names(mod2)$param, c("TVCL", "TVVC", "TVKA", "TVD2", "FR",  "ETA1", "ETA2", "ETA3", "ETA4"))
   expect_equal(get_data(mod2)$ID, rep(2, 5)) #5 lines
 
-  expect_equal(dim(get_data(exmodel(add_exdata = FALSE, compile = FALSE))), c(0,0))
+  expect_equal(dim(get_data(exmodel(add_exdata = FALSE))), c(0,0))
 
-  expect_false(mrgsolve:::compiled.mrgmod(exmodel(compile = FALSE)))
-  expect_true(mrgsolve:::compiled.mrgmod(exmodel()))
+  expect_message(exmodel(quiet = FALSE), "Loading model from cache")
+  expect_message(exmodel(quiet = TRUE), NA)
+
+  expect_false(mrgsolve:::compiled.mrgmod(exmodel(compile = FALSE, cache = FALSE)))
+  expect_true(mrgsolve:::compiled.mrgmod(exmodel(cache = FALSE)))
 })

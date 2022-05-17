@@ -6,12 +6,18 @@
 \alias{exdata}
 \title{Example model and data}
 \source{
-
-
 \url{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}
 }
 \usage{
-exmodel(num = 1, add_exdata = TRUE, ..., ID = 1, clean_data = TRUE)
+exmodel(
+  num = 1,
+  add_exdata = TRUE,
+  cache = TRUE,
+  quiet = getOption("mrgsolve_mread_quiet", TRUE),
+  ...,
+  ID = 1,
+  clean_data = TRUE
+)
 
 exdata(num = 1, ID = 1, clean_data = TRUE)
 }
@@ -20,7 +26,11 @@ exdata(num = 1, ID = 1, clean_data = TRUE)
 
 \item{add_exdata}{should data be automatically loaded with the model}
 
-\item{...}{passed to \code{mrgsolve::mread()}}
+\item{cache}{read the model with \code{mrgsolve::mread_cache()}}
+
+\item{quiet}{don't print messages when compiling}
+
+\item{...}{passed to \code{mrgsolve::mread()} or \code{mrgsolve::mread_cache()}}
 
 \item{ID}{individual number to include in the data (from 1 to 8)}
 
