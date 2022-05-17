@@ -43,3 +43,11 @@ test_that("output tab is correct if model with metabolite", {
 test_that("dataset is not carried with model object", {
   expect_null(est1$model@args$data)
 })
+
+test_that("output = 'eta' works", {
+  expect_mat <- matrix(c(-0.1453658, 0.02405846, -0.006188025, 0.2948274, -0.18212879, 0.011288384),
+                       ncol = 3, nrow = 2, byrow = TRUE, dimnames = list(c(2,6), c("ETA1", "ETA2", "ETA3")))
+
+  ans <- mapbayest(exmodel(ID = c(2, 6)), output = "eta")
+  expect_equal(ans, expect_mat, tolerance = 0.001)
+})
