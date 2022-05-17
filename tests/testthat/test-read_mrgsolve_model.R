@@ -147,7 +147,7 @@ Q   :  3.0 : Intercompartmental clearance
 
 ETA1: 0 : Clearance (L/h)
 ETA_2: 0 : Central volume (L) //                     error here
-ETA3: .1://                                           error here
+ETA3: .1://
 
 $OMEGA 0.3 0.2 0.1
 $SIGMA
@@ -178,7 +178,6 @@ $CAPTURE DV
 
   expect_true("$PARAM: 2 ETA found, but not sequentially named ETA1." %in% check1$descr)
   expect_true("$PARAM: Initial value is not 0 for all ETA." %in% check1$descr)
-  expect_true("$PARAM: Description missing for at least one ETA (optionnal)." %in% check1$descr)
   expect_true("$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM." %in% check1$descr)
   expect_true("$CMT: No [ADM] compartment(s) defined (optionnal)." %in% check1$descr)
   expect_true("$CMT: No [OBS] compartment(s) defined (optionnal)." %in% check1$descr)
@@ -330,4 +329,27 @@ $CAPTURE DV CL
 "
   mod2 <- mcode('mod2', code2, compile = FALSE)
   expect_match(paste(check_mapbayr_model(mod2, check_compile = FALSE)$descr, collapse = " "), "SIGMA are equal to zero")
+})
+
+test_that("eta_descr works", {
+  mod87 <- mcode("mod87", "$PARAM ETA1 = 0, ETA2 = 0
+$PARAM @annotated @covariate
+BW : 50 : Body weight (kg)", compile = FALSE)
+
+expect_equal(eta_descr(mod87), c("ETA1", "ETA2"))
+
+mod87bis <- mcode("mod87bis",
+                  "$PARAM @annotated
+              ETA1 : 0 : Clearance
+              ETA2 : 0 :
+$PARAM @annotated @covariate
+BW : 50 : Body weight (kg)", compile = FALSE)
+
+expect_equal(eta_descr(mod87bis), c("Clearance", "ETA2"))
+
+mod87ter <- mcode("mod87bis",
+                  "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)
+
+expect_equal(eta_descr(mod87ter), c("ETA1", "ETA2"))
+
 })

@@ -147,19 +147,26 @@ n_eta <- function(x){
 #' @return a vector of character
 #' @noRd
 eta_descr <- function(x){
+  etas <- eta_names(x)
   dat <- as.list(x)$details$data
 
   if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
-    v <- eta_names(x)
+    return(etas)
   } else { # If it is annotated, take names
-    datpar <- filter(dat, .data$block=="PARAM")
-    v <- datpar$descr[datpar$name %in% eta_names(x)]
+    eta_descr <- character(0)
+    for(i in etas){
+      idescr <- dat$descr[(dat$name==i)]
+      if(length(idescr)==0){
+        idescr <- i
+      }
+      if(is.na(idescr)){
+        idescr <- i
+      }
+      eta_descr <- c(eta_descr, idescr)
+    }
+    return(eta_descr)
   }
-
-  return(v)
-
 }
-
 
 # COVARIATES -----------
 
