@@ -55,8 +55,9 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #'  - add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
-#' #plot(est001, delta = 1) +
-#' #  ggplot2::labs(title = "Awesome predictions")
+#' est <- mapbayest(exmodel(ID = 1))
+#' plot(est, end = 48) +
+#'   ggplot2::labs(title = "Awesome prediction")
 #'
 #' @method plot mapbayests
 #' @export
@@ -143,8 +144,9 @@ plot.mapbayests <- function(x, ...){
 #' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
-#' #hist(est001) +
-#' #  ggplot2::labs(title = "Awesome predictions")
+#' est <- mapbayest(exmodel(ID = 1))
+#' hist(est) +
+#'   ggplot2::labs(title = "Awesome estimations")
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){

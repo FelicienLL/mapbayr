@@ -1,6 +1,7 @@
 #' Check if model is valid for mapbayr
 #'
 #' @param x model file
+#' @param check_compile check if model is compiled (used internally)
 #'
 #' @return TRUE value if check is passed, a vector of character with errors otherwise.
 #' @export
@@ -9,7 +10,7 @@
 #' library(mapbayr)
 #' library(mrgsolve)
 #' check_mapbayr_model(house())
-check_mapbayr_model <- function(x){
+check_mapbayr_model <- function(x, check_compile = TRUE){
   # browser()
   if(!is.mrgmod(x)){
     stop("the first argument must be a model object", call. = F)
@@ -20,6 +21,12 @@ check_mapbayr_model <- function(x){
 
     if(!is.list(x@param@data)){
       stop("mod@param@data is not a list")
+    }
+
+    if(check_compile){
+      if(!x@shlib$compiled){
+        stop('model object is not compiled')
+      }
     }
 
     # $PARAM
@@ -144,6 +151,7 @@ split_mapbayr_data <- function(data){
 #' Pre-process: arguments for optimization function
 #'
 #' @inheritParams mapbayest
+#'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
 preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){
@@ -235,6 +243,14 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 #'  - `idvaliddata`: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 #'  - `idDV`: a vector of (possibly log-transformed) observations
 #'  - `idcmt`: a vector of compartments where observations belong to
+#'
+#' @examples
+#' mod <- exmodel(add_exdata = FALSE, compile = FALSE)
+#' dat <- exdata(ID = c(1,4))
+#'
+#' preprocess.ofv.fix(x = mod, data = dat)
+#' preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 1,])
+#' preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 4,])
 #'
 #' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while others are specific of each individual (`preprocess.ofv.id`).
 NULL

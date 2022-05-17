@@ -22,6 +22,7 @@ Use this function to plot the results of the estimations, in the form of histogr
 For additional modifications, you can add extra \verb{+function(...)} in order to modify the plot as a regular \code{ggplot2} object.
 }
 \examples{
-#hist(est001) +
-#  ggplot2::labs(title = "Awesome predictions")
+est <- mapbayest(exmodel(ID = 1))
+hist(est) +
+  ggplot2::labs(title = "Awesome estimations")
 }

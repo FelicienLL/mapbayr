@@ -1,6 +1,28 @@
-mod1 <- mread('ex_mbr1', mbrlib())
-mod2 <- mread('ex_mbr2', mbrlib())
-mod3 <- mread('ex_mbr3', mbrlib())
+mod1 <- mcode("mod1", "
+$PARAM DUR = 1
+$CMT @annotated
+DEPOT : Depot compartment () [ADM]
+CENT : Central compartment ()[ADM, OBS]
+$MAIN
+D_CENT = DUR
+", compile = FALSE)
+
+
+mod2 <- mcode("mod1", "
+$PARAM DUR = 1
+$CMT @annotated
+DEPOT : Depot compartment () [ADM]
+CENT : Central compartment ()[OBS]
+$MAIN
+D_DEPOT = DUR
+", compile = FALSE)
+
+mod3 <- mcode("mod1", "
+$CMT @annotated
+DEPOT : Depot compartment () [ADM]
+CENT : Central compartment ()[OBS]
+", compile = FALSE)
+
 
 test_that("example models are suitable for these tests", {
   #Administration compartment
@@ -13,8 +35,6 @@ test_that("example models are suitable for these tests", {
   expect_equal(adm_0_cmt(mod2), 1)
   expect_null(adm_0_cmt(mod3))
 })
-
-
 
 test_that("detection of default administration compartment is good",{
   expect_equal(get_data(adm_lines(mod1, amt = 100))[["cmt"]], adm_cmt(mod1))
@@ -84,7 +104,5 @@ test_that("no NA in SS, ADDL, RATE or II",{
     get_data()
 
   expect_false(any(is.na(data3$rate)))
-
-
 
 })

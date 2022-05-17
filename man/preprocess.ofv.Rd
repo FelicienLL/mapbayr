@@ -37,3 +37,12 @@ The following arguments differs between individuals:
 \description{
 Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (\code{preprocess.ofv.fix}), while others are specific of each individual (\code{preprocess.ofv.id}).
 }
+\examples{
+mod <- exmodel(add_exdata = FALSE, compile = FALSE)
+dat <- exdata(ID = c(1,4))
+
+preprocess.ofv.fix(x = mod, data = dat)
+preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 1,])
+preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 4,])
+
+}

@@ -1,11 +1,4 @@
 test_that("mbrest is deprecated", {
-  mod <- mread("ex_mbr3", mbrlib())
-  moddata <- mod %>%
-    adm_lines(amt = 100) %>%
-    obs_lines(time = 6, DV = .89)
-
-  my_est <- mapbayest(moddata, verbose = F)
-
-  expect_warning(my_mbrest <- mbrest(moddata, verbose = F), "Deprecated")
-  expect_equal(my_est$mapbay_tab, my_mbrest$mapbay_tab)
+  expect_warning(my_mbrest <- mbrest(exmodel()), "Deprecated")
+  expect_equal(my_mbrest$mapbay_tab, filter(est001$mapbay_tab, ID == 1))
 })

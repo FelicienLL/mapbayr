@@ -10,6 +10,11 @@
 - Implement a progress bar for long-time computation. Can be turned-off with `progress = FALSE`. Displays the number of the ID being optimized. #118 #28
 - add dependency: {progress} package.
 - add Suggestion: {minqa} package. #120
+- Export `exmodel()` and `exdata()` for example models and data. More consistent with the published article. The models are used in multiple places inside the package, especially in tests and examples. 
+- Stop exporting `mbrlib()` and associated models, the former internal library system.
+- Improve tests: lighter, faster, more consistent, more unitary and run with check
+- Improve documentation: some monographies were merged, and some gained an example section.
+- Fix bug: no more warning when updating a model without covariates #115
 
 # mapbayr 0.6.0
 This version of mapbayr introduces several features that aim to express uncertainty around the point estimate. Please note that the results of these functions were not validated *vs* a gold-standard software such as NONMEM. This is why they are referred as "experimental features" in the following subsections. They are exported with the objective to ease their future validation, and to provide a very rough idea of the estimation uncertainty.

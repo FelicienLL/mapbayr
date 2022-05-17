@@ -16,6 +16,7 @@ vector of integer
 Get zero-order infusion compartment from mrgsolve model
 }
 \examples{
-model <- mrgsolve::mread("ex_mbr1", mbrlib())
+# Both 1st and 0- order administration
+model <- exmodel(6, compile = FALSE)
 adm_0_cmt(model)
 }
