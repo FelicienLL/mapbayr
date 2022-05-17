@@ -3,30 +3,73 @@
 \name{get_x}
 \alias{get_x}
 \alias{get_data}
+\alias{get_data.mrgmod}
+\alias{get_data.mapbayests}
 \alias{get_eta}
+\alias{get_eta.mapbayests}
 \alias{get_cov}
+\alias{get_cov.mapbayests}
 \alias{get_param}
+\alias{get_param.mapbayests}
 \alias{get_phi}
+\alias{get_phi.mapbayests}
 \title{Get content from object}
 \usage{
 get_data(x, ...)
 
+\method{get_data}{mrgmod}(x, ...)
+
+\method{get_data}{mapbayests}(x, ..., output = "df")
+
 get_eta(x, ...)
+
+\method{get_eta}{mapbayests}(x, ..., output = NULL)
 
 get_cov(x, ...)
 
+\method{get_cov}{mapbayests}(x, ..., simplify = TRUE)
+
 get_param(x, ...)
 
+\method{get_param}{mapbayests}(x, ..., output = NULL, keep_ID = NULL, keep_names = NULL)
+
 get_phi(x, ...)
+
+\method{get_phi}{mapbayests}(x, ...)
 }
 \arguments{
-\item{x}{object to get content from}
+\item{x}{mapbayests object}
 
-\item{...}{passed along}
+\item{...}{not used}
+
+\item{output}{either a data.frame ("df") or a vector of numeric ("num"). Default to "num" if only one ID}
+
+\item{simplify}{a logical. If TRUE (the default) and only one ID, one matrix is returned instead of a list of length 1}
+
+\item{keep_ID}{a logical. By default, the ID variable is dropped if one ID in data.}
+
+\item{keep_names}{a logical. By default, names are dropped if one parameter is requested, and output is not a data frame.}
 }
 \value{
 the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 }
 \description{
 Helpful functions to get content from a \code{mrgmod} object (i.e. data) or from a \code{mapbayests} object (\code{data}, \code{eta}, \code{cov}, \code{param}, \code{phi}).
+}
+\examples{
+# From a model object (mrgmod)
+mod <- exmodel(compile = FALSE)
+get_data(mod)
+
+# From an estimation object (mapbayests)
+get_data(est001)
+get_data(est001, output = "list")
+
+get_eta(est001)
+get_eta(est001, output = "list")
+
+get_cov(est001)
+
+get_phi(est001)
+
 }

@@ -16,6 +16,14 @@
 #' It does not handle time-varying covariates: only the first value will be used as the individual value.
 #' @return a mrgmod, or a list of mrgmod if there is more than 1 ID
 #' @export
+#' @examples
+#' library(magrittr)
+#' est <- mapbayest(exmodel())
+#' est %>%
+#'   use_posterior() %>%
+#'   mrgsolve::ev(amt = 50000) %>%
+#'   mrgsolve::mrgsim()
+#'
 use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta = TRUE, .zero_re = NULL, simplify = TRUE){
   if(!inherits(x, "mapbayests")) stop("x is not a mapbayests class object")
 

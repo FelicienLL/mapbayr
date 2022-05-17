@@ -42,3 +42,12 @@ This function takes the results of an estimation (i.e. a \code{mapbayests} objec
 It does not handle time-varying covariates: only the first value will be used as the individual value.
 }
 }
+\examples{
+library(magrittr)
+est <- mapbayest(exmodel())
+est \%>\%
+  use_posterior() \%>\%
+  mrgsolve::ev(amt = 50000) \%>\%
+  mrgsolve::mrgsim()
+
+}
