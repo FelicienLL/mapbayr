@@ -15,6 +15,10 @@
 - Improve tests: lighter, faster, more consistent, more unitary and run with check
 - Improve documentation: some monographies were merged, and some gained an example section.
 - Fix bug: no more warning when updating a model without covariates #115
+- Fix bug: no more warning when plotting data with DV being NA #114
+- Fix bug: `plot_phi()` now plots correct values on the x axis #108
+- Refactor `eta_descr` to always return a name even if description is missing #87
+- add `output="eta"` function to immediately return ETA after estimation #106
 
 # mapbayr 0.6.0
 This version of mapbayr introduces several features that aim to express uncertainty around the point estimate. Please note that the results of these functions were not validated *vs* a gold-standard software such as NONMEM. This is why they are referred as "experimental features" in the following subsections. They are exported with the objective to ease their future validation, and to provide a very rough idea of the estimation uncertainty.

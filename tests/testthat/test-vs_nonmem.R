@@ -35,5 +35,8 @@ test_that("is.variance works", {
 })
 
 test_that("plot_phi works", {
-  expect_s3_class(plot_phi(merged), "ggplot")
+  p <- plot_phi(merged)
+  expect_s3_class(p, "ggplot")
+  x_labels <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$x$get_labels()
+  expect_equal(x_labels, c("ETA1", "ETA2", "ETA3"))
 })

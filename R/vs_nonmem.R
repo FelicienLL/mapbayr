@@ -89,7 +89,7 @@ merge_phi <- function(mapbayr_phi, nonmem_phi){
 #' @export
 plot_phi <- function(merged_phi, only_ETA = TRUE){
   dat <- merged_phi
-  if(only_ETA) dat <- filter(dat, .data$type == "COVARIANCE")
+  if(only_ETA) dat <- filter(dat, .data$type == "ETA")
 
   dat %>%
     ggplot(aes(.data$variable, .data$adiff, group = .data$ID)) +

@@ -36,7 +36,6 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     } else {
       if(any(eta_names(x) != paste0("ETA", seq.int(length.out = neta)))) check <-  bind_rows(check, list(stop = TRUE, descr = paste0("$PARAM: ", neta, " ETA found, but not sequentially named ETA1.")))
       if(!all(x[eta_names(x)]==0)) check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: Initial value is not 0 for all ETA."))
-      if(any(is.na(eta_descr(x)))) check <- bind_rows(check, list(stop = FALSE, descr = "$PARAM: Description missing for at least one ETA (optionnal)."))
     }
 
     # $CMT

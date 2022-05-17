@@ -112,6 +112,9 @@ mapbayest <- function(x,
   # Start optimization
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
+  if(!is.null(output)){
+    if(output == "eta") return(do.call(rbind, sapply(opt.value, eta_from_opt, simplify = F)))
+  }
   # End optimization
   t3 <- Sys.time()
 
