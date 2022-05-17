@@ -16,6 +16,7 @@ vector of integer
 Get observation compartment numbers from mrgsolve model
 }
 \examples{
-model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#Both parent drug and metabolite
+model <- exmodel(401, compile = FALSE)
 obs_cmt(model)
 }

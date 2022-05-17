@@ -174,12 +174,7 @@ Reliability of parameter estimation against NONMEM was assessed for a wide varie
 
 ## *mrgsolve* model specification
 
-mapbayr contains a library of example model files (.cpp), accessible with `mbrlib()`
-```{r, eval = F}
-my_model <- mread("ex_mbr1.cpp", mbrlib())
-```
-
-You are invited to perform MAP-Bayesian estimation with your own models. These model files should be slightly modified in order to be "read" by mapbayr with the subsequent specifications: 
+mapbayr contains a library of example model files (.cpp), accessible with `exmodel()`. You are invited to perform MAP-Bayesian estimation with your own models. These model files should be slightly modified in order to be "read" by mapbayr with the subsequent specifications: 
 
 ### 1.  `$PARAM` block
 #### 1.1 ETA specifications

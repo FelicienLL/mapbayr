@@ -38,14 +38,6 @@ get_quantile <- function(x, .p){
   map_dbl(sqrt(odiag(x)), stats::qnorm, p = .p, mean = 0)
 }
 
-#' Internal "mapbayr" model examples
-#'
-#' @export
-#' @return a character string, the location of the example models.
-mbrlib <- function(){
-  system.file("models", package = "mapbayr")
-}
-
 my_percent <- function(x){
   stopifnot(is.numeric(x))
   paste0(round(x * 100, 0), "%")

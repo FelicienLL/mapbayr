@@ -113,8 +113,6 @@ my_data
 
 ``` r
 my_est <- mapbayest(my_model, data = my_data)
-#> 
-#> ID 1... done.
 ```
 
 As building dataset into a NM-TRAN format can be painful, you can use
@@ -240,15 +238,9 @@ tracker](https://github.com/FelicienLL/mapbayr/issues).
 ## *mrgsolve* model specification
 
 mapbayr contains a library of example model files (.cpp), accessible
-with `mbrlib()`
-
-``` r
-my_model <- mread("ex_mbr1.cpp", mbrlib())
-```
-
-You are invited to perform MAP-Bayesian estimation with your own models.
-These model files should be slightly modified in order to be “read” by
-mapbayr with the subsequent specifications:
+with `exmodel()`. You are invited to perform MAP-Bayesian estimation
+with your own models. These model files should be slightly modified in
+order to be “read” by mapbayr with the subsequent specifications:
 
 ### 1. `$PARAM` block
 
