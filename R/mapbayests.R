@@ -96,7 +96,7 @@ plot.mapbayests <- function(x, ...){
   }
 
   observations <- x$mapbay_tab %>%
-    filter(.data$evid==0) %>%
+    filter(.data$evid==0, !(.data$mdv==1 & is.na(.data$DV))) %>%
     mutate(MDV = as.factor(.data$mdv))
 
   #MDV
