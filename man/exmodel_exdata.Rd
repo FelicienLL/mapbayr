@@ -55,7 +55,7 @@ An example dataset of eight (simulated) individuals is available for each model.
 
 Model code and data files are stored at the location given by \code{system.file("exmodel", package = "mapbayr")}.
 
-These models and data were created for the validation study of \code{mapbayr} published in \href{https://ascpt.onlinelibrary.wiley.com/doi/10.1002/psp4.12689}{CPT:Pharmacometrics & System Pharmacology}. More models and full datasets can be accessed \href{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}{in a dedicated repository}
+These models and data were created for the validation study of \code{mapbayr} published in \href{https://pubmed.ncbi.nlm.nih.gov/34342170/}{CPT:Pharmacometrics & System Pharmacology}. More models and full datasets can be accessed \href{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}{in a dedicated repository}
 }
 \examples{
 # Models can be loaded with data (the default), ready for parameter estimation
