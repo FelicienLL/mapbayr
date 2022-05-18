@@ -206,7 +206,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   #lower, upper
   bound = -Inf
   if(method == "L-BFGS-B"){
-     bound <- get_quantile(x, .p = quantile_bound)
+    bound <- get_quantile(x, .p = quantile_bound)
   }
 
   arg <- list(
@@ -289,8 +289,7 @@ preprocess.ofv.id <- function(x, iddata){
   if(log_transformation(x)) idDV <- log(idDV)
   idcmt <- iddata$cmt[iddata$mdv==0]
 
-  list(#iddata = iddata,
-       idvaliddata = mrgsolve::valid_data_set(iddata, x),
+  list(idvaliddata = mrgsolve::valid_data_set(iddata, x),
        idDV = idDV,
        idcmt = idcmt
   )

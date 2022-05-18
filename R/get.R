@@ -9,19 +9,22 @@
 #'
 #' @examples
 #' # From a model object (mrgmod)
-#' mod <- exmodel(compile = FALSE)
+#' mod <- exmodel(ID = 1:2, cache = FALSE, capture = "CL")
 #' get_data(mod)
 #'
 #' # From an estimation object (mapbayests)
-#' get_data(est001)
-#' get_data(est001, output = "list")
+#' est <- mapbayest(mod)
+#' get_data(est)
+#' get_data(est, output = "list")
 #'
-#' get_eta(est001)
-#' get_eta(est001, output = "list")
+#' get_eta(est)
+#' get_eta(est, output = "list")
 #'
-#' get_cov(est001)
+#' get_cov(est)
 #'
-#' get_phi(est001)
+#' get_param(est)
+#'
+#' get_phi(est)
 #'
 NULL
 #> NULL

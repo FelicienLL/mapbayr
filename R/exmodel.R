@@ -12,8 +12,8 @@
 #' @details
 #' Available models are:
 #'
-#' - 1: Base model. A simple monocompartmental PK model with inter-individual variabilty on absorption constante (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
-#' - 6: Complex absorption model. Dual 0- and 1st orders absorption phenomenon.
+#' - 1: Base model. A simple monocompartmental PK model with inter-individual variabilty on absorption constant (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
+#' - 6: Complex absorption model. Dual 0- and 1st orders absorption phenomenons.
 #' - 301: Time-varying covariates. A continuous covariate (body weight "BW") and a categorical one (sex "SEX") influence the clearance parameter. In the corresponding dataset, the values randomly changes from one record to another within a single individual.
 #' - 401: Metabolite. The PK model of both a parent drug and its metabolite.
 #'
@@ -24,13 +24,10 @@
 #' @return `exmodel()` reads and compiles code, and returns a (`mrgmod`) model object. `exdata()` returns a data.frame.
 #' @export
 #' @examples
-#' # Save the model object once and for all to avoid to call of `mread()`
-#' mod <- exmodel()
-#'
 #' # Models can be loaded with data (the default), ready for parameter estimation
-#' est <- mapbayest(mod)
+#' est <- mapbayest(exmodel())
 #'
-#' # Number of subject in dataset can be chosen up to 8 individuals
+#' # Number of subjects in dataset can be chosen up to 8 individuals
 #' exdata(301, ID = c(5,8))
 #' @source \url{https://github.com/FelicienLL/mapbayr-CPTPSP-2021}
 #'
