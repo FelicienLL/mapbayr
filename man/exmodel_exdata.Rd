@@ -34,7 +34,7 @@ exdata(num = 1, ID = 1, clean_data = TRUE)
 
 \item{ID}{individual number to include in the data (from 1 to 8)}
 
-\item{clean_data}{remove useless columns and raws from the original data}
+\item{clean_data}{remove useless columns and rows from the original data}
 }
 \value{
 \code{exmodel()} reads and compiles code, and returns a (\code{mrgmod}) model object. \code{exdata()} returns a data.frame.
@@ -45,7 +45,7 @@ A collection of example models and corresponding data to test and explore \code{
 \details{
 Available models are:
 \itemize{
-\item 1: Base model. A simple monocompartmental PK model with inter-individual variabilty on absorption constant (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
+\item 1: Base model. A simple monocompartmental PK model with inter-individual variability on absorption constant (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
 \item 6: Complex absorption model. Dual 0- and 1st orders absorption phenomenons.
 \item 301: Time-varying covariates. A continuous covariate (body weight "BW") and a categorical one (sex "SEX") influence the clearance parameter. In the corresponding dataset, the values randomly changes from one record to another within a single individual.
 \item 401: Metabolite. The PK model of both a parent drug and its metabolite.

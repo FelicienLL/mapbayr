@@ -4,10 +4,12 @@ bayesian
 behaviour
 benchmarked
 bfgs
+BW
 cmt
 CMT
 CPT
 cmt'
+CMD
 cpp
 dealed
 df
@@ -20,6 +22,7 @@ iddata
 ini
 IPRED
 iteratively
+KA
 mapbay
 mapbayest
 mapbayests
@@ -30,6 +33,7 @@ mbrhist
 mbrplot
 MDV
 MIPD
+monocompartmental
 mrgmod
 mrgsim
 mrgsolve
@@ -60,3 +64,4 @@ se
 ss
 testthatted
 tibble
+VC

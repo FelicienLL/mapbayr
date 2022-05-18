@@ -29,7 +29,7 @@ do_compute_ofv(eta, argofv, ...)
 
 \item{...}{for compatibility (not used)}
 
-\item{argofv}{above mentionned arguments as a list}
+\item{argofv}{above mentioned arguments as a list}
 }
 \value{
 a single numeric value (the objective function value)

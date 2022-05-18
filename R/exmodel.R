@@ -8,11 +8,11 @@
 #' @param quiet don't print messages when compiling
 #' @param ... passed to `mrgsolve::mread()` or `mrgsolve::mread_cache()`
 #' @param ID individual number to include in the data (from 1 to 8)
-#' @param clean_data remove useless columns and raws from the original data
+#' @param clean_data remove useless columns and rows from the original data
 #' @details
 #' Available models are:
 #'
-#' - 1: Base model. A simple monocompartmental PK model with inter-individual variabilty on absorption constant (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
+#' - 1: Base model. A simple monocompartmental PK model with inter-individual variability on absorption constant (KA), volume of distribution (VC) and clearance (CL). The residual error model is proportional.
 #' - 6: Complex absorption model. Dual 0- and 1st orders absorption phenomenons.
 #' - 301: Time-varying covariates. A continuous covariate (body weight "BW") and a categorical one (sex "SEX") influence the clearance parameter. In the corresponding dataset, the values randomly changes from one record to another within a single individual.
 #' - 401: Metabolite. The PK model of both a parent drug and its metabolite.

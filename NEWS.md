@@ -2,12 +2,12 @@
 
 ## Breaking changes
 - Change the outputs of pre-processing functions. For fixed elements, `qmod`, `omega_inv `and `all_cmt` now replace `mrgsolve_model`, `omega.inv` and `obs_cmt`. For individual-related elements, `idDV` replaces `DVobs`, `data` is removed, `idvaliddata` and `idcmt` are added. This can have an impact for the user since these elements are reported in the standard output. However, it does not change the behaviour of `get_data()`.
-- Change argument behaviour: `mapbayest(verbose = TRUE)` now only displays the messages related to optimization reset, and not the progression of ID being optimized which is now controled by `mapbayest(progress = TRUE)`.
+- Change argument behaviour: `mapbayest(verbose = TRUE)` now only displays the messages related to optimization reset, and not the progression of ID being optimized which is now controlled by `mapbayest(progress = TRUE)`.
 - Stop exporting `derivatives()`, now replaced by `mapbayr:::h()`.
 - Stop exporting `mbrlib()` and associated models. See the "Model examples" section below.
 
 ## Model examples
-The example models system was totally re-thinked around a new function: `exmodel()`. It now embeds several models that were used in the validation study, with a small corresponding dataset that can be loaded automatically (the default). They are used in multiple places inside the package, especially in tests and examples. More models could be added in the future.  
+The example models system was totally re-thought around a new function: `exmodel()`. It now embeds several models that were used in the validation study, with a small corresponding dataset that can be loaded automatically (the default). They are used in multiple places inside the package, especially in tests and examples. More models could be added in the future.  
 
 - Export `exmodel()`. See the list of available models in the documentation.  
 - Export `exdata()`, to load data only.
@@ -17,11 +17,11 @@ The example models system was totally re-thinked around a new function: `exmodel
 - New argument value: `mapbayest(output = "eta")` returns only estimated ETA in order to skip most of post-processing steps. #106
 - `eta_descr()` now always returns a non-NA value even if description is missing. #87
 - New function: `do_compute_ofv()`, a wrapper around `do.call(compute_ofv, ...)`.
-- Add Dependency: {progress}.
-- Add Suggestion: {testthat}, {minqa}. #120
+- Add Dependency: `{progress}`.
+- Add Suggestion: `{testthat}`, `{minqa}`. #120
 - Improve the performance of objective function value calculation. Now use a faster parameter update, pre-validate data and refactor the computation of the H matrix. Thanks @kylebaron for the useful suggestions. #104 #111
-- Improve tests. Now work with example models which is overall lighter, faster, more consistent, more unitary. Also, they are run during R CMD check.
-- Improve documentation: some monographies were merged, and some gained an example section thanks to the new example models system.
+- Improve tests. Now work with example models which is overall lighter, faster, more consistent, more unitary. Also, they are run during `R CMD check`.
+- Improve documentation: some monographs were merged, and some gained an example section thanks to the new example models system.
 
 ## Bug fixes
 - `plot_phi()` now plots correct values on the x-axis. #108
