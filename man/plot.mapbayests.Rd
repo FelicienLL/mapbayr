@@ -26,7 +26,8 @@ For additional modifications, you can:
 }
 }
 \examples{
-#plot(est001, delta = 1) +
-#  ggplot2::labs(title = "Awesome predictions")
+est <- mapbayest(exmodel(ID = 1))
+plot(est, end = 48) +
+  ggplot2::labs(title = "Awesome prediction")
 
 }

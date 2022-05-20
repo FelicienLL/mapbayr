@@ -4,10 +4,12 @@
 \alias{check_mapbayr_model}
 \title{Check if model is valid for mapbayr}
 \usage{
-check_mapbayr_model(x)
+check_mapbayr_model(x, check_compile = TRUE)
 }
 \arguments{
 \item{x}{model file}
+
+\item{check_compile}{check if model is compiled (used internally)}
 }
 \value{
 TRUE value if check is passed, a vector of character with errors otherwise.

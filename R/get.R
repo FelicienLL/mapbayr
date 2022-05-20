@@ -6,6 +6,26 @@
 #' @return the class of the object returned depends on the function, and on their arguments. Typically, a data.frame or a vector if the output can be reduced to one line.
 #'
 #' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (`data`, `eta`, `cov`, `param`, `phi`).
+#'
+#' @examples
+#' # From a model object (mrgmod)
+#' mod <- exmodel(ID = 1:2, cache = FALSE, capture = "CL")
+#' get_data(mod)
+#'
+#' # From an estimation object (mapbayests)
+#' est <- mapbayest(mod)
+#' get_data(est)
+#' get_data(est, output = "list")
+#'
+#' get_eta(est)
+#' get_eta(est, output = "list")
+#'
+#' get_cov(est)
+#'
+#' get_param(est)
+#'
+#' get_phi(est)
+#'
 NULL
 #> NULL
 
@@ -18,8 +38,8 @@ get_data <- function(x, ...)UseMethod("get_data")
 #' @param x model object
 #' @param ... not used
 #'
+#' @rdname get_x
 #' @method get_data mrgmod
-#' @return a tibble
 #' @export
 get_data.mrgmod <- function(x, ...){
   as_tibble(x@args$data)
@@ -31,12 +51,13 @@ get_data.mrgmod <- function(x, ...){
 #' @param ... not used
 #' @param output either a single data.frame ("df", the default) or a list ("list") of individual data sets
 #'
+#' @rdname get_x
 #' @method get_data mapbayests
-#' @return a tibble
 #' @export
 get_data.mapbayests <- function(x, ..., output = "df"){
-  if(output == "df") return(map_dfr(x$arg.ofv.id , "data"))
-  if(output == "list") return(map(x$arg.ofv.id , "data"))
+  iddata <- map(x$arg.ofv.id, ~ devalid_data_set(.x$idvaliddata))
+  if(output == "df") return(bind_rows(iddata))
+  if(output == "list") return(iddata)
   if(!output %in% c("df", "list")) stop("output type must be 'df' or 'list'", call. = FALSE)
 }
 
@@ -51,8 +72,8 @@ get_eta <- function(x, ...) UseMethod("get_eta")
 #' @param ... not used
 #' @param output either a list ("list"), a data.frame ("df") or a vector of numeric ("num"). Default to "num" if only one ID.
 #'
+#' @rdname get_x
 #' @method get_eta mapbayests
-#' @return a tibble
 #' @export
 get_eta.mapbayests <- function(x, ..., output = NULL){
 
@@ -104,8 +125,8 @@ get_cov <- function(x, ...) UseMethod("get_cov")
 #' @param ... not used
 #' @param simplify a logical. If TRUE (the default) and only one ID, one matrix is returned instead of a list of length 1
 #'
+#' @rdname get_x
 #' @method get_cov mapbayests
-#' @return a tibble
 #' @export
 get_cov.mapbayests <- function(x, ..., simplify = TRUE){
   ans <- x$covariance
@@ -125,8 +146,8 @@ get_param <- function(x, ...) UseMethod("get_param")
 #' @param keep_ID a logical. By default, the ID variable is dropped if one ID in data.
 #' @param keep_names a logical. By default, names are dropped if one parameter is requested, and output is not a data frame.
 #'
+#' @rdname get_x
 #' @method get_param mapbayests
-#' @return a tibble
 #' @export
 get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_names = NULL){
   #Check Arguments
@@ -207,10 +228,10 @@ get_phi <- function(x, ...) UseMethod("get_phi")
 
 #' Return "NONMEM phi"-like file from a mapbayests
 #'
+#' @rdname get_x
 #' @param x mapbayests object
 #' @param ... not used
 #' @method get_phi mapbayests
-#' @return a tibble
 #' @export
 get_phi.mapbayests <- function(x, ...){
   namcov <- namephicov(n_eta(x$model))

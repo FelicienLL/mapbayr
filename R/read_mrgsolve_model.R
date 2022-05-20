@@ -6,7 +6,8 @@
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' # Both 1st and 0- order administration
+#' model <- exmodel(6, compile = FALSE)
 #' adm_cmt(model)
 adm_cmt <- function(x){
   dat <- as.list(x)$details$data
@@ -34,7 +35,8 @@ adm_cmt <- function(x){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' #Both parent drug and metabolite
+#' model <- exmodel(401, compile = FALSE)
 #' obs_cmt(model)
 obs_cmt <- function(x){
   dat <- as.list(x)$details$data
@@ -80,7 +82,8 @@ fit_cmt <- function(x, data){
 #' @export
 #'
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' # Both 1st and 0- order administration
+#' model <- exmodel(6, compile = FALSE)
 #' adm_0_cmt(model)
 adm_0_cmt <- function(x){
   v <- paste0("D_", x@cmtL) %>%
@@ -144,19 +147,26 @@ n_eta <- function(x){
 #' @return a vector of character
 #' @noRd
 eta_descr <- function(x){
+  etas <- eta_names(x)
   dat <- as.list(x)$details$data
 
   if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
-    v <- eta_names(x)
+    return(etas)
   } else { # If it is annotated, take names
-    datpar <- filter(dat, .data$block=="PARAM")
-    v <- datpar$descr[datpar$name %in% eta_names(x)]
+    eta_descr <- character(0)
+    for(i in etas){
+      idescr <- dat$descr[(dat$name==i)]
+      if(length(idescr)==0){
+        idescr <- i
+      }
+      if(is.na(idescr)){
+        idescr <- i
+      }
+      eta_descr <- c(eta_descr, idescr)
+    }
+    return(eta_descr)
   }
-
-  return(v)
-
 }
-
 
 # COVARIATES -----------
 
@@ -167,7 +177,7 @@ eta_descr <- function(x){
 #' @return a character string vector
 #' @noRd
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' model <- exmodel(301, compile = FALSE)
 #' mbr_cov_names(model)
 mbr_cov_names <- function(x){
   as.list(x)$covariates
@@ -180,15 +190,11 @@ mbr_cov_names <- function(x){
 #' @return a named vector of numerics
 #' @noRd
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' model <- exmodel(301, compile = FALSE)
 #' mbr_cov_refvalues(model)
 mbr_cov_refvalues <- function(x){
   unlist(x@param[mbr_cov_names(x)])
 }
-
-
-
-
 
 #' Get covariate description from mrgsolve model
 #'
@@ -197,7 +203,7 @@ mbr_cov_refvalues <- function(x){
 #' @return a character string vector
 #' @noRd
 #' @examples
-#' model <- mrgsolve::mread("ex_mbr1", mbrlib())
+#' model <- exmodel(301, compile = FALSE)
 #' mbr_cov_descr(model)
 mbr_cov_descr <- function(x){
   as.list(x)$details$data %>%
@@ -205,158 +211,3 @@ mbr_cov_descr <- function(x){
     mutate(covariate_description = paste0(.data$descr, " (", .data$unit, ")")) %>%
     pull(.data$covariate_description)
 }
-
-
-
-#DEPRECATED FUNCTIONS
-
-# #' Get drug name from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return name of the drug as a character string
-# #' @export
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_drug(model)
-# #'
-# mbr_drug <- function(x){
-#   pattern <- "drug"
-#   x@code %>%
-#     str_subset(paste0("\\s*-\\s*", pattern, "\\s*:\\s*")) %>%
-#     str_remove(paste0("\\s*-\\s*", pattern, "\\s*:\\s*")) %>%
-#     str_squish()
-# }
-
-# #' Get model reference from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return model reference as a character string
-# #' @export
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_model_ref(model)
-# #'
-# mbr_model_ref <- function(x){
-#   pattern <- "model_ref"
-#   x@code %>%
-#     str_subset(paste0("\\s*-\\s*", pattern, "\\s*:\\s*")) %>%
-#     str_remove(paste0("\\s*-\\s*", pattern, "\\s*:\\s*")) %>%
-#     str_squish()
-# }
-
-# # Get model file from mrgsolve model
-# #
-# #@param x model object
-# #
-# # @return model file as a character string
-# # @export
-# # @examples
-# # model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# # mbr_model_name(model)
-# #
-# mbr_model_file <- function(x){
-#   x@model %>%
-#     str_remove("_mapbay_cpp")
-# }
-
-# #' Get model name from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return model name as a character string
-# #' @export
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_model_name(model)
-# #'
-# mbr_model_name <- function(x){
-#   x@model %>%
-#     str_remove("_mapbay_cpp") %>%
-#     str_replace("_", " ") %>%
-#     str_to_title()
-# }
-
-# #' Get concentration units from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return vector of character
-# #' @export
-# #'
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_conc_unit(model)
-# mbr_conc_unit <- function(x){
-#   as.list(x)$details$data %>%
-#     filter(.data$block  %in%c("CMT", "INIT"), .data$unit != '') %>%
-#     slice(1) %>%
-#     pull(.data$unit)
-# }
-
-# #' Get scaling factor from user to model
-# #'
-# #' @param x model object
-# #'
-# #' @return an integer
-# #' @export
-# #'
-# #' @examples
-# #' #Dose expected in mg, and Volume of distribution in L.
-# #' #Possible values for concentration units: mg/L, ng/mL, pg/mL
-# #' #Microgramme not supported for compatibility and encoding reasons (greek letter mu)
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_conc_scaling(model)
-# mbr_conc_scaling <- function(x){
-#   switch(mbr_conc_unit(x),
-#          "mg/L"  = 1,
-#          "ng/mL" = 1000,
-#          "pg/mL" = 1000000)
-# }
-
-# #' Get parameter units from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return a character string vector
-# #' @export
-# #'
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_param_units(model)
-# mbr_param_units <- function(x){
-#   ((as.list(x))$details$data %>%
-#      filter(.data$block=="PARAM", str_detect(.data$name, "ETA")))$unit
-# }
-
-# #' Get parameter typical values from mrgsolve model
-# #'
-# #' @param x model object
-# #'
-# #' @return a numeric vector
-# #' @export
-# #'
-# #' @examples
-# #' model <- mrgsolve::mread("ex_mbr1", mbrlib())
-# #' mbr_param_tv(model)
-# mbr_param_tv <- function(x){
-#   tab <- (as.list(x))$details$data %>%
-#     filter(.data$block=="PARAM") %>%
-#     filter(str_detect(.data$name, "ETA"))
-#   x@param@data %>%
-#     unlist() %>%
-#     enframe() %>%
-#     mutate(descr = str_remove(.data$name, "TV"), .keep = "unused") %>%
-#     right_join(tab, by = "descr") %>%
-#     replace_na(list(value = 1)) %>%
-#     mutate(descr = factor(.data$descr, mbr_param_names(x))) %>%
-#     arrange(.data$descr) %>%
-#     pull(.data$value)
-# }
-#
-#
-
-
-
-

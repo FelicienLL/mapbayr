@@ -10,7 +10,7 @@
 print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
-  nOBS <- x$arg.ofv.id %>% map("DVobs") %>% unname() %>% simplify() %>% length()
+  nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
   nETA <- n_eta(x$model)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
@@ -55,8 +55,9 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #'  - add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
-#' #plot(est001, delta = 1) +
-#' #  ggplot2::labs(title = "Awesome predictions")
+#' est <- mapbayest(exmodel(ID = 1))
+#' plot(est, end = 48) +
+#'   ggplot2::labs(title = "Awesome prediction")
 #'
 #' @method plot mapbayests
 #' @export
@@ -95,7 +96,7 @@ plot.mapbayests <- function(x, ...){
   }
 
   observations <- x$mapbay_tab %>%
-    filter(.data$evid==0) %>%
+    filter(.data$evid==0, !(.data$mdv==1 & is.na(.data$DV))) %>%
     mutate(MDV = as.factor(.data$mdv))
 
   #MDV
@@ -143,8 +144,9 @@ plot.mapbayests <- function(x, ...){
 #' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
-#' #hist(est001) +
-#' #  ggplot2::labs(title = "Awesome predictions")
+#' est <- mapbayest(exmodel(ID = 1))
+#' hist(est) +
+#'   ggplot2::labs(title = "Awesome estimations")
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){
@@ -242,7 +244,7 @@ augment <- function (x, ...) UseMethod("augment")
 #' @export
 augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
   if(is.null(data)){
-    idata <- map(x$arg.ofv.id, "data")
+    idata <- get_data.mapbayests(x, output = "list")
   } else {
     idata <- data %>%
       check_mapbayr_data() %>%

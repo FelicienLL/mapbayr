@@ -3,16 +3,25 @@
 \name{data_helpers}
 \alias{data_helpers}
 \alias{adm_lines}
+\alias{adm_lines.mrgmod}
 \alias{obs_lines}
+\alias{obs_lines.mrgmod}
 \alias{add_covariates}
+\alias{add_covariates.mrgmod}
 \alias{see_data}
 \title{Data helpers}
 \usage{
 adm_lines(x, ...)
 
+\method{adm_lines}{mrgmod}(x, ...)
+
 obs_lines(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
 
+\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
+
 add_covariates(x, covariates, ...)
+
+\method{add_covariates}{mrgmod}(x, covariates = list(), ...)
 
 see_data(x, ...)
 }
@@ -45,24 +54,12 @@ These functions are meant to be used for one single patient at a time. Multiple 
 }
 \examples{
 library(magrittr)
-# First, code a model
-code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-KA = 0.5, TVCL = 1.1, TVV = 23.3
-$OMEGA 0.41 0.32
-$SIGMA 0.04 0
-$CMT DEPOT CENT
-$PK
-double CL=TVCL*exp(ETA1+ETA(1));
-double V=TVV*exp(ETA2+ETA(2)) ;
-$ERROR
-double DV=CENT/V*(1+EPS(1))+EPS(2);
-$PKMODEL ncmt = 1, depot = TRUE
-$CAPTURE DV CL"
-my_model <- mrgsolve::mcode("my_model", code1)
+# First, import a model
+mod <- exmodel(add_exdata = FALSE)
 
-my_model \%>\%
-  adm_lines(amt = 500, cmt = 1) \%>\%
-  obs_lines(time = c(1.1, 5.2), DV = c(15.1, 29.5), cmt = 2) \%>\%
+mod \%>\%
+  adm_lines(amt = 10000, cmt = 1) \%>\%
+  obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671), cmt = 2) \%>\%
   # get_data() # for curiosity, you can extract the data set at this step
   mapbayest()
 

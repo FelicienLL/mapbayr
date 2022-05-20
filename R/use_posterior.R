@@ -16,6 +16,14 @@
 #' It does not handle time-varying covariates: only the first value will be used as the individual value.
 #' @return a mrgmod, or a list of mrgmod if there is more than 1 ID
 #' @export
+#' @examples
+#' library(magrittr)
+#' est <- mapbayest(exmodel())
+#' est %>%
+#'   use_posterior() %>%
+#'   mrgsolve::ev(amt = 50000) %>%
+#'   mrgsolve::mrgsim()
+#'
 use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta = TRUE, .zero_re = NULL, simplify = TRUE){
   if(!inherits(x, "mapbayests")) stop("x is not a mapbayests class object")
 
@@ -34,14 +42,15 @@ use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta
     }
   }
 
-  if(isTRUE(update_cov)){
-    covs_name <- mbr_cov_names(mod)
-    covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
-
-    cov_values <- get_data(x, output = "list") %>% map(~.x[1,covs_name, drop = FALSE])
-    L_mod <- map2(L_mod, cov_values, ~ param(.x, as.list(.y)))
-
+  covs_name <- mbr_cov_names(mod)
+  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
+  if(length(covs_name)){
+    if(isTRUE(update_cov)){
+      cov_values <- get_data(x, output = "list") %>% map(~.x[1,covs_name, drop = FALSE])
+      L_mod <- map2(L_mod, cov_values, ~ param(.x, as.list(.y)))
+    }
   }
+
 
   if(isTRUE(update_eta)){
     L_mod <- map2(L_mod, get_eta(x, output = "list"), ~ param(.x, as.list(.y)))

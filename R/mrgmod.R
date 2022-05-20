@@ -26,24 +26,12 @@
 #'
 #' @examples
 #' library(magrittr)
-#' # First, code a model
-#' code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-#' KA = 0.5, TVCL = 1.1, TVV = 23.3
-#' $OMEGA 0.41 0.32
-#' $SIGMA 0.04 0
-#' $CMT DEPOT CENT
-#' $PK
-#' double CL=TVCL*exp(ETA1+ETA(1));
-#' double V=TVV*exp(ETA2+ETA(2)) ;
-#' $ERROR
-#' double DV=CENT/V*(1+EPS(1))+EPS(2);
-#' $PKMODEL ncmt = 1, depot = TRUE
-#' $CAPTURE DV CL"
-#' my_model <- mrgsolve::mcode("my_model", code1)
+#' # First, import a model
+#' mod <- exmodel(add_exdata = FALSE)
 #'
-#' my_model %>%
-#'   adm_lines(amt = 500, cmt = 1) %>%
-#'   obs_lines(time = c(1.1, 5.2), DV = c(15.1, 29.5), cmt = 2) %>%
+#' mod %>%
+#'   adm_lines(amt = 10000, cmt = 1) %>%
+#'   obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671), cmt = 2) %>%
 #'   # get_data() # for curiosity, you can extract the data set at this step
 #'   mapbayest()
 #'
@@ -57,11 +45,9 @@ NULL
 adm_lines <- function(x, ...) UseMethod("adm_lines")
 
 #' Add administrations lines to data
+#' @rdname data_helpers
 #'
-#' @param x model object
-#' @param ... passed to mrgsolve::ev
 #' @method adm_lines mrgmod
-#' @return model object with dataset
 #' @export
 adm_lines.mrgmod <- function(x, ...){
   #if (!mrgsolve:::is.mrgmod(x))
@@ -132,16 +118,8 @@ obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMe
 
 #' Add observations lines to data
 #'
-#' @param x model object
-#' @param time vector of time
-#' @param DV vector of values to fit
-#' @param mdv optional should the DV be ignored (1) or not (0)
-#' @param DVmet optional : metabolite data to fit
-#' @param cmt an integer. Optional, cmt where observation is measured
-#' @param ... not used
 #' @method obs_lines mrgmod
-#'
-#' @return model object with dataset
+#' @rdname data_helpers
 #' @export
 obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...){
 
@@ -212,11 +190,8 @@ NA_filler <- function(data){
 add_covariates <- function(x, covariates, ...) UseMethod("add_covariates")
 
 #' Add covariates columns to data
-#' @param x model object
-#' @param covariates a list of named covariates, with a single value or exact number of lines than data
-#' @param ... not used
 #' @method add_covariates mrgmod
-#' @return model object with dataset
+#' @rdname data_helpers
 #' @export
 add_covariates.mrgmod <- function(x, covariates = list(), ...){
   if(is.null(x@args$data)) stop("Please provide a dataset")

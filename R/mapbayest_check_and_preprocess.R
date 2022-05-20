@@ -1,6 +1,7 @@
 #' Check if model is valid for mapbayr
 #'
 #' @param x model file
+#' @param check_compile check if model is compiled (used internally)
 #'
 #' @return TRUE value if check is passed, a vector of character with errors otherwise.
 #' @export
@@ -9,12 +10,24 @@
 #' library(mapbayr)
 #' library(mrgsolve)
 #' check_mapbayr_model(house())
-check_mapbayr_model <- function(x){
+check_mapbayr_model <- function(x, check_compile = TRUE){
   # browser()
   if(!is.mrgmod(x)){
     stop("the first argument must be a model object", call. = F)
   }else{
     check <- tibble(stop = logical(0), descr = character(0))
+
+    # Structure
+
+    if(!is.list(x@param@data)){
+      stop("mod@param@data is not a list")
+    }
+
+    if(check_compile){
+      if(!x@shlib$compiled){
+        stop('model object is not compiled')
+      }
+    }
 
     # $PARAM
     neta <- length(eta_names(x))
@@ -23,7 +36,6 @@ check_mapbayr_model <- function(x){
     } else {
       if(any(eta_names(x) != paste0("ETA", seq.int(length.out = neta)))) check <-  bind_rows(check, list(stop = TRUE, descr = paste0("$PARAM: ", neta, " ETA found, but not sequentially named ETA1.")))
       if(!all(x[eta_names(x)]==0)) check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: Initial value is not 0 for all ETA."))
-      if(any(is.na(eta_descr(x)))) check <- bind_rows(check, list(stop = FALSE, descr = "$PARAM: Description missing for at least one ETA (optionnal)."))
     }
 
     # $CMT
@@ -138,6 +150,7 @@ split_mapbayr_data <- function(data){
 #' Pre-process: arguments for optimization function
 #'
 #' @inheritParams mapbayest
+#'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
 preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){
@@ -147,6 +160,15 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   okmethod <- c("newuoa", "L-BFGS-B")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   method <- method[1]
+
+  if(method == "newuoa"){
+    if(!requireNamespace("minqa", quietly = TRUE)) {
+      stop(
+        "Package \"minqa\" must be installed to use method = \"newuoa\" ",
+        call. = FALSE
+      )
+    }
+  }
 
   #par
   initial_eta <- force_initial_eta
@@ -184,7 +206,7 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
   #lower, upper
   bound = -Inf
   if(method == "L-BFGS-B"){
-     bound <- get_quantile(x, .p = quantile_bound)
+    bound <- get_quantile(x, .p = quantile_bound)
   }
 
   arg <- list(
@@ -205,30 +227,51 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
 #' @name preprocess.ofv
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
-#' @return a list of arguments use to `compute_ofv()`.
-#' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while other are specific of each individual (`preprocess.ofv.id`).
+#' @return A list of arguments used to compute the objective function value.
+#'
+#' The following arguments are fixed between individuals:
+#'
+#'  - `qmod`: model object, modified to simulate without random effects and with controlled outputs
+#'  - `sigma`: a single matrix object
+#'  - `log_transformation`: a logical, whether predictions need to be log-transformed for ofv computation
+#'  - `omega_inv`: a single matrix object
+#'  - `all_cmt`: a vector of compartment numbers where observations can be expected
+#'
+#' The following arguments differs between individuals:
+#'
+#'  - `idvaliddata`: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
+#'  - `idDV`: a vector of (possibly log-transformed) observations
+#'  - `idcmt`: a vector of compartments where observations belong to
+#'
+#' @examples
+#' mod <- exmodel(add_exdata = FALSE, compile = FALSE)
+#' dat <- exdata(ID = c(1,4))
+#'
+#' preprocess.ofv.fix(x = mod, data = dat)
+#' preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 1,])
+#' preprocess.ofv.id(x = mod, iddata = dat[dat$ID == 4,])
+#'
+#' @description Functions to generate arguments passed to \code{\link{compute_ofv}}. Arguments that are fixed between individuals are created once (`preprocess.ofv.fix`), while others are specific of each individual (`preprocess.ofv.id`).
 NULL
 #> NULL
-
-
 
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
 preprocess.ofv.fix <- function(x, data){
-  q_model <- zero_re(x)
-  q_model@end <- -1 #Make sure no modif in the time grid
-  q_model@cmtL <- character(0) # Do not return amounts in compartments in the output
-  q_model@Icmt <- integer(0)
-  q_model@Icap <- which(x@capL== "DV") # Only return DV among $captured items
-  q_model@capL <- "DV"
+  qmod <- zero_re(x)
+  qmod@end <- -1 #Make sure no modif in the time grid
+  qmod@cmtL <- character(0) # Do not return amounts in compartments in the output
+  qmod@Icmt <- integer(0)
+  qmod@Icap <- which(x@capL== "DV") # Only return DV among $captured items
+  qmod@capL <- "DV"
 
   list(
-    mrgsolve_model = q_model,
+    qmod = qmod,
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
-    omega.inv = solve(omat(x, make = T)),
-    obs_cmt = fit_cmt(x, data) #on full data
+    omega_inv = solve(omat(x, make = T)),
+    all_cmt = fit_cmt(x, data) #on full data
   )
 }
 
@@ -242,10 +285,12 @@ preprocess.ofv.id <- function(x, iddata){
 
   # --- Generate preprocess
 
-  iDVobs <- iddata[iddata$mdv==0,]$DV #keep observations to fit only
-  if(log_transformation(x)) iDVobs <- log(iDVobs)
+  idDV <- iddata$DV[iddata$mdv==0] #keep observations to fit only
+  if(log_transformation(x)) idDV <- log(idDV)
+  idcmt <- iddata$cmt[iddata$mdv==0]
 
-  list(data = iddata,
-       DVobs = iDVobs
+  list(idvaliddata = mrgsolve::valid_data_set(iddata, x),
+       idDV = idDV,
+       idcmt = idcmt
   )
 }

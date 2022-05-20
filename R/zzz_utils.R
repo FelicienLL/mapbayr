@@ -38,14 +38,6 @@ get_quantile <- function(x, .p){
   map_dbl(sqrt(odiag(x)), stats::qnorm, p = .p, mean = 0)
 }
 
-#' Internal "mapbayr" model examples
-#'
-#' @export
-#' @return a character string, the location of the example models.
-mbrlib <- function(){
-  system.file("models", package = "mapbayr")
-}
-
 my_percent <- function(x){
   stopifnot(is.numeric(x))
   paste0(round(x * 100, 0), "%")
@@ -64,4 +56,17 @@ znorm <- function(ci){
 
 namephicov <- function(n){
   unlist(map(seq_len(n), ~ paste0("ETC",.x,"_",unlist(combn(.x, 1, simplify = FALSE)))))
+}
+
+rename_as_eta <- function(x){
+  if(is.matrix(x)){
+    colnames(x) <- paste0("ETA", seq_len(ncol(x)))
+    return(x)
+  }
+  names(x) <- paste0("ETA", seq_along(x))
+  x
+}
+
+devalid_data_set <- function(x){
+  as_tibble(x[,colnames(x)!="..zeros.."])
 }

@@ -7,7 +7,7 @@
 
 [![CRAN
 status](https://www.r-pkg.org/badges/version-last-release/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
-[![](https://img.shields.io/badge/Citation-CPT:PSP-blue.svg)](https://doi.org/10.1002/psp4.12689)
+[![](https://img.shields.io/badge/Citation-CPT:PSP-blue.svg)](https://pubmed.ncbi.nlm.nih.gov/34342170/)
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori*
@@ -113,8 +113,6 @@ my_data
 
 ``` r
 my_est <- mapbayest(my_model, data = my_data)
-#> 
-#> ID 1... done.
 ```
 
 As building dataset into a NM-TRAN format can be painful, you can use
@@ -205,8 +203,8 @@ tracker](https://github.com/FelicienLL/mapbayr/issues).
 
 mapbayr is a generalization of the “MAP Bayes estimation” tutorial
 available on the [mrgsolve
-blog](https://mrgsolve.org/blog/map_bayes.html). Additional features
-are:
+blog](https://mrgsolve.org/blog/posts/map_bayes.html). Additional
+features are:
 
 -   a unique function to perform the estimation: `mapbayest()`.
 -   accepts a large variety of structural models thanks to the
@@ -230,8 +228,8 @@ are:
 Reliability of parameter estimation against NONMEM was assessed for a
 wide variety of models and data. The results of this validation study
 were published in [CPT:Pharmacometrics & System
-Pharmacology](https://doi.org/10.1002/psp4.12689), and materials are
-available in [a dedicated
+Pharmacology](https://pubmed.ncbi.nlm.nih.gov/34342170/), and materials
+are available in [a dedicated
 repository](https://github.com/FelicienLL/mapbayr-CPTPSP-2021). If you
 observe some discrepancies between mapbayr and NONMEM on your own model
 and data, feel free to contact us through the [issue
@@ -240,15 +238,9 @@ tracker](https://github.com/FelicienLL/mapbayr/issues).
 ## *mrgsolve* model specification
 
 mapbayr contains a library of example model files (.cpp), accessible
-with `mbrlib()`
-
-``` r
-my_model <- mread("ex_mbr1.cpp", mbrlib())
-```
-
-You are invited to perform MAP-Bayesian estimation with your own models.
-These model files should be slightly modified in order to be “read” by
-mapbayr with the subsequent specifications:
+with `exmodel()`. You are invited to perform MAP-Bayesian estimation
+with your own models. These model files should be slightly modified in
+order to be “read” by mapbayr with the subsequent specifications:
 
 ### 1. `$PARAM` block
 
