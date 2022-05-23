@@ -1,3 +1,6 @@
+# mapbayr 0.7.1
+- Fix additional CRAN checks (Mac M1)
+
 # mapbayr 0.7.0
 
 ## Breaking changes
