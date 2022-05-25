@@ -1,3 +1,9 @@
+## Re - resubmission
+This is a re-resubmission. In this version I have:
+
+* Switched straight singles quotes instead of backticks.
+* Added a reference about the method in DESCRIPTION.
+
 ## Resubmission
 This is a resubmission. In this version I have:
 
