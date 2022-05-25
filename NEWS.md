@@ -1,3 +1,6 @@
+# mapbayr 0.7.2
+- Change contact adress in description (CRAN requirements)
+
 # mapbayr 0.7.1
 - Fix additional CRAN checks (Mac M1)
 

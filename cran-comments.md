@@ -1,3 +1,8 @@
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Changed the contact address in DESCRIPTION.
+  
 ## Test environment
 local Windows 10, R 4.2.0, 64 bit
 
