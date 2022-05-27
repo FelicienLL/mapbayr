@@ -1,19 +1,19 @@
 Package: mapbayr
 Title: MAP-Bayesian Estimation of PK Parameters
-Version: 0.7.0
+Version: 0.7.3
 Authors@R: 
     c(person(given = "Felicien", family = "Le Louedec", 
              role = c("aut", "cre"), 
-             email = "lelouedec.felicien@iuct-oncopole.fr",
+             email = "felicienlelouedec@proton.me",
              comment = c(ORCID = "0000-0003-3699-2729")),
       person(given = "Kyle T", family = "Baron", 
              role = "ctb", 
              comment = c(ORCID = "0000-0001-7252-5656")))
-Description: Performs maximum a posteriori Bayesian estimation of individual pharmacokinetic parameters from a model defined in `mrgsolve`, typically for model-based therapeutic drug monitoring. Internally computes an objective function value from model and data, performs optimization and returns predictions in a convenient format.
+Description: Performs maximum a posteriori Bayesian estimation of individual pharmacokinetic parameters from a model defined in 'mrgsolve', typically for model-based therapeutic drug monitoring. Internally computes an objective function value from model and data, performs optimization and returns predictions in a convenient format. The performance of the package was described by Le Louedec et al (2021) <doi:10.1002/psp4.12689>.
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.1.2
+RoxygenNote: 7.2.0
 Imports: 
     dplyr,
     ggplot2,

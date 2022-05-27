@@ -1,16 +1,31 @@
+## Re - resubmission
+This is a re-resubmission. In this version I have:
+
+* Switched straight singles quotes instead of backticks.
+* Added a reference about the method in DESCRIPTION.
+
+## Resubmission
+This is a resubmission. In this version I have:
+
+* Changed the contact address in DESCRIPTION.
+  
 ## Test environment
 local Windows 10, R 4.2.0, 64 bit
 
 R-hub (Windows Server 2022, R-devel, 64 bit ; Ubuntu Linux 20.04.1 LTS, R-release, GCC ; Fedora Linux, R-devel, clang, gfortran)
 
+Mac OS M1 (macOS builder)
+
 ## R CMD check results
-This is an update of a package already on CRAN. 
+This is a patch of a package archived of CRAN due to test-fails during additional checks on Mac M1
 
-There were no ERRORs, no WARNINGs, no NOTEs.
+Locally, there were no ERRORs, no WARNINGs, no NOTEs.
 
-except on Windows Server 2022 (via r-hub) : one NOTE
+On r-hub, there was one NOTE:  
 
-* checking for detritus in the temp directory ... NOTE
-Found the following files/directories:
-  'lastMiKTeXException'
+Possibly misspelled words in DESCRIPTION:
+  mrgsolve (12:130)
+  pharmacokinetic (12:78)
+  posteriori (12:33)
 
+However words are in the WORDLIST.

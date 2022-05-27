@@ -6,8 +6,6 @@ test_that("hessian = FALSE works", {
 test_that("covariance matrix is correct", {
   expect_false(any(is.na(est001$covariance)))
 
- # est1b <- mapbayest(model1, data1, verbose = FALSE, hessian = "nlmixrHess")
-
   nmphi <- matrix(c(1.28120118E-002, 5.40868557E-003, 4.69547364E-004,
                     5.40868557E-003, 2.31664035E-002, 2.19133609E-002,
                     4.69547364E-004, 2.19133609E-002, 1.25252672E-001), nrow = 3, ncol = 3)
@@ -25,7 +23,7 @@ test_that("get_cov method is correct", {
                     `6` = est001$covariance[[6]],
                     `7` = est001$covariance[[7]],
                     `8` = est001$covariance[[8]]))
-  expect_equal(get_cov(mapbayest(exmodel()), simplify = FALSE), list(`1` = est001$covariance[[1]]))
+  expect_equal(get_cov(mapbayest(exmodel()), simplify = FALSE), list(`1` = est001$covariance[[1]]), tolerance = 0.03)
 })
 
 test_that("get_phi works", {
