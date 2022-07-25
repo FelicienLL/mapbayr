@@ -44,7 +44,6 @@ my_percent <- function(x){
 }
 
 eta_from_opt <- function(x){
-  stopifnot(is.data.frame(x))
   unlist(x[,grepl("ETA", names(x))])
 }
 

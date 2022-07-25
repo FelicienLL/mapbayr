@@ -112,32 +112,42 @@ mapbayest <- function(x,
   # Start optimization
   opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
 
-  if(!is.null(output)){
-    if(output == "eta") return(do.call(rbind, sapply(opt.value, eta_from_opt, simplify = F)))
-  }
   # End optimization
   t3 <- Sys.time()
 
-  # Start post-processing (i.e. generating output files)
-  post <- list(
-    data = iddata,
-    opt.value = opt.value,
-    arg.ofv = arg.ofv
-  ) %>%
-    pmap(postprocess.optim,
-         x = x,
-         hessian = hessian,
-         arg.optim = arg.optim)
 
-  out <- postprocess.output(x,
-                            arg.optim = arg.optim,
-                            arg.ofv.fix = arg.ofv.fix,
-                            arg.ofv.id = arg.ofv.id,
-                            opt.value = opt.value,
-                            post = post,
-                            output = output,
-                            times = c(t1, t2, t3)
+  # Start post-processing (i.e. generating output files)
+  etamat <- post_eta(opt.value)
+  if(!is.null(output)){
+    if(output == "eta") return(etamat)
+  }
+
+  mapbay_tab <- post_mapbay_tab(x = x, data = data, etamat = etamat)
+  if(!is.null(output)){
+    if(output == "df") return(mapbay_tab)
+  }
+
+  final_eta <- apply(etamat, MARGIN = 1, FUN = identity, simplify = FALSE)
+
+  if(is.function(hessian)){
+    covariance <- purrr::map2(arg.ofv, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim)
+  } else {
+    covariance <- map(iddata, ~matrix(NA_real_))
+  }
+
+  out <- list(
+    model = x,
+    arg.optim = arg.optim,
+    arg.ofv.fix = arg.ofv.fix,
+    arg.ofv.id = arg.ofv.id,
+    opt.value = as.data.frame(map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID")),
+    final_eta = final_eta,
+    covariance = covariance,
+    mapbay_tab = mapbay_tab,
+    information = generate_information(c(t1, t2, t3))
   )
+
+  class(out) <- "mapbayests"
 
   return(out)
 }
