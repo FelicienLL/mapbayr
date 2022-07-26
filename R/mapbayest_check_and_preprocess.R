@@ -144,13 +144,14 @@ split_mapbayr_data <- function(data){
 #'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
-preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bound){
+preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   #Checks argument
 
   #method
-  okmethod <- c("newuoa", "L-BFGS-B")
-  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   method <- method[1]
+  okmethod <- c("L-BFGS-B", "newuoa")
+  if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
+  netas <- n_eta(x)
 
   if(method == "newuoa"){
     if(!requireNamespace("minqa", quietly = TRUE)) {
@@ -159,55 +160,83 @@ preprocess.optim <- function(x, method, control, force_initial_eta, quantile_bou
         call. = FALSE
       )
     }
-  }
 
-  #par
-  initial_eta <- force_initial_eta
-  if(is.null(initial_eta)){
-    if(method == "newuoa"){
-      initial_eta <- rep_len(0.01, n_eta(x))
-      names(initial_eta) <- eta_names(x)
-    }
-    if(method == "L-BFGS-B"){
-      initial_eta <- rep(0, n_eta(x))
-      names(initial_eta) <- eta_names(x)
+    # Call minqa::newuoa(par, fn, control = list(), ...)
+
+    # par
+    initial_eta <- force_initial_eta
+    if(is.null(initial_eta)){
+      initial_eta <- etas(n = netas, val = 0.01)
     }
 
+    # fn = compute_ofv
+
+    # control = list(npt, rhobeg, rhoend, iprint, maxfun)
+    if(is.null(control$iprint)){
+      control$iprint <- 0
+    }
+
+    arg <- list(
+      par = initial_eta,
+      fn = compute_ofv,
+      control = control,
+      method = method  # I still keep it for the wrappers around newuoa
+    )
   }
 
-  #fn = compute_ofv
-
-  #control
-  if(is.null(control$trace)){
-    control <- c(control, list(trace = 0))
-  }
-  if(is.null(control$maxit)){
-    control <- c(control, list(maxit = 9999))
-  }
-  if(is.null(control$kkt)){
-    control <- c(control, list(kkt = FALSE))
-  }
   if(method == "L-BFGS-B"){
-    if(is.null(control$fnscale))
-      control <- c(control, list(fnscale = 0.001))
-    if(is.null(control$lmm))
-      control <- c(control, list(lmm = 7))
-  }
 
-  #lower, upper
-  bound = -Inf
-  if(method == "L-BFGS-B"){
+    # Call stats::optim(par, fn, gr = NULL, ...,
+    #                   method = c("Nelder-Mead", "BFGS", "CG", "L-BFGS-B", "SANN",
+    #                              "Brent"),
+    #                   lower = -Inf, upper = Inf,
+    #                   control = list(), hessian = FALSE)
+
+    # par
+    initial_eta <- force_initial_eta
+    if(is.null(initial_eta)){
+      initial_eta <- etas(n = netas)
+    }
+
+    # fn = compute_ofv, gr = NULL, hessian = FALSE
+
+    # method = "L-BFGS-B"
+
+    # lower, upper
     bound <- get_quantile(x, .p = quantile_bound)
-  }
 
-  arg <- list(
-    par = initial_eta,
-    fn = compute_ofv,
-    method = method,
-    control = control,
-    lower = bound,
-    upper = -bound
-  )
+    # control = list(trace,
+    #                fnscale,
+    #                parscale, ndeps,
+    #                maxit,
+    #                abstol, reltol, alpha, beta, gamma,
+    #                REPORT, warn.1d.NelderMead, type,
+    #                lmm,   # <-- L-BFGS-B (Defaults to 5)
+    #                factr, # <-- L-BFGS-B (Default is 1e7, that is a tolerance of about 1e-8)
+    #                pgtol, # <-- L-BFGS-B (Defaults to 0)
+    #                temp, tmax)
+    if(is.null(control$trace)){
+      control$trace <- 0
+    }
+    if(is.null(control$maxit)){
+      control$maxit <- 9999
+    }
+    if(is.null(control$fnscale)){
+      control$fnscale = 0.001
+    }
+    if(is.null(control$lmm)){
+      control$lmm = 7
+    }
+
+    arg <- list(
+      par = initial_eta,
+      fn = compute_ofv,
+      method = method,
+      control = control,
+      lower = bound,
+      upper = -bound
+    )
+  }
 
   return(arg)
 }

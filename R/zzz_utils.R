@@ -44,7 +44,15 @@ my_percent <- function(x){
 }
 
 eta_from_opt <- function(x){
-  unlist(x[,grepl("ETA", names(x))])
+  if(inherits(x, "minqa")){
+    rename_as_eta(x$par)
+  } else {
+    x$par
+  }
+}
+
+etas <- function(n, val = 0){
+  rename_as_eta(rep(val, n))
 }
 
 ci2q <- function(ci) (1-(ci/100))/2

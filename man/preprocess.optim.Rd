@@ -4,7 +4,13 @@
 \alias{preprocess.optim}
 \title{Pre-process: arguments for optimization function}
 \usage{
-preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
+preprocess.optim(
+  x,
+  method = c("L-BFGS-B", "newuoa"),
+  control = list(),
+  force_initial_eta = NULL,
+  quantile_bound = 0.001
+)
 }
 \arguments{
 \item{x}{the model object}

@@ -8,7 +8,7 @@
 mapbayest(
   x,
   data = NULL,
-  method = "L-BFGS-B",
+  method = c("L-BFGS-B", "newuoa"),
   hessian = stats::optimHess,
   force_initial_eta = NULL,
   quantile_bound = 0.001,

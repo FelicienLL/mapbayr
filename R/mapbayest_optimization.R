@@ -10,6 +10,11 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
 
+  optimizer <- switch(args$method,
+                      "L-BFGS-B" = quietly(stats::optim),
+                      "newuoa" = quietly(minqa::newuoa)
+  )
+
   nreset <- 0
 
   while(nreset == 0 || (nreset <= reset && (need_new_ini | need_new_bounds))){
@@ -30,7 +35,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
       }
     }
 
-    opt <- do.call(quietly(optimx), args)$result
+    opt <- do.call(optimizer, args)$result
     opt$nreset <- nreset
     nreset <- nreset + 1
     need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
@@ -54,6 +59,10 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
     }
   }
 
+  if(inherits(opt, "minqa")){
+    opt$par <- rename_as_eta(opt$par)
+  }
+
   return(opt)
 }
 
@@ -67,22 +76,30 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
 check_new_ini <- function(OPT, par, arg.ofv){
   #If not all conditions TRUE, will return FALSE
   all(
-    check_convcode(OPT),
+    check_convergence(OPT),
     check_finalofv(OPT, par, arg.ofv),
     check_absolute_eta(OPT = OPT)
   )
 }
 
 # 1.2 -  Unit functions that test a particular condition for new initial values
-check_convcode <- function(OPT){
-  #Success condition: `convcode` variable is 0 (meaning no error returned by optim).
-  OPT$convcode == 0
+check_convergence <- function(OPT){
+  #Success condition: `convergence` variable is 0 (meaning no error returned by optim).
+  if(inherits(OPT, "minqa")){
+    OPT$ierr == 0
+  } else {
+    OPT$convergence == 0
+  }
 }
 
 check_finalofv <- function(OPT, par, arg.ofv){
   #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
   ini <- do_compute_ofv(eta = par, argofv = arg.ofv)
-  fin <- OPT$value
+  if(inherits(OPT, "minqa")){
+    fin <- OPT$fval
+  } else {
+    fin <- OPT$value
+  }
   !isTRUE(all.equal(ini, fin))
 }
 
@@ -146,7 +163,7 @@ new_ini3 <- function(arg.ofv, upper, nreset){
 
   # Set Out-of-bound etas to 0
   bound <- upper
-  if(!(length(bound) == 1 && !is.finite(bound))){ #prevent fail if bound = Inf with newuoa
+  if(!(length(bound) == 1 && !is.null(bound))){ #prevent fail if bound = NULL with newuoa
     for(i in seq_len(neta)){
       vals <- simmat[,i]
       simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
