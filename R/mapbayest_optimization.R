@@ -5,12 +5,29 @@
 do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
 
+  par     = arg.optim$par
+  fn      = arg.optim$fn
+  method  = arg.optim$method
+  control = arg.optim$control
+  lower   = arg.optim$lower
+  upper   = arg.optim$upper
+
+  qmod    = arg.ofv$qmod
+  sigma   = arg.ofv$sigma
+  log_transformation = arg.ofv$log_transformation
+  omega_inv   = arg.ofv$omega_inv
+  all_cmt     = arg.ofv$all_cmt
+
+  idvaliddata = arg.ofv$idvaliddata
+  idDV        = arg.ofv$idDV
+  idcmt       = arg.ofv$idcmt
+
   # First the optimization is done once.
   opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
 
   RUN <- 1
-  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)
-  need_new_bounds <- !check_new_bounds(OPT = opt, arg.optim)
+  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, par = par)
+  need_new_bounds <- !check_new_bounds(OPT = opt, method, lower, upper)
 
   # Secondly, if conditions for a reset are met, a new optimization is done until reset is not needed.
   while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
@@ -30,8 +47,8 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 
     # Re-check if an additional reset is needed
     RUN <- RUN + 1
-    need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, arg.optim = arg.optim)
-    need_new_bounds <- !check_new_bounds(OPT = opt, arg.optim)
+    need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, par = par)
+    need_new_bounds <- !check_new_bounds(OPT = opt, method, lower, upper)
 
   }
 
@@ -63,11 +80,11 @@ do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
 # All the functions return TRUE if there is no problem
 # 1.1 -  One function to test all conditions for new initial values.
 
-check_new_ini <- function(OPT, arg.ofv, arg.optim){
+check_new_ini <- function(OPT, par, arg.ofv){
   #If not all conditions TRUE, will return FALSE
   all(
     check_convcode(OPT),
-    check_finalofv(OPT, arg.ofv, arg.optim),
+    check_finalofv(OPT, par, arg.ofv),
     check_absolute_eta(OPT = OPT)
   )
 }
@@ -78,9 +95,8 @@ check_convcode <- function(OPT){
   OPT$convcode == 0
 }
 
-check_finalofv <- function(OPT, arg.ofv, arg.optim){
-  #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
-  ini <- do_compute_ofv(eta = arg.optim$par, argofv = arg.ofv)
+check_finalofv <- function(OPT, par, arg.ofv){  #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
+  ini <- do_compute_ofv(eta = par, argofv = arg.ofv)
   fin <- OPT$value
   !isTRUE(all.equal(ini, fin))
 }
@@ -96,13 +112,13 @@ check_absolute_eta <- function(OPT){
 }
 
 # 2.1 One function to test condition for new bounds.
-check_new_bounds <- function(OPT, arg.optim){
+check_new_bounds <- function(OPT, method, lower, upper){
   #Success condition : no eta equal to a bound
-  if(arg.optim$method != "L-BFGS-B") return(TRUE)
+  if(method != "L-BFGS-B") return(TRUE)
   vec <- eta_from_opt(OPT)
   if(any(is.na(vec))) return(TRUE)
-  !any(vec == arg.optim$lower,
-       vec == arg.optim$upper)
+  !any(vec == lower,
+       vec == upper)
 }
 
 
