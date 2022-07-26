@@ -2,53 +2,42 @@
 #### do_optimization ####
 # This is the function that realize optimization from the argument arg.ofv, arg.optim etc...
 
-do_optimization <- function(arg.ofv, arg.optim, verbose, reset){
+keep_argofv <- function(x){
+  x[c("qmod",  "sigma", "log_transformation", "omega_inv", "all_cmt", "idvaliddata", "idDV", "idcmt")]
+}
+
+do_optimization <- function(..., verbose, reset){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
-
-  par     = arg.optim$par
-  fn      = arg.optim$fn
-  method  = arg.optim$method
-  control = arg.optim$control
-  lower   = arg.optim$lower
-  upper   = arg.optim$upper
-
-  qmod    = arg.ofv$qmod
-  sigma   = arg.ofv$sigma
-  log_transformation = arg.ofv$log_transformation
-  omega_inv   = arg.ofv$omega_inv
-  all_cmt     = arg.ofv$all_cmt
-
-  idvaliddata = arg.ofv$idvaliddata
-  idDV        = arg.ofv$idDV
-  idcmt       = arg.ofv$idcmt
+  args <- list(...)
+  #browser()
 
   # First the optimization is done once.
-  opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
+  opt <- do.call(quietly(optimx), args)$result
 
   RUN <- 1
-  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, par = par)
-  need_new_bounds <- !check_new_bounds(OPT = opt, method, lower, upper)
+  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
+  need_new_bounds <- !check_new_bounds(OPT = opt, args$method, args$lower, args$upper)
 
   # Secondly, if conditions for a reset are met, a new optimization is done until reset is not needed.
   while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
 
     if(need_new_ini){
-      arg.optim$par <- new_ini3(arg.ofv, arg.optim, run = RUN)
-      if(verbose) message("Reset with new initial values: ", paste(arg.optim$par, collapse = ' '))
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args, run = RUN)
+      if(verbose) message("Reset with new initial values: ", paste(args$par, collapse = ' '))
     }
 
     if(need_new_bounds){
-      arg.optim$lower <- new_bounds(arg.ofv, arg.optim)
-      arg.optim$upper <- -arg.optim$lower
-      if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(arg.optim$lower), collapse = ' '))
+      args$lower <- new_bounds(arg.ofv, args)
+      args$upper <- -args$lower
+      if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(args$lower), collapse = ' '))
     }
 
-    opt <- do.call(quietly(optimx), c(arg.optim, arg.ofv))$result
+    opt <- do.call(quietly(optimx), args)$result
 
     # Re-check if an additional reset is needed
     RUN <- RUN + 1
-    need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = arg.ofv, par = par)
-    need_new_bounds <- !check_new_bounds(OPT = opt, method, lower, upper)
+    need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
+    need_new_bounds <- !check_new_bounds(OPT = opt, args$method, args$lower, args$upper)
 
   }
 
@@ -153,7 +142,7 @@ new_bounds <- function(arg.ofv, arg.optim){
   map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
-new_ini3 <- function(arg.ofv, arg.optim, run){
+new_ini3 <- function(arg.ofv, upper, run){
   neta <- n_eta(arg.ofv$qmod)
   nsim <- 1 + neta ^ 2
 
@@ -161,7 +150,7 @@ new_ini3 <- function(arg.ofv, arg.optim, run){
   simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+run)
 
   # Set Out-of-bound etas to 0
-  bound <- arg.optim$upper
+  bound <- upper
   if(!(length(bound) == 1 && !is.finite(bound))){ #prevent fail if bound = Inf with newuoa
     for(i in seq_len(neta)){
       vals <- simmat[,i]
