@@ -10,22 +10,15 @@ do_optimization <- function(..., verbose, reset){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
 
-  # First the optimization is done once.
-  opt <- do.call(quietly(optimx), args)$result
+  nreset <- 0
 
-  RUN <- 1
-  need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
-  need_new_bounds <- !check_new_bounds(OPT = opt, args$method, args$lower, args$upper)
-
-  # Secondly, if conditions for a reset are met, a new optimization is done until reset is not needed.
-  while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
-
-    if(need_new_ini){
-      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, run = RUN)
+  while(nreset == 0 || (nreset <= 50 && reset == T && (need_new_ini | need_new_bounds))){
+    if(nreset != 0 && need_new_ini){
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)
       if(verbose) message("Reset with new initial values: ", paste(args$par, collapse = ' '))
     }
 
-    if(need_new_bounds){
+    if(nreset != 0 && need_new_bounds){
       args$lower <- new_bounds(arg.ofv = keep_argofv(args), args)
       args$upper <- -args$lower
       if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(args$lower), collapse = ' '))
@@ -33,11 +26,9 @@ do_optimization <- function(..., verbose, reset){
 
     opt <- do.call(quietly(optimx), args)$result
 
-    # Re-check if an additional reset is needed
-    RUN <- RUN + 1
+    nreset <- nreset + 1
     need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
     need_new_bounds <- !check_new_bounds(OPT = opt, args$method, args$lower, args$upper)
-
   }
 
   # Next chunk comes from the postprocess functions, but it did not belong there
@@ -57,7 +48,7 @@ do_optimization <- function(..., verbose, reset){
     }
   }
 
-  opt$run <- RUN
+  opt$nreset <- nreset-1
   return(opt)
 }
 
@@ -146,12 +137,12 @@ new_bounds <- function(arg.ofv, arg.optim){
   map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
-new_ini3 <- function(arg.ofv, upper, run){
+new_ini3 <- function(arg.ofv, upper, nreset){
   neta <- n_eta(arg.ofv$qmod)
   nsim <- 1 + neta ^ 2
 
   # Sample eta from prior distribution
-  simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+run)
+  simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+nreset)
 
   # Set Out-of-bound etas to 0
   bound <- upper
