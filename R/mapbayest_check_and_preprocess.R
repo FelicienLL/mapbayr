@@ -134,16 +134,7 @@ check_mapbayr_modeldata <- function(x, data){
 
 split_mapbayr_data <- function(data){
   # --- Data split by ID
-
-  iID <- unique(data$ID)
-
-  idata <- data %>%
-    mutate(split_ID = factor(.data$ID, levels = iID)) %>%
-    group_by(.data$split_ID) %>%
-    group_split(.keep = FALSE) %>%
-    set_names(iID)
-
-  return(idata)
+  split(data, ~factor(ID, levels = unique(data$ID)))
 }
 
 

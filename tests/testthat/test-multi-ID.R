@@ -16,15 +16,21 @@ test_that("mapbayr fits multiple ID", {
 })
 
 test_that("order of IDs is preserved", {
-  dat$ID[dat$ID == 2] <- 20
-
   est1 <- mapbayest(mod, dat[dat$ID == 1,])
   est20<- mapbayest(mod, dat[dat$ID == 20,])
   est3 <- mapbayest(mod, dat[dat$ID == 3,])
 
-  expect_named(etalist <- get_eta(est_all, output = "list"), c("1", "20", "3"))
+  etalist <- get_eta(est_all, output = "list")
+
+  expect_named(etalist, c("1", "20", "3"))
   expect_equal(
     lapply(list(est1, est20, est3), get_eta),
     unname(etalist)
   )
+})
+
+test_that("can pass a dataset with iID column", {
+  dat <- dat[dat$ID==1, ]
+  dat$iID <- 99
+  expect_error(mapbayest(mod, dat), NA)
 })
