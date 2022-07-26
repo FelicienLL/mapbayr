@@ -22,7 +22,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
     }
 
     if(nreset != 0 && need_new_bounds){
-      args$lower <- new_bounds(arg.ofv = keep_argofv(args), args)
+      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower)
       args$upper <- -args$lower
       if(verbose) {
         if(nreset == 1) cat("\n")
@@ -83,11 +83,7 @@ check_finalofv <- function(OPT, par, arg.ofv){
   #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
   ini <- do_compute_ofv(eta = par, argofv = arg.ofv)
   fin <- OPT$value
-  if(length(arg.ofv$idDV)==0){
-    return(TRUE)
-  } else{
-    return(!isTRUE(all.equal(ini, fin)))
-  }
+  !isTRUE(all.equal(ini, fin))
 }
 
 check_absolute_eta <- function(OPT){
@@ -133,10 +129,9 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 }
 
 # 2 Returns a vector of lower bounds
-
-new_bounds <- function(arg.ofv, arg.optim){
-  vec_SE <- sqrt(diag(solve(arg.ofv$omega_inv)))
-  P <- map2_dbl(.y = vec_SE, .x = arg.optim$lower, .f = stats::pnorm, mean = 0)
+new_bounds <- function(omega_inv, lower){
+  vec_SE <- sqrt(diag(solve(omega_inv)))
+  P <- map2_dbl(.y = vec_SE, .x = lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
   map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
