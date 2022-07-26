@@ -15,13 +15,19 @@ do_optimization <- function(..., verbose, reset){
   while(nreset == 0 || (nreset <= 50 && reset == T && (need_new_ini | need_new_bounds))){
     if(nreset != 0 && need_new_ini){
       args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)
-      if(verbose) message("Reset with new initial values: ", paste(args$par, collapse = ' '))
+      if(verbose){
+        if(nreset == 1) cat("\n")
+        message("Reset with new initial values: ", paste(args$par, collapse = ' '))
+      }
     }
 
     if(nreset != 0 && need_new_bounds){
       args$lower <- new_bounds(arg.ofv = keep_argofv(args), args)
       args$upper <- -args$lower
-      if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(args$lower), collapse = ' '))
+      if(verbose) {
+        if(nreset == 1) cat("\n")
+        message("Reset with new bounds (lower displayed): ", paste(signif(args$lower), collapse = ' '))
+      }
     }
 
     opt <- do.call(quietly(optimx), args)$result
@@ -39,11 +45,11 @@ do_optimization <- function(..., verbose, reset){
 
   if(!is.null(opt$fevals)){
     if(is.nan(opt$fevals)) {
-      opt[eta_names(args$qmod)] <- 0
+      opt[names(args$par)] <- 0
       warning("\nCannot compute objective function value ; typical value (ETA = 0) returned")
     }
     if(is.na(opt$fevals)) {
-      opt[eta_names(args$qmod)] <- 0
+      opt[names(args$par)] <- 0
       warning("\nCannot minimize objective function value ; typical value (ETA = 0) returned")
     }
   }
