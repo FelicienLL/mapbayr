@@ -16,5 +16,5 @@ test_that("do_optimization works outside the call of mapbayest", {
   arg.ofv <- c(preprocess.ofv.fix(x = my_model, data = my_data), preprocess.ofv.id(x = my_model, iddata = my_data))
   arg.optim <- preprocess.optim(x = my_model, method = "L-BFGS-B", control = list(), force_initial_eta = NULL, quantile_bound = 0.001)
 
-  expect_error(do_optimization(arg.ofv, arg.optim, verbose = F, reset = T), NA)
+  expect_error(do.call(do_optimization, c(arg.ofv, arg.optim, list(verbose = F, reset = T))), NA)
 })

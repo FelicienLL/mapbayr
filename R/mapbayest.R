@@ -100,7 +100,6 @@ mapbayest <- function(x,
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
-  arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 
   # End checks and pre-processing
   t2 <- Sys.time()
@@ -110,8 +109,14 @@ mapbayest <- function(x,
   }
 
   # Start optimization
-  opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
-
+  opt.value <- .mapply(FUN = do_optimization,
+                       dots = transpose(arg.ofv.id),
+                       MoreArgs = c(arg.optim,
+                                    arg.ofv.fix,
+                                    list(reset = reset, verbose = verbose)
+                                    )
+                       )
+  names(opt.value) <- names(iddata)
   # End optimization
   t3 <- Sys.time()
 
@@ -130,7 +135,7 @@ mapbayest <- function(x,
   final_eta <- apply(etamat, MARGIN = 1, FUN = identity, simplify = FALSE)
 
   if(is.function(hessian)){
-    covariance <- purrr::map2(arg.ofv, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim)
+    covariance <- purrr::map2(arg.ofv.id, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim, arg.ofv.fix = arg.ofv.fix)
   } else {
     covariance <- map(iddata, ~matrix(NA_real_))
   }

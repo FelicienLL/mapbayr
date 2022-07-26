@@ -9,7 +9,6 @@ keep_argofv <- function(x){
 do_optimization <- function(..., verbose, reset){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
-  #browser()
 
   # First the optimization is done once.
   opt <- do.call(quietly(optimx), args)$result
@@ -22,12 +21,12 @@ do_optimization <- function(..., verbose, reset){
   while(RUN <= 50 && reset == T && (need_new_ini | need_new_bounds)){
 
     if(need_new_ini){
-      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args, run = RUN)
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, run = RUN)
       if(verbose) message("Reset with new initial values: ", paste(args$par, collapse = ' '))
     }
 
     if(need_new_bounds){
-      args$lower <- new_bounds(arg.ofv, args)
+      args$lower <- new_bounds(arg.ofv = keep_argofv(args), args)
       args$upper <- -args$lower
       if(verbose) message("Reset with new bounds (lower displayed): ", paste(signif(args$lower), collapse = ' '))
     }
@@ -49,11 +48,11 @@ do_optimization <- function(..., verbose, reset){
 
   if(!is.null(opt$fevals)){
     if(is.nan(opt$fevals)) {
-      opt[eta_names(arg.ofv$qmod)] <- 0
+      opt[eta_names(args$qmod)] <- 0
       warning("\nCannot compute objective function value ; typical value (ETA = 0) returned")
     }
     if(is.na(opt$fevals)) {
-      opt[eta_names(arg.ofv$qmod)] <- 0
+      opt[eta_names(args$qmod)] <- 0
       warning("\nCannot minimize objective function value ; typical value (ETA = 0) returned")
     }
   }
@@ -84,10 +83,15 @@ check_convcode <- function(OPT){
   OPT$convcode == 0
 }
 
-check_finalofv <- function(OPT, par, arg.ofv){  #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
+check_finalofv <- function(OPT, par, arg.ofv){
+  #Success condition: final OFV is not the same than initial OFV (meaning OFV was minimized)
   ini <- do_compute_ofv(eta = par, argofv = arg.ofv)
   fin <- OPT$value
-  !isTRUE(all.equal(ini, fin))
+  if(length(arg.ofv$idDV)==0){
+    return(TRUE)
+  } else{
+    return(!isTRUE(all.equal(ini, fin)))
+  }
 }
 
 check_absolute_eta <- function(OPT){

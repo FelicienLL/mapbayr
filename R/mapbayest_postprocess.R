@@ -43,13 +43,13 @@ post_mapbay_tab <- function(x, data, etamat){
 
 safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
 
-post_covariance <- function(arg.ofv, final_eta, x, hessian, arg.optim){
+post_covariance <- function(arg.ofv.id, final_eta, x, hessian, arg.optim, arg.ofv.fix){
   accepted_args <- names(formals(hessian))
 
   if(all(c("par", "fn") %in% accepted_args)){
 
     fp <- function(p){ #obj fun value as function of param
-      arg <- arg.ofv
+      arg <- c(arg.ofv.fix, arg.ofv.id)
       eta <- p
       names(eta) <- eta_names(x)
       arg$eta <- eta
