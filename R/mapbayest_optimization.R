@@ -6,13 +6,13 @@ keep_argofv <- function(x){
   x[c("qmod",  "sigma", "log_transformation", "omega_inv", "all_cmt", "idvaliddata", "idDV", "idcmt")]
 }
 
-do_optimization <- function(..., verbose, reset){
+do_optimization <- function(..., verbose = TRUE, reset = 50){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
 
   nreset <- 0
 
-  while(nreset == 0 || (nreset <= 50 && reset == T && (need_new_ini | need_new_bounds))){
+  while(nreset == 0 || (nreset <= reset && (need_new_ini | need_new_bounds))){
     if(nreset != 0 && need_new_ini){
       args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)
       if(verbose){
@@ -31,7 +31,7 @@ do_optimization <- function(..., verbose, reset){
     }
 
     opt <- do.call(quietly(optimx), args)$result
-
+    opt$nreset <- nreset
     nreset <- nreset + 1
     need_new_ini <- !check_new_ini(OPT = opt, arg.ofv = keep_argofv(args), par = args$par)
     need_new_bounds <- !check_new_bounds(OPT = opt, args$method, args$lower, args$upper)
@@ -54,7 +54,6 @@ do_optimization <- function(..., verbose, reset){
     }
   }
 
-  opt$nreset <- nreset-1
   return(opt)
 }
 

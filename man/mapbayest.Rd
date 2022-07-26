@@ -16,7 +16,7 @@ mapbayest(
   check = TRUE,
   verbose = TRUE,
   progress = TRUE,
-  reset = TRUE,
+  reset = 50,
   output = NULL
 )
 
@@ -43,7 +43,7 @@ mbrest(...)
 
 \item{progress}{print a progress bar (a logical, default is \code{TRUE})}
 
-\item{reset}{reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is \code{TRUE})}
+\item{reset}{maximum allowed reset of the optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a numeric, default is 50)}
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 

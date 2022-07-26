@@ -14,7 +14,7 @@
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print a message whenever optimization is reset (a logical, default is `TRUE`)
 #' @param progress print a progress bar (a logical, default is `TRUE`)
-#' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
+#' @param reset maximum allowed reset of the optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a numeric, default is 50)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
 #' @return a mapbayests object. Basically a list containing:
@@ -73,7 +73,7 @@ mapbayest <- function(x,
                       check = TRUE,
                       verbose = TRUE,
                       progress = TRUE,
-                      reset = TRUE,
+                      reset = 50,
                       output = NULL
 ){
 
