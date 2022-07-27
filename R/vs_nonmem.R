@@ -5,12 +5,18 @@
 #' @param mapbayr_phi results of mapbayr estimations, in the form of a tibble data.frame, typically obtained from `get_phi()`
 #' @param nonmem_phi results of NONMEM estimations, in the form of a tibble data.frame, typically obtained from `read_nmphi()`
 #' @param merged_phi merged results of estimations, typically obtained from `merge_phi()`
-#' @param only_ETA filter the data with `type=="ETA"` before the plot (a logical, default is `TRUE`)
+#' @param summarised_phi summarised results of estimations, typically obtained from `summarise_phi()`
+#' @param only_ETA filter the data with `type=="ETA"` (a logical, default is `TRUE`)
+#' @param group one or multiple variables to `group_by()`
+#' @param levels a named vector of length 3 inorder to classify the absolute differences. Default cut-offs are 0.1% and 10% in the parameters space.
+#' @param xaxis optional. A character value, that correspond to a variable in data, passed to the x-axis to plot multiple bars side-by-side.
+#' @param facet a formula, that will be passed to `ggplot2::facet_wrap()`
 #'
 #' @return
 #'  - read_nmphi: a tibble data.frame with a format close to the original .phi file
 #'  - merge_phi: a long-form tibble data.frame with results of mapbayr and NONMEM
-#'  - plot_phi: a `ggplot2` object
+#'  - summarise_phi: a summarised tibble data.frame classifying the performance of mapbayr and NONMEM
+#'  - plot_phi, bar_phi: a `ggplot2` object
 #'
 #' @details
 #'
@@ -34,14 +40,31 @@
 #'
 #' Use `plot_phi()` to graphically represent `adiff` *vs* `variable`. Alternatively, the table returned by `merge_phi()` is easy to play with in order to derive performance statistics or the graphical plot of your choice.
 #'
+#' Use `summarise_phi()` to classify the estimation as "Excellent", "Acceptable" or "Discordant", over the whole dataset or by `group`.
+#'
+#' Use `bar_phi()` to graphically represent the proportion of the aforementioned classification as bar plot.
+#'
 #' @examples
 #' library(mapbayr)
 #' nmphi <- read_nmphi(system.file("nm001", "run001.phi", package = "mapbayr"))
-#' est001 |>
-#'   get_phi() |>
-#'   merge_phi(nmphi) |>
-#'   plot_phi()
-
+#' mapbayrphi <- get_phi(est001)
+#'
+#' merged <- merge_phi(mapbayrphi, nmphi)
+#' plot_phi(merged)
+#'
+#' summarised <- summarise_phi(merged)
+#' bar_phi(summarised)
+#'
+#'
+#' # Analyse the results of multiple runs simultaneously
+#'
+#' #Example dataset that represents 3 runs
+#' merge3 <- dplyr::bind_rows(merged, merged, merged, .id = "RUN")
+#' merge3$adiff <- 10 ^ runif(nrow(merge3), -8, 0)
+#'
+#' summarised3 <- summarise_phi(merge3, group = RUN)
+#' bar_phi(summarised3, xaxis = "RUN")
+#'
 #' @rdname vs_nonmem
 #' @export
 read_nmphi <- function(x){
@@ -96,3 +119,60 @@ plot_phi <- function(merged_phi, only_ETA = TRUE){
     geom_line() +
     scale_y_log10(name = "absolute difference")
 }
+
+classify <- function(adiff, levels = c(Excellent = 0, Acceptable = 0.001, Discordant = 0.1)){
+  val <- log(1 + levels)
+  nam <- names(levels)
+  ans <- case_when(
+    adiff > val[3] ~ nam[3],
+    adiff > val[2] ~ nam[2],
+    adiff > val[1] ~ nam[1]
+  )
+  factor(ans, levels = nam, ordered = TRUE)
+}
+
+#' @rdname vs_nonmem
+#' @export
+summarise_phi <- function(merged_phi, group, only_ETA = TRUE, levels = c(Excellent = 0, Acceptable = 0.001, Discordant = 0.1)){
+  dat <- merged_phi
+  if(only_ETA) dat <- filter(dat, .data$type == "ETA")
+
+  dat %>%
+    mutate(classif = classify(.data$adiff, levels = levels)) %>%
+    group_by(across({{group}})) %>%
+    group_by(.data$ID, .add = TRUE) %>%
+    summarise(Performance = max(.data$classif), .groups = "drop_last") %>%
+    group_by(.data$Performance, .add = TRUE) %>%
+    summarise(count = dplyr::n(), .groups = "drop_last") %>%
+    mutate(prop = .data$count/sum(.data$count)) %>%
+    mutate(perc = my_percent(.data$prop))
+}
+
+#' @rdname vs_nonmem
+#' @export
+bar_phi <- function(summarised_phi, xaxis = NULL, facet = NULL){
+  if(is.null(xaxis)){
+    p <- ggplot(summarised_phi, aes(x = "", fill = .data$Performance))
+  } else {
+    p <- ggplot(summarised_phi, aes(x = .data[[xaxis]], fill = .data$Performance))
+  }
+
+  fillscale <- c("forestgreen", "orange", "firebrick")
+  names(fillscale) <- levels(summarised_phi$Performance)
+
+  p <- p +
+    ggplot2::geom_col(aes(y = .data$prop), col = 1, width = 1, position = ggplot2::position_stack(reverse = TRUE)) +
+    scale_y_continuous(NULL, labels = my_percent) +
+    scale_fill_manual(values = fillscale) +
+    theme_bw() +
+    theme(legend.position = "bottom") +
+    ggplot2::coord_flip()
+
+  if(!is.null(facet)){
+    p <- p +
+      facet_wrap(facet)
+  }
+  return(p)
+}
+
+
