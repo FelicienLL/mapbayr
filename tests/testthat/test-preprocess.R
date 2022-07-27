@@ -1,4 +1,4 @@
-mod <- exmodel(1, add_exdata = FALSE)
+mod <- exmodel(1, add_exdata = FALSE, compile = FALSE)
 test_that("non-allowed method are detected", {
   expect_error(preprocess.optim(mod, "L-BFGS-B"), NA)
   expect_error(preprocess.optim(mod, "newuoa"), NA)
