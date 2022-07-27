@@ -19,19 +19,18 @@ Imports:
     ggplot2,
     magrittr,
     mrgsolve (>= 1.0.0),
-    optimx,
     progress,
     purrr,
     rlang,
     stringr,
-    tibble,
     tidyr
 URL: https://github.com/FelicienLL/mapbayr
 BugReports: https://github.com/FelicienLL/mapbayr/issues
 Suggests: 
     knitr,
     minqa,
-    testthat (>= 3.0.0)
+    testthat (>= 3.0.0),
+    tibble
 Depends: 
     R (>= 2.10)
 LazyData: true

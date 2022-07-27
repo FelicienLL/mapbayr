@@ -48,19 +48,19 @@ test_that("explicit cmt works well",{
 })
 
 test_that("rate incrementation is ok",{
-  expect_equal(get_data(adm_lines(mod1, amt = 100))[c("cmt","rate")], tibble(cmt = c(1,2), rate = c(0, -2)))
-  expect_equal(get_data(adm_lines(mod2, amt = 100))[c("cmt","rate")], tibble(cmt = 1, rate = -2))
+  expect_equal(get_data(adm_lines(mod1, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = c(1,2), rate = c(0, -2)))
+  expect_equal(get_data(adm_lines(mod2, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = 1, rate = -2))
   expect_null(get_data(adm_lines(mod3, amt = 100))[["rate"]])
 })
 
 test_that("rate incrementation is ok with explicit cmt",{
   expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = 3))[["rate"]], 0)
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99)))[c("cmt","rate")], tibble(cmt = c(-99, 1, 3), rate = c(0, -2 , 0)))
+  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99)))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = c(0, -2 , 0)))
 })
 
 test_that("rate incrementation is ok with explicit rate",{
   expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = 3, rate = 150))[["rate"]], 150)
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99), rate = 150))[c("cmt","rate")], tibble(cmt = c(-99, 1, 3), rate = 150))
+  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99), rate = 150))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = 150))
 })
 
 test_that("ID increment ok", {

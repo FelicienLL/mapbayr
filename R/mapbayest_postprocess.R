@@ -5,7 +5,7 @@ post_eta <- function(x){
 dataeta <- function(data, eta){
   #data a data set
   #eta a matrix of eta (no ID column)
-  dplyr::left_join(x = data, y = mutate(as.data.frame(eta), ID = as.double(rownames(eta))), by = "ID")
+  left_join(x = data, y = mutate(as.data.frame(eta), ID = as.double(rownames(eta))), by = "ID")
 }
 
 
@@ -15,7 +15,7 @@ post_mapbay_tab <- function(x, data, etamat){
 
   # IPRED and POST HOC parameters
   dataposthoc <- dataeta(data = data, eta = etamat)
-  capturednames <- mrgsolve::outvars(x)$capture
+  capturednames <- outvars(x)$capture
   posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
     rename(IPRED = .data[["DV"]]) %>%
     select(-all_of(c("ID", "time")))
@@ -41,7 +41,7 @@ post_mapbay_tab <- function(x, data, etamat){
     relocate(any_of(c(namesdata, "DV", "IPRED", "PRED", capturednames, all_covs)), starts_with("ETA"))
 }
 
-safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
+safe_solve <- safely(solve, otherwise = matrix(NA_real_))
 
 post_covariance <- function(arg.ofv.id, final_eta, x, hessian, arg.optim, arg.ofv.fix){
   accepted_args <- names(formals(hessian))
@@ -69,6 +69,12 @@ post_covariance <- function(arg.ofv.id, final_eta, x, hessian, arg.optim, arg.of
 }
 
 generate_information <- function(times){
+  version <- c(
+    mapbayr = as.character(utils::packageVersion("mapbayr")),
+    mrgsolve = as.character(utils::packageVersion("mrgsolve")),
+    stats = as.character(utils::packageVersion("stats")),
+    minqa = tryCatch(utils::packageVersion("minqa"), silent = TRUE, error = function(x)NA)
+  )
   times[4] <- Sys.time()
   list(
     start = times[1],
@@ -79,10 +85,6 @@ generate_information <- function(times){
       optimization = as.double.difftime(times[3]-times[2], units = "secs"),
       postprocessing = as.double.difftime(times[4]-times[3], units = "secs")
     ),
-    version = c(
-      mapbayr = as.character(utils::packageVersion("mapbayr")),
-      mrgsolve = as.character(utils::packageVersion("mrgsolve")),
-      optimx = as.character(utils::packageVersion("optimx"))
-    )
+    version = version
   )
 }

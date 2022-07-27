@@ -6,11 +6,11 @@
 #'
 #' @param x the model object
 #' @param data NMTRAN-like data set
-#' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
+#' @param method optimization method; the default is `"L-BFGS-B"` (from `stat::optim()`), alternatively `"newuoa"` for `minqa::newuoa()`
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
-#' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
+#' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print a message whenever optimization is reset (a logical, default is `TRUE`)
 #' @param progress print a progress bar (a logical, default is `TRUE`)
@@ -135,7 +135,7 @@ mapbayest <- function(x,
   final_eta <- apply(etamat, MARGIN = 1, FUN = identity, simplify = FALSE)
 
   if(is.function(hessian)){
-    covariance <- purrr::map2(arg.ofv.id, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim, arg.ofv.fix = arg.ofv.fix)
+    covariance <- map2(arg.ofv.id, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim, arg.ofv.fix = arg.ofv.fix)
   } else {
     covariance <- map(iddata, ~matrix(NA_real_))
   }
@@ -145,7 +145,7 @@ mapbayest <- function(x,
     arg.optim = arg.optim,
     arg.ofv.fix = arg.ofv.fix,
     arg.ofv.id = arg.ofv.id,
-    opt.value = map_dfr(opt.value, purrr::flatten, .id = "ID"),
+    opt.value = bind_rows(lapply(opt.value, flatten), .id = "ID"),
     final_eta = final_eta,
     covariance = covariance,
     mapbay_tab = mapbay_tab,

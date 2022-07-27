@@ -15,7 +15,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
   if(!is.mrgmod(x)){
     stop("the first argument must be a model object", call. = F)
   }else{
-    check <- tibble(stop = logical(0), descr = character(0))
+    check <- as_tibble(data.frame(stop = logical(0), descr = character(0)))
 
     # Structure
 
@@ -82,7 +82,7 @@ check_mapbayr_data <- function(data){
   if(is.null(data)) stop("No data provided", call. = F)
 
   # Are all column numerics
-  non_num <- names(data)[!map_lgl(data, is.numeric)]
+  non_num <- names(data)[!sapply(data, is.numeric)]
   if(length(non_num)) stop(paste("Non-numeric column found:", paste(non_num, collapse = " ")), call. = F)
 
   # Are required items present?
@@ -309,7 +309,7 @@ preprocess.ofv.id <- function(x, iddata){
   if(log_transformation(x)) idDV <- log(idDV)
   idcmt <- iddata$cmt[iddata$mdv==0]
 
-  list(idvaliddata = mrgsolve::valid_data_set(iddata, x),
+  list(idvaliddata = valid_data_set(iddata, x),
        idDV = idDV,
        idcmt = idcmt
   )

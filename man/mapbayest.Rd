@@ -27,7 +27,7 @@ mbrest(...)
 
 \item{data}{NMTRAN-like data set}
 
-\item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
+\item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
 
 \item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
 
@@ -35,7 +35,7 @@ mbrest(...)
 
 \item{quantile_bound}{a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1\%)}
 
-\item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
+\item{control}{a list passed to the optimizer (see \code{\link[stats:optim]{stats::optim()}} or  \code{\link[minqa:newuoa]{minqa::newuoa()}} documentation)}
 
 \item{check}{check model code for mapbayr specification (a logical, default is \code{TRUE})}
 

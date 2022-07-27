@@ -58,7 +58,7 @@ read_nmphi <- function(x){
 
 is.variance <- function(x){
   str_extract_all(x, "\\d+") %>%
-    map_lgl(~ .x[1]==.x[2])
+    sapply(function(x) x[1]==x[2])
 }
 
 #' @rdname vs_nonmem

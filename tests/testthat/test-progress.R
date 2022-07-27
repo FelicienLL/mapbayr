@@ -6,7 +6,8 @@ test_that("progress argument works", {
   # works manually, but not through automatic testing procedures
 
   my_data10 <- seq(10) %>%
-    map_dfr(.f = ~ mutate(my_data, ID = .x))
+    lapply(function(x) mutate(my_data, ID = x)) %>%
+    bind_rows()
 
   expect_message(mapbayest(x = my_model, my_data10), "\\[=====")
   expect_message(mapbayest(x = my_model, my_data10, progress = FALSE), NA)

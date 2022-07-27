@@ -135,11 +135,11 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
     transpose() %>%
     map(unlist) %>%
     map(~ ifelse(abs(.x) > arg.optim$upper, 0, .x)) %>%   # If out of bounds value of eta, set it to zero.
-    map_dfr(function(x){                                  # Compute OFV for every vector value
+    purrr::map_dfr(function(x){                                  # Compute OFV for every vector value
       ofv <- do.call(compute_ofv, c(list(eta = x), arg.ofv))
       c(unlist(x), OFV = ofv)
     }) %>%
-    slice_min(.data$OFV, with_ties = FALSE) %>%           # Keep the lowest one
+    dplyr::slice_min(.data$OFV, with_ties = FALSE) %>%           # Keep the lowest one
     select(-.data$OFV) %>%
     unlist() %>%
     round(6)
@@ -151,7 +151,7 @@ new_bounds <- function(omega_inv, lower){
   P <- map2_dbl(.y = vec_SE, .x = lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
-  map_dbl(vec_SE, stats::qnorm, p = new_P, mean = 0)
+  sapply(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
 new_ini3 <- function(arg.ofv, upper, nreset){

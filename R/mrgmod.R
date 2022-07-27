@@ -54,7 +54,7 @@ adm_lines.mrgmod <- function(x, ...){
   #  mrgsolve:::mod_first()
 
   if(is.null(x@args$data)){
-    d0 <- tibble()
+    d0 <- as_tibble(data.frame())
   } else {
     d0 <- x@args$data
   }
@@ -124,7 +124,7 @@ obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMe
 obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...){
 
   if(is.null(x@args$data)){
-    d0 <- tibble()
+    d0 <- as_tibble(data.frame())
   } else {
     d0 <- x@args$data
   }
@@ -135,10 +135,11 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...
     iID <- (d0[["ID"]])[1]
   }
 
-  d <- tibble(
+  d <- data.frame(
     time = time,
     DV   = DV,
-    mdv = mdv)
+    mdv = mdv) %>%
+    as_tibble()
 
   # What cmt ?
   .cmt <- cmt
