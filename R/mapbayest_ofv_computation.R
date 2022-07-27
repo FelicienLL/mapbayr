@@ -75,7 +75,14 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
 
   #Predict concentrations
   pred <- f(qmod = qmod, data = idvaliddata)
-  if(log_transformation) pred <- log(pred)
+  if(log_transformation){
+    abspred <- abs(pred)
+    small <- abspred < sqrt(.Machine$double.eps)
+    if(any(small)){
+      pred[small] <- abspred[small]
+    }
+    pred <- log(pred)
+  }
 
   #Compute variance associated to predictions
   H <- h(pred = pred, cmt = idcmt, all_cmt = all_cmt)
