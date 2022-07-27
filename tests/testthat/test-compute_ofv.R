@@ -72,3 +72,70 @@ test_that("compute basic ofv", {
 
 })
 
+test_that("small negative values are fixed", {
+  #see #140
+
+  code408 <- "$PROB Reference model
+
+$PARAM @annotated
+TVCL   : 4.00 : Clearance (L/h)
+TVVC   : 70.0 : Central volume of distribution (L)
+TVKA   : 1.00 : Absorption rate (h-1)
+
+ETA1 : 0 : CL
+ETA2 : 0 : VC
+ETA3 : 0 : KA
+
+$OMEGA
+0.2 // CL
+0.2 // VC
+0.2 // KA
+
+$SIGMA
+0 // err prop
+.05 //  err log additive
+
+
+$CMT @annotated
+DEPOT   : Depot () []
+CENTRAL : Central () [ADM, OBS]
+
+$TABLE
+double DV = (CENTRAL / VC) * exp(EPS(2)) ;
+
+$MAIN
+double CL  = TVCL  * exp(ETA(1) + ETA1 ) ;
+double VC  = TVVC  * exp(ETA(2) + ETA2 ) ;
+double KA  = TVKA  * exp(ETA(3) + ETA3 ) ;
+
+double K20 = CL / VC ;
+
+$ODE
+dxdt_DEPOT   = - KA * DEPOT ;
+dxdt_CENTRAL = - K20 * CENTRAL + KA * DEPOT ;
+
+$CAPTURE DV"
+
+
+  mod408 <- mcode("mod408", code408, quiet = TRUE)
+  dat408 <- data.frame(
+    ID = 1405,
+    time = c(0, 1.2, 4.6, 8.8, 26.5),
+    evid = c(1, 0, 0, 0, 0),
+    amt = c(30000, 0,0,0,0),
+    cmt = 2,
+    rate = c(30000, 0,0,0,0),
+    mdv = c(1, 0, 0, 0, 0),
+    DV =  c(NA, 1703, 669, 216, 0.806)
+  )
+
+  argofv <- c(
+    preprocess.ofv.fix(mod408, dat408),
+    preprocess.ofv.id(mod408, dat408)
+  )
+  testparam <- c(ETA1 = 1.6, ETA2 = -1.6, ETA3 = 0)
+  pred <- mapbayr:::f(param(argofv$qmod, testparam), data = dat408)
+  expect_true(any(pred < 0))
+  expect_true(any(is.nan(suppressWarnings(log(pred)))))
+  expect_false(is.nan(do_compute_ofv(eta = testparam, argofv)))
+})
