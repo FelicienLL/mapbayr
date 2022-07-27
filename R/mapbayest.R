@@ -105,7 +105,7 @@ mapbayest <- function(x,
   t2 <- Sys.time()
 
   if(progress){
-    pb <- progress::progress_bar$new(format = "[:bar] ID :current/:total (:percent)", total = length(arg.ofv.id))
+    pb <- progress::progress_bar$new(format = "[:bar] ID :current/:total (:percent)", total = length(arg.ofv.id), force = TRUE)
   }
 
   # Start optimization
