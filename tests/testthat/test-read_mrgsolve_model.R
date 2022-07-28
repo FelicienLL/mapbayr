@@ -100,8 +100,8 @@ PERIPH: Peripheral compartment ()
                "\\$SIGMA: Define one pair of sigma values.*")
 
   #2 Modified data to test point 2 = obs cmt in data must be defined in model
-  data2 <- mutate(data1, cmt = c(1, 1, 99))
-  expect_error(check_mapbayr_modeldata(x = mod1, data2), "ID =1; CMT =99\n One or more compartment with observation .* in data don't match those defined with")
+  data2 <- mutate(data1, cmt = c(1, 1, 2))
+  expect_error(check_mapbayr_modeldata(x = mod1, data2), ".*One or more compartment with observation .* in data don't match those defined with")
 
   #Other type of model. Here [OBS] is NOT defined in $CMT
   cmt3 <- "$CMT CENT PERIPH"
@@ -124,9 +124,10 @@ PERIPH: Peripheral compartment ()
   data31 <- mutate(data1, cmt = c(1,2,2), ID = 20) %>% bind_rows(data1)
   expect_error(check_mapbayr_modeldata(mod3, data31), "More than one 'observation compartment' to detect from data. Consider editing model code")
 
-  ##4) Compartment must exist in the model
-  data4 <- mutate(data1, cmt = c(1,99,99))
-  expect_error(check_mapbayr_modeldata(mod3, data4), "Compartment number with observation in dataset does not exist in model.")
+  # ##4) Compartment must exist in the model
+  # data4 <- mutate(data1, cmt = c(1,99,99))
+  # expect_error(check_mapbayr_modeldata(mod3, data4), "Compartment number with observation in dataset does not exist in model.")
+  # test off: picked up in test-check_mapbayr_modeldata.R
 
   ##5) Sigma must be equal to 2
 
