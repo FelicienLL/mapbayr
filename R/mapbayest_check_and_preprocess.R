@@ -27,6 +27,8 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
       if(!x@shlib$compiled){
         stop('model object is not compiled')
       }
+      # Check if shared object is loaded. If not it errors.
+      mrgsolve::loadso(x)
     }
 
     # $PARAM
