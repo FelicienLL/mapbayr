@@ -1,4 +1,4 @@
-# mapbayr 0.7.3.9003 (Development version)
+# mapbayr 0.7.3.9006 (Development version)
 - New functions `summarise_phi()` and `bar_phi()` to summarise the comparison of estimation of mapbayr and NONMEM (i.e. classify it as Excellent/Acceptable/Discordant), and to graphically represent it as a bar plot. 
 - Fix a bug where "vs_nonmem" functions could not work if covariance was missing/failing in mapbayests object.
 - Fix a bug where small negative predicted concentrations generated NaN after log-transformation. #140
@@ -10,6 +10,11 @@
 - Remove dependency to `optimx` package.
 - Fix a bug where objective function value could not be computed if lag time was longer than interdose interval at steady-state because it is a known error of 'mrgsolve'. #142
 - Forces progress bar to appear, especially in 'RStudio' job launcher.
+- Fix a bug where non-loaded shared object were not signaled explicitely #130
+- Fix a bug where missing values in `mdv==0` lines were not checked #131
+- Fix a bug where compartment in the data were not defined in the model #132
+
+
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)
