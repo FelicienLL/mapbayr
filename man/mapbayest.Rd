@@ -8,7 +8,7 @@
 mapbayest(
   x,
   data = NULL,
-  method = "L-BFGS-B",
+  method = c("L-BFGS-B", "newuoa"),
   hessian = stats::optimHess,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
@@ -16,7 +16,7 @@ mapbayest(
   check = TRUE,
   verbose = TRUE,
   progress = TRUE,
-  reset = TRUE,
+  reset = 50,
   output = NULL
 )
 
@@ -27,7 +27,7 @@ mbrest(...)
 
 \item{data}{NMTRAN-like data set}
 
-\item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
+\item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
 
 \item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
 
@@ -35,7 +35,7 @@ mbrest(...)
 
 \item{quantile_bound}{a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1\%)}
 
-\item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
+\item{control}{a list passed to the optimizer (see \code{\link[stats:optim]{stats::optim()}} or  \code{\link[minqa:newuoa]{minqa::newuoa()}} documentation)}
 
 \item{check}{check model code for mapbayr specification (a logical, default is \code{TRUE})}
 
@@ -43,7 +43,7 @@ mbrest(...)
 
 \item{progress}{print a progress bar (a logical, default is \code{TRUE})}
 
-\item{reset}{reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is \code{TRUE})}
+\item{reset}{maximum allowed reset of the optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a numeric, default is 50)}
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 

@@ -2,6 +2,14 @@
 - New functions `summarise_phi()` and `bar_phi()` to summarise the comparison of estimation of mapbayr and NONMEM (i.e. classify it as Excellent/Acceptable/Discordant), and to graphically represent it as a bar plot. 
 - Fix a bug where "vs_nonmem" functions could not work if covariance was missing/failing in mapbayests object.
 - Fix a bug where small negative predicted concentrations generated NaN after log-transformation. #140
+- Post-processing was rewritten to be more efficient and in now directly executed after optimization by `mapbayest()` as function of the `output =` argument. #134
+- `postprocess.optim` and `postprocess.output` are not exported anymore. 
+- Data splitting is simpler, #127
+- the `reset` argument is now a numeric and drives the maximum allowed reset during optimization.
+- optimization is now done by calling `stats::optim` if method is L-BFGS-B and `minqa::newuoa` if method is newuoa. These replace `optimx::optimx`. #136 
+- Remove dependency to `optimx` package.
+- Fix a bug where objective function value could not be computed if lag time was longer than interdose interval at steady-state because it is a known error of 'mrgsolve'. #142
+- Forces progress bar to appear, especially in 'RStudio' job launcher.
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)

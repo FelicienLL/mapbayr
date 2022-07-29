@@ -139,3 +139,42 @@ $CAPTURE DV"
   expect_true(any(is.nan(suppressWarnings(log(pred)))))
   expect_false(is.nan(do_compute_ofv(eta = testparam, argofv)))
 })
+
+test_that("dose-related parameters > II", {
+
+  code141 <- "
+$PARAM ETA1 = 0, ETA2 = 0
+$CMT GUT CENT
+$OMEGA .5 .5
+$SIGMA .04 0
+$MAIN
+double KA = 1 ;
+double CL = 1 ;
+double V = 30 ;
+double ALAG1 = 5.0 * exp(ETA(1) + ETA1) ;
+double D1 = 5.0 * exp(ETA(2) + ETA2) ;
+ALAG_GUT = ALAG1 ;
+D_GUT = D1 ;
+$PKMODEL ncmt = 1, depot = TRUE
+$ERROR
+double DV = CENT/V *(1 + EPS(1)) ;
+$CAPTURE DV ALAG1 D1
+"
+  mod141 <- mcode("mod141",code141, quiet = TRUE)
+
+  dat141 <- mod141 %>%
+    adm_lines(amt = 1000, cmt = 1, ss = 1, ii = 24) %>%
+    obs_lines(time = c(1,4), DV = c(26, 52), cmt = 2) %>%
+    get_data()
+
+  argofv141 <- c(
+    preprocess.ofv.fix(mod141, dat141),
+    preprocess.ofv.id(mod141, dat141)
+  )
+
+  ofv1 <- do_compute_ofv(eta = c(ETA1 = -2, ETA2 = -2), argofv141)
+  expect_true(all(ofv1 > 20, ofv1 < 30))
+
+  ofv2 <- do_compute_ofv(eta = c(ETA1 = 2, ETA2 = 2), argofv141)
+  expect_equal(ofv2, 1E10)
+})

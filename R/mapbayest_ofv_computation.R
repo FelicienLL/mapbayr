@@ -74,7 +74,8 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
   qmod <- qparam(x = qmod, p = eta)
 
   #Predict concentrations
-  pred <- f(qmod = qmod, data = idvaliddata)
+  pred <- tryCatch(f(qmod = qmod, data = idvaliddata), silent = TRUE, error = function(x)NA)
+  if(any(is.na(pred))) return(1E10)
   if(log_transformation){
     abspred <- abs(pred)
     small <- abspred < sqrt(.Machine$double.eps)

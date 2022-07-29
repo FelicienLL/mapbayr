@@ -73,7 +73,7 @@ exdata <- function(num = 1, ID = 1, clean_data = TRUE){
 }
 
 make_model_name <- function(x, cache = TRUE){
-  num <- stringr::str_pad(x, 3, pad = 0)
+  num <- str_pad(x, 3, pad = 0)
   nam <- paste0("mrg_", num)
   if(cache) return(nam)
 
@@ -81,7 +81,7 @@ make_model_name <- function(x, cache = TRUE){
 }
 
 make_data_name <- function(x){
-  num <- stringr::str_pad(x, 3, pad = 0)
+  num <- str_pad(x, 3, pad = 0)
   nam <- paste0("data_to_fit", num, ".csv")
   system.file("exmodel", nam, package = "mapbayr")
 }
