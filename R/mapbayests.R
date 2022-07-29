@@ -116,17 +116,17 @@ plot.mapbayests <- function(x, ...){
 
   if(all(!one_cmt, !one_ID)) {
     gg <- gg+
-      facet_grid(rows = vars(.data$ID), cols = vars(.data$cmt), scales = "free", labeller = label_both)
+      facet_grid(ID~cmt, scales = "free", labeller = label_both)
   }
 
   if(all(one_cmt, !one_ID)) {
     gg <- gg+
-      facet_grid(rows = vars(.data$ID), scales = "free", labeller = label_both)
+      facet_grid(ID~., scales = "free", labeller = label_both)
   }
 
   if(all(!one_cmt, one_ID)) {
     gg <- gg+
-      facet_grid(cols = vars(.data$cmt), scales = "free", labeller = label_both)
+      facet_grid(.~cmt, scales = "free", labeller = label_both)
   }
 
   return(gg)
@@ -252,12 +252,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   }
 
   if(is.null(start)){
-    start <- unname(map_dbl(idata, ~ min(.x$time)))
+    start <- unname(sapply(idata, function(x) min(x$time)))
     #A vector. For each ID, possibly a different start time.
   }
 
   if(is.null(end)){
-    end <- unname(map_dbl(idata, ~ max(.x$time)))
+    end <- unname(sapply(idata, function(x) max(x$time)))
     #A vector. For each ID, possibly a different end time.
     end <- end * 1.2
     #By default, +20% of last obs or dosing.
@@ -350,12 +350,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
 }
 
 data_nid <- function(data, n){
-  map_dfr(.x = seq_len(n), ~mutate(data, ID = .x))
+  bind_rows(lapply(seq_len(n), function(x) mutate(data, ID = x)))
 }
 
 prepare_summarise <- function(data){
   data %>%
     group_by(.data$ID) %>%
-    mutate(rowID = row_number()) %>%
+    mutate(rowID = rank(.data$ID, ties.method = "first")) %>%
     group_by(.data$rowID)
 }

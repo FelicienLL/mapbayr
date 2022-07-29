@@ -7,7 +7,7 @@ test_that("get_data.mrgmod works", {
 data1 <- get_data.mrgmod(moddata1)
 
 test_that("devalid_data_set works", {
-  expect_equal(devalid_data_set(mrgsolve::valid_data_set(data1, moddata1)), data1)
+  expect_equal(devalid_data_set(valid_data_set(data1, moddata1)), data1)
 })
 
 test_that("get_data.mapbayests works", {
