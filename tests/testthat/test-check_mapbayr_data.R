@@ -23,4 +23,7 @@ test_that("misspecification of evid/mdv are checked", {
   expect_error(check_mapbayr_data(dat), "Observation line \\(mdv = 0\\) not accepted at time = 0")
 })
 
-
+test_that("DV cannot be NA if mdv == 0", {
+  dat[3, "DV"] <- NA
+  expect_error(check_mapbayr_data(dat), "DV cannot be missing \\(NA\\) on an observation line \\(mdv = 0\\)")
+})

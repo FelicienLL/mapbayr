@@ -1,4 +1,4 @@
-test_that("multiplication works", {
+test_that("annotations are read correctly", {
   code00 <- "
 $PROB Demo MAP BAY
 $PARAM TVKA = .5, TVCL = 2, TVV = 100
@@ -179,8 +179,5 @@ $PKMODEL ncmt = 1, depot = TRUE
 
   expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0), "Define observation compartment .*")
   expect_error(adm_lines(mod0, amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 2), NA)
-  dat1 <- get_data(mod1 %>% adm_lines(amt = 100, cmt = 1) %>% obs_lines(time = 24, DV = 1.0, cmt = 9))
-
-  expect_error(check_mapbayr_modeldata(mod1, dat1), ".*One or more compartment with observation.*")
 })
 

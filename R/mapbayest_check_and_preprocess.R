@@ -27,6 +27,8 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
       if(!x@shlib$compiled){
         stop('model object is not compiled')
       }
+      # Check if shared object is loaded. If not it errors.
+      mrgsolve::loadso(x)
     }
 
     # $PARAM
@@ -102,7 +104,7 @@ check_mapbayr_data <- function(data){
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
   if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
-
+  if(any(data$mdv==0 & is.na(data$DV))) stop("DV cannot be missing (NA) on an observation line (mdv = 0)", call. = F)
   return(data)
 }
 
@@ -118,6 +120,10 @@ check_mapbayr_modeldata <- function(x, data){
 
   if(length(commonvar) > 0) stop("These variables cannot be set in both model and data: ", paste(commonvar, collapse = ", "), '.', call. = FALSE)
 
+  maxcmtdata <- max(data$cmt)
+  maxcmtmod <- length(x$cmt)
+
+  if(maxcmtdata > maxcmtmod) stop("One or multiple line(s) with cmt = ", maxcmtdata, " observed in data, but only ", maxcmtmod, " compartments defined in model.", call. = FALSE)
 
   cmt_data <- obs_cmt_data(data)
   cmt_model <- obs_cmt(x)
@@ -125,7 +131,7 @@ check_mapbayr_modeldata <- function(x, data){
     if(length(cmt_data)!=1) stop(paste0("ID =", data$ID[1], "; CMT =", paste(cmt_data, collapse = " "), "\nMore than one 'observation compartment' to detect from data. Consider editing model code with [OBS] in $CMT."), call. = F)
     if(any(!(cmt_data %in% x@Icmt))) stop(paste0("ID =", data$ID[1], "; CMT =", cmt_data, "\n Compartment number with observation in dataset does not exist in model."))
   } else {
-    if(any(!cmt_data %in% cmt_model)) stop(paste0("ID =", data$ID[1], "; CMT =", cmt_data, "\n One or more compartment with observation (mdv=0) in data don't match those defined with [OBS] in $CMT."), call. = F)
+    if(any(!cmt_data %in% cmt_model)) stop(paste0("ID =", data$ID[1], "; CMT =", paste(cmt_data, collapse = " "), "\n One or more compartment with observation (mdv=0) in data don't match those defined with [OBS] in $CMT."), call. = F)
   }
 
 
