@@ -96,8 +96,8 @@ PERIPH: Peripheral compartment ()
 
   mod1 <- mcode("mod1", code = paste0(basecode, sigma1, cmt0), compile = FALSE)
 
-  expect_match(merge_errors(check_mapbayr_model(mod1, check_compile = FALSE)),
-               "\\$SIGMA: Define one pair of sigma values.*")
+  # expect_match(merge_errors(check_mapbayr_model(mod1, check_compile = FALSE)),
+  #              "\\$SIGMA: Define one pair of sigma values.*")
 
   #2 Modified data to test point 2 = obs cmt in data must be defined in model
   data2 <- mutate(data1, cmt = c(1, 1, 2))
@@ -108,9 +108,7 @@ PERIPH: Peripheral compartment ()
   mod3 <- mcode("mod3", code = paste0(basecode, sigma0, cmt3), compile = FALSE)
 
   check3 <- check_mapbayr_model(mod3, check_compile = FALSE)
-  expect_true("$CMT: No [ADM] compartment(s) defined (optionnal)." %in% check3$descr)
-  expect_true("$CMT: No [OBS] compartment(s) defined (optionnal)." %in% check3$descr)
-  expect_equal(fit_cmt(mod3, data1), 1)
+   expect_equal(fit_cmt(mod3, data1), 1)
   expect_null(obs_cmt(mod3))
 
   #This works
@@ -131,60 +129,12 @@ PERIPH: Peripheral compartment ()
 
   ##5) Sigma must be equal to 2
 
-  mod5 <- mcode("mod5", code = paste0(basecode, sigma1, cmt3), compile = FALSE)
-  check5 <- check_mapbayr_model(mod5, check_compile = FALSE)
-  expect_match(merge_errors(check5), ".*Define only one pair of sigma values .* if you do not use .*One observation compartment will be defined from MDV=0 lines in individual data")
+  # mod5 <- mcode("mod5", code = paste0(basecode, sigma1, cmt3), compile = FALSE)
+  # check5 <- check_mapbayr_model(mod5, check_compile = FALSE)
+  # expect_match(merge_errors(check5), ".*Define only one pair of sigma values .* if you do not use .*One observation compartment will be defined from MDV=0 lines in individual data")
 })
 
 
-
-test_that("wrong code is correctly checked", {
-  code1 <- "
-$PARAM @annotated
-TVCL:  0.5 : Clearance
-TVV1: 20.0 : Central volume
-V2  : 10.0 : Peripheral volume of distribution
-Q   :  3.0 : Intercompartmental clearance
-
-ETA1: 0 : Clearance (L/h)
-ETA_2: 0 : Central volume (L) //                     error here
-ETA3: .1://
-
-$OMEGA 0.3 0.2 0.1
-$SIGMA
-0.06 // proportional
-0.1 // additive
-0.1 //                                             error here
-
-$CMT CENT PERIPH
-
-$TABLE
-double DV = (CENT/V2) *(1 + EPS(1)) + EPS(2);
-
-$MAIN
-double CL = TVCL * exp(ETA1 + ETA(1)) ;
-double V1 = TVV1 * exp(ETA(2)) ; //                       error
-double K12 = (Q / V1) * exp(ETA3 + ETA(3)) ;
-double K21 = Q / V2  ;
-double K10 = CL / V1 ;
-
-$ODE
-dxdt_CENT   =  K21 * PERIPH - (K10 + K12) * CENT ;
-dxdt_PERIPH =  K12 * CENT - K21 * PERIPH ;
-
-$CAPTURE DV
-"
-
-  check1 <- check_mapbayr_model(mcode("test1", code = code1, compile = FALSE), check_compile = FALSE)
-
-  expect_true("$PARAM: 2 ETA found, but not sequentially named ETA1." %in% check1$descr)
-  expect_true("$PARAM: Initial value is not 0 for all ETA." %in% check1$descr)
-  expect_true("$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM." %in% check1$descr)
-  expect_true("$CMT: No [ADM] compartment(s) defined (optionnal)." %in% check1$descr)
-  expect_true("$CMT: No [OBS] compartment(s) defined (optionnal)." %in% check1$descr)
-  expect_true("$SIGMA: A pair number of sigma values is expected (3 values found)." %in% check1$descr)
-
-})
 
 test_that("model+data are checked", {
   code1 <- "
@@ -237,100 +187,6 @@ $CAPTURE DV PAR MET CL
 
 })
 
-
-
-test_that("log apply on additive error",{
-  code1 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
-$OMEGA 0.3
-$SIGMA 0 0.01
-$CMT CENT
-$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
-$TABLE capture DV = CENT/V * exp(EPS(2)) ;
-$PKMODEL ncmt = 1, depot = FALSE
-"
-  code2 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
-$OMEGA 0.3
-$SIGMA 0.01 0
-$CMT CENT
-$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
-$TABLE capture DV = CENT/V * exp(EPS(2)) ;
-$PKMODEL ncmt = 1, depot = FALSE
-"
-  code3 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
-$OMEGA 0.3
-$SIGMA 0.01 0.01
-$CMT CENT
-$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
-$TABLE capture DV = CENT/V * exp(EPS(2)) ;
-$PKMODEL ncmt = 1, depot = FALSE
-"
-  code4 <- "$PARAM TVCL = 1, V = 30, ETA1 = 0
-$OMEGA 0.3
-$SIGMA 0 0
-$CMT CENT
-$MAIN double CL = TVCL * exp(ETA1 + ETA(1)) ;
-$TABLE capture DV = CENT/V * exp(EPS(2)) ;
-$PKMODEL ncmt = 1, depot = FALSE
-"
-  mod1 <- mcode("mod1", code1, compile = FALSE)
-  mod2 <- mcode("mod2", code2, compile = FALSE)
-  mod3 <- mcode("mod3", code3, compile = FALSE)
-  mod4 <- mcode("mod4", code4, compile = FALSE)
-
-  descr1 <- check_mapbayr_model(mod1, check_compile = FALSE)$descr
-  descr2 <- check_mapbayr_model(mod2, check_compile = FALSE)$descr
-  descr3 <- check_mapbayr_model(mod3, check_compile = FALSE)$descr
-  descr4 <- check_mapbayr_model(mod4, check_compile = FALSE)$descr
-
-  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr1)
-  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr1)
-
-  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr2)
-  expect_true("$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr2)
-
-  expect_true("$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr3)
-  expect_true(!"$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr3)
-
- # expect_true(!"$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0." %in% descr4)
-#  expect_true("$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0." %in% descr4)
-
-})
-
-
-test_that("deals with zero in OMEGA/SIGMA matrices", {
-  code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-KA = 0.5, TVCL = 1.1, TVV = 23.3
-$OMEGA 0.41 0
-$SIGMA 0.04 0
-$CMT DEPOT CENT
-$PK
-double CL=TVCL*exp(ETA1+ETA(1));
-double V=TVV*exp(ETA2+ETA(2)) ;
-$ERROR
-double DV=CENT/V*(1+EPS(1))+EPS(2);
-$PKMODEL ncmt = 1, depot = TRUE
-$CAPTURE DV CL
-"
-
-  mod1 <- mcode('mod1', code1, compile = FALSE)
-  expect_match(paste(check_mapbayr_model(mod1, check_compile = FALSE)$descr, collapse = " "), "Cannot be equal to zero")
-
-  code2 <- "$PARAM ETA1 = 0, ETA2 = 0,
-KA = 0.5, TVCL = 1.1, TVV = 23.3
-$OMEGA 0.41 0.32
-$SIGMA 0 0
-$CMT DEPOT CENT
-$PK
-double CL=TVCL*exp(ETA1+ETA(1));
-double V=TVV*exp(ETA2+ETA(2)) ;
-$ERROR
-double DV=CENT/V*(1+EPS(1))+EPS(2);
-$PKMODEL ncmt = 1, depot = TRUE
-$CAPTURE DV CL
-"
-  mod2 <- mcode('mod2', code2, compile = FALSE)
-  expect_match(paste(check_mapbayr_model(mod2, check_compile = FALSE)$descr, collapse = " "), "SIGMA are equal to zero")
-})
 
 test_that("eta_descr works", {
   mod87 <- mcode("mod87", "$PARAM ETA1 = 0, ETA2 = 0

@@ -150,19 +150,19 @@ $PKMODEL ncmt = 1, depot = TRUE
   expect_equal(eta_descr(mod2), c("ind value KA", "ind value CL", "ind value V"))
   expect_equal(eta_descr(mod3), c("ind value KA", "ind value V", "ind value CL"))
 
-  # model check ok ?
-  expect_s3_class(check_mapbayr_model(mod00, check_compile = FALSE), "data.frame")
-  expect_s3_class(check_mapbayr_model(mod0, check_compile = FALSE), "data.frame")
-  expect_true(check_mapbayr_model(mod1, check_compile = FALSE))
-  expect_s3_class(check_mapbayr_model(mod2, check_compile = FALSE), "data.frame")
-  expect_s3_class(check_mapbayr_model(mod3, check_compile = FALSE), "data.frame")
-
-  # model check send stop ?
-  sendstop <- function(x) any(TRUE %in% check_mapbayr_model(x, check_compile = FALSE)$stop)
-  expect_true(sendstop(mod00))
-  expect_false(sendstop(mod0))
-  expect_false(sendstop(mod2))
-  expect_true(sendstop(mod3))
+  # # model check ok ?
+  # expect_s3_class(check_mapbayr_model(mod00, check_compile = FALSE), "data.frame")
+  # expect_s3_class(check_mapbayr_model(mod0, check_compile = FALSE), "data.frame")
+  # expect_true(check_mapbayr_model(mod1, check_compile = FALSE))
+  # expect_s3_class(check_mapbayr_model(mod2, check_compile = FALSE), "data.frame")
+  # expect_s3_class(check_mapbayr_model(mod3, check_compile = FALSE), "data.frame")
+  #
+  # # model check send stop ?
+  # sendstop <- function(x) any(TRUE %in% check_mapbayr_model(x, check_compile = FALSE)$stop)
+  # expect_true(sendstop(mod00))
+  # expect_false(sendstop(mod0))
+  # expect_false(sendstop(mod2))
+  # expect_true(sendstop(mod3))
 
   # model + data check for model that do not return STOP
   expect_error(check_mapbayr_modeldata(mod0, data0), NA)
