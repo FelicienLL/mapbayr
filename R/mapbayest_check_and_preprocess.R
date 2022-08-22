@@ -9,14 +9,11 @@
 #' @examples
 #' library(mapbayr)
 #' library(mrgsolve)
-#' check_mapbayr_model(house())
+#' \dontrun{check_mapbayr_model(house())}
 check_mapbayr_model <- function(x, check_compile = TRUE){
-  # browser()
   if(!is.mrgmod(x)){
     stop("the first argument must be a model object", call. = F)
-  }else{
-    check <- as_tibble(data.frame(stop = logical(0), descr = character(0)))
-
+  } else {
     # Structure
 
     if(!is.list(x@param@data)){
@@ -32,51 +29,71 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     }
 
     # $PARAM
-    neta <- length(eta_names(x))
+    eta_names_x <- eta_names(x)
+    neta <- length(eta_names_x)
     if(neta == 0) {
-      check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: No ETA (ETA1, ETA2...) defined."))
+      stop('$PARAM. Cannot find parameters named "ETA1", "ETA2", etc... \nDid you forget to add these parameters in $PARAM?', call. = FALSE)
     } else {
-      if(any(eta_names(x) != paste0("ETA", seq.int(length.out = neta)))) check <-  bind_rows(check, list(stop = TRUE, descr = paste0("$PARAM: ", neta, " ETA found, but not sequentially named ETA1.")))
-      if(!all(x[eta_names(x)]==0)) check <- bind_rows(check, list(stop = TRUE, descr = "$PARAM: Initial value is not 0 for all ETA."))
+      expected_eta_names <- paste0("ETA", seq_along(eta_names_x))
+      if(any(eta_names_x != expected_eta_names)){
+        stop(paste0("$PARAM. ", neta, " ETA parameter(s) found, but not named ", paste(expected_eta_names, collapse = ", "), ". "), call. = FALSE)
+      }
+      if(!all(x[eta_names_x]==0)){
+        stop(paste0("$PARAM. The value of one or multiple ETA parameter(s) is not 0."), call. = FALSE)
+      }
     }
 
-    # $CMT
-    if(is.null(adm_cmt(x))) check <- bind_rows(check, list(stop = FALSE, descr = "$CMT: No [ADM] compartment(s) defined (optionnal)."))
-    if(is.null(obs_cmt(x))) check <- bind_rows(check, list(stop = FALSE, descr = "$CMT: No [OBS] compartment(s) defined (optionnal)."))
-
-    # $OMEGA as much as ETA ?
-    nomega <- length(diag(omat(x, make = T)))
-    if(nomega != neta) check <- bind_rows(check, list(stop = TRUE, descr = "$OMEGA: Length of omega matrix diagonal not equal to the number of ETA defined in $PARAM."))
-
-    # OMEGA : no value = 0.
-    omega0 <- which(odiag(x) == 0)
-    if(length(omega0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$OMEGA: ", paste0(omega0, collapse = "-"), " is (are) equal to 0. Cannot be equal to zero.")))
+    # $OMEGA
+    odiag_x <- odiag(x)
+    nomega <- length(odiag_x)
+    if(nomega != neta) {
+      stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
+    }
+    if(any(odiag_x == 0)){
+      stop("$OMEGA. The value of one or multiple OMEGA value is equal to 0. Cannot accept value in OMEGA equal to zero.", call. = FALSE)
+    }
 
     # $SIGMA
-    nsig <- length(diag(smat(x, make = T)))
-    if(nsig%%2 !=0) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: A pair number of sigma values is expected (", nsig, " values found).")))
-    if(is.null(obs_cmt(x))){
-      if(nsig != 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$SIGMA: Define only one pair of sigma values (prop + add errors) in $SIGMA if you do not use [OBS] in $CMT. (One observation compartment will be defined from MDV=0 lines in individual data"))
-    } else {
-      ncmt <- length(obs_cmt(x))
-      if(ncmt != nsig/2) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."))
+    sdiag_x <- diag(smat(x, make = T))
+    if(all(sdiag_x == 0)){
+      stop("$SIGMA. All the values in $SIGMA are equal to zero, which is not allowed.", call. = FALSE)
+    }
+    nsig <- length(sdiag_x)
+    if(nsig %% 2 != 0){
+      stop(paste0("$SIGMA. The SIGMA matrix diagonal has length ", nsig, ". A pair number is expected."), call. = FALSE)
     }
 
-    dsig <- diag(smat(x, make = T))
-    if(all(dsig == 0)) check <- bind_rows(check, list(stop = TRUE, descr = paste0("$SIGMA: All the values of SIGMA are equal to zero, which is not allowed.")))
+    obs_cmt_x <- obs_cmt(x)
+    if(is.null(obs_cmt_x)){
+      if(nsig != 2){
+        stop("$SIGMA. More than 2 values defined in $SIGMA, while [OBS] was not defined in $CMT.", call. = FALSE)
+      }
+    } else {
+      ncmt <- length(obs_cmt_x)
+      if(nsig != ncmt * 2){
+        stop(paste0("$SIGMA. ", nsig, " values defined in $SIGMA, but ", ncmt * 2, " were expected. Define one pair of sigma values (prop + add errors) per [OBS] compartment(s) defined in $CMT."), call. = FALSE)
+      }
+    }
 
     if(log_transformation(x)){
-      if(any(which(dsig==0)%%2 == 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 2,4... cannot be equal to 0."))
-      if(any(which(dsig!=0)%%2 != 0)) check <- bind_rows(check, list(stop = TRUE, descr = "$SIGMA: Exponential error found. Sigma values in position 1,3... must be equal to 0."))
+      if(any(which(sdiag_x==0)%%2 == 0)){
+        stop("$SIGMA. Values in position 2,4... (i.e. additive) cannot be equal to 0 if residual error is defined as exponential in $TABLE", call. = FALSE)
+      }
+      if(any(which(sdiag_x!=0)%%2 != 0)){
+        stop("$SIGMA. Values in position 1,3...(i.e. proportional) must be equal to 0 if residual error is defined as exponential in $TABLE", call. = FALSE)
+      }
     }
 
     # $CAPTURE
-    if(!"DV" %in% x@capL) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE: DV must be captured."))
-    if(any(!(c("PAR", "MET") %in% x@capL)) & nsig > 2) check <- bind_rows(check, list(stop = TRUE,  descr = "$CAPTURE PAR and MET must be captured if multiple types of DV are fitted (more than one pair of sigma provided in $SIGMA)"))
+    if(!"DV" %in% x@capL){
+      stop("$CAPTURE. Cannot find DV in captured items. DV must be captured", call. = FALSE)
+    }
+    if(any(!(c("PAR", "MET") %in% x@capL)) & nsig > 2){
+      stop("$CAPTURE. Cannot find PAR and MET in captured items. They must be captured if multiple types of DV are fitted (more than one pair of sigma provided in $SIGMA)", call. = FALSE)
+    }
 
   }
-  if(nrow(check)==0) check <- TRUE
-  return(check)
+  return(invisible(TRUE))
 }
 
 check_mapbayr_data <- function(data){

@@ -20,5 +20,5 @@ Check if model is valid for mapbayr
 \examples{
 library(mapbayr)
 library(mrgsolve)
-check_mapbayr_model(house())
+\dontrun{check_mapbayr_model(house())}
 }
