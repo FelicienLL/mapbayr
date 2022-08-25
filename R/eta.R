@@ -53,3 +53,11 @@ rename_as_eta <- function(x){
   names(x) <- paste0("ETA", seq_along(x))
   x
 }
+
+eta_length <- function(...){
+  length(eta(...))
+}
+
+eta_names <- function(...){
+  names(eta(...))
+}
