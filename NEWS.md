@@ -13,8 +13,7 @@
 - Fix a bug where non-loaded shared object were not signaled explicitely #130
 - Fix a bug where missing values in `mdv==0` lines were not checked #131
 - Fix a bug where compartment in the data were not defined in the model #132
-
-
+- New `eta()`, a helper to generate a vector of values named `ETA1, ETA2, ETA3`...
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)
