@@ -17,6 +17,7 @@
 #'
 #' # Coerce numeric values
 #' eta(0.1, 0.2, c(0.3, 0.4), list(0.5, 0.6))
+#' eta(rnorm(4))
 #'
 #' # Generate a sequence from scratch
 #' eta(n = 3)
