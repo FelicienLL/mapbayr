@@ -20,7 +20,7 @@ Note that some elements cannot be checked:
 \itemize{
 \item In \verb{$MAIN} block, make sure that you added \verb{ETA1, ETA2...} in the code. For instance: \verb{double CL = TVCL * exp(ETA(1) + ETA1) ;}.
 \item In \verb{$OMEGA} block, make sure the order of the (diagonal) values is the same as for ETAs in \verb{$PARAM}. For instance, if \code{ETA1} corresponds to clearance, the first value in \verb{$OMEGA} must be the variance of clearance.
-\item In \verb{$SIGMA} block, make sure that the first and second values are proportional and additive errors, \emph{respectively}.
+\item In \verb{$SIGMA} block, make sure the order is respected: proportional error first, and additive error secondly.
 }
 }
 \examples{

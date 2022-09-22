@@ -5,7 +5,7 @@
 #' Note that some elements cannot be checked:
 #' - In `$MAIN` block, make sure that you added `ETA1, ETA2...` in the code. For instance: `double CL = TVCL * exp(ETA(1) + ETA1) ;`.
 #' - In `$OMEGA` block, make sure the order of the (diagonal) values is the same as for ETAs in `$PARAM`. For instance, if `ETA1` corresponds to clearance, the first value in `$OMEGA` must be the variance of clearance.
-#' - In `$SIGMA` block, make sure that the first and second values are proportional and additive errors, *respectively*.
+#' - In `$SIGMA` block, make sure the order is respected: proportional error first, and additive error secondly.
 #'
 #' @param x model file
 #' @param check_compile check if model is compiled
