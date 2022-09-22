@@ -1,3 +1,7 @@
+test_that("nice error message if we do not pass a mrgsolve model to mapbayest", {
+  expect_error(mapbayest("bla"), "the first argument must be a model object")
+})
+
 test_that("missing shared object is checked", {
   model_first <- exmodel(cache = FALSE)
   model_second <- exmodel(cache = FALSE)
