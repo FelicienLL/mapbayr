@@ -21,3 +21,15 @@ test_that("Observation compartment in data are those defined with [OBS] in model
   expect_error(check_mapbayr_modeldata(mod, dat),
                ".*One or more compartment with observation \\(mdv=0\\) in data don\\'t match those defined with \\[OBS\\] in \\$CMT\\.")
 })
+
+test_that("Covariates in `$PARAM` are tagged with @covariates", {
+  modcovannot <- mcode("mod",
+                       "
+             $PARAM TVCL = 1, BW = 70
+             $PARAM @annotated @covariates
+             SEX : 0 : sex
+             ", compile = FALSE)
+  datacovannot <- data.frame(ID = 1, BW = 80, SEX = 1)
+  expect_error(check_mapbayr_modeldata(modcovannot, datacovannot),
+               "Variables found both in the model \\(\\`\\$PARAM\\`\\) and in the data\\: BW\\.\\nIf these are covariates\\, please declare them with the \\`\\@annotated \\@covariates\\` tags in \\`\\$PARAM\\`\\.\\nOtherwise\\, remove them from the data\\.")
+})

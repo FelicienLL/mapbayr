@@ -142,7 +142,13 @@ check_mapbayr_modeldata <- function(x, data){
   varindata <- names(data)
   commonvar <- varindata[varindata %in% varinmodel]
 
-  if(length(commonvar) > 0) stop("These variables cannot be set in both model and data: ", paste(commonvar, collapse = ", "), '.', call. = FALSE)
+  if(length(commonvar) > 0) {
+    stop("Variables found both in the model (`$PARAM`) and in the data: ",
+         paste(commonvar, collapse = ", "),
+         ".\nIf these are covariates, please declare them with the `@annotated @covariates` tags in `$PARAM`.\n",
+         "Otherwise, remove them from the data.",
+         call. = FALSE)
+  }
 
   maxcmtdata <- max(data$cmt)
   maxcmtmod <- length(x$cmt)
