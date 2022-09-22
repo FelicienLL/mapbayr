@@ -128,7 +128,7 @@ check_new_bounds <- function(OPT, method, lower, upper){
 # 1 Returns a vector of ETA to start the new estimation from:
 
 new_ini2 <- function(arg.ofv, arg.optim, run){
-  mvgauss(solve(arg.ofv$omega_inv), n = 1+n_eta(arg.ofv$qmod)^2, seed = 1+run) %>% #Sample 1+(Neta x Neta) vectors from prior MVN distribution
+  mvgauss(solve(arg.ofv$omega_inv), n = 1+eta_length(arg.ofv$qmod)^2, seed = 1+run) %>% #Sample 1+(Neta x Neta) vectors from prior MVN distribution
     as.data.frame() %>%
     rename_with(str_replace, everything(), "V","ETA") %>%
     map(unlist) %>%
@@ -155,7 +155,7 @@ new_bounds <- function(omega_inv, lower){
 }
 
 new_ini3 <- function(arg.ofv, upper, nreset){
-  neta <- n_eta(arg.ofv$qmod)
+  neta <- eta_length(arg.ofv$qmod)
   nsim <- 1 + neta ^ 2
 
   # Sample eta from prior distribution

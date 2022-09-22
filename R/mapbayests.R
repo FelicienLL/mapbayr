@@ -11,7 +11,7 @@ print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
   nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
-  nETA <- n_eta(x$model)
+  nETA <- eta_length(x$model)
   ETA <- x$final_eta %>%
     bind_rows(.id = "ID") %>%
     as.data.frame() %>%

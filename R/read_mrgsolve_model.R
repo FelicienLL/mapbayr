@@ -110,30 +110,6 @@ log_transformation <- function(x){
 
 # ETA -----------
 
-#' Name of ETA no estimate
-#'
-#' @param x model file
-#'
-#' @return a vector of character
-#' @noRd
-eta_names <- function(x){
-  parnames <- names(param(x))
-  v <- parnames[grepl("^ETA\\d+$", parnames)]
-  if(length(v)== 0){
-    v <- NULL
-  }
-  return(v)
-}
-
-#' Number of ETA to estimate
-#'
-#' @param x model file
-#'
-#' @return a numeric
-#' @noRd
-n_eta <- function(x){
-  length(eta_names(x))
-}
 
 #' Description of ETA to estimate
 #'
@@ -148,7 +124,7 @@ eta_descr <- function(x){
   if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
     return(etas)
   } else { # If it is annotated, take names
-    eta_descr <- character(0)
+    ans <- character(0)
     for(i in etas){
       idescr <- dat$descr[(dat$name==i)]
       if(length(idescr)==0){
@@ -157,11 +133,12 @@ eta_descr <- function(x){
       if(is.na(idescr)){
         idescr <- i
       }
-      eta_descr <- c(eta_descr, idescr)
+      ans <- c(ans, idescr)
     }
-    return(eta_descr)
+    return(ans)
   }
 }
+
 
 # COVARIATES -----------
 

@@ -235,7 +235,7 @@ get_phi <- function(x, ...) UseMethod("get_phi")
 #' @export
 get_phi.mapbayests <- function(x, ...){
   nid <- length(x$arg.ofv.id)
-  namcov <- namephicov(n_eta(x$model))
+  namcov <- namephicov(eta_length(x$model))
   covs <- get_cov(x, output = "list", simplify = FALSE)
   if(is.null(covs)){
     # mapbayr < 0.6.0

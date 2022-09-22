@@ -187,7 +187,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
   method <- method[1]
   okmethod <- c("L-BFGS-B", "newuoa")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
-  netas <- n_eta(x)
+  netas <- eta_length(x)
 
   if(method == "newuoa"){
     if(!requireNamespace("minqa", quietly = TRUE)) {
