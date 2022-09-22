@@ -16,6 +16,9 @@
 - `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarised the check.
 - `check_mapbayr_model()` now only checks critical points and not suggested features.
 - Fix a bug where the model object type was not checked before being used in `mapbayest()` #149
+- Better error message if covariates are not properly tagged in the model #92
+- Bug fix: now detects error as exponential even if sigma labels are used to define `DV` #150
+- Test refactor and more tests for internal *_cmt functions
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)
