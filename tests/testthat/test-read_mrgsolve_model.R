@@ -101,8 +101,28 @@ test_that("adm_0_cmt works", {
   expect_equal(adm_0_cmt(mod2), c(1,2))
 })
 
+test_that("log_transformation works", {
+  expect_true(log_transformation(mcode("mod","$TABLE double DV = exp(EPS(2)) ; ", compile = FALSE)))
+  expect_true(log_transformation(mcode("mod","$TABLE double DV = exp ( EPS(2)) ; ", compile = FALSE)))
+  expect_false(log_transformation(mcode("mod","$TABLE double DV = 1 + EPS(2) ; ", compile = FALSE)))
+})
 
-
+test_that("log_transformation works with sigma labels", {
+  sigma_block <- "
+                $SIGMA @annotated
+                PROP: 0.1 : Proportional
+                ADD : 0.2 : Additive
+                $SIGMA @annotated
+                PROP2 : .3: Proportional 2
+                $SIGMA
+                0.4
+  "
+  expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(EPS(1)) ;"), compile = FALSE)))
+  expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(PROP) ;"), compile = FALSE)))
+  expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(ADD) ;"), compile = FALSE)))
+  expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(PROP2) ;"), compile = FALSE)))
+  expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(EPS(4)) ;"), compile = FALSE)))
+})
 
 test_that("eta_descr works", {
   mod87 <- mcode("mod87", "$PARAM ETA1 = 0, ETA2 = 0

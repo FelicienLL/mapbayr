@@ -100,10 +100,12 @@ adm_0_cmt <- function(x){
 #' @return a logical
 #' @noRd
 log_transformation <- function(x){
-  x@code %>%
-    str_subset("EPS") %>%
-    str_detect("exp *\\(.*EPS") %>%
-    any()
+  eps_patterns <- c(
+    grep(pattern = "[^\\.{1}]", x = unlist(x@sigma@labels), value = TRUE),
+    "EPS\\(\\d+\\)"
+  )
+  dv_patterns <- paste0("DV.*exp *\\(.*", eps_patterns)
+  any(sapply(dv_patterns, grepl, x = x@code))
 }
 
 # ETA -----------
