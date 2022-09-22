@@ -57,7 +57,7 @@ obs_cmt <- function(x){
 }
 
 obs_cmt_data <- function(data){
-  v <- sort(unique(data[data$mdv==0,]$cmt))
+  v <- sort(unique(data$cmt[data$mdv==0]))
   if(length(v)== 0){
     v <- NULL
   }
@@ -86,19 +86,12 @@ fit_cmt <- function(x, data){
 #' model <- exmodel(6, compile = FALSE)
 #' adm_0_cmt(model)
 adm_0_cmt <- function(x){
-  v <- paste0("D_", x@cmtL) %>%
-    map(str_detect, string = x@code) %>%
-    map(any) %>%
-    as.logical() %>%
-    which()
-
+  v <- which(sapply(paste0("D_", x@cmtL), function(i) any(grepl(i, x@code)), USE.NAMES = FALSE))
   if(length(v)== 0){
     v <- NULL
   }
-
   return(v)
 }
-
 
 #' Check if error is log-additive
 #'
