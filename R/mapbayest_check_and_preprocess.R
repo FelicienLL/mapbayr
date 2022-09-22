@@ -1,9 +1,15 @@
-#' Check if model is valid for mapbayr
+#' Check if model is valid for 'mapbayr'
+#'
+#' @description
+#' Checks that the model respects points related exclusively to 'mapbayr'. Useful at the time you wish to convert a "regular" 'mrgsolve' model you used for simulation into a model to perform MAP-Bayesian estimation.
+#' Note that some elements cannot be checked:
+#' - In `$MAIN` block, make sure that you added `ETA1, ETA2...` in the code. For instance: `double CL = TVCL * exp(ETA(1) + ETA1) ;`.
+#' - In `$OMEGA` block, make sure the order of the (diagonal) values is the same as for ETAs in `$PARAM`. For instance, if `ETA1` corresponds to clearance, the first value in `$OMEGA` must be the variance of clearance.
 #'
 #' @param x model file
-#' @param check_compile check if model is compiled (used internally)
+#' @param check_compile check if model is compiled
 #'
-#' @return TRUE value if check is passed, a vector of character with errors otherwise.
+#' @return Invisibly returns `TRUE` if checks are passed, errors otherwise.
 #' @export
 #'
 #' @examples
