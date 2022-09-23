@@ -10,6 +10,11 @@ test_that("eta works", {
   expect_equal(eta(n = 3, val = 1), c(ETA1 = 1, ETA2 = 1, ETA3 = 1))
 })
 
+test_that("eta() overrides the order of eta in model object", {
+  expect_equal(eta(mcode("model", "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)), c(ETA1 = 0, ETA2 = 0))
+  expect_equal(eta(mcode("model", "$PARAM ETA2 = 0, ETA1 = 0", compile = FALSE)), c(ETA1 = 0, ETA2 = 0))
+})
+
 test_that("rename_as_eta works", {
   expect_equal(rename_as_eta(c(0.1, 0.2, 0.3)), c(ETA1 = 0.1, ETA2 = 0.2, ETA3 = 0.3))
   mat <- do.call(cbind, list(ETA1 = c(0.1, 1), ETA2 = c(0.2, 2), ETA3 = c(0.3, 3)))

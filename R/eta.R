@@ -35,7 +35,7 @@ eta <- function(x, ..., n, val = 0){
     par <- as.double(param(x))
     ans <- par[grepl("^ETA\\d+$", names(par))]
     if(length(ans) == 0) ans <- NULL
-    return(ans)
+    return(ans[sort(names(ans))])
   }
   dots <- list(...)
   xdots <- c(list(x), ...)

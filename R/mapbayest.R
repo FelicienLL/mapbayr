@@ -80,18 +80,17 @@ mapbayest <- function(x,
   # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
   t1 <- Sys.time()
 
+  if(check){
+    check_mapbayr_model(x)
+  }
+
   if(is.null(data)){
     data <- x@args$data
   }
   x@args$data <- NULL #empty the data slot in model object
 
   if(check){
-    ok <- check_mapbayr_model(x)
-    if(!isTRUE(ok)){
-      if(any(ok$stop)) stop(paste(ok[ok$stop==T,]$descr, collapse = "\n"), call. = F)
-    }
     data <- check_mapbayr_data(data)
-
     check_mapbayr_modeldata(x, data)
   }
 
@@ -114,8 +113,8 @@ mapbayest <- function(x,
                        MoreArgs = c(arg.optim,
                                     arg.ofv.fix,
                                     list(reset = reset, verbose = verbose)
-                                    )
                        )
+  )
   names(opt.value) <- names(iddata)
   # End optimization
   t3 <- Sys.time()

@@ -14,6 +14,12 @@
 - Fix a bug where missing values in `mdv==0` lines were not checked #131
 - Fix a bug where compartment in the data were not defined in the model #132
 - New `eta()`, a helper to generate a vector of values named `ETA1, ETA2, ETA3`...
+- `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarised the check.
+- `check_mapbayr_model()` now only checks critical points and not suggested features.
+- Fix a bug where the model object type was not checked before being used in `mapbayest()` #149
+- Better error message if covariates are not properly tagged in the model #92
+- Bug fix: now detects error as exponential even if sigma labels are used to define `DV` #150
+- Test refactor and more tests for internal *_cmt functions
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)

@@ -1,3 +1,5 @@
+mod0 <- mcode("mod0", "$CMT DEPOT CENT", compile = FALSE)
+
 mod1 <- mcode("mod1", "
 $PARAM DUR = 1
 $CMT @annotated
@@ -7,8 +9,7 @@ $MAIN
 D_CENT = DUR
 ", compile = FALSE)
 
-
-mod2 <- mcode("mod1", "
+mod2 <- mcode("mod2", "
 $PARAM DUR = 1
 $CMT @annotated
 DEPOT : Depot compartment () [ADM]
@@ -17,7 +18,7 @@ $MAIN
 D_DEPOT = DUR
 ", compile = FALSE)
 
-mod3 <- mcode("mod1", "
+mod3 <- mcode("mod3", "
 $CMT @annotated
 DEPOT : Depot compartment () [ADM]
 CENT : Central compartment ()[OBS]
@@ -26,20 +27,23 @@ CENT : Central compartment ()[OBS]
 
 test_that("example models are suitable for these tests", {
   #Administration compartment
+  expect_null(adm_cmt(mod0))
   expect_equal(adm_cmt(mod1), c(1,2))
   expect_equal(adm_cmt(mod2), 1)
   expect_equal(adm_cmt(mod3), 1)
 
   #Zero order infusion to estimate => rate = -2
+  expect_null(adm_0_cmt(mod0))
   expect_equal(adm_0_cmt(mod1), 2)
   expect_equal(adm_0_cmt(mod2), 1)
   expect_null(adm_0_cmt(mod3))
 })
 
 test_that("detection of default administration compartment is good",{
-  expect_equal(get_data(adm_lines(mod1, amt = 100))[["cmt"]], adm_cmt(mod1))
-  expect_equal(get_data(adm_lines(mod2, amt = 100))[["cmt"]], adm_cmt(mod2))
-  expect_equal(get_data(adm_lines(mod3, amt = 100))[["cmt"]], adm_cmt(mod3))
+  expect_error(get_data(adm_lines(mod0, amt = 100))[["cmt"]], "Define administration compartment \\(with adm_lines\\(cmt \\= \\.\\.\\.\\)\\) or in model code with the \\[ADM\\] tag in \\$CMT")
+  expect_equal(get_data(adm_lines(mod1, amt = 100))[["cmt"]], c(1,2))
+  expect_equal(get_data(adm_lines(mod2, amt = 100))[["cmt"]], 1)
+  expect_equal(get_data(adm_lines(mod3, amt = 100))[["cmt"]], 1)
 })
 
 test_that("explicit cmt works well",{
