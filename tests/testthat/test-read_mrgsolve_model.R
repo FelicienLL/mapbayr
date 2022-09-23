@@ -125,18 +125,19 @@ test_that("log_transformation works with sigma labels", {
 })
 
 test_that("eta_descr works", {
-  mod87 <- mcode("mod87", "$PARAM ETA1 = 0, ETA2 = 0
-$PARAM @annotated @covariate
-BW : 50 : Body weight (kg)", compile = FALSE)
+  mod87 <- mcode("mod87",
+                 "$PARAM ETA1 = 0, ETA2 = 0
+                 $PARAM @annotated @covariate
+                 BW : 50 : Body weight (kg)", compile = FALSE)
 
   expect_equal(eta_descr(mod87), c("ETA1", "ETA2"))
 
   mod87bis <- mcode("mod87bis",
                     "$PARAM @annotated
-              ETA1 : 0 : Clearance
-              ETA2 : 0 :
-$PARAM @annotated @covariate
-BW : 50 : Body weight (kg)", compile = FALSE)
+                    ETA1 : 0 : Clearance
+                    ETA2 : 0 :
+                    $PARAM @annotated @covariate
+                    BW : 50 : Body weight (kg)", compile = FALSE)
 
   expect_equal(eta_descr(mod87bis), c("Clearance", "ETA2"))
 
@@ -144,5 +145,15 @@ BW : 50 : Body weight (kg)", compile = FALSE)
                     "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)
 
   expect_equal(eta_descr(mod87ter), c("ETA1", "ETA2"))
+
+  #etas are reordered
+  mod87quat <- mcode("mod87bis",
+                    "$PARAM @annotated
+                    ETA2 : 0 :
+                    ETA1 : 0 : Clearance
+                    $PARAM @annotated @covariate
+                    BW : 50 : Body weight (kg)", compile = FALSE)
+
+  expect_equal(eta_descr(mod87quat), c("Clearance", "ETA2"))
 
 })
