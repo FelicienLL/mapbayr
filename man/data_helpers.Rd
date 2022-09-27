@@ -21,7 +21,7 @@ obs_lines(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
 
 add_covariates(x, covariates, ...)
 
-\method{add_covariates}{mrgmod}(x, covariates = list(), ...)
+\method{add_covariates}{mrgmod}(x, ..., covariates = list())
 
 see_data(x, ...)
 }

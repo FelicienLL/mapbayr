@@ -116,7 +116,7 @@ my_est <- my_model %>%
   obs_lines(time = 6, DV = 3.9) %>% 
   obs_lines(time = 20, DV = 1.1) %>% 
   obs_lines(time = 24, DV = 2, mdv = 1) %>% 
-  add_covariates(list(BW = 90)) %>% 
+  add_covariates(BW = 90) %>% 
   mapbayest()
 ```
 
