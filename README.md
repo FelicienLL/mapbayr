@@ -440,11 +440,13 @@ double CL = TVCL * exp(ETA1 + ETA(1))
     -   DV must be captured
     -   For models with parent + metabolite, PAR and MET must be
         captured too.
+    -   Do not capture variables called IPRED and PRED (they will be
+        returned by `mapbayest()` anyway)
+    -   Do not capture any ETAn (ETA1, ETA2 etc…) (they will be returned
+        by `mapbayest()` anyway)
 -   Strongly recommended:
     -   Capture a posteriori values of parameters you are interested in
         (e.g. CL)
-    -   Do not capture covariates and ETAn (they will be returned by
-        `mapbayest()` anyway)
 
 ``` c
 $CAPTURE DV PAR MET CL
