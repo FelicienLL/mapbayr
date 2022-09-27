@@ -1,4 +1,4 @@
-# mapbayr 0.7.3.9006 (Development version)
+# mapbayr 0.7.3.9007 (Development version)
 - New functions `summarise_phi()` and `bar_phi()` to summarise the comparison of estimation of mapbayr and NONMEM (i.e. classify it as Excellent/Acceptable/Discordant), and to graphically represent it as a bar plot. 
 - Fix a bug where "vs_nonmem" functions could not work if covariance was missing/failing in mapbayests object.
 - Fix a bug where small negative predicted concentrations generated NaN after log-transformation. #140
