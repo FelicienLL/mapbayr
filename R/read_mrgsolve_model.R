@@ -1,14 +1,26 @@
-#' Get administration compartment numbers from mrgsolve model
+#' Read compartment options in a model
 #'
+#' @name x_cmt
 #' @param x model object
+#' @return a vector of compartment identified as default "administration" or "observation" compartments.
 #'
-#' @return vector of integer
-#' @export
+#' @details
+#' In a mrgsolve model, it is possible to specify options in `$CMT`. If `[ADM]` or `[OBS]` are set, mapbayr will interpret these as defaults administration and observation compartments, respectively.
 #'
 #' @examples
-#' # Both 1st and 0- order administration
+#' #Administration:  Both 1st and 0- order
 #' model <- exmodel(6, compile = FALSE)
+#' mrgsolve::see(model)
 #' adm_cmt(model)
+#'
+#' #Observation: Both parent drug and metabolite
+#' model <- exmodel(401, compile = FALSE)
+#' mrgsolve::see(model)
+#' obs_cmt(model)
+
+
+#' @rdname x_cmt
+#' @export
 adm_cmt <- function(x){
   dat <- as.list(x)$details$data
 
@@ -27,17 +39,8 @@ adm_cmt <- function(x){
   return(v)
 }
 
-#' Get observation compartment numbers from mrgsolve model
-#'
-#' @param x model object
-#'
-#' @return vector of integer
+#' @rdname x_cmt
 #' @export
-#'
-#' @examples
-#' #Both parent drug and metabolite
-#' model <- exmodel(401, compile = FALSE)
-#' obs_cmt(model)
 obs_cmt <- function(x){
   dat <- as.list(x)$details$data
 
@@ -79,8 +82,7 @@ fit_cmt <- function(x, data){
 #' @param x model object
 #'
 #' @return vector of integer
-#' @export
-#'
+#' @noRd
 #' @examples
 #' # Both 1st and 0- order administration
 #' model <- exmodel(6, compile = FALSE)
