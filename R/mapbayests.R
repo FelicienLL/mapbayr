@@ -46,6 +46,8 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #'
 #' @param x A \code{mapbayests} object.
 #' @param ... additional arguments (passed to \code{\link{augment.mapbayests}})
+#' @param PREDICTION plot either "IPRED", "PRED" or both.
+#'
 #' @return a `ggplot` object.
 #'
 #' @details
@@ -59,9 +61,10 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' plot(est, end = 48) +
 #'   ggplot2::labs(title = "Awesome prediction")
 #'
+#'
 #' @method plot mapbayests
 #' @export
-plot.mapbayests <- function(x, ...){
+plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
   #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
@@ -77,6 +80,7 @@ plot.mapbayests <- function(x, ...){
   }
 
   predictions <- x$aug_tab %>%
+    filter(.data$type %in% PREDICTION) %>%
     mutate(PREDICTION  = .data$type)
 
   gg <- predictions %>%

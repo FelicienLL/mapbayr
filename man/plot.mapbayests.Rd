@@ -4,12 +4,14 @@
 \alias{plot.mapbayests}
 \title{Plot predictions from mapbayests object}
 \usage{
-\method{plot}{mapbayests}(x, ...)
+\method{plot}{mapbayests}(x, ..., PREDICTION = c("IPRED", "PRED"))
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
 \item{...}{additional arguments (passed to \code{\link{augment.mapbayests}})}
+
+\item{PREDICTION}{plot either "IPRED", "PRED" or both.}
 }
 \value{
 a \code{ggplot} object.
@@ -29,5 +31,6 @@ For additional modifications, you can:
 est <- mapbayest(exmodel(ID = 1))
 plot(est, end = 48) +
   ggplot2::labs(title = "Awesome prediction")
+
 
 }

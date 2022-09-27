@@ -10,3 +10,11 @@ test_that("no warning if DV is NA and mdv = 1", {
   est$mapbay_tab[5, "DV"] <- NA
   expect_warning(plot(est), NA)
 })
+
+test_that("can choose type of prediction", {
+  #112
+  est1 <- exmodel(ID = 1) %>% mapbayest()
+  expect_s3_class(plot(est1), "ggplot")
+  expect_s3_class(plot(est1, PREDICTION = "IPRED"), "ggplot")
+  expect_s3_class(plot(est1, PREDICTION = "PRED"), "ggplot")
+})
