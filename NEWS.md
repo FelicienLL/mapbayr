@@ -1,32 +1,40 @@
 # mapbayr 0.8.0
-- New functions `summarise_phi()` and `bar_phi()` to summarise the comparison of estimation of mapbayr and NONMEM (i.e. classify it as Excellent/Acceptable/Discordant), and to graphically represent it as a bar plot. 
-- Fix a bug where "vs_nonmem" functions could not work if covariance was missing/failing in mapbayests object.
-- Fix a bug where small negative predicted concentrations generated NaN after log-transformation. #140
-- Post-processing was rewritten to be more efficient and in now directly executed after optimization by `mapbayest()` as function of the `output =` argument. #134
-- `postprocess.optim` and `postprocess.output` are not exported anymore. 
-- Data splitting is simpler, #127
-- the `reset` argument is now a numeric and drives the maximum allowed reset during optimization.
-- optimization is now done by calling `stats::optim` if method is L-BFGS-B and `minqa::newuoa` if method is newuoa. These replace `optimx::optimx`. #136 
-- Remove dependency to `optimx` package.
-- Fix a bug where objective function value could not be computed if lag time was longer than interdose interval at steady-state because it is a known error of 'mrgsolve'. #142
-- Forces progress bar to appear, especially in 'RStudio' job launcher.
-- Fix a bug where non-loaded shared object were not signaled explicitely #130
-- Fix a bug where missing values in `mdv==0` lines were not checked #131
-- Fix a bug where compartment in the data were not defined in the model #132
-- New `eta()`, a helper to generate a vector of values named `ETA1, ETA2, ETA3`...
-- `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarised the check.
-- `check_mapbayr_model()` now only checks critical points and not suggested features.
-- Fix a bug where the model object type was not checked before being used in `mapbayest()` #149
-- Better error message if covariates are not properly tagged in the model #92
-- Bug fix: now detects error as exponential even if sigma labels are used to define `DV` #150
-- Test refactor and more tests for internal *_cmt functions
-- Bug fix: mdv=1 if DV is set to NA with `obs_lines()` #147
-- Bug fix: explicitely forbid IPRED, PRED and ETA1, ETA2 etc... #148
-- `get_eta(output = "num")` can return a matrix if multiple IDs are available (and not an error message) #145
-- `add_covariates()` now accepts values through `...` instead of a single list. Previous behaviour still works (with a warning) but will be deprecated. Replace `add_covariates(list(BW = 90))` with `add_covariates(BW = 90)` or `add_covariates(covariates = list(BW = 90))` if you want to use a list. #156
-- can choose to plot either "PRED", "IPRED" or both with `plot(PREDICTION = c("IPRED", "PRED"))` #113
-- stop exporting `adm_0_cmt()`
-- remove unexported functions from documentation
+
+## New features
+* New `summarise_phi()` and `bar_phi()` summarises the comparison of estimation of 'mapbayr' and 'NONMEM' (i.e. classifies it as Excellent/Acceptable/Discordant) and graphically represents it as a bar plot.
+* New `eta()` generates numerical values named `ETA1, ETA2, ETA3...`, either from scratch, from a pre-existing vector or from a 'mrgsolve' model object.
+* In `plot()`, `PREDICTION = c("IPRED", "PRED")` controls to plot either "PRED", "IPRED" or both (#113).
+* In `add_covariates()`, `covariates` is relocated in last position, in the favor of `...` which now accepts covariate values. Calling `add_covariates(list(BW = 90))` will still works (with a warning) for the sake of retrocompatibility but will be deprecated. Instead, just use `add_covariates(BW = 90)` or explicitely call `add_covariates(covariates = list(BW = 90))` if you want to pass covariate values as a list (#156).
+* In `get_eta()`, `output = "num"` returns a matrix if multiple IDs are available instead of an error message (#145).
+
+## Minor changes
+* Stop exporting `postprocess.optim()` and `postprocess.output()`. Removed due to refactoring of internal post-processing. 
+* Stop exporting `adm_0_cmt()`. 
+* In `mapbayest()`, `reset` is now a numeric and drives the maximum allowed reset during optimization.
+* The progress bar is now forced to appear, especially in the 'RStudio' job launcher.
+* `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarised the errors.
+* `check_mapbayr_model()` now only checks critical points and not suggested features.
+* `check_mapbayr_model()` now explicitely forbids `IPRED`, `PRED` and `ETA1, ETA2...` (#148). 
+
+## Internal
+* Data splitting is simpler (#127).
+* Post-processing is faster and its content depends on `mapbayest(output = )` (#134).
+* Optimization is faster thanks to `stats::optim()` if method is 'L-BFGS-B' and `minqa::newuoa()` if method is 'newuoa'. These replace `optimx::optimx()` (#136).
+* Remove dependency to `optimx` package.
+* Test refactor and more tests for internal *_cmt functions.
+* Remove unexported functions from documentation.
+
+## Bug fixes
+* `vs_nonmem()` and `get_phi()` works even if covariance was missing/failing in mapbayests object (#126).
+* `pred()` does not generate `NaN` if small negative concentrations were predicted after log-transformation (#140).
+* `pred()` does not propagate 'mrgsolve' error when lag time is longer than interdose interval at steady-state (#142). 
+* Non-loaded shared object are now explicitely detected (#130).
+* The absence of `NA` values in `DV` if `mdv == 0` is checked (#131). 
+* The compartment numbers in the data is compared to compartments defined in the model (#132).
+* `check_mapbayr_model()` is now called before any use the model inside `mapbayest()` (#149).
+* A better error message is rendered if covariates are not properly tagged in the model (#92).
+* It is possible to use sigma labels to define `DV` if error is exponential (#150).
+* In `obs_lines()`, `mdv` will be 1 if `DV` is set to `NA` (#147).
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)
