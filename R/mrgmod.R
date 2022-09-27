@@ -121,7 +121,7 @@ obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMe
 #' @method obs_lines mrgmod
 #' @rdname data_helpers
 #' @export
-obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...){
+obs_lines.mrgmod <- function(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...){
 
   if(is.null(x@args$data)){
     d0 <- as_tibble(data.frame())
@@ -137,9 +137,13 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...
 
   d <- data.frame(
     time = time,
-    DV   = DV,
-    mdv = mdv) %>%
+    DV   = as.double(DV)) %>%
     as_tibble()
+
+  # What mdv ?
+  .mdv <- mdv
+  if(is.null(.mdv)) .mdv <- as.double(is.na(DV))
+  d$mdv <- .mdv
 
   # What cmt ?
   .cmt <- cmt
@@ -161,7 +165,7 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...
     select(-any_of("name")) %>%
     mutate(ID = iID, evid = 0, amt = 0)
 
-  #Add these administrations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
+  #Add these observations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
   d <- d0 %>%
     bind_rows(d) %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)

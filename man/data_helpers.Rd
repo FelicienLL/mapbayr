@@ -17,7 +17,7 @@ adm_lines(x, ...)
 
 obs_lines(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
 
-\method{obs_lines}{mrgmod}(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
+\method{obs_lines}{mrgmod}(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...)
 
 add_covariates(x, covariates, ...)
 
