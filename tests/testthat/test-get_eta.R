@@ -29,12 +29,15 @@ test_that("get_eta list works", {
 
 test_that("get_eta num works", {
   e1 <- get_eta(estid1, output = "num")
+  e8 <- get_eta(est001, output = "num")
 
   expect_length(e1, 3)
   expect_type(e1, "double")
   expect_named(e1, c("ETA1", "ETA2", "ETA3"))
 
-  expect_error(get_eta(est001, output = "num"), "Multiple ID, cannot coerce list to a vector of numeric.")
+  expect_length(e8, 8*3)
+  expect_type(e8, "double")
+  expect_equal(dimnames(e8)[[2]], c("ETA1", "ETA2", "ETA3"))
 })
 
 test_that("get_eta df works", {

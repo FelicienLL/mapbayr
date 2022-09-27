@@ -103,13 +103,22 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
     .out <- output[1]
   }
 
-  if(!oneID & .out == "num") stop("Multiple ID, cannot coerce list to a vector of numeric.")
+  if(.out == "num"){
+    e <- do.call(rbind, selected_eta)
+    if(oneID){
+      nam <- dimnames(e)[[2]]
+      e <- e[1,]
+      names(e) <- nam
+    }
+  }
 
-  e <- switch (.out,
-               "num" = selected_eta[[1]],
-               "list"= selected_eta,
-               "df" = bind_rows(selected_eta, .id = "ID")
-  )
+  if(.out == "list"){
+    e <- selected_eta
+  }
+
+  if(.out == "df"){
+    e <- bind_rows(selected_eta, .id = "ID")
+  }
 
   return(e)
 }
