@@ -1,4 +1,4 @@
-# mapbayr 0.7.3.9006 (Development version)
+# mapbayr 0.7.3.9007 (Development version)
 - New functions `summarise_phi()` and `bar_phi()` to summarise the comparison of estimation of mapbayr and NONMEM (i.e. classify it as Excellent/Acceptable/Discordant), and to graphically represent it as a bar plot. 
 - Fix a bug where "vs_nonmem" functions could not work if covariance was missing/failing in mapbayests object.
 - Fix a bug where small negative predicted concentrations generated NaN after log-transformation. #140
@@ -20,6 +20,13 @@
 - Better error message if covariates are not properly tagged in the model #92
 - Bug fix: now detects error as exponential even if sigma labels are used to define `DV` #150
 - Test refactor and more tests for internal *_cmt functions
+- Bug fix: mdv=1 if DV is set to NA with `obs_lines()` #147
+- Bug fix: explicitely forbid IPRED, PRED and ETA1, ETA2 etc... #148
+- `get_eta(output = "num")` can return a matrix if multiple IDs are available (and not an error message) #145
+- `add_covariates()` now accepts values through `...` instead of a single list. Previous behaviour still works (with a warning) but will be deprecated. Replace `add_covariates(list(BW = 90))` with `add_covariates(BW = 90)` or `add_covariates(covariates = list(BW = 90))` if you want to use a list. #156
+- can choose to plot either "PRED", "IPRED" or both with `plot(PREDICTION = c("IPRED", "PRED"))` #113
+- stop exporting `adm_0_cmt()`
+- remove unexported functions from documentation
 
 # mapbayr 0.7.3
 - Minor changes in DESCRIPTION file (CRAN requirements)

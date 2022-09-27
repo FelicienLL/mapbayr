@@ -7,7 +7,7 @@
 #'
 #' @details
 #' Faster update of parameters inside the model object. Useful in the context of parameter optimization, otherwise consider the regular `param()` because speed comes at the cost of safety.
-#'
+#' @noRd
 #' @examples
 #' library(mrgsolve)
 #' ho <- house()
@@ -31,6 +31,7 @@ qparam <- function(x, p){
 #'
 #' @return a matrix of dimensions `[length(pred), 2 * length(all_cmt)]`
 #'
+#' @noRd
 #' @examples
 #' mapbayr:::h(
 #' pred = c(400, 40, 200, 20),

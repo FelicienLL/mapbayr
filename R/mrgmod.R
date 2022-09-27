@@ -121,7 +121,7 @@ obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMe
 #' @method obs_lines mrgmod
 #' @rdname data_helpers
 #' @export
-obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...){
+obs_lines.mrgmod <- function(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...){
 
   if(is.null(x@args$data)){
     d0 <- as_tibble(data.frame())
@@ -137,9 +137,13 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...
 
   d <- data.frame(
     time = time,
-    DV   = DV,
-    mdv = mdv) %>%
+    DV   = as.double(DV)) %>%
     as_tibble()
+
+  # What mdv ?
+  .mdv <- mdv
+  if(is.null(.mdv)) .mdv <- as.double(is.na(DV))
+  d$mdv <- .mdv
 
   # What cmt ?
   .cmt <- cmt
@@ -161,7 +165,7 @@ obs_lines.mrgmod <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...
     select(-any_of("name")) %>%
     mutate(ID = iID, evid = 0, amt = 0)
 
-  #Add these administrations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
+  #Add these observations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
   d <- d0 %>%
     bind_rows(d) %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)
@@ -183,9 +187,6 @@ NA_filler <- function(data){
   return(data)
 }
 
-
-
-
 #' @rdname data_helpers
 #' @export
 add_covariates <- function(x, covariates, ...) UseMethod("add_covariates")
@@ -194,12 +195,25 @@ add_covariates <- function(x, covariates, ...) UseMethod("add_covariates")
 #' @method add_covariates mrgmod
 #' @rdname data_helpers
 #' @export
-add_covariates.mrgmod <- function(x, covariates = list(), ...){
+add_covariates.mrgmod <- function(x, ..., covariates = list()){
   if(is.null(x@args$data)) stop("Please provide a dataset")
 
-  d <- x@args$data %>%
-    arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
-    bind_cols(covariates)
+  d <- arrange(x@args$data, .data$ID, .data$time, -.data$evid, .data$cmt)
+
+  if(length(covariates)!=0){
+    d <- bind_cols(d, covariates)
+  } else {
+    dots <- list(...)
+    if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
+      warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
+      d <- bind_cols(d, dots[[1]])
+    } else {
+      if(any(is.null(names(dots)))){
+        stop("Arguments must be named (with covariates names)")
+      }
+      d <- bind_cols(d, dots)
+    }
+  }
 
   if("AOLA" %in% mbr_cov_names(x)) {
     d <- d %>%

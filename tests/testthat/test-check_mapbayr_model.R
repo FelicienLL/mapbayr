@@ -108,6 +108,30 @@ test_that("$CAPTURE is well-specified", {
     check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
                                $OMEGA 0.1 0.1
                                $SIGMA 1 0
+                               $CAPTURE PRED"), check_compile = FALSE),
+    "\\$CAPTURE. PRED found in \\$CAPTURE. Do not set PRED in \\$CAPTURE."
+  )
+
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
+                               $OMEGA 0.1 0.1
+                               $SIGMA 1 0
+                               $CAPTURE IPRED"), check_compile = FALSE),
+    "\\$CAPTURE. IPRED found in \\$CAPTURE. Do not set IPRED in \\$CAPTURE."
+  )
+
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
+                               $OMEGA 0.1 0.1
+                               $SIGMA 1 0
+                               $CAPTURE ETA1"), check_compile = FALSE),
+    "\\$CAPTURE. ETAn found in \\$CAPTURE. Do not set ETA1\\, ETA2 etc... in \\$CAPTURE."
+  )
+
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
+                               $OMEGA 0.1 0.1
+                               $SIGMA 1 0
                                $TABLE double DV = 0 ;"), check_compile = FALSE),
     "\\$CAPTURE. Cannot find DV in captured items. DV must be captured"
   )
@@ -154,4 +178,3 @@ test_that("$CAPTURE is well-specified", {
     "\\$CAPTURE. Cannot find PAR and MET in captured items. They must be captured if multiple types of DV are fitted \\(more than one pair of sigma provided in \\$SIGMA\\)"
   )
 })
-

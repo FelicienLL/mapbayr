@@ -92,6 +92,15 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     }
 
     # $CAPTURE
+    if("PRED" %in% x@capL){
+      stop("$CAPTURE. PRED found in $CAPTURE. Do not set PRED in $CAPTURE.", call. = FALSE)
+    }
+    if("IPRED" %in% x@capL){
+      stop("$CAPTURE. IPRED found in $CAPTURE. Do not set IPRED in $CAPTURE.", call. = FALSE)
+    }
+    if(any(eta_names_x %in% x@capL)){
+      stop("$CAPTURE. ETAn found in $CAPTURE. Do not set ETA1, ETA2 etc... in $CAPTURE.", call. = FALSE)
+    }
     if(!"DV" %in% x@capL){
       stop("$CAPTURE. Cannot find DV in captured items. DV must be captured", call. = FALSE)
     }
