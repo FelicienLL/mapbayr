@@ -159,10 +159,11 @@ check_mapbayr_modeldata <- function(x, data){
          call. = FALSE)
   }
 
-  maxcmtdata <- max(data$cmt)
-  maxcmtmod <- length(x$cmt)
+  cmt_in_data <- unique(data$cmt)
+  max_cmt_mod <- length(x$cmt)
+  invalid_cmt_in_data <- cmt_in_data[cmt_in_data > max_cmt_mod]
 
-  if(maxcmtdata > maxcmtmod) stop("One or multiple line(s) with cmt = ", maxcmtdata, " observed in data, but only ", maxcmtmod, " compartments defined in model.", call. = FALSE)
+  if(any(as.logical(invalid_cmt_in_data))) stop("One or multiple line(s) with cmt = ", paste(invalid_cmt_in_data, collapse = " "), " observed in data, but only ", max_cmt_mod, " compartments defined in model.", call. = FALSE)
 
   cmt_data <- obs_cmt_data(data)
   cmt_model <- obs_cmt(x)

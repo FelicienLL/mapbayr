@@ -14,6 +14,10 @@ test_that("Compartment in data is ok with cmt defined in model", {
   faildata_mdv1 <- rbind(data, c(ID = 1, time = 30, evid = 0, amt = 0, cmt = 3, ii = 0, addl = 0, mdv = 1, DV = 15))
   expect_error(check_mapbayr_modeldata(mod, faildata_mdv1),
                "One or multiple line\\(s\\) with cmt = 3 observed in data, but only 2 compartments defined in model\\.")
+
+  faildata_mdv1_bis <- rbind(faildata_mdv1, c(ID = 1, time = 30, evid = 0, amt = 0, cmt = 99, ii = 0, addl = 0, mdv = 1, DV = 15))
+  expect_error(check_mapbayr_modeldata(mod, faildata_mdv1_bis),
+               "One or multiple line\\(s\\) with cmt = 3 99 observed in data, but only 2 compartments defined in model\\.")
 })
 
 test_that("Observation compartment in data are those defined with [OBS] in model, if any", {
