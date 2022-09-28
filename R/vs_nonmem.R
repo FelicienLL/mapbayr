@@ -5,17 +5,17 @@
 #' @param mapbayr_phi results of mapbayr estimations, in the form of a tibble data.frame, typically obtained from `get_phi()`
 #' @param nonmem_phi results of NONMEM estimations, in the form of a tibble data.frame, typically obtained from `read_nmphi()`
 #' @param merged_phi merged results of estimations, typically obtained from `merge_phi()`
-#' @param summarised_phi summarised results of estimations, typically obtained from `summarise_phi()`
+#' @param summarised_phi summarized results of estimations, typically obtained from `summarise_phi()`
 #' @param only_ETA filter the data with `type=="ETA"` (a logical, default is `TRUE`)
 #' @param group one or multiple variables to `group_by()`
-#' @param levels a named vector of length 3 inorder to classify the absolute differences. Default cut-offs are 0.1% and 10% in the parameters space.
+#' @param levels a named vector of length 3 in order to classify the absolute differences. Default cut-offs are 0.1% and 10% in the parameters space.
 #' @param xaxis optional. A character value, that correspond to a variable in data, passed to the x-axis to plot multiple bars side-by-side.
 #' @param facet a formula, that will be passed to `ggplot2::facet_wrap()`
 #'
 #' @return
 #'  - read_nmphi: a tibble data.frame with a format close to the original .phi file
 #'  - merge_phi: a long-form tibble data.frame with results of mapbayr and NONMEM
-#'  - summarise_phi: a summarised tibble data.frame classifying the performance of mapbayr and NONMEM
+#'  - summarise_phi: a summarized tibble data.frame classifying the performance of mapbayr and NONMEM
 #'  - plot_phi, bar_phi: a `ggplot2` object
 #'
 #' @details

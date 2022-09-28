@@ -37,9 +37,9 @@ bar_phi(summarised_phi, xaxis = NULL, facet = NULL)
 
 \item{group}{one or multiple variables to \code{group_by()}}
 
-\item{levels}{a named vector of length 3 inorder to classify the absolute differences. Default cut-offs are 0.1\% and 10\% in the parameters space.}
+\item{levels}{a named vector of length 3 in order to classify the absolute differences. Default cut-offs are 0.1\% and 10\% in the parameters space.}
 
-\item{summarised_phi}{summarised results of estimations, typically obtained from \code{summarise_phi()}}
+\item{summarised_phi}{summarized results of estimations, typically obtained from \code{summarise_phi()}}
 
 \item{xaxis}{optional. A character value, that correspond to a variable in data, passed to the x-axis to plot multiple bars side-by-side.}
 
@@ -49,7 +49,7 @@ bar_phi(summarised_phi, xaxis = NULL, facet = NULL)
 \itemize{
 \item read_nmphi: a tibble data.frame with a format close to the original .phi file
 \item merge_phi: a long-form tibble data.frame with results of mapbayr and NONMEM
-\item summarise_phi: a summarised tibble data.frame classifying the performance of mapbayr and NONMEM
+\item summarise_phi: a summarized tibble data.frame classifying the performance of mapbayr and NONMEM
 \item plot_phi, bar_phi: a \code{ggplot2} object
 }
 }

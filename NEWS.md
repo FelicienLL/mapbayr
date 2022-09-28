@@ -1,20 +1,20 @@
 # mapbayr 0.8.0
 
 ## New features
-* New `summarise_phi()` and `bar_phi()` summarises the comparison of estimation of 'mapbayr' and 'NONMEM' (i.e. classifies it as Excellent/Acceptable/Discordant) and graphically represents it as a bar plot.
+* New `summarise_phi()` and `bar_phi()` summarizes the comparison of estimation of 'mapbayr' and 'NONMEM' (i.e. classifies it as Excellent/Acceptable/Discordant) and graphically represents it as a bar plot.
 * New `eta()` generates numerical values named `ETA1, ETA2, ETA3...`, either from scratch, from a pre-existing vector or from a 'mrgsolve' model object.
 * In `plot()`, `PREDICTION = c("IPRED", "PRED")` controls to plot either "PRED", "IPRED" or both (#113).
-* In `add_covariates()`, `covariates` is relocated in last position, in the favor of `...` which now accepts covariate values. Calling `add_covariates(list(BW = 90))` will still works (with a warning) for the sake of retrocompatibility but will be deprecated. Instead, just use `add_covariates(BW = 90)` or explicitely call `add_covariates(covariates = list(BW = 90))` if you want to pass covariate values as a list (#156).
+* In `add_covariates()`, `covariates` is relocated in last position, in the favor of `...` which now accepts covariate values. Calling `add_covariates(list(BW = 90))` will still works (with a warning) for the sake of compatibility but will be deprecated. Instead, just use `add_covariates(BW = 90)` or explicitly call `add_covariates(covariates = list(BW = 90))` if you want to pass covariate values as a list (#156).
 * In `get_eta()`, `output = "num"` returns a matrix if multiple IDs are available instead of an error message (#145).
 
 ## Minor changes
 * Stop exporting `postprocess.optim()` and `postprocess.output()`. Removed due to refactoring of internal post-processing. 
 * Stop exporting `adm_0_cmt()`. 
 * In `mapbayest()`, `reset` is now a numeric and drives the maximum allowed reset during optimization.
-* The progress bar is now forced to appear, especially in the 'RStudio' job launcher.
-* `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarised the errors.
+* The progress bar is now forced to appear, especially in the RStudio job launcher.
+* `check_mapbayr_model()` now returns an error if a check fails instead of a table that summarized the errors.
 * `check_mapbayr_model()` now only checks critical points and not suggested features.
-* `check_mapbayr_model()` now explicitely forbids `IPRED`, `PRED` and `ETA1, ETA2...` (#148). 
+* `check_mapbayr_model()` now explicitly forbids `IPRED`, `PRED` and `ETA1, ETA2...` (#148). 
 
 ## Internal
 * Data splitting is simpler (#127).
@@ -28,8 +28,8 @@
 ## Bug fixes
 * `vs_nonmem()` and `get_phi()` works even if covariance was missing/failing in mapbayests object (#126).
 * `pred()` does not generate `NaN` if small negative concentrations were predicted after log-transformation (#140).
-* `pred()` does not propagate 'mrgsolve' error when lag time is longer than interdose interval at steady-state (#142). 
-* Non-loaded shared object are now explicitely detected (#130).
+* `pred()` does not propagate 'mrgsolve' error when lag time is longer than inter-dose interval at steady-state (#142). 
+* Non-loaded shared object are now explicitly detected (#130).
 * The absence of `NA` values in `DV` if `mdv == 0` is checked (#131). 
 * The compartment numbers in the data is compared to compartments defined in the model (#132).
 * `check_mapbayr_model()` is now called before any use the model inside `mapbayest()` (#149).
