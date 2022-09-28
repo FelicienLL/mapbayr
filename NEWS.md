@@ -21,6 +21,7 @@
 * Post-processing is faster and its content depends on `mapbayest(output = )` (#134).
 * Optimization is faster thanks to `stats::optim()` if method is 'L-BFGS-B' and `minqa::newuoa()` if method is 'newuoa'. These replace `optimx::optimx()` (#136).
 * Remove dependency to `optimx` package.
+* Downgrade `tibble` package from dependency to suggestion. 
 * Test refactor and more tests for internal *_cmt functions.
 * Remove unexported functions from documentation.
 
