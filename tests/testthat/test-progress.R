@@ -2,6 +2,7 @@ my_model <- exmodel(add_exdata = FALSE)
 my_data <- exdata(ID = 1)
 
 test_that("progress argument works", {
+  skip_on_cran()
   my_data10 <- seq(10) %>%
     lapply(function(x) mutate(my_data, ID = x)) %>%
     bind_rows()
