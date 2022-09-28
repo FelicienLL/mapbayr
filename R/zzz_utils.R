@@ -26,7 +26,6 @@ odiag <- function(x){
   diag(omat(x, make = T))
 }
 
-
 #' Get quantile from omega diag and a probability
 #'
 #' @param x model object
@@ -52,10 +51,6 @@ eta_from_opt <- function(x){
   }
 }
 
-etas <- function(n, val = 0){
-  rename_as_eta(rep(val, n))
-}
-
 ci2q <- function(ci) (1-(ci/100))/2
 znorm <- function(ci){
   stopifnot(is.numeric(ci), ci > 0, ci < 100)
@@ -66,9 +61,6 @@ namephicov <- function(n){
   unlist(map(seq_len(n), ~ paste0("ETC",.x,"_",unlist(combn(.x, 1, simplify = FALSE)))))
 }
 
-
-
 devalid_data_set <- function(x){
   as_tibble(x[,colnames(x)!="..zeros.."])
 }
-

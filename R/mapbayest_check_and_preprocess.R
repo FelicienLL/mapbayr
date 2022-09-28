@@ -211,7 +211,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- etas(n = netas, val = 0.01)
+      initial_eta <- eta(n = netas, val = 0.01)
     }
 
     # fn = compute_ofv
@@ -240,7 +240,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- etas(n = netas)
+      initial_eta <- eta(n = netas)
     }
 
     # fn = compute_ofv, gr = NULL, hessian = FALSE
