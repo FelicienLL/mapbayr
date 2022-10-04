@@ -103,13 +103,22 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
     .out <- output[1]
   }
 
-  if(!oneID & .out == "num") stop("Multiple ID, cannot coerce list to a vector of numeric.")
+  if(.out == "num"){
+    e <- do.call(rbind, selected_eta)
+    if(oneID){
+      nam <- dimnames(e)[[2]]
+      e <- e[1,]
+      names(e) <- nam
+    }
+  }
 
-  e <- switch (.out,
-    "num" = selected_eta[[1]],
-    "list"= selected_eta,
-    "df" = bind_rows(selected_eta, .id = "ID")
-  )
+  if(.out == "list"){
+    e <- selected_eta
+  }
+
+  if(.out == "df"){
+    e <- bind_rows(selected_eta, .id = "ID")
+  }
 
   return(e)
 }
@@ -234,13 +243,32 @@ get_phi <- function(x, ...) UseMethod("get_phi")
 #' @method get_phi mapbayests
 #' @export
 get_phi.mapbayests <- function(x, ...){
-  namcov <- namephicov(n_eta(x$model))
-  covphi <- x %>% get_cov(output = "list", simplify = FALSE) %>% map(~ set_names(.x[upper.tri(.x, diag = TRUE)], namcov)) %>% bind_rows()
+  nid <- length(x$arg.ofv.id)
+  namcov <- namephicov(eta_length(x$model))
+  covs <- get_cov(x, output = "list", simplify = FALSE)
+  if(is.null(covs)){
+    # mapbayr < 0.6.0
+    covphi <- as.data.frame(matrix(NA_real_, ncol = length(namcov), nrow = nid, dimnames = list(NULL, namcov)))
+  } else {
+    covphi <- map(covs, function(x){
+      if(isTRUE(is.na(x))){
+        # hessian = FALSE or covariance step failed
+        ans <- rep(NA_real_, length(namcov))
+      } else {
+        # covariance was successful
+        ans <- x[upper.tri(x, diag = TRUE)]
+      }
+      names(ans) <- namcov
+      return(ans)
+    }) %>%
+      bind_rows()
+  }
+
   x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
     bind_cols(covphi) %>%
     select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
-    mutate(SUBJECT_NO = as.double(row_number()), .before = 1) %>%
     mutate(ID = as.double(.data$ID)) %>%
+    mutate(SUBJECT_NO = as.double(rank(.data$ID, ties.method = "first")), .before = 1) %>%
     as_tibble()
 }
 

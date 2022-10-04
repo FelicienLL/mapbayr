@@ -7,7 +7,7 @@
 #'
 #' @details
 #' Faster update of parameters inside the model object. Useful in the context of parameter optimization, otherwise consider the regular `param()` because speed comes at the cost of safety.
-#'
+#' @noRd
 #' @examples
 #' library(mrgsolve)
 #' ho <- house()
@@ -31,6 +31,7 @@ qparam <- function(x, p){
 #'
 #' @return a matrix of dimensions `[length(pred), 2 * length(all_cmt)]`
 #'
+#' @noRd
 #' @examples
 #' mapbayr:::h(
 #' pred = c(400, 40, 200, 20),
@@ -74,8 +75,16 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
   qmod <- qparam(x = qmod, p = eta)
 
   #Predict concentrations
-  pred <- f(qmod = qmod, data = idvaliddata)
-  if(log_transformation) pred <- log(pred)
+  pred <- tryCatch(f(qmod = qmod, data = idvaliddata), silent = TRUE, error = function(x)NA)
+  if(any(is.na(pred))) return(1E10)
+  if(log_transformation){
+    abspred <- abs(pred)
+    small <- abspred < sqrt(.Machine$double.eps)
+    if(any(small)){
+      pred[small] <- abspred[small]
+    }
+    pred <- log(pred)
+  }
 
   #Compute variance associated to predictions
   H <- h(pred = pred, cmt = idcmt, all_cmt = all_cmt)

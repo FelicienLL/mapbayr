@@ -4,14 +4,20 @@
 \alias{preprocess.optim}
 \title{Pre-process: arguments for optimization function}
 \usage{
-preprocess.optim(x, method, control, force_initial_eta, quantile_bound)
+preprocess.optim(
+  x,
+  method = c("L-BFGS-B", "newuoa"),
+  control = list(),
+  force_initial_eta = NULL,
+  quantile_bound = 0.001
+)
 }
 \arguments{
 \item{x}{the model object}
 
-\item{method}{optimization method; possible values are \code{L-BFGS-B} (the default) and \code{newuoa}}
+\item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
 
-\item{control}{a list passed to the optimizer (see \code{\link{optimx}} documentation)}
+\item{control}{a list passed to the optimizer (see \code{\link[stats:optim]{stats::optim()}} or  \code{\link[minqa:newuoa]{minqa::newuoa()}} documentation)}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 

@@ -20,8 +20,8 @@ test_that("make_data_name works", {
 })
 
 test_that("clean_exdata works", {
-  datatoclean <- tibble(rownum = 1:3, time = 72, evid = c(1,0,1), s2_sampling = c(1,2,3))
-  datacleaned <- tibble(rownum = 2:3, time = 72, evid = c(0,1))
+  datatoclean <- tibble::tibble(rownum = 1:3, time = 72, evid = c(1,0,1), s2_sampling = c(1,2,3))
+  datacleaned <- tibble::tibble(rownum = 2:3, time = 72, evid = c(0,1))
   expect_equal(clean_exdata(datatoclean), datacleaned)
 })
 

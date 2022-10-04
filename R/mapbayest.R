@@ -6,15 +6,15 @@
 #'
 #' @param x the model object
 #' @param data NMTRAN-like data set
-#' @param method optimization method; possible values are `L-BFGS-B` (the default) and `newuoa`
+#' @param method optimization method; the default is `"L-BFGS-B"` (from `stat::optim()`), alternatively `"newuoa"` for `minqa::newuoa()`
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
-#' @param control a list passed to the optimizer (see \code{\link{optimx}} documentation)
+#' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)
 #' @param check check model code for mapbayr specification (a logical, default is `TRUE`)
 #' @param verbose print a message whenever optimization is reset (a logical, default is `TRUE`)
 #' @param progress print a progress bar (a logical, default is `TRUE`)
-#' @param reset reset optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a logical, default is `TRUE`)
+#' @param reset maximum allowed reset of the optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a numeric, default is 50)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
 #'
 #' @return a mapbayests object. Basically a list containing:
@@ -65,7 +65,7 @@
 #'
 mapbayest <- function(x,
                       data = NULL,
-                      method = "L-BFGS-B",
+                      method = c("L-BFGS-B", "newuoa"),
                       hessian = stats::optimHess,
                       force_initial_eta = NULL,
                       quantile_bound = 0.001,
@@ -73,12 +73,16 @@ mapbayest <- function(x,
                       check = TRUE,
                       verbose = TRUE,
                       progress = TRUE,
-                      reset = TRUE,
+                      reset = 50,
                       output = NULL
 ){
 
   # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
   t1 <- Sys.time()
+
+  if(check){
+    check_mapbayr_model(x)
+  }
 
   if(is.null(data)){
     data <- x@args$data
@@ -86,12 +90,7 @@ mapbayest <- function(x,
   x@args$data <- NULL #empty the data slot in model object
 
   if(check){
-    ok <- check_mapbayr_model(x)
-    if(!isTRUE(ok)){
-      if(any(ok$stop)) stop(paste(ok[ok$stop==T,]$descr, collapse = "\n"), call. = F)
-    }
     data <- check_mapbayr_data(data)
-
     check_mapbayr_modeldata(x, data)
   }
 
@@ -100,44 +99,59 @@ mapbayest <- function(x,
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
-  arg.ofv <- map(arg.ofv.id, ~ c(arg.ofv.fix, .x))
 
   # End checks and pre-processing
   t2 <- Sys.time()
 
   if(progress){
-    pb <- progress::progress_bar$new(format = "[:bar] ID :current/:total (:percent)", total = length(arg.ofv.id))
+    pb <- progress::progress_bar$new(format = "[:bar] ID :current/:total (:percent)", total = length(arg.ofv.id), force = TRUE)
   }
 
   # Start optimization
-  opt.value <- map(arg.ofv, do_optimization, arg.optim = arg.optim, verbose = verbose, reset = reset)
-
-  if(!is.null(output)){
-    if(output == "eta") return(do.call(rbind, sapply(opt.value, eta_from_opt, simplify = F)))
-  }
+  opt.value <- .mapply(FUN = do_optimization,
+                       dots = transpose(arg.ofv.id),
+                       MoreArgs = c(arg.optim,
+                                    arg.ofv.fix,
+                                    list(reset = reset, verbose = verbose)
+                       )
+  )
+  names(opt.value) <- names(iddata)
   # End optimization
   t3 <- Sys.time()
 
-  # Start post-processing (i.e. generating output files)
-  post <- list(
-    data = iddata,
-    opt.value = opt.value,
-    arg.ofv = arg.ofv
-  ) %>%
-    pmap(postprocess.optim,
-         x = x,
-         hessian = hessian,
-         arg.optim = arg.optim)
 
-  out <- postprocess.output(x,
-                            arg.optim = arg.optim,
-                            arg.ofv.fix = arg.ofv.fix,
-                            arg.ofv.id = arg.ofv.id,
-                            opt.value = opt.value,
-                            post = post,
-                            output = output,
-                            times = c(t1, t2, t3)
+  # Start post-processing (i.e. generating output files)
+  etamat <- post_eta(opt.value)
+  if(!is.null(output)){
+    if(output == "eta") return(etamat)
+  }
+
+  mapbay_tab <- post_mapbay_tab(x = x, data = data, etamat = etamat)
+  if(!is.null(output)){
+    if(output == "df") return(mapbay_tab)
+  }
+
+  final_eta <- apply(etamat, MARGIN = 1, FUN = identity, simplify = FALSE)
+
+  if(is.function(hessian)){
+    covariance <- map2(arg.ofv.id, final_eta, .f = post_covariance, x = x, hessian = hessian, arg.optim = arg.optim, arg.ofv.fix = arg.ofv.fix)
+  } else {
+    covariance <- map(iddata, ~matrix(NA_real_))
+  }
+
+  out <- list(
+    model = x,
+    arg.optim = arg.optim,
+    arg.ofv.fix = arg.ofv.fix,
+    arg.ofv.id = arg.ofv.id,
+    opt.value = bind_rows(lapply(opt.value, flatten), .id = "ID"),
+    final_eta = final_eta,
+    covariance = covariance,
+    mapbay_tab = mapbay_tab,
+    information = generate_information(c(t1, t2, t3))
   )
+
+  class(out) <- "mapbayests"
 
   return(out)
 }

@@ -1,14 +1,26 @@
-#' Get administration compartment numbers from mrgsolve model
+#' Read compartment options in a model
 #'
+#' @name x_cmt
 #' @param x model object
+#' @return a vector of compartment identified as default "administration" or "observation" compartments.
 #'
-#' @return vector of integer
-#' @export
+#' @details
+#' In a mrgsolve model, it is possible to specify options in `$CMT`. If `[ADM]` or `[OBS]` are set, mapbayr will interpret these as defaults administration and observation compartments, respectively.
 #'
 #' @examples
-#' # Both 1st and 0- order administration
+#' #Administration:  Both 1st and 0- order
 #' model <- exmodel(6, compile = FALSE)
+#' mrgsolve::see(model)
 #' adm_cmt(model)
+#'
+#' #Observation: Both parent drug and metabolite
+#' model <- exmodel(401, compile = FALSE)
+#' mrgsolve::see(model)
+#' obs_cmt(model)
+
+
+#' @rdname x_cmt
+#' @export
 adm_cmt <- function(x){
   dat <- as.list(x)$details$data
 
@@ -27,17 +39,8 @@ adm_cmt <- function(x){
   return(v)
 }
 
-#' Get observation compartment numbers from mrgsolve model
-#'
-#' @param x model object
-#'
-#' @return vector of integer
+#' @rdname x_cmt
 #' @export
-#'
-#' @examples
-#' #Both parent drug and metabolite
-#' model <- exmodel(401, compile = FALSE)
-#' obs_cmt(model)
 obs_cmt <- function(x){
   dat <- as.list(x)$details$data
 
@@ -57,7 +60,7 @@ obs_cmt <- function(x){
 }
 
 obs_cmt_data <- function(data){
-  v <- sort(unique(data[data$mdv==0,]$cmt))
+  v <- sort(unique(data$cmt[data$mdv==0]))
   if(length(v)== 0){
     v <- NULL
   }
@@ -79,26 +82,18 @@ fit_cmt <- function(x, data){
 #' @param x model object
 #'
 #' @return vector of integer
-#' @export
-#'
+#' @noRd
 #' @examples
 #' # Both 1st and 0- order administration
 #' model <- exmodel(6, compile = FALSE)
 #' adm_0_cmt(model)
 adm_0_cmt <- function(x){
-  v <- paste0("D_", x@cmtL) %>%
-    map(str_detect, string = x@code) %>%
-    map(any) %>%
-    as.logical() %>%
-    which()
-
+  v <- which(sapply(paste0("D_", x@cmtL), function(i) any(grepl(i, x@code)), USE.NAMES = FALSE))
   if(length(v)== 0){
     v <- NULL
   }
-
   return(v)
 }
-
 
 #' Check if error is log-additive
 #'
@@ -107,38 +102,16 @@ adm_0_cmt <- function(x){
 #' @return a logical
 #' @noRd
 log_transformation <- function(x){
-  x@code %>%
-    str_subset("EPS") %>%
-    str_detect("exp *\\(.*EPS") %>%
-    any()
+  eps_patterns <- c(
+    grep(pattern = "[^\\.{1}]", x = unlist(x@sigma@labels), value = TRUE),
+    "EPS\\(\\d+\\)"
+  )
+  dv_patterns <- paste0("DV.*exp *\\(.*", eps_patterns)
+  any(sapply(dv_patterns, grepl, x = x@code))
 }
 
 # ETA -----------
 
-#' Name of ETA no estimate
-#'
-#' @param x model file
-#'
-#' @return a vector of character
-#' @noRd
-eta_names <- function(x){
-  parnames <- names(param(x))
-  v <- parnames[grepl("^ETA\\d+$", parnames)]
-  if(length(v)== 0){
-    v <- NULL
-  }
-  return(v)
-}
-
-#' Number of ETA to estimate
-#'
-#' @param x model file
-#'
-#' @return a numeric
-#' @noRd
-n_eta <- function(x){
-  length(eta_names(x))
-}
 
 #' Description of ETA to estimate
 #'
@@ -153,7 +126,7 @@ eta_descr <- function(x){
   if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
     return(etas)
   } else { # If it is annotated, take names
-    eta_descr <- character(0)
+    ans <- character(0)
     for(i in etas){
       idescr <- dat$descr[(dat$name==i)]
       if(length(idescr)==0){
@@ -162,11 +135,12 @@ eta_descr <- function(x){
       if(is.na(idescr)){
         idescr <- i
       }
-      eta_descr <- c(eta_descr, idescr)
+      ans <- c(ans, idescr)
     }
-    return(eta_descr)
+    return(ans)
   }
 }
+
 
 # COVARIATES -----------
 

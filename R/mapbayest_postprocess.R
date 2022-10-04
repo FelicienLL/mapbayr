@@ -1,122 +1,80 @@
-#' Postprocess mapbayr
-#'
-#' @name postprocess
-#' @return `postprocess.optim()` returns a list with final parameters and `mapbay_tab`. `postprocess.output()` returns a `mapbayests` class object.
-#' @inheritParams mapbayest
-#' @param opt.value value returned by optimizer
-#' @param arg.optim,arg.ofv,arg.ofv.fix,arg.ofv.id argument passed to optimizer
-#' @param post,times output of the post.process function
-#' @description Functions to generate postprocess after optimization.
-NULL
-#> NULL
+post_eta <- function(x){
+  do.call(rbind, sapply(x, eta_from_opt, simplify = F))
+}
 
-#Variance Covariance Matrix
-safe_solve <- purrr::safely(solve, otherwise = matrix(NA_real_))
+dataeta <- function(data, eta){
+  #data a data set
+  #eta a matrix of eta (no ID column)
+  left_join(x = data, y = mutate(as.data.frame(eta), ID = as.double(rownames(eta))), by = "ID")
+}
 
-#' Post-process: derive predictions from optimization
-#' @rdname postprocess
-#' @export
-postprocess.optim <- function(x, data, opt.value, arg.ofv, arg.optim, hessian){
 
-  #Final eta
-  final_eta <- opt.value[eta_names(x)] %>%
-    as.double() %>%
-    set_names(eta_names(x))
+post_mapbay_tab <- function(x, data, etamat){
+  # PRED
+  pred <- mrgsim_df(zero_re(x), data, Req = "DV")[["DV"]]
 
-  #Variance Covariance Matrix
-  if(is.function(hessian)){
+  # IPRED and POST HOC parameters
+  dataposthoc <- dataeta(data = data, eta = etamat)
+  capturednames <- outvars(x)$capture
+  posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
+    rename(IPRED = .data[["DV"]]) %>%
+    select(-all_of(c("ID", "time")))
 
-    accepted_args <- names(formals(hessian))
+  mapbay_tab <- cbind(dataposthoc, PRED = pred, posthocsims)
 
-    if(all(c("par", "fn") %in% accepted_args)){
+  # REMAINING COVARIATES (not in data and not captured)
+  all_covs <- mbr_cov_names(x)
+  captured_covs <- all_covs[all_covs %in% capturednames]
+  data_covs <- all_covs[all_covs %in% names(data)]
+  missing_covs <- all_covs[!all_covs %in% c(captured_covs, data_covs)]
 
-      fp <- function(p){ #obj fun value as function of param
-        arg <- arg.ofv
-        eta <- p
-        names(eta) <- eta_names(x)
-        arg$eta <- eta
-        do.call(compute_ofv, arg)
-      }
+  if(length(missing_covs) > 0){
+    missing_cov_vals <- param(x)[[missing_covs]]
+    names(missing_cov_vals) <- missing_covs
+    mapbay_tab <- cbind(mapbay_tab, as.data.frame(as.list(missing_cov_vals)))
+  }
 
-      all_args_to_pass <- list(par = final_eta,
-                               fn = fp,
-                               control = arg.optim$control)
-      actual_args <- all_args_to_pass[intersect(names(all_args_to_pass), accepted_args)]
-      hess <- do.call(hessian, args = actual_args)
-      covariance <- unname(2 * safe_solve(hess)$result)
+  # RELOCATE NAMES
+  namesdata <- names(data)
+  namesdata <- namesdata[!namesdata %in% c("DV", all_covs)]
+  mapbay_tab %>%
+    relocate(any_of(c(namesdata, "DV", "IPRED", "PRED", capturednames, all_covs)), starts_with("ETA"))
+}
 
-    } else {
-      covariance <- matrix(NA_real_)
+safe_solve <- safely(solve, otherwise = matrix(NA_real_))
+
+post_covariance <- function(arg.ofv.id, final_eta, x, hessian, arg.optim, arg.ofv.fix){
+  accepted_args <- names(formals(hessian))
+
+  if(all(c("par", "fn") %in% accepted_args)){
+
+    fp <- function(p){ #obj fun value as function of param
+      arg <- c(arg.ofv.fix, arg.ofv.id)
+      eta <- p
+      names(eta) <- eta_names(x)
+      arg$eta <- eta
+      do.call(compute_ofv, arg)
     }
+
+    all_args_to_pass <- list(par = final_eta,
+                             fn = fp,
+                             control = arg.optim$control)
+    actual_args <- all_args_to_pass[intersect(names(all_args_to_pass), accepted_args)]
+    hess <- do.call(hessian, args = actual_args)
+    covariance <- unname(2 * safe_solve(hess)$result)
+
   } else {
     covariance <- matrix(NA_real_)
   }
-
-  #Mapbay Tab
-  reserved_capt <- c("DV", "PAR", "MET")
-  reserved_names <- names(data)[names(data) %in% c("ID", "time", "cmt", "evid", "amt", "mdv", "addl", "rate", "ss", "ii")]
-  other_items <- names(data)[!(names(data) %in% c(reserved_names, mbr_cov_names(x), reserved_capt))]
-  captured_items <- (x@capL)[!(x@capL) %in% reserved_capt]
-
-  col_DV <- data$DV
-  col_PRED <- x %>%
-    zero_re() %>%
-    mrgsim_df(data = data, end = -1) %>%
-    pull(.data$DV)
-
-  tab <- x %>%
-    param(final_eta) %>%
-    zero_re() %>%
-    mrgsim_df(data = data, end = -1, carry_out = c(reserved_names, mbr_cov_names(x), other_items)) %>%
-    rename(IPRED = .data$DV) %>%
-    select(-any_of(x@cmtL)) %>%
-    mutate(PRED = col_PRED,
-           DV = col_DV)
-
-  missing_cov <- mbr_cov_refvalues(x)[!names(mbr_cov_refvalues(x)) %in% names(data)]
-
-  mapbay_tab <- tab %>%
-    bind_cols(bind_rows(c(missing_cov, final_eta))) %>%
-    relocate(reserved_names, "DV", "IPRED", "PRED", any_of(reserved_capt), captured_items, mbr_cov_names(x), other_items, eta_names(x))
-
-  list(
-    final_eta = final_eta,
-    covariance = covariance,
-    mapbay_tab = mapbay_tab
-  )
-
-}
-
-
-#' Post-process: Build the output (mapbayests model object)
-#' @rdname postprocess
-#' @export
-postprocess.output <- function(x, arg.optim, arg.ofv.fix, arg.ofv.id, opt.value, post, output, times){
-
-  if(!is.null(output)){
-    if(output == "df") out <- map_dfr(post, "mapbay_tab")
-
-  } else {
-    out <- list(
-      model = x,
-      arg.optim = arg.optim,
-      arg.ofv.fix = arg.ofv.fix,
-      arg.ofv.id = arg.ofv.id,
-      opt.value = as.data.frame(map_dfr(opt.value, rownames_to_column, var = "method", .id = "ID")),
-      final_eta = map(post, "final_eta"),
-      covariance = map(post, "covariance"),
-      mapbay_tab = map_dfr(post, "mapbay_tab"),
-      information = generate_information(times)
-    )
-
-    class(out) <- "mapbayests"
-
-  }
-  return(out)
-
 }
 
 generate_information <- function(times){
+  version <- c(
+    mapbayr = as.character(utils::packageVersion("mapbayr")),
+    mrgsolve = as.character(utils::packageVersion("mrgsolve")),
+    stats = as.character(utils::packageVersion("stats")),
+    minqa = tryCatch(utils::packageVersion("minqa"), silent = TRUE, error = function(x)NA)
+  )
   times[4] <- Sys.time()
   list(
     start = times[1],
@@ -127,10 +85,6 @@ generate_information <- function(times){
       optimization = as.double.difftime(times[3]-times[2], units = "secs"),
       postprocessing = as.double.difftime(times[4]-times[3], units = "secs")
     ),
-    version = c(
-      mapbayr = as.character(utils::packageVersion("mapbayr")),
-      mrgsolve = as.character(utils::packageVersion("mrgsolve")),
-      optimx = as.character(utils::packageVersion("optimx"))
-    )
+    version = version
   )
 }

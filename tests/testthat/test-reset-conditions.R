@@ -83,8 +83,8 @@ DV : Concentration central
   #With initial eta = 0, this subject automatically converge to... 0.
 
   #Need a "reset" of the estimation with other values:
-  est_lbfgsb_reset <- mapbayest(model, data739, method = "L-BFGS-B", verbose = F, reset = T)
-  expect_gt(est_lbfgsb_reset$opt.value$run, 1)
+  est_lbfgsb_reset <- mapbayest(model, data739, method = "L-BFGS-B", verbose = F, reset = 50)
+  expect_gt(est_lbfgsb_reset$opt.value$nreset, 0)
   expect_equal(unname(round(est_lbfgsb_reset$final_eta[[1]], 4)), c(0.0477, -0.0314, -0.0007, -0.0738))
 
 })
@@ -133,7 +133,7 @@ $CAPTURE DV
 
   est1 <- mapbayest(mod1, data1, verbose = F)
   est2 <- mapbayest(mod1, data1, quantile_bound = 0.00001, verbose = F)
-  expect_gt(est2$opt.value$run, 1)
+  expect_gt(est2$opt.value$nreset, 0)
   est3 <- mapbayest(mod1, data1, quantile_bound = 0.00001, reset = F, verbose = F)
 
   expect_true(length(unique(abs(get_eta(est1)))) != 1)
@@ -166,7 +166,7 @@ $CAPTURE DV CL
     obs_lines(time = c(1, 6), DV = c(1.095, 1.643), cmt = 2) %>%
     mapbayest(verbose = FALSE)
 
-  expect_equal(est1$opt.value$run, 1)
+  expect_equal(est1$opt.value$nreset, 0)
 }
 )
 
