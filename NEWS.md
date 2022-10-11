@@ -1,3 +1,6 @@
+# mapbayr Development version
+* `eta()` properly sorts vectors of length superior to 9 (#159).
+
 # mapbayr 0.8.0
 
 ## New features

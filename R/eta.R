@@ -35,7 +35,7 @@ eta <- function(x, ..., n, val = 0){
     par <- as.double(param(x))
     ans <- par[grepl("^ETA\\d+$", names(par))]
     if(length(ans) == 0) ans <- NULL
-    return(ans[sort(names(ans))])
+    return(sort_eta(ans))
   }
   dots <- list(...)
   xdots <- c(list(x), ...)
@@ -53,6 +53,10 @@ rename_as_eta <- function(x){
   }
   names(x) <- paste0("ETA", seq_along(x))
   x
+}
+
+sort_eta <- function(x){
+  x[order(as.numeric(gsub("ETA", "", names(x))))]
 }
 
 eta_length <- function(...){

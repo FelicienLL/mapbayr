@@ -11,8 +11,17 @@ test_that("eta works", {
 })
 
 test_that("eta() overrides the order of eta in model object", {
+
+  expect_named(sort_eta(c(ETA1 = 0, ETA33 = 0, ETA2 = 0, ETA11 = 0, ETA22 = 0, ETA3 = 0)), c("ETA1", "ETA2", "ETA3", "ETA11", "ETA22", "ETA33"), ignore.order = FALSE)
+
   expect_equal(eta(mcode("model", "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)), c(ETA1 = 0, ETA2 = 0))
   expect_equal(eta(mcode("model", "$PARAM ETA2 = 0, ETA1 = 0", compile = FALSE)), c(ETA1 = 0, ETA2 = 0))
+
+  # even if n > 9
+
+  mod <- mrgsolve::mcode("mod", "$PARAM ETA1 = 0, ETA2 = 0, ETA3 = 0, ETA4 = 0, ETA5 = 0, ETA6 = 0, ETA7 = 0, ETA8 = 0, ETA9 = 0, ETA10 = 0, ETA11 = 0", compile = FALSE)
+  expect_equal(eta(mod), c(ETA1 = 0, ETA2 = 0, ETA3 = 0, ETA4 = 0, ETA5 = 0, ETA6 = 0, ETA7 = 0, ETA8 = 0, ETA9 = 0, ETA10 = 0, ETA11 = 0))
+
 })
 
 test_that("rename_as_eta works", {
