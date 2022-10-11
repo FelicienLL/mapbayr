@@ -1,7 +1,8 @@
+mod <- exmodel(add_exdata = FALSE, compile = FALSE) %>%
+  adm_lines(amt = 1000) %>%
+  obs_lines(time = 24, DV = 123)
+
 test_that("covariates can be implicitly and explicitly be called", {
-  mod <- exmodel(add_exdata = FALSE, compile = FALSE) %>%
-    adm_lines(amt = 1000) %>%
-    obs_lines(time = 24, DV = 123)
 
   expected_cov <- as_tibble(data.frame(BW = rep(123, 2), SEX = 0))
 
@@ -21,4 +22,6 @@ test_that("covariates can be implicitly and explicitly be called", {
   expect_error(get_data(add_covariates(mod, 123, 0)), "Arguments must be named \\(with covariates names\\)")
 })
 
-
+test_that("works with empty arguments", {
+   expect_equal(get_data(add_covariates(mod)), get_data(mod))
+})

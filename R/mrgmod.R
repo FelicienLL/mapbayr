@@ -204,14 +204,16 @@ add_covariates.mrgmod <- function(x, ..., covariates = list()){
     d <- bind_cols(d, covariates)
   } else {
     dots <- list(...)
-    if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
-      warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
-      d <- bind_cols(d, dots[[1]])
-    } else {
-      if(any(is.null(names(dots)))){
-        stop("Arguments must be named (with covariates names)")
+    if(length(dots) != 0){
+      if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
+        warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
+        d <- bind_cols(d, dots[[1]])
+      } else {
+        if(any(is.null(names(dots)))){
+          stop("Arguments must be named (with covariates names)")
+        }
+        d <- bind_cols(d, dots)
       }
-      d <- bind_cols(d, dots)
     }
   }
 
