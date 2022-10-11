@@ -42,11 +42,15 @@ use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta
     }
   }
 
-  covs_name <- mbr_cov_names(mod)
-  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")]
+  covs_name <- mbr_cov_names(mod) # covariates defined in the model
+  covs_name <- covs_name[!covs_name%in%c("AOLA", "TOLA")] # not if called "aola" or "tola"
+
+  L_data <- get_data(x, output = "list")
+  covs_name <- covs_name[covs_name %in% names(L_data[[1]])] # not if missing in data
+
   if(length(covs_name)){
     if(isTRUE(update_cov)){
-      cov_values <- get_data(x, output = "list") %>% map(~.x[1,covs_name, drop = FALSE])
+      cov_values <- L_data %>% map(~.x[1,covs_name, drop = FALSE])
       L_mod <- map2(L_mod, cov_values, ~ param(.x, as.list(.y)))
     }
   }
