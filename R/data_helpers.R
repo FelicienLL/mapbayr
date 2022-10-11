@@ -104,7 +104,7 @@ adm_lines.mrgmod <- function(x, ...){
 
 #' @rdname data_helpers
 #' @export
-obs_lines <- function(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...) UseMethod("obs_lines")
+obs_lines <- function(x, ...) UseMethod("obs_lines")
 
 #' Add observations lines to data
 #'
@@ -179,7 +179,7 @@ NA_filler <- function(data){
 
 #' @rdname data_helpers
 #' @export
-add_covariates <- function(x, covariates, ...) UseMethod("add_covariates")
+add_covariates <- function(x, ...) UseMethod("add_covariates")
 
 #' Add covariates columns to data
 #' @method add_covariates mrgmod

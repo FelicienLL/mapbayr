@@ -14,11 +14,11 @@ adm_lines(x, ...)
 
 \method{adm_lines}{mrgmod}(x, ...)
 
-obs_lines(x, time, DV, mdv = 0, cmt = NULL, DVmet = NULL, ...)
+obs_lines(x, ...)
 
 \method{obs_lines}{mrgmod}(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...)
 
-add_covariates(x, covariates, ...)
+add_covariates(x, ...)
 
 \method{add_covariates}{mrgmod}(x, ..., covariates = list())
 }
