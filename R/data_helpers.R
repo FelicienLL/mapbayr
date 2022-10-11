@@ -1,7 +1,3 @@
-#-------------------------
-#---   Data helpers   ----
-#-------------------------
-
 #' Data helpers
 #'
 #' @name data_helpers
@@ -50,9 +46,6 @@ adm_lines <- function(x, ...) UseMethod("adm_lines")
 #' @method adm_lines mrgmod
 #' @export
 adm_lines.mrgmod <- function(x, ...){
-  #if (!mrgsolve:::is.mrgmod(x))
-  #  mrgsolve:::mod_first()
-
   if(is.null(x@args$data)){
     d0 <- as_tibble(data.frame())
   } else {
@@ -108,9 +101,6 @@ adm_lines.mrgmod <- function(x, ...){
   return(dd)
 
 }
-
-
-
 
 #' @rdname data_helpers
 #' @export
@@ -239,12 +229,4 @@ add_covariates.mrgmod <- function(x, ..., covariates = list()){
 
   return(dd)
 
-}
-
-
-#' @rdname data_helpers
-#' @export
-see_data <- function(x, ...){
-  warning("see_data() is deprecated. Use get_data() instead.")
-  UseMethod("get_data")
 }
