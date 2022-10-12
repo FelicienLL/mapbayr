@@ -3,21 +3,6 @@
 #' @name data_helpers
 #' @description Create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model
 #'
-#' @param x either a data.frame or a 'mrgsolve' model object
-#' @param ID subject ID (default is 1)
-#' @param time event time
-#' @param evid event identification (default is 1 for administration, 0 for observation)
-#' @param cmt compartment (no default, except if one `[ADM]` and `[OBS]` were tagged in the `$CMT` block in model code. See `details`.)
-#' @param amt dose amount (for administration records only)
-#' @param DV dependant value, i.e. observed concentration (for observation records only)
-#' @param mdv missing dependant value (default is 0 for observation to take into account for parameter estimation, 1 otherwise)
-#' @param addl additional dose (optional and for administration records only)
-#' @param ss steady-state (optional and for administration records only. Is this dose the last of an infinity of administration? Yes, 1, or no, 0)
-#' @param ii interdose interval (optional and for administration records only. Use it with `ss` and `addl`)
-#' @param rate rate of administration (optional and for administration records only. Set to -2 if you model zero-order infusion. See `details`.)
-#' @param ... additional columns or arguments for [mrgsolve::ev()]
-#' @param DVmet passed to `obs_lines()`
-#' @param covariates a list of named covariates, with a single value or same number of lines than data
 #' @return a `mrgmod` object, with a dataset in the `@args$data` slot.
 #'
 #'
@@ -48,8 +33,76 @@
 NULL
 #> NULL
 
-#' @rdname data_helpers
+#
+
+#' Add administration lines to a dataset
+#'
+#' @description The `adm_lines()` function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with `obs_lines()` and `add_covariates()`, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+#'
+#' @param x either a data.frame or a 'mrgsolve' model object
+#' @param ID subject ID (default is 1)
+#' @param time event time (default is 0 if first administration)
+#' @param evid event identification (default is 1 for administration, 0 for observation)
+#' @param cmt compartment (no default, except if `[ADM]` was tagged in the `$CMT` block in model code. See `examples`.)
+#' @param amt dose amount (for administration records only)
+#' @param mdv missing dependant value (default is 1 for administration records)
+#' @param addl additional dose (optional)
+#' @param ss steady-state (optional, is this dose the last of an infinity of administration? Yes, 1, or no, 0)
+#' @param ii interdose interval (optional, use it with `ss` and `addl`)
+#' @param rate rate of administration (optional, set to -2 if you model zero-order infusion. See `examples`.)
+#' @param ... additional columns or arguments for [mrgsolve::ev()]
+#'
+#' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with `get_data()`).
 #' @export
+#'
+#' @examples
+#' # Create a dataset from scratch
+#' adm_lines(amt = 100, cmt = 1)
+#'
+#' # Pipe-friendly addition of administration record to a pre-existing dataset
+#' library(magrittr)
+#' adm_lines(amt = 100, cmt = 1) %>%
+#'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1)
+#'
+#' # Start from a 'mrgsolve' model
+#' library(mrgsolve)
+#' house() %>%
+#'   adm_lines(amt = 100, cmt = 1) %>%
+#'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1) %>%
+#'   mrgsim(delta =1)
+#'
+#' # Default administration compartments
+#' # Set default administration compartments in the code with `[ADM]`
+#' model <- mcode("model", "
+#' $CMT @annotated
+#' DEPOT : Depot [ADM]
+#' CENTR : Central
+#' ", compile = FALSE)
+#' adm_cmt(model)
+#'
+#' # Thus, no need to manually specified `cmt = 1` anymore.
+#' model %>%
+#'   adm_lines(amt = 100) %>%
+#'   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) %>%
+#'   get_data()
+#'
+#' # Automatic lines duplication if multiple depot compartments
+#' # Automatic `rate = -2` increment if model with 0-order absorption
+#' model <- mcode("model", "
+#' $PARAM DUR = 1.0
+#' $CMT @annotated
+#' DEPOT : Depot [ADM]
+#' CENTR : Central [ADM]
+#' $MAIN
+#' D_CENTR = DUR ;
+#' ", compile = FALSE)
+#' adm_cmt(model)
+#'
+#' model %>%
+#'   adm_lines(amt = 100) %>%
+#'   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) %>%
+#'   get_data()
+#'
 adm_lines <- function(x, ...) {
   if(missing(x)) {
     adm_lines.missing(...)
@@ -59,9 +112,7 @@ adm_lines <- function(x, ...) {
 }
 
 
-#' Add administrations lines to data
-#' @rdname data_helpers
-#'
+#' @rdname adm_lines
 #' @method adm_lines data.frame
 #' @export
 adm_lines.data.frame <- function(x,
@@ -116,9 +167,7 @@ adm_lines.data.frame <- function(x,
   rearrange_nmdata(new_data)
 }
 
-#' Add administrations lines to data
-#' @rdname data_helpers
-#'
+#' @rdname adm_lines
 #' @method adm_lines missing
 #' @export
 adm_lines.missing <- function(...){
@@ -126,9 +175,7 @@ adm_lines.missing <- function(...){
   adm_lines.data.frame(x = x, ... = ...)
 }
 
-#' Add administrations lines to data
-#' @rdname data_helpers
-#'
+#' @rdname adm_lines
 #' @method adm_lines mrgmod
 #' @export
 adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
@@ -155,10 +202,69 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 
 
 
-
-
-#' @rdname data_helpers
+#' Add observation lines to a dataset
+#'
+#' @description The `obs_lines()` function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with `adm_lines()` and `add_covariates()`, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+#'
+#' @param x either a data.frame or a 'mrgsolve' model object
+#' @param ID subject ID (default is 1)
+#' @param time event time
+#' @param evid event identification (default is 1 for administration, 0 for observation)
+#' @param cmt compartment (no default, except if `[OBS]` was tagged in the `$CMT` block in model code. See `examples`.)
+#' @param DV dependant value, i.e. observed concentration.
+#' @param mdv missing dependant value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)
+#' @param ... additional columns
+#' @param DVmet second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if `x` is a 'mrgsolve' model where two `[OBS]` compartments were defined (see `examples`)
+#'
+#' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with `get_data()`).
 #' @export
+#'
+#' @examples
+#' # Create a dataset from scratch
+#' obs_lines(time = 12, DV = 0.12, cmt = 2)
+#'
+#' # Pipe-friendly addition of administration record to a pre-existing dataset
+#' library(magrittr)
+#' obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
+#'
+#' # Start from a 'mrgsolve' model
+#' library(mrgsolve)
+#' house() %>%
+#'   obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2) %>%
+#'   mrgsim()
+#'
+#' # Default observation compartments
+#' # Set default observation compartments in the code with `[OBS]`
+#' model <- mcode("model", "
+#' $CMT @annotated
+#' DEPOT : Depot
+#' CENTR : Central [OBS]
+#' ", compile = FALSE)
+#' obs_cmt(model)
+#'
+#' # Thus, no need to manually specified `cmt = 2` anymore.
+#' model %>%
+#'   obs_lines(time = 12, DV = 0.12) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0)) %>%
+#'   get_data()
+#'
+#' # Automatic lines duplication if parent + metabolite defined in the model
+#' model <- mcode("model", "
+#' $CMT @annotated
+#' DEPOT : Depot
+#' CENTR : Central [OBS]
+#' PERIPH : Periph
+#' METABO : Metabo [OBS]
+#' ", compile = FALSE)
+#' obs_cmt(model)
+#'
+#' model %>%
+#'   obs_lines(time = 12, DV = 0.12, DVmet = 120) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), DVmet = c(340, 560, 780)) %>%
+#'   get_data()
+#'
 obs_lines <- function(x, ...){
   if(missing(x)) {
     obs_lines.missing(...)
@@ -167,12 +273,8 @@ obs_lines <- function(x, ...){
   }
 }
 
-
-
-#' Add observations lines to data
-#'
 #' @method obs_lines data.frame
-#' @rdname data_helpers
+#' @rdname obs_lines
 #' @export
 obs_lines.data.frame <- function(x,
                                  ID = NULL,
@@ -182,7 +284,6 @@ obs_lines.data.frame <- function(x,
                                  DV = NA_real_,
                                  mdv = NULL,
                                  ...){
-
   old_data <- x
 
   # ID
@@ -212,20 +313,16 @@ obs_lines.data.frame <- function(x,
   rearrange_nmdata(new_data)
 }
 
-#' Add observations lines to data
-#'
 #' @method obs_lines missing
-#' @rdname data_helpers
+#' @rdname obs_lines
 #' @export
 obs_lines.missing <- function(...){
   x <- as_tibble(data.frame())
   obs_lines.data.frame(x = x, ... = ...)
 }
 
-#' Add observations lines to data
-#'
 #' @method obs_lines mrgmod
-#' @rdname data_helpers
+#' @rdname obs_lines
 #' @export
 obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
   #x = a model object
@@ -258,8 +355,59 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
   data_set(x, new_data)
 }
 
-#' @rdname data_helpers
+
+
+
+#' Add covariate columns to a dataset
+#'
+#' @description The `add_covariates()` function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with `adm_lines()` and `obs_lines()`, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+#'
+#' @param x either a data.frame or a 'mrgsolve' model object
+#' @param ... covariates values to add to the data. For each variabe, supply a vector of length 1 or with the same number of rows. Ignored if `covariates` argument is used.
+#' @param covariates Covariates passed as a single list of variables. Overrides `...`.
+#' @param AOLA,TOLA a logical. Should the "Amount Of Last Administration" and "Time Of Last Administration" variables be added into the dataset? Default if FALSE if `x` is a dataset, TRUE if `x` is a 'mrgsolve' model where `AOLA` and `TOLA` are defined as covariates
+#'
+#' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with `get_data()`).
 #' @export
+#'
+#' @examples
+#' # Cannot start from scratch
+#' \dontrun{
+#' add_covariates(BW = 90, SEX = 0)
+#' }
+#'
+#' library(magrittr)
+#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#'   add_covariates(BW = c(90, 85, 80), SEX = 0)
+#'
+#' # If covariates are stored in a list, use `covariates = `
+#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#'   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
+#'
+#' # Missing values are filled with the "next-observation carried backward" rule
+#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#'   add_covariates(BW = c(90, 85, 80), SEX = 0) %>%
+#'   obs_lines(time = 36, DV = .0123, cmt = 2)
+#' # Always verify the output in case of time-varying covariates
+#'
+#' # Possibility to add Time and Amount of last administration as covariates
+#' adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+#'   obs_lines(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) %>%
+#'   add_covariates(TOLA = TRUE, AOLA = TRUE) %>%
+#'   obs_lines(time = 72, cmt = 2, DV = .123) #AOLA/TOLA re-updated afterwards
+#'
+#' # Automatic inclusion of `TOLA`/`AOLA` if they are covariates of the model
+#' library(mrgsolve)
+#' model <- mcode("model", "
+#' $PARAM @annotated @covariates
+#' TOLA : 0 : Time Last Adm
+#' AOLA : 0 : Amount Last Adm
+#' ", compile = FALSE)
+#'
+#' model %>%
+#'   adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+#'   add_covariates() %>%
+#'   get_data()
 add_covariates <- function(x, ...) {
   if(missing(x)){
     stop("Initial dataset not found. Cannot add columns to a dataset that do not exists.")
@@ -268,9 +416,8 @@ add_covariates <- function(x, ...) {
   }
 }
 
-#' Add covariates columns to data
 #' @method add_covariates data.frame
-#' @rdname data_helpers
+#' @rdname add_covariates
 #' @export
 add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE, TOLA = FALSE){
   old_data <- x
@@ -302,9 +449,8 @@ add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE,
   rearrange_nmdata(new_data)
 }
 
-#' Add covariates columns to data
 #' @method add_covariates mrgmod
-#' @rdname data_helpers
+#' @rdname add_covariates
 #' @export
 add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA = NULL){
 
@@ -316,19 +462,11 @@ add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA
   }
 
   if(is.null(AOLA)){
-    if("AOLA" %in% model_covariates){
-      AOLA <- TRUE
-    } else {
-      AOLA <- FALSE
-    }
+    AOLA <- "AOLA" %in% model_covariates
   }
 
   if(is.null(TOLA)){
-    if("TOLA" %in% model_covariates){
-      TOLA <- TRUE
-    } else {
-      TOLA <- FALSE
-    }
+    TOLA <- "TOLA" %in% model_covariates
   }
 
   new_data <- add_covariates.data.frame(x = old_data, ... = ..., covariates = covariates, AOLA = AOLA, TOLA = TOLA)
@@ -367,10 +505,10 @@ rearrange_nmdata <- function(x){
   if(!is.null(x[["TOLA"]])) x <- TOLA(x)
 
   # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
-  if(!is.null(x[["amt"]]))   x$amt[is.na(x$amt)]   <- 0
-  if(!is.null(x[["addl"]]))  x$addl[is.na(x$addl)] <- 0
-  if(!is.null(x[["ii"]]))    x$ii[is.na(x$ii)]     <- 0
-  if(!is.null(x[["rate"]]))  x$rate[is.na(x$rate)] <- 0
-  if(!is.null(x[["ss"]]))    x$ss[is.na(x$ss)]     <- 0
+  if(!is.null(x[["amt"]]))  x$amt[is.na(x$amt)]   <- 0
+  if(!is.null(x[["addl"]])) x$addl[is.na(x$addl)] <- 0
+  if(!is.null(x[["ii"]]))   x$ii[is.na(x$ii)]     <- 0
+  if(!is.null(x[["rate"]])) x$rate[is.na(x$rate)] <- 0
+  if(!is.null(x[["ss"]]))   x$ss[is.na(x$ss)]     <- 0
   x
 }
