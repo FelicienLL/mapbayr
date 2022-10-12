@@ -3,35 +3,48 @@
 \name{data_helpers}
 \alias{data_helpers}
 \title{Data helpers}
-\value{
-a \code{mrgmod} object, with a dataset in the \verb{@args$data} slot.
-}
 \description{
-Create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model
+Use \code{\link[=adm_lines]{adm_lines()}}, \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}} to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
 }
 \details{
-Helpful functions build the data set. Instead of painfully build a data set and mind how to format the data, you can pass information about :
+Instead of importing a .csv file, or painfully build a data set with a call to \code{data.frame()} and mind how to format the data, you can pass information about:
 \itemize{
-\item administrations with \code{adm_lines()},
-\item observations with \code{obs_lines()}
-\item covariates with \code{add_covariates()}.
+\item administrations with \code{\link[=adm_lines]{adm_lines()}},
+\item observations with \code{\link[=obs_lines]{obs_lines()}},
+\item covariates with \code{\link[=add_covariates]{add_covariates()}},
 }
 
-These functions are passed to a \code{mrgmod} object (mrgsolve model), and return a \code{mrgmod} object with a data set inside with the correct formatting (so-called NM-TRAN format), so that mrgsolve or mapbayr functions can be passed along within a pipe-friendly workflow.
-
-These functions are meant to be used for one single patient at a time. Multiple ID is accepted, but the user is asked to check if the output is acceptable.
+all being called jointly with a pipe (\verb{\%>\%} or \verb{|>}).
+These functions can be used to create or modify a dataset as a proper data.frame, or to create or modify a dataset within a 'mrgsolve' model (\verb{@args$data} slot).
+The latter is particularly useful in order to:
+\itemize{
+\item automatically use default administration and observation compartments,
+\item automatically duplicate rows if there are several depot compartments,
+\item automatically set \code{rate = -2} if model has zero-order absorption pathways,
+\item automatically duplicate rows if concentrations of Parent drug and Metabolite are observed together,
+\item automatically add "Amount Of Last Administration" and "Time Of Last Administration" variables if these are covariates,
+\item subsequently call \code{mrgsim()} or \code{mapbayest()}.
+}
 }
 \examples{
 library(magrittr)
-# First, import a model
+# First option: work with a data.frame
+
+adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12) \%>\%
+  obs_lines(time = c(12.3, 45.6), DV = c(.111, .222), cmt = 2) \%>\%
+  obs_lines(time = 48, cmt = 2) \%>\%
+  add_covariates(BW = 90, SEX = 0, TOLA = TRUE)
+
+# Second option: work with a dataset within a 'mrgsolve' model
 mod <- exmodel(add_exdata = FALSE)
+# call `mrgsolve::see(mod)` to see how default compartment were coded
+adm_cmt(mod)
+obs_cmt(mod)
 
 mod \%>\%
   adm_lines(amt = 10000, cmt = 1) \%>\%
   obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671), cmt = 2) \%>\%
   # get_data() # for curiosity, you can extract the data set at this step
   mapbayest()
-
-# If `[ADM]` or `[OBS]` are set in `$CMT` in model code, the `cmt =` argument are superfluous.
 
 }

@@ -22,10 +22,10 @@ add_covariates(x, ...)
 \item{AOLA, TOLA}{a logical. Should the "Amount Of Last Administration" and "Time Of Last Administration" variables be added into the dataset? Default if FALSE if \code{x} is a dataset, TRUE if \code{x} is a 'mrgsolve' model where \code{AOLA} and \code{TOLA} are defined as covariates}
 }
 \value{
-a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{get_data()}).
+a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{adm_lines()} and \code{obs_lines()}, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=obs_lines]{obs_lines()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
 }
 \examples{
 # Cannot start from scratch
@@ -65,4 +65,7 @@ model \%>\%
   adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
   add_covariates() \%>\%
   get_data()
+}
+\seealso{
+\link{data_helpers}
 }

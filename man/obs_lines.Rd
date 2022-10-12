@@ -35,10 +35,10 @@ obs_lines(x, ...)
 \item{DVmet}{second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if \code{x} is a 'mrgsolve' model where two \verb{[OBS]} compartments were defined (see \code{examples})}
 }
 \value{
-a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{get_data()}).
+a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{obs_lines()} function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{adm_lines()} and \code{add_covariates()}, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+The \code{obs_lines()} function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
 }
 \examples{
 # Create a dataset from scratch
@@ -85,5 +85,7 @@ model \%>\%
   obs_lines(time = 12, DV = 0.12, DVmet = 120) \%>\%
   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), DVmet = c(340, 560, 780)) \%>\%
   get_data()
-
+}
+\seealso{
+\link{data_helpers}
 }

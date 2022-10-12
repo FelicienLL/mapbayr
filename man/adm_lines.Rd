@@ -54,10 +54,10 @@ adm_lines(x, ...)
 \item{rate}{rate of administration (optional, set to -2 if you model zero-order infusion. See \code{examples}.)}
 }
 \value{
-a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{get_data()}).
+a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{adm_lines()} function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{obs_lines()} and \code{add_covariates()}, it facilitates the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr'.
+The \code{adm_lines()} function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
 }
 \examples{
 # Create a dataset from scratch
@@ -106,5 +106,7 @@ model \%>\%
   adm_lines(amt = 100) \%>\%
   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) \%>\%
   get_data()
-
+}
+\seealso{
+\link{data_helpers}
 }
