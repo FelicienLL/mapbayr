@@ -11,6 +11,7 @@
 \alias{obs_lines.missing}
 \alias{obs_lines.mrgmod}
 \alias{add_covariates}
+\alias{add_covariates.data.frame}
 \alias{add_covariates.mrgmod}
 \title{Data helpers}
 \usage{
@@ -45,7 +46,9 @@ obs_lines(x, ...)
 
 add_covariates(x, ...)
 
-\method{add_covariates}{mrgmod}(x, ..., covariates = list())
+\method{add_covariates}{data.frame}(x, ..., covariates = list(), AOLA = FALSE, TOLA = FALSE)
+
+\method{add_covariates}{mrgmod}(x, ..., covariates = list(), AOLA = NULL, TOLA = NULL)
 }
 \arguments{
 \item{x}{either a data.frame or a 'mrgsolve' model object}

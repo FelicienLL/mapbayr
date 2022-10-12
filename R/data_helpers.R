@@ -123,7 +123,7 @@ adm_lines.data.frame <- function(x,
 #' @export
 adm_lines.missing <- function(...){
   x <- as_tibble(data.frame())
-  adm_lines.data.frame(x, ...)
+  adm_lines.data.frame(x = x, ... = ...)
 }
 
 #' Add administrations lines to data
@@ -219,7 +219,7 @@ obs_lines.data.frame <- function(x,
 #' @export
 obs_lines.missing <- function(...){
   x <- as_tibble(data.frame())
-  obs_lines.data.frame(x, ...)
+  obs_lines.data.frame(x = x, ... = ...)
 }
 
 #' Add observations lines to data
@@ -260,56 +260,97 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
 
 #' @rdname data_helpers
 #' @export
-add_covariates <- function(x, ...) UseMethod("add_covariates")
+add_covariates <- function(x, ...) {
+  if(missing(x)){
+    stop("Initial dataset not found. Cannot add columns to a dataset that do not exists.")
+  } else {
+    UseMethod("add_covariates")
+  }
+}
 
 #' Add covariates columns to data
-#' @method add_covariates mrgmod
+#' @method add_covariates data.frame
 #' @rdname data_helpers
 #' @export
-add_covariates.mrgmod <- function(x, ..., covariates = list()){
-  if(is.null(x@args$data)) stop("Please provide a dataset")
+add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE, TOLA = FALSE){
+  old_data <- x
 
-  d <- arrange(x@args$data, .data$ID, .data$time, -.data$evid, .data$cmt)
-
-  if(length(covariates)!=0){
-    d <- bind_cols(d, covariates)
+  if(length(covariates) != 0){
+    new_data <- bind_cols(old_data, covariates)
   } else {
     dots <- list(...)
     if(length(dots) != 0){
       if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
         warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
-        d <- bind_cols(d, dots[[1]])
+        new_data <- bind_cols(old_data, dots[[1]])
       } else {
         if(any(is.null(names(dots)))){
           stop("Arguments must be named (with covariates names)")
         }
-        d <- bind_cols(d, dots)
+        new_data <- bind_cols(old_data, dots)
       }
+    } else {
+      new_data <- old_data
+    }
+  }
+  if(AOLA) {
+    new_data$AOLA <- 1
+  }
+  if(TOLA) {
+    new_data$TOLA <- 1
+  }
+  rearrange_nmdata(new_data)
+}
+
+#' Add covariates columns to data
+#' @method add_covariates mrgmod
+#' @rdname data_helpers
+#' @export
+add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA = NULL){
+
+  old_data <- get_data.mrgmod(x)
+
+  # AOLA /TOLA
+  if(is.null(AOLA) | is.null(TOLA)){
+    model_covariates <- mbr_cov_names(x)
+  }
+
+  if(is.null(AOLA)){
+    if("AOLA" %in% model_covariates){
+      AOLA <- TRUE
+    } else {
+      AOLA <- FALSE
     }
   }
 
-  if("AOLA" %in% mbr_cov_names(x)) {
-    d <- d %>%
-      group_by(.data$ID) %>%
-      mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
-      fill(.data$AOLA) %>%
-      ungroup()
+  if(is.null(TOLA)){
+    if("TOLA" %in% model_covariates){
+      TOLA <- TRUE
+    } else {
+      TOLA <- FALSE
+    }
   }
 
-  if("TOLA" %in% mbr_cov_names(x)) {
-    d <- d %>%
-      realize_addl() %>%
-      arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
-      group_by(.data$ID) %>%
-      mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
-      fill(.data$TOLA)%>%
-      ungroup()
-  }
+  new_data <- add_covariates.data.frame(x = old_data, ... = ..., covariates = covariates, AOLA = AOLA, TOLA = TOLA)
+  data_set(x, new_data)
+}
 
-  dd <- data_set(x, d)
+AOLA <- function(x){
+  x %>%
+    group_by(.data$ID) %>%
+    mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
+    fill(.data$AOLA) %>%
+    ungroup()
+}
 
-  return(dd)
-
+TOLA <- function(x){
+  x %>%
+    realize_addl() %>%
+    arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
+    group_by(.data$ID) %>%
+    mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
+    fill(.data$TOLA) %>%
+    ungroup()
 }
 
 NULL_remove <- function(x){
@@ -318,7 +359,12 @@ NULL_remove <- function(x){
 
 rearrange_nmdata <- function(x){
   #Sort ADM (evid1) before OBS (evid0) if same time = recsort 3/4
-  x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
+  if(!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))){
+    x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
+  }
+
+  if(!is.null(x[["AOLA"]])) x <- AOLA(x)
+  if(!is.null(x[["TOLA"]])) x <- TOLA(x)
 
   # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
   if(!is.null(x[["amt"]]))   x$amt[is.na(x$amt)]   <- 0
