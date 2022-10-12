@@ -28,9 +28,9 @@ obs_lines(x, ...)
 
 \item{cmt}{compartment (no default, except if \verb{[OBS]} was tagged in the \verb{$CMT} block in model code. See \code{examples}.)}
 
-\item{DV}{dependant value, i.e. observed concentration.}
+\item{DV}{dependent value, i.e. observed concentration.}
 
-\item{mdv}{missing dependant value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)}
+\item{mdv}{missing dependent value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)}
 
 \item{DVmet}{second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if \code{x} is a 'mrgsolve' model where two \verb{[OBS]} compartments were defined (see \code{examples})}
 }
@@ -38,13 +38,13 @@ obs_lines(x, ...)
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{obs_lines()} function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
+The \code{obs_lines()} function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in \link{data_helpers}.
 }
 \examples{
 # Create a dataset from scratch
 obs_lines(time = 12, DV = 0.12, cmt = 2)
 
-# Pipe-friendly addition of administration record to a pre-existing dataset
+# Pipe-friendly addition of observation record to a pre-existing dataset
 library(magrittr)
 obs_lines(time = 12, DV = 0.12, cmt = 2) \%>\%
   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
@@ -65,7 +65,7 @@ CENTR : Central [OBS]
 ", compile = FALSE)
 obs_cmt(model)
 
-# Thus, no need to manually specified `cmt = 2` anymore.
+# Thus, no need to manually specify `cmt = 2` anymore.
 model \%>\%
   obs_lines(time = 12, DV = 0.12) \%>\%
   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0)) \%>\%
@@ -83,7 +83,8 @@ obs_cmt(model)
 
 model \%>\%
   obs_lines(time = 12, DV = 0.12, DVmet = 120) \%>\%
-  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), DVmet = c(340, 560, 780)) \%>\%
+  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
+            mdv = c(0,1,0), DVmet = c(340, 560, 780)) \%>\%
   get_data()
 }
 \seealso{

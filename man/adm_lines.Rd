@@ -43,13 +43,13 @@ adm_lines(x, ...)
 
 \item{amt}{dose amount (for administration records only)}
 
-\item{mdv}{missing dependant value (default is 1 for administration records)}
+\item{mdv}{missing dependent value (default is 1 for administration records)}
 
 \item{addl}{additional dose (optional)}
 
 \item{ss}{steady-state (optional, is this dose the last of an infinity of administration? Yes, 1, or no, 0)}
 
-\item{ii}{interdose interval (optional, use it with \code{ss} and \code{addl})}
+\item{ii}{inter-dose interval (optional, use it with \code{ss} and \code{addl})}
 
 \item{rate}{rate of administration (optional, set to -2 if you model zero-order infusion. See \code{examples}.)}
 }
@@ -57,7 +57,7 @@ adm_lines(x, ...)
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{adm_lines()} function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
+The \code{adm_lines()} function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in \link{data_helpers}.
 }
 \examples{
 # Create a dataset from scratch
@@ -84,7 +84,7 @@ CENTR : Central
 ", compile = FALSE)
 adm_cmt(model)
 
-# Thus, no need to manually specified `cmt = 1` anymore.
+# Thus, no need to manually specify `cmt = 1` anymore.
 model \%>\%
   adm_lines(amt = 100) \%>\%
   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) \%>\%

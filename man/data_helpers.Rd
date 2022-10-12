@@ -2,12 +2,12 @@
 % Please edit documentation in R/data_helpers.R
 \name{data_helpers}
 \alias{data_helpers}
-\title{Data helpers}
+\title{Data helpers: functions to build the dataset}
 \description{
 Use \code{\link[=adm_lines]{adm_lines()}}, \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}} to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
 }
 \details{
-Instead of importing a .csv file, or painfully build a data set with a call to \code{data.frame()} and mind how to format the data, you can pass information about:
+Instead of importing a '.csv' file, or painfully build a data set with a call to \code{data.frame()} and mind how to format the data, you can pass information about:
 \itemize{
 \item administrations with \code{\link[=adm_lines]{adm_lines()}},
 \item observations with \code{\link[=obs_lines]{obs_lines()}},
@@ -42,8 +42,8 @@ adm_cmt(mod)
 obs_cmt(mod)
 
 mod \%>\%
-  adm_lines(amt = 10000, cmt = 1) \%>\%
-  obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671), cmt = 2) \%>\%
+  adm_lines(amt = 10000) \%>\%
+  obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) \%>\%
   # get_data() # for curiosity, you can extract the data set at this step
   mapbayest()
 

@@ -15,7 +15,7 @@ add_covariates(x, ...)
 \arguments{
 \item{x}{either a data.frame or a 'mrgsolve' model object}
 
-\item{...}{covariates values to add to the data. For each variabe, supply a vector of length 1 or with the same number of rows. Ignored if \code{covariates} argument is used.}
+\item{...}{covariates values to add to the data. For each variable, supply a vector of length 1 or with the same number of rows. Ignored if \code{covariates} argument is used.}
 
 \item{covariates}{Covariates passed as a single list of variables. Overrides \code{...}.}
 
@@ -25,7 +25,7 @@ add_covariates(x, ...)
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=obs_lines]{obs_lines()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explain in \link{data_helpers}.
+The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=obs_lines]{obs_lines()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in \link{data_helpers}.
 }
 \examples{
 # Cannot start from scratch
@@ -41,7 +41,7 @@ adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
 adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
 
-# Missing values are filled with the "next-observation carried backward" rule
+# Missing values are filled with the "next observation carried backward" rule
 adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(BW = c(90, 85, 80), SEX = 0) \%>\%
   obs_lines(time = 36, DV = .0123, cmt = 2)
