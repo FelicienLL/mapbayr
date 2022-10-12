@@ -496,13 +496,34 @@ NULL_remove <- function(x){
 }
 
 rearrange_nmdata <- function(x){
-  #Sort ADM (evid1) before OBS (evid0) if same time = recsort 3/4
+  # Arrange. ADM (evid1) before OBS (evid0) if same time = recsort 3/4
   if(!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))){
     x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
   }
 
+  # Fill AOLA/TOLA if exists
   if(!is.null(x[["AOLA"]])) x <- AOLA(x)
   if(!is.null(x[["TOLA"]])) x <- TOLA(x)
+
+  nmtran <- c("ID", "time", "evid", "cmt", "amt", "DV", "mdv", "ss", "addl", "ii", "rate")
+  # Relocate
+  x <- relocate(x, any_of(nmtran))
+
+  # Fill covariates (NOCB)
+  non_nmtran_variables <- names(x)[!names(x) %in% c(nmtran, "AOLA", "TOLA")]
+  x <- x %>%
+    group_by(.data$ID) %>%
+    fill(any_of(non_nmtran_variables), .direction = "updown") %>%
+    ungroup()
+
+  # Type
+  if(!is.null(x[["ID"]])) x$ID <- as.integer(x$ID)
+  if(!is.null(x[["evid"]])) x$evid <- as.integer(x$evid)
+  if(!is.null(x[["cmt"]])) x$cmt <- as.integer(x$cmt)
+  if(!is.null(x[["mdv"]])) x$mdv <- as.integer(x$mdv)
+  if(!is.null(x[["ss"]])) x$ss <- as.integer(x$ss)
+  if(!is.null(x[["addl"]])) x$addl <- as.integer(x$addl)
+
 
   # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
   if(!is.null(x[["amt"]]))  x$amt[is.na(x$amt)]   <- 0
