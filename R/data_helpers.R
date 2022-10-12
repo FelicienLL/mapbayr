@@ -1,13 +1,25 @@
 #' Data helpers
 #'
 #' @name data_helpers
-#' @param x model object
-#' @param ... passed to `mrgsolve::ev()` in `adm_lines()`
-#' @param time,DV,mdv,cmt,DVmet passed to `obs_lines()`
+#' @description Create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model
+#'
+#' @param x either a data.frame or a 'mrgsolve' model object
+#' @param ID subject ID (default is 1)
+#' @param time event time
+#' @param evid event identification (default is 1 for administration, 0 for observation)
+#' @param cmt compartment (no default, except if one `[ADM]` and `[OBS]` were tagged in the `$CMT` block in model code. See `details`.)
+#' @param amt dose amount (for administration records only)
+#' @param DV dependant value, i.e. observed concentration (for observation records only)
+#' @param mdv missing dependant value (default is 0 for observation to take into account for parameter estimation, 1 otherwise)
+#' @param addl additional dose (optional and for administration records only)
+#' @param ss steady-state (optional and for administration records only. Is this dose the last of an infinity of administration? Yes, 1, or no, 0)
+#' @param ii interdose interval (optional and for administration records only. Use it with `ss` and `addl`)
+#' @param rate rate of administration (optional and for administration records only. Set to -2 if you model zero-order infusion. See `details`.)
+#' @param ... additional columns or arguments for [mrgsolve::ev()]
+#' @param DVmet passed to `obs_lines()`
 #' @param covariates a list of named covariates, with a single value or same number of lines than data
 #' @return a `mrgmod` object, with a dataset in the `@args$data` slot.
 #'
-#' @description Helpers to build data set.
 #'
 #' @details
 #' Helpful functions build the data set. Instead of painfully build a data set and mind how to format the data, you can pass information about :
@@ -38,143 +50,212 @@ NULL
 
 #' @rdname data_helpers
 #' @export
-adm_lines <- function(x, ...) UseMethod("adm_lines")
+adm_lines <- function(x, ...) {
+  if(missing(x)) {
+    adm_lines.missing(...)
+  } else {
+    UseMethod("adm_lines")
+  }
+}
+
+
+#' Add administrations lines to data
+#' @rdname data_helpers
+#'
+#' @method adm_lines data.frame
+#' @export
+adm_lines.data.frame <- function(x,
+                                 ID = NULL,
+                                 time = NULL,
+                                 evid = 1L,
+                                 cmt,
+                                 amt,
+                                 mdv = 1L,
+                                 addl = NULL,
+                                 ss = NULL,
+                                 ii = NULL,
+                                 rate = NULL,
+                                 ...){
+  old_data <- x
+
+  # ID
+  if(is.null(ID)){
+    cur_ID <- utils::tail(old_data[["ID"]], 1)
+    if(is.null(cur_ID)){
+      ID <- 1L
+    } else {
+      ID <- cur_ID
+    }
+  }
+
+  # TIME
+  if(is.null(time) && (all(old_data[["time"]]==0) | nrow(old_data)==0)){
+    time <- 0
+  }
+
+  # MATCH time & amt, and CROSS WITH cmt and rate
+  if(length(time) == length(amt)){
+    nadm <- length(time)
+  } else {
+    amttime <- expand.grid(amt, time)
+    nadm <- nrow(amttime)
+    amt <- amttime[,1]
+    time <- amttime[,2]
+  }
+  amt <- rep(amt, each = length(cmt))
+  time <- rep(time, each = length(cmt))
+  cmt <- rep(cmt, nadm)
+  rate <- rep(rate, nadm)
+
+  # Call `mrgsolve::ev()`
+  ev_args <- list(ID = ID, time = time, evid = evid, cmt = cmt, amt = amt, mdv = mdv, addl = addl, ss = ss, ii = ii, rate = rate, ... = ...)
+  ev_args <- NULL_remove(ev_args)
+
+  new_lines <- as.data.frame(do.call(ev, ev_args))
+  new_data <- bind_rows(old_data, new_lines)
+  rearrange_nmdata(new_data)
+}
+
+#' Add administrations lines to data
+#' @rdname data_helpers
+#'
+#' @method adm_lines missing
+#' @export
+adm_lines.missing <- function(...){
+  x <- as_tibble(data.frame())
+  adm_lines.data.frame(x, ...)
+}
 
 #' Add administrations lines to data
 #' @rdname data_helpers
 #'
 #' @method adm_lines mrgmod
 #' @export
-adm_lines.mrgmod <- function(x, ...){
-  if(is.null(x@args$data)){
-    d0 <- as_tibble(data.frame())
-  } else {
-    d0 <- x@args$data
-  }
+adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
+  #x = a model object
+  old_data <- get_data.mrgmod(x) #if no data: an empty 0x0 tibble, not "NULL"!
 
-  if(is.null((list(...)[["ID"]]))){
-    if(is.null((d0[["ID"]]))){
-      iID <- 1
-    } else {
-      iID <- (d0[["ID"]])[1]
+  if(is.null(rate)){
+    zero_order_cmt <- adm_0_cmt(x)
+    if(!is.null(zero_order_cmt) && any(cmt==zero_order_cmt)){
+      rate <- rep(0, length(cmt))
+      rate[cmt==zero_order_cmt] <- -2
     }
-  } else {
-    iID <- list(...)[["ID"]]
   }
 
+  args <- list(x = old_data, cmt = cmt, rate = rate, ... = ...)
+  args <- NULL_remove(args)
 
-  #Adm info passed to ev()
-  d <- ev(..., mdv = 1) %>%
-    as_tibble() %>%
-    mutate(ID = iID) %>%
-    select(any_of(c('ID', "time", "evid", "mdv", "amt", "addl", "ss", "ii", "rate", "cmt"))) #drop other columns
+  new_data <- do.call(adm_lines.data.frame, args)
 
-  #CMT
-  #If cmt not explicitly provided in ..., set it to adm_cmt from model cod
-  if(is.null((list(...)[["cmt"]]))){
-    if(is.null(adm_cmt(x))){ #No [ADM] set in the model
-      stop("Define administration compartment (with adm_lines(cmt = ...)) or in model code with the [ADM] tag in $CMT")
-    }
-    d <- d %>%
-      select(-.data$cmt) %>% #if not supplied in ..., cmt is set by ev() with cmt = 1
-      expand_grid(cmt = adm_cmt(x))
-  }
-
-  #RATE
-  if(is.null((list(...)[["rate"]]))){   #If rate is not explicitly provided in ...,
-    if(!is.null(adm_0_cmt(x))){     #check if needed with adm_0_cmt
-      d <- d %>%
-        mutate(rate = ifelse(.data$cmt %in% adm_0_cmt(x), -2, 0))
-    }
-    #otherwise: no rate and I'm fine with it
-  }
-
-  #Add these administrations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
-  d <- bind_rows(d0, d) %>%
-    arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)
-
-  # If no pre-existing RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
-  d <- NA_filler(d)
-
-  dd <- data_set(x, d)
-
-  return(dd)
-
+  data_set(x, new_data)
 }
+
+
+
+
+
+
 
 #' @rdname data_helpers
 #' @export
-obs_lines <- function(x, ...) UseMethod("obs_lines")
+obs_lines <- function(x, ...){
+  if(missing(x)) {
+    obs_lines.missing(...)
+  } else {
+    UseMethod("obs_lines")
+  }
+}
+
+
+
+#' Add observations lines to data
+#'
+#' @method obs_lines data.frame
+#' @rdname data_helpers
+#' @export
+obs_lines.data.frame <- function(x,
+                                 ID = NULL,
+                                 time,
+                                 evid = 0L,
+                                 cmt,
+                                 DV = NA_real_,
+                                 mdv = NULL,
+                                 ...){
+
+  old_data <- x
+
+  # ID
+  if(is.null(ID)){
+    cur_ID <- utils::tail(old_data[["ID"]], 1)
+    if(is.null(cur_ID)){
+      ID <- 1L
+    } else {
+      ID <- cur_ID
+    }
+  }
+
+  # Match time and cmt to the length of DV (especially if DV is parent + metab)
+  cmttime <- expand.grid(cmt, time)
+  #nobs <- nrow(cmttime)
+  cmt <- cmttime[,1]
+  time <- cmttime[,2]
+
+  #MDV
+  if(is.null(mdv)){
+    mdv <- as.integer(is.na(DV))
+  }
+
+  new_lines <- data.frame(ID = ID, time = time, evid = evid, cmt = cmt, DV = DV, mdv = mdv, ... = ...)
+
+  new_data <- bind_rows(old_data, new_lines)
+  rearrange_nmdata(new_data)
+}
+
+#' Add observations lines to data
+#'
+#' @method obs_lines missing
+#' @rdname data_helpers
+#' @export
+obs_lines.missing <- function(...){
+  x <- as_tibble(data.frame())
+  obs_lines.data.frame(x, ...)
+}
 
 #' Add observations lines to data
 #'
 #' @method obs_lines mrgmod
 #' @rdname data_helpers
 #' @export
-obs_lines.mrgmod <- function(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...){
+obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
+  #x = a model object
+  old_data <- get_data.mrgmod(x) #if no data: an empty 0x0 tibble, not "NULL"!
 
-  if(is.null(x@args$data)){
-    d0 <- as_tibble(data.frame())
-  } else {
-    d0 <- x@args$data
+  #CMT
+  model_obs_cmt <- obs_cmt(x)
+  if(is.null(cmt)){
+    if(is.null(DVmet)){
+      cmt <- model_obs_cmt[1]
+    } else {
+      cmt <- model_obs_cmt
+    }
   }
 
-  if(is.null((d0[["ID"]]))){
-    iID <- 1
-  } else {
-    iID <- (d0[["ID"]])[1]
-  }
-
-  d <- data.frame(
-    time = time,
-    DV   = as.double(DV)) %>%
-    as_tibble()
-
-  # What mdv ?
-  .mdv <- mdv
-  if(is.null(.mdv)) .mdv <- as.double(is.na(DV))
-  d$mdv <- .mdv
-
-  # What cmt ?
-  .cmt <- cmt
-  if(is.null(.cmt)) .cmt <- (obs_cmt(x))
-  if(is.null(.cmt))
-    stop("Define observation compartment (with obs_lines(cmt = ...)) or in model code with the [OBS] tag in $CMT")
-
+  #DVmet to DV
   if(!is.null(DVmet)){
-    if(length(.cmt)!=2)
-      stop("Define 2 observation compartments with the [OBS] tags in model code")
-    d <- d %>%
-      mutate(DVmet = DVmet)
+    if(length(cmt)!=2) stop("Define 2 observation compartments with the [OBS] tags in model code")
+    nobs <- length(DV)
+    if(nobs != length(DVmet)) stop("`DVmet` must be the same length as `DV`")
+    DV <- as.double(rbind(DV, DVmet)) # = pivot longer: DV[1] DVmet[1] DV[2] DVmet[2] etc
+    DVmet <- NULL
   }
 
-  d <- d %>%
-    pivot_longer(starts_with("DV"), values_to = "DV") %>%
-    mutate(cmt = ifelse(.data$name == "DV", as.integer(.cmt[1]), as.integer(.cmt[2]))) %>%
-    filter(!is.na(.data$cmt)) %>%
-    select(-any_of("name")) %>%
-    mutate(ID = iID, evid = 0, amt = 0)
+  args <- list(x = old_data, cmt = cmt, DV = DV, ... = ...)
+  args <- NULL_remove(args)
 
-  #Add these observations to existing data and sort (adm (evid1) before obs (evid0) if same time = recsort 3/4)
-  d <- d0 %>%
-    bind_rows(d) %>%
-    arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt)
+  new_data <- do.call(obs_lines.data.frame, args)
 
-  # If no pre-existing RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
-  d <- NA_filler(d)
-
-  dd <- data_set(x, d)
-
-  return(dd)
-
-}
-
-NA_filler <- function(data){
-  if(!is.null(data[["addl"]]))  data$addl <- ifelse(is.na(data$addl), 0, data$addl)
-  if(!is.null(data[["ii"]]))    data$ii   <- ifelse(is.na(data$ii),   0, data$ii)
-  if(!is.null(data[["rate"]]))  data$rate <- ifelse(is.na(data$rate), 0, data$rate)
-  if(!is.null(data[["ss"]]))    data$ss   <- ifelse(is.na(data$ss),   0, data$ss)
-  return(data)
+  data_set(x, new_data)
 }
 
 #' @rdname data_helpers
@@ -229,4 +310,21 @@ add_covariates.mrgmod <- function(x, ..., covariates = list()){
 
   return(dd)
 
+}
+
+NULL_remove <- function(x){
+  x[!sapply(x,is.null)]
+}
+
+rearrange_nmdata <- function(x){
+  #Sort ADM (evid1) before OBS (evid0) if same time = recsort 3/4
+  x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
+
+  # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
+  if(!is.null(x[["amt"]]))   x$amt[is.na(x$amt)]   <- 0
+  if(!is.null(x[["addl"]]))  x$addl[is.na(x$addl)] <- 0
+  if(!is.null(x[["ii"]]))    x$ii[is.na(x$ii)]     <- 0
+  if(!is.null(x[["rate"]]))  x$rate[is.na(x$rate)] <- 0
+  if(!is.null(x[["ss"]]))    x$ss[is.na(x$ss)]     <- 0
+  x
 }

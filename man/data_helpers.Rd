@@ -3,8 +3,12 @@
 \name{data_helpers}
 \alias{data_helpers}
 \alias{adm_lines}
+\alias{adm_lines.data.frame}
+\alias{adm_lines.missing}
 \alias{adm_lines.mrgmod}
 \alias{obs_lines}
+\alias{obs_lines.data.frame}
+\alias{obs_lines.missing}
 \alias{obs_lines.mrgmod}
 \alias{add_covariates}
 \alias{add_covariates.mrgmod}
@@ -12,22 +16,65 @@
 \usage{
 adm_lines(x, ...)
 
-\method{adm_lines}{mrgmod}(x, ...)
+\method{adm_lines}{data.frame}(
+  x,
+  ID = NULL,
+  time = NULL,
+  evid = 1L,
+  cmt,
+  amt,
+  mdv = 1L,
+  addl = NULL,
+  ss = NULL,
+  ii = NULL,
+  rate = NULL,
+  ...
+)
+
+\method{adm_lines}{missing}(...)
+
+\method{adm_lines}{mrgmod}(x, cmt = adm_cmt(x), rate = NULL, ...)
 
 obs_lines(x, ...)
 
-\method{obs_lines}{mrgmod}(x, time, DV, mdv = NULL, cmt = NULL, DVmet = NULL, ...)
+\method{obs_lines}{data.frame}(x, ID = NULL, time, evid = 0L, cmt, DV = NA_real_, mdv = NULL, ...)
+
+\method{obs_lines}{missing}(...)
+
+\method{obs_lines}{mrgmod}(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...)
 
 add_covariates(x, ...)
 
 \method{add_covariates}{mrgmod}(x, ..., covariates = list())
 }
 \arguments{
-\item{x}{model object}
+\item{x}{either a data.frame or a 'mrgsolve' model object}
 
-\item{...}{passed to \code{mrgsolve::ev()} in \code{adm_lines()}}
+\item{...}{additional columns or arguments for \code{\link[mrgsolve:ev]{mrgsolve::ev()}}}
 
-\item{time, DV, mdv, cmt, DVmet}{passed to \code{obs_lines()}}
+\item{ID}{subject ID (default is 1)}
+
+\item{time}{event time}
+
+\item{evid}{event identification (default is 1 for administration, 0 for observation)}
+
+\item{cmt}{compartment (no default, except if one \verb{[ADM]} and \verb{[OBS]} were tagged in the \verb{$CMT} block in model code. See \code{details}.)}
+
+\item{amt}{dose amount (for administration records only)}
+
+\item{mdv}{missing dependant value (default is 0 for observation to take into account for parameter estimation, 1 otherwise)}
+
+\item{addl}{additional dose (optional and for administration records only)}
+
+\item{ss}{steady-state (optional and for administration records only. Is this dose the last of an infinity of administration? Yes, 1, or no, 0)}
+
+\item{ii}{interdose interval (optional and for administration records only. Use it with \code{ss} and \code{addl})}
+
+\item{rate}{rate of administration (optional and for administration records only. Set to -2 if you model zero-order infusion. See \code{details}.)}
+
+\item{DV}{dependant value, i.e. observed concentration (for observation records only)}
+
+\item{DVmet}{passed to \code{obs_lines()}}
 
 \item{covariates}{a list of named covariates, with a single value or same number of lines than data}
 }
@@ -35,7 +82,7 @@ add_covariates(x, ...)
 a \code{mrgmod} object, with a dataset in the \verb{@args$data} slot.
 }
 \description{
-Helpers to build data set.
+Create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model
 }
 \details{
 Helpful functions build the data set. Instead of painfully build a data set and mind how to format the data, you can pass information about :
