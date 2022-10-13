@@ -316,9 +316,16 @@ obs_lines.data.frame <- function(x,
   #MDV
   if(is.null(mdv)){
     mdv <- as.integer(is.na(DV))
+  } else {
+    if(length(mdv) < length(DV)){
+      mdv <- rep(mdv, each = length(unique(cmt)))
+    }
   }
 
   new_lines <- data.frame(ID = ID, time = time, evid = evid, cmt = cmt, DV = DV, mdv = mdv, ... = ...)
+  if(any(names(new_lines)=="DVmet")){
+    warning("`DVmet` column added to the data. If you expected metabolite concentrations set in `DV`, `obs_lines()` must be used with a 'mrgsolve' model.")
+  }
 
   new_data <- bind_rows(old_data, new_lines)
   rearrange_nmdata(new_data)
@@ -535,6 +542,12 @@ rearrange_nmdata <- function(x){
   if(!is.null(x[["mdv"]])) x$mdv <- as.integer(x$mdv)
   if(!is.null(x[["ss"]])) x$ss <- as.integer(x$ss)
   if(!is.null(x[["addl"]])) x$addl <- as.integer(x$addl)
+
+  if(!is.null(x[["DV"]])) x$DV <- as.double(x$DV)
+  if(!is.null(x[["amt"]])) x$amt <- as.double(x$amt)
+  if(!is.null(x[["time"]])) x$time <- as.double(x$time)
+  if(!is.null(x[["ii"]])) x$ii <- as.double(x$ii)
+  if(!is.null(x[["rate"]])) x$rate <- as.double(x$rate)
 
 
   # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
