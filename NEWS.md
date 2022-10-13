@@ -2,6 +2,10 @@
 * `eta()` properly sorts vectors of length superior to 9 (#159).
 * `add_covariates()` accepts empty arguments. 
 * `use_posterior()` works if covariates had not been defind in data (#160).
+* exports `adm_lines.data.frame()`, `adm_lines.missing()`, `obs_lines.data.frame()`, `obs_lines.missing()`, `add_covariates.data.frame()`. This means users can now create a dataset from scratch, or modify a data.frame without the need to start from a mrgmod.
+* Refactor of the code to generate more robust data sets, always rearrange for NM-TRAN compatibility.
+* stop exporting `see_data()`
+* Better documentation: Separate documentation for `adm_lines()`, `obs_lines()` and `add_covariates()`. Keep a general `data_helpers` however.
 
 # mapbayr 0.8.0
 
