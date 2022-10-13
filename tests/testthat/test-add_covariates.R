@@ -1,27 +1,59 @@
-mod <- exmodel(add_exdata = FALSE, compile = FALSE) %>%
-  adm_lines(amt = 1000) %>%
-  obs_lines(time = 24, DV = 123)
+dat <- adm_lines(amt = 1000, cmt = 1) %>%
+  obs_lines(time = 24, DV = 123, cmt = 1)
 
-test_that("covariates can be implicitly and explicitly be called", {
-
+test_that("covariates can be called through `...` or `covariates = list()`", {
   expected_cov <- as_tibble(data.frame(BW = rep(123, 2), SEX = 0))
 
-  expect_equal(get_data(add_covariates(mod, BW = 123, SEX = 0))[, c("BW", "SEX")], expected_cov)
-  expect_equal(get_data(add_covariates(mod, BW = 123))[, "BW"], expected_cov[, "BW"])
+  expect_equal(add_covariates(dat, BW = 123, SEX = 0)[, c("BW", "SEX")], expected_cov)
+  expect_equal(add_covariates(dat, BW = 123)[, "BW"], expected_cov[, "BW"])
 
-  expect_warning(dat1 <- get_data(add_covariates(mod, list(BW = 123, SEX = 0)))[, c("BW", "SEX")], "A list was passed as first argument to ")
+  expect_warning(dat1 <- add_covariates(dat, list(BW = 123, SEX = 0))[, c("BW", "SEX")], "A list was passed as first argument to ")
   expect_equal(dat1, expected_cov)
 
-  expect_equal(get_data(add_covariates(mod, covariates = list(BW = 123, SEX = 0)))[, c("BW", "SEX")], expected_cov)
+  expect_equal(add_covariates(dat, covariates = list(BW = 123, SEX = 0))[, c("BW", "SEX")], expected_cov)
 
-  expect_warning(dat2 <- get_data(add_covariates(mod, list(BW = 123), SEX = 0))[, "BW"], "A list was passed as first argument to ")
+  expect_warning(dat2 <- add_covariates(dat, list(BW = 123), SEX = 0)[, "BW"], "A list was passed as first argument to ")
   expect_equal(dat2, expected_cov[, "BW"])
 
-  expect_equal(get_data(add_covariates(mod, SEX = 0, list(BW = 123)))[, "SEX"], expected_cov[, "SEX"])
+  expect_equal(add_covariates(dat, SEX = 0, list(BW = 123))[, "SEX"], expected_cov[, "SEX"])
 
-  expect_error(get_data(add_covariates(mod, 123, 0)), "Arguments must be named \\(with covariates names\\)")
+  expect_error(add_covariates(dat, 123, 0), "Arguments must be named \\(with covariates names\\)")
 })
 
 test_that("works with empty arguments", {
-   expect_equal(get_data(add_covariates(mod)), get_data(mod))
+   expect_equal(add_covariates(dat), dat)
+})
+
+test_that("AOLA TOLA works", {
+  expect_equal(add_covariates(dat, AOLA = TRUE, TOLA = TRUE)[,c("AOLA", "TOLA")], tibble::tibble(AOLA = c(1000, 1000), TOLA = c(0,0)))
+
+  #updates afterwards
+  dat2 <- dat %>%
+    add_covariates(AOLA = TRUE, TOLA = TRUE) %>%
+    adm_lines(time = 48, cmt = 1, amt = 2000)
+
+  expect_equal(dat2[,c("AOLA", "TOLA")], tibble::tibble(AOLA = c(1000, 1000, 2000), TOLA = c(0,0, 48)))
+
+  model <- mcode("model", "
+  $PARAM @annotated @covariates
+  TOLA : 0 : Time Last Adm
+  AOLA : 0 : Amount Last Adm
+  ", compile = FALSE)
+
+  #automatic if AOLA/TOLA are cov
+  dat3 <- model %>%
+    adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+    add_covariates() %>%
+    get_data()
+
+  expect_equal(dat3$AOLA, c(100, 200, 300))
+  expect_equal(dat3$TOLA, c(0, 24, 48))
+
+})
+
+test_that("fill is NOCB", {
+  dat <- adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+    add_covariates(BW = c(90, 85, 80), SEX = 0) %>%
+    obs_lines(time = 36, DV = .0123, cmt = 2)
+  expect_equal(dat$BW, c(90, 85, 80, 80))
 })
