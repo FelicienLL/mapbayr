@@ -41,5 +41,5 @@ parse_datehour(x = "02-02-2022 22:22", orders = "dmY HM")
 \dontrun{adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)}
 options(mapbayr.datehour = "HM dmY")
 adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
-
+options(mapbayr.datehour = NULL)
 }

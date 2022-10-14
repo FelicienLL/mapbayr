@@ -629,7 +629,8 @@ rearrange_nmdata <- function(x, dh0 = NULL){
 #' \dontrun{adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)}
 #' options(mapbayr.datehour = "HM dmY")
 #' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
-#'
+#' options(mapbayr.datehour = NULL)
+
 parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"))){
   if(inherits(x, "POSIXct")){
     return(x)
@@ -647,7 +648,7 @@ parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c
   }
 
   if(is.character(x)){
-    y <- lubridate::parse_date_time(x = x, orders = orders)
+    y <- lubridate::parse_date_time(x = x, orders = orders, quiet = TRUE)
 
     if(any(is.na(y))){
       stop("Cannot parse `.datehour`. No valid format found.", call. = FALSE)
