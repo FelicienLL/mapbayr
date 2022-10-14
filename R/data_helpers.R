@@ -598,9 +598,48 @@ rearrange_nmdata <- function(x, dh0 = NULL){
   x
 }
 
-parse_datehour <- function(x){
+
+#' Parse datehour to POSIXct
+#'
+#' @description A wrapper around functions of `lubridate`, mainly in order to transform characters into a datetime (POSIXct) format.
+#'
+#' @param x a numeric or a character.
+#' @param orders format specification for x, passed tp [lubridate::parse_date_time()]
+#'
+#' @return a POSIXct
+#' @export
+#'
+#' @examples
+#' # POSITct are returned as is.
+#' parse_datehour(x = as.POSIXct("2022-02-02 22:22:22", tz = "UTC"))
+#'
+#' # numeric are passed to `lubridate::as_datetime()`.
+#' parse_datehour(1643840542)
+#'
+#' # characters are passed to `lubridate::parse_date_time()`.
+#' # The format used will be the one defined in `orders`
+#' parse_datehour(x = "2022-02-02 22:22:22", orders = "Ymd HMS")
+#' parse_datehour(x = "02-02-2022 22:22", orders = "dmY HM")
+#'
+#' # By default, the following formats will be subsequently tried:
+#' # "Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"#'
+#'
+#' # Alternatively, set a format through `options(mapbayr.datehour)`
+#' # Convenient for the use `.datehour` in  [adm_lines()] and [obs_lines()]
+#' \dontrun{adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)}
+#' options(mapbayr.datehour = "HM dmY")
+#' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+#'
+parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"))){
   if(inherits(x, "POSIXct")){
     return(x)
+  }
+
+  if(!requireNamespace("lubridate", quietly = TRUE)) {
+    stop(
+      "Package \"lubridate\" must be installed to use `.datehour`",
+      call. = FALSE
+    )
   }
 
   if(is.double(x)){
@@ -608,16 +647,14 @@ parse_datehour <- function(x){
   }
 
   if(is.character(x)){
-    y <- lubridate::ymd_hms(x, quiet = TRUE)
-    if(!any(is.na(y))) return(y)
-    y <- lubridate::ymd_hm(x, quiet = TRUE)
-    if(!any(is.na(y))) return(y)
-    y <- lubridate::dmy_hms(x, quiet = TRUE)
-    if(!any(is.na(y))) return(y)
-    y <- lubridate::dmy_hm(x, quiet = TRUE)
-    if(!any(is.na(y))) return(y)
+    y <- lubridate::parse_date_time(x = x, orders = orders)
+
+    if(any(is.na(y))){
+      stop("Cannot parse `.datehour`. No valid format found.", call. = FALSE)
+    } else {
+      return(y)
+    }
   }
-  stop("Cannot parse `.datehour`. No valid format found.")
 }
 
 cur_dh0 <- function(x, na.rm = FALSE){
