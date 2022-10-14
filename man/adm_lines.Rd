@@ -21,6 +21,7 @@ adm_lines(x, ...)
   ss = NULL,
   ii = NULL,
   rate = NULL,
+  .datehour = NULL,
   ...
 )
 
@@ -35,7 +36,7 @@ adm_lines(x, ...)
 
 \item{ID}{subject ID (default is 1)}
 
-\item{time}{event time (default is 0 if first administration)}
+\item{time}{event time. Default is 0 if no previous events. Mind consistency with \code{.datehour}.}
 
 \item{evid}{event identification (default is 1 for administration, 0 for observation)}
 
@@ -52,6 +53,8 @@ adm_lines(x, ...)
 \item{ii}{inter-dose interval (optional, use it with \code{ss} and \code{addl})}
 
 \item{rate}{rate of administration (optional, set to -2 if you model zero-order infusion. See \code{examples}.)}
+
+\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will udpate the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
 }
 \value{
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
@@ -67,6 +70,11 @@ adm_lines(amt = 100, cmt = 1)
 library(magrittr)
 adm_lines(amt = 100, cmt = 1) \%>\%
   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1)
+
+# Inform times using the `.datehour` argument:
+adm_lines(.datehour = "2020-01-01 11:11", amt = 100, cmt = 1) \%>\%
+  adm_lines(.datehour = "2020-01-02 22:22", amt = 200, cmt = 1) \%>\%
+  adm_lines(time = 48, amt = 300, cmt = 1)
 
 # Start from a 'mrgsolve' model
 library(mrgsolve)

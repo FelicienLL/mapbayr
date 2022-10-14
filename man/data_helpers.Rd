@@ -35,6 +35,10 @@ adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12) \%>\%
   obs_lines(time = 48, cmt = 2) \%>\%
   add_covariates(BW = 90, SEX = 0, TOLA = TRUE)
 
+# You can even inform "time" using date and hours:
+adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") \%>\%
+  obs_lines(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
+
 # Second option: work with a dataset within a 'mrgsolve' model
 mod <- exmodel(add_exdata = FALSE)
 # call `mrgsolve::see(mod)` to see how default compartment were coded

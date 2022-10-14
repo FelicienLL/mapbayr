@@ -180,7 +180,14 @@ test_that(".datehour works", {
     "Cannot assign when `.datehour` is in the timeline already defined by `time`."
   )
 
-  #3) time non-NULL, no initial data
+  #3) time=NULL, initial data with .datehour
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, .datehour = dh1) %>%
+      adm_lines(amt = 200, cmt = 1, .datehour = dh2),
+    tibble::tibble(ID = 1L, time = c(0,24), evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L, .datehour = c(dh1, dh2))
+  )
+
+  #4) time non-NULL, no initial data
   expect_equal(
     adm_lines(amt = 100, cmt = 1, time = 0, .datehour = dh1),
     tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = dh1)
@@ -199,7 +206,7 @@ test_that(".datehour works", {
     "`.time` and `.datehour` are of different length."
   )
 
-  #3) time non-NULL, initial data without .datehour
+  #5) time non-NULL, initial data without .datehour
   #>  if all times = 0
   expect_equal(
     adm_lines(amt = 100, cmt = 1, time = 0) %>%
@@ -225,7 +232,7 @@ test_that(".datehour works", {
     tibble::tibble(ID = 1L, time = c(0, 48), evid = 1L, cmt = 1L, amt = c(200, 100), mdv = 1L, .datehour = c(dh1, dh3))
   )
 
-  #4) time non-NULL, initial data with .datehour
+  #6) time non-NULL, initial data with .datehour
   #> new time/datehour matching, but consistent so ok
   expect_equal(
     adm_lines(amt = 100, cmt = 1, time = 0, .datehour = dh1) %>%
@@ -243,4 +250,15 @@ test_that(".datehour works", {
       adm_lines(amt = 200, cmt = 1, time = 9999, .datehour = dh2),
     "`time` and `.datehour` are inconsistent with values already in the initial dataset."
   )
+
+
+  ####
+
+  # Suitable to be passed to mapbayest()
+  est <- exmodel(1, add_exdata = FALSE) %>%
+    adm_lines(amt = 10000, time = 0, .datehour = parse_datehour("15/05/2022 15:20")) %>%
+    obs_lines(time = 24, DV = 123) %>%
+    mapbayest()
+  expect_s3_class(est, "mapbayests")
+
 })

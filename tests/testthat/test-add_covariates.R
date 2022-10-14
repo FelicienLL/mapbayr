@@ -57,3 +57,9 @@ test_that("fill is NOCB", {
     obs_lines(time = 36, DV = .0123, cmt = 2)
   expect_equal(dat$BW, c(90, 85, 80, 80))
 })
+
+test_that("cannot have '.datehour'",{
+  dat <- adm_lines(amt = 100, cmt = 1)
+  expect_error(add_covariates(dat, .datehour = "123"), "Cannot have a covariate named: .datehour")
+  expect_error(add_covariates(dat, covariates = list(.datehour = "123")), "Cannot have a covariate named: .datehour")
+})

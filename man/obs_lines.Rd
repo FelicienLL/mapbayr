@@ -9,7 +9,17 @@
 \usage{
 obs_lines(x, ...)
 
-\method{obs_lines}{data.frame}(x, ID = NULL, time, evid = 0L, cmt, DV = NA_real_, mdv = NULL, ...)
+\method{obs_lines}{data.frame}(
+  x,
+  ID = NULL,
+  time = NULL,
+  evid = 0L,
+  cmt,
+  DV = NA_real_,
+  mdv = NULL,
+  .datehour = NULL,
+  ...
+)
 
 \method{obs_lines}{missing}(...)
 
@@ -22,7 +32,7 @@ obs_lines(x, ...)
 
 \item{ID}{subject ID (default is 1)}
 
-\item{time}{event time}
+\item{time}{event time. Default is 0 if no previous events. Mind consistency with \code{.datehour}.}
 
 \item{evid}{event identification (default is 1 for administration, 0 for observation)}
 
@@ -31,6 +41,8 @@ obs_lines(x, ...)
 \item{DV}{dependent value, i.e. observed concentration.}
 
 \item{mdv}{missing dependent value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)}
+
+\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will udpate the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
 
 \item{DVmet}{second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if \code{x} is a 'mrgsolve' model where two \verb{[OBS]} compartments were defined (see \code{examples})}
 }
@@ -48,6 +60,11 @@ obs_lines(time = 12, DV = 0.12, cmt = 2)
 library(magrittr)
 obs_lines(time = 12, DV = 0.12, cmt = 2) \%>\%
   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
+
+# Inform times using the `.datehour` argument:
+obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) \%>\%
+  obs_lines(.datehour = "2020-01-02 22:22", DV = 0.34, cmt = 1) \%>\%
+  obs_lines(time = 48, DV = 0.56, cmt = 1)
 
 # Start from a 'mrgsolve' model
 library(mrgsolve)

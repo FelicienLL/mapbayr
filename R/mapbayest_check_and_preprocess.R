@@ -116,6 +116,9 @@ check_mapbayr_data <- function(data){
   # Is there any data?
   if(is.null(data)) stop("No data provided", call. = F)
 
+  # Remove .datehour, if any
+  data[[".datehour"]] <- NULL
+
   # Are all column numerics
   non_num <- names(data)[!sapply(data, is.numeric)]
   if(length(non_num)) stop(paste("Non-numeric column found:", paste(non_num, collapse = " ")), call. = F)

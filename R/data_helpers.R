@@ -28,6 +28,10 @@
 #'   obs_lines(time = 48, cmt = 2) %>%
 #'   add_covariates(BW = 90, SEX = 0, TOLA = TRUE)
 #'
+#' # You can even inform "time" using date and hours:
+#' adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") %>%
+#'   obs_lines(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
+#'
 #' # Second option: work with a dataset within a 'mrgsolve' model
 #' mod <- exmodel(add_exdata = FALSE)
 #' # call `mrgsolve::see(mod)` to see how default compartment were coded
@@ -51,7 +55,7 @@ NULL
 #'
 #' @param x either a data.frame or a 'mrgsolve' model object
 #' @param ID subject ID (default is 1)
-#' @param time event time (default is 0 if first administration)
+#' @param time event time. Default is 0 if no previous events. Mind consistency with `.datehour`.
 #' @param evid event identification (default is 1 for administration, 0 for observation)
 #' @param cmt compartment (no default, except if `[ADM]` was tagged in the `$CMT` block in model code. See `examples`.)
 #' @param amt dose amount (for administration records only)
@@ -60,6 +64,7 @@ NULL
 #' @param ss steady-state (optional, is this dose the last of an infinity of administration? Yes, 1, or no, 0)
 #' @param ii inter-dose interval (optional, use it with `ss` and `addl`)
 #' @param rate rate of administration (optional, set to -2 if you model zero-order infusion. See `examples`.)
+#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will udpate the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
 #' @param ... additional columns or arguments for [mrgsolve::ev()]
 #'
 #' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with [get_data()]).
@@ -73,6 +78,11 @@ NULL
 #' library(magrittr)
 #' adm_lines(amt = 100, cmt = 1) %>%
 #'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1)
+#'
+#' # Inform times using the `.datehour` argument:
+#' adm_lines(.datehour = "2020-01-01 11:11", amt = 100, cmt = 1) %>%
+#'   adm_lines(.datehour = "2020-01-02 22:22", amt = 200, cmt = 1) %>%
+#'   adm_lines(time = 48, amt = 300, cmt = 1)
 #'
 #' # Start from a 'mrgsolve' model
 #' library(mrgsolve)
@@ -149,42 +159,14 @@ adm_lines.data.frame <- function(x,
     }
   }
 
-  dh0 <- NULL
-  if(is.null(.datehour)){
-    if(is.null(time)){
-      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
-        time <- 0
-      } # else error later, a time must be provided
-    } #else : time is time and dh0 does not change if any
-  } else { # -> .datehour is non NULL
-    .datehour <- parse_datehour(.datehour)
-    if(is.null(time)){
-      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
-        dh0 <- min(.datehour)
-        time <- as.double.difftime(.datehour - dh0, units = "hours")
-      } else { # old dataset exists
-        if(is.null(old_data[[".datehour"]])){
-          stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
-        } else {
-          old_dh0 <- cur_dh0(old_data)
-          dh0 <- min(.datehour, old_dh0)
-          delta_dh <- as.double.difftime(old_dh0 - dh0, units = "hours")
-          old_data$time <- old_data$time + delta_dh
-          time <- as.double.difftime(.datehour - dh0, units = "hours")
-        }
-      }
-    } else { #time and .datehour are non-null
-      if(length(time) != length(.datehour)) stop("`.time` and `.datehour` are of different length.")
-      if(nrow(old_data) == 0 || is.null(old_data[[".datehour"]])){
-          dh0 <- unique(.datehour - time * 60 * 60)
-          if(length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
-      } else {# old dataset exists and has .datehour
-        old_dh0 <- cur_dh0(old_data)
-        new_dh0 <- unique(.datehour - time * 60 * 60)
-        if(any(old_dh0 != new_dh0)) stop("`time` and `.datehour` are inconsistent with values already in the initial dataset.")
-      }
-    }
-  }
+  # Redefine time and deal with .datehour
+  datehour_answers <- datehour_manager(old_data = old_data,
+                                       time = time,
+                                       .datehour = .datehour)
+  dh0 <- datehour_answers$dh0
+  time <- datehour_answers$time
+  .datehour <- datehour_answers$.datehour
+  old_data <- datehour_answers$old_data
 
   # MATCH time & amt, and CROSS WITH cmt and rate
   if(length(time) == length(amt)){
@@ -250,12 +232,13 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #'
 #' @param x either a data.frame or a 'mrgsolve' model object
 #' @param ID subject ID (default is 1)
-#' @param time event time
+#' @param time event time. Default is 0 if no previous events. Mind consistency with `.datehour`.
 #' @param evid event identification (default is 1 for administration, 0 for observation)
 #' @param cmt compartment (no default, except if `[OBS]` was tagged in the `$CMT` block in model code. See `examples`.)
 #' @param DV dependent value, i.e. observed concentration.
 #' @param mdv missing dependent value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)
 #' @param ... additional columns
+#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will udpate the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
 #' @param DVmet second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if `x` is a 'mrgsolve' model where two `[OBS]` compartments were defined (see `examples`)
 #'
 #' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with [get_data()]).
@@ -269,6 +252,11 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #' library(magrittr)
 #' obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
 #'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
+#'
+#' # Inform times using the `.datehour` argument:
+#' obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) %>%
+#'   obs_lines(.datehour = "2020-01-02 22:22", DV = 0.34, cmt = 1) %>%
+#'   obs_lines(time = 48, DV = 0.56, cmt = 1)
 #'
 #' # Start from a 'mrgsolve' model
 #' library(mrgsolve)
@@ -321,11 +309,12 @@ obs_lines <- function(x, ...){
 #' @export
 obs_lines.data.frame <- function(x,
                                  ID = NULL,
-                                 time,
+                                 time = NULL,
                                  evid = 0L,
                                  cmt,
                                  DV = NA_real_,
                                  mdv = NULL,
+                                 .datehour = NULL,
                                  ...){
   old_data <- x
 
@@ -338,6 +327,15 @@ obs_lines.data.frame <- function(x,
       ID <- cur_ID
     }
   }
+
+  # Redefine time and deal with .datehour
+  datehour_answers <- datehour_manager(old_data = old_data,
+                                       time = time,
+                                       .datehour = .datehour)
+  dh0 <- datehour_answers$dh0
+  time <- datehour_answers$time
+  .datehour <- datehour_answers$.datehour
+  old_data <- datehour_answers$old_data
 
   # Match time and cmt to the length of DV (especially if DV is parent + metab)
   cmttime <- expand.grid(cmt, time)
@@ -360,7 +358,7 @@ obs_lines.data.frame <- function(x,
   }
 
   new_data <- bind_rows(old_data, new_lines)
-  rearrange_nmdata(new_data)
+  rearrange_nmdata(new_data, dh0 = dh0)
 }
 
 #' @method obs_lines missing
@@ -474,9 +472,11 @@ add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE,
   old_data <- x
 
   if(length(covariates) != 0){
+    forbidden_covariate(x = covariates, cov = ".datehour")
     new_data <- bind_cols(old_data, covariates)
   } else {
     dots <- list(...)
+    forbidden_covariate(x = dots, cov = ".datehour")
     if(length(dots) != 0){
       if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
         warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
@@ -551,7 +551,6 @@ rearrange_nmdata <- function(x, dh0 = NULL){
   if(!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))){
     x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
   }
-
   # Fill .datehour if exists or requested
   if(any(!is.null(x[[".datehour"]]), !is.null(dh0))){
     if(is.null(dh0)){
@@ -624,4 +623,58 @@ parse_datehour <- function(x){
 cur_dh0 <- function(x, na.rm = FALSE){
   if(is.null(x[[".datehour"]])) return(NULL)
   min(x$.datehour, na.rm = na.rm) - x$time[which.min(x$.datehour)] * 60 * 60
+}
+
+datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
+  if(is.null(.datehour)){
+    if(is.null(time)){
+      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
+        time <- 0
+      } # else error later, a time must be provided
+    } #else : time is time and dh0 does not change if any
+  } else { # -> .datehour is non NULL
+    .datehour <- parse_datehour(.datehour)
+    if(is.null(time)){
+      if(nrow(old_data) == 0){
+        dh0 <- min(.datehour)
+        time <- as.double.difftime(.datehour - dh0, units = "hours")
+      } else { # old dataset exists
+        if(is.null(old_data[[".datehour"]])){
+          if(all(old_data[["time"]] == 0)){
+            dh0 <- min(.datehour)
+            time <- as.double.difftime(.datehour - dh0, units = "hours")
+          } else { #cannot default to 0 -> stop.
+            stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
+          }
+        } else {
+          old_dh0 <- cur_dh0(old_data)
+          dh0 <- min(.datehour, old_dh0)
+          delta_dh <- as.double.difftime(old_dh0 - dh0, units = "hours")
+          old_data$time <- old_data$time + delta_dh
+          time <- as.double.difftime(.datehour - dh0, units = "hours")
+        }
+      }
+    } else { #time and .datehour are non-null
+      if(length(time) != length(.datehour)) stop("`.time` and `.datehour` are of different length.")
+      if(nrow(old_data) == 0 || is.null(old_data[[".datehour"]])){
+        dh0 <- unique(.datehour - time * 60 * 60)
+        if(length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
+      } else {# old dataset exists and has .datehour
+        old_dh0 <- cur_dh0(old_data)
+        new_dh0 <- unique(.datehour - time * 60 * 60)
+        if(any(old_dh0 != new_dh0)) stop("`time` and `.datehour` are inconsistent with values already in the initial dataset.")
+      }
+    }
+  }
+
+  list(
+    old_data = old_data,
+    time = time,
+    .datehour = .datehour,
+    dh0 = dh0
+  )
+}
+
+forbidden_covariate <- function(x, cov){
+  if(any(names(x) == cov)) stop("Cannot have a covariate named: ", cov)
 }
