@@ -121,7 +121,6 @@ adm_lines <- function(x, ...) {
   }
 }
 
-
 #' @rdname adm_lines
 #' @method adm_lines data.frame
 #' @export
@@ -136,6 +135,7 @@ adm_lines.data.frame <- function(x,
                                  ss = NULL,
                                  ii = NULL,
                                  rate = NULL,
+                                 .datehour = NULL,
                                  ...){
   old_data <- x
 
@@ -149,9 +149,39 @@ adm_lines.data.frame <- function(x,
     }
   }
 
-  # TIME
-  if(is.null(time) && (all(old_data[["time"]]==0) | nrow(old_data)==0)){
-    time <- 0
+  dh0 <- NULL
+  if(is.null(.datehour)){
+    if(is.null(time)){
+      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
+        time <- 0
+      } # else error later, a time must be provided
+    } #else : time is time and dh0 does not change if any
+  } else { # -> .datehour is non NULL
+    .datehour <- parse_datehour(.datehour)
+    if(is.null(time)){
+      if(nrow(old_data) == 0){
+        dh0 <- min(.datehour)
+        time <- as.double.difftime(.datehour - dh0, units = "hours")
+      } else { # old dataset exists
+        if(is.null(old_data[[".datehour"]])){
+          stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
+        } else {
+          old_dh0 <- min(old_data[[".datehour"]])
+          dh0 <- min(.datehour, old_dh0)
+          delta_dh <- as.double.difftime(old_dh0 - dh0, units = "hours")
+          old_data$time <- old_data$time + delta_dh
+          time <- as.double.difftime(.datehour - dh0, units = "hours")
+        }
+      }
+    } else { #time and .datehour are non-null
+      if(length(time) != length(.datehour)) stop("`.time` and `.datehour` are of different length.")
+      if(nrow(old_data) == 0 || is.null(old_data[[".datehour"]])){
+          dh0 <- unique(.datehour - time * 60 * 60)
+          if(length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
+      } else {
+        stop("Both `time` and `.datehour` are non-NULL, but `time` and `.datehour` already match each other in the initial dataset. Please use one or the other.")
+      }
+    }
   }
 
   # MATCH time & amt, and CROSS WITH cmt and rate
@@ -174,7 +204,7 @@ adm_lines.data.frame <- function(x,
 
   new_lines <- as.data.frame(do.call(ev, ev_args))
   new_data <- bind_rows(old_data, new_lines)
-  rearrange_nmdata(new_data)
+  rearrange_nmdata(new_data, dh0 = dh0)
 }
 
 #' @rdname adm_lines
@@ -514,10 +544,18 @@ NULL_remove <- function(x){
   x[!sapply(x,is.null)]
 }
 
-rearrange_nmdata <- function(x){
+rearrange_nmdata <- function(x, dh0 = NULL){
   # Arrange. ADM (evid1) before OBS (evid0) if same time = recsort 3/4
   if(!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))){
     x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
+  }
+
+  # Fill .datehour if exists or requested
+  if(any(!is.null(x[[".datehour"]]), !is.null(dh0))){
+    if(is.null(dh0)){
+      dh0 <- min(x[[".datehour"]], na.rm = TRUE)
+    }
+    x[[".datehour"]] <- dh0 + x$time*60*60
   }
 
   # Fill AOLA/TOLA if exists
@@ -558,3 +596,26 @@ rearrange_nmdata <- function(x){
   if(!is.null(x[["ss"]]))   x$ss[is.na(x$ss)]     <- 0
   x
 }
+
+parse_datehour <- function(x){
+  if(inherits(x, "POSIXct")){
+    return(x)
+  }
+
+  if(is.double(x)){
+    return(lubridate::as_datetime(x))
+  }
+
+  if(is.character(x)){
+    y <- lubridate::ymd_hms(x, quiet = TRUE)
+    if(!any(is.na(y))) return(y)
+    y <- lubridate::ymd_hm(x, quiet = TRUE)
+    if(!any(is.na(y))) return(y)
+    y <- lubridate::dmy_hms(x, quiet = TRUE)
+    if(!any(is.na(y))) return(y)
+    y <- lubridate::dmy_hm(x, quiet = TRUE)
+    if(!any(is.na(y))) return(y)
+  }
+  stop("Cannot parse `.datehour`. No valid format found.")
+}
+
