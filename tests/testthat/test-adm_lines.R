@@ -139,5 +139,108 @@ test_that("no NA in SS, ADDL, RATE or II",{
     get_data()
 
   expect_false(any(is.na(data3$rate)))
+})
 
+
+dh1 <- as.POSIXct("2022/01/01 10:00:00", tz = "UTC")
+dh2 <- as.POSIXct("2022/01/02 10:00:00", tz = "UTC")
+dh3 <- as.POSIXct("2022/01/03 10:00:00", tz = "UTC")
+
+test_that("cur_dh0 works", {
+  expect_null(cur_dh0(tibble::tibble()))
+  expect_equal(cur_dh0(data.frame(time = c(0, 24), .datehour = c(dh1, dh2))), dh1)
+  expect_equal(cur_dh0(data.frame(time = c(0, 0, 24), .datehour = c(dh1, dh1, dh2))), dh1)
+  expect_equal(cur_dh0(data.frame(time = c(24), .datehour = c(dh2))), dh1)
+})
+
+test_that(".datehour works", {
+
+  #1) time=NULL, no initial data
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = dh1)
+  )
+
+  #2) time=NULL, initial data without .datehour
+  #> ok if all time = 0
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0) %>%
+      adm_lines(amt = 200, cmt = 1, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = c(100,200), mdv = 1L, .datehour = dh1)
+  )
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0) %>%
+      adm_lines(amt = 200, cmt = 1, .datehour = c(dh1, dh2)),
+    tibble::tibble(ID = 1L, time = c(0, 0, 24), evid = 1L, cmt = 1L, amt = c(100, 200, 200), mdv = 1L, .datehour = c(dh1, dh1, dh2))
+  )
+  #> error otherwise
+  expect_error(
+    adm_lines(amt = 100, cmt = 1, time = 24) %>%
+      adm_lines(amt = 200, cmt = 1, .datehour = dh1),
+    "Cannot assign when `.datehour` is in the timeline already defined by `time`."
+  )
+
+  #3) time non-NULL, no initial data
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = dh1)
+  )
+
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 24, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = 24, evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = dh1)
+  )
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = c(0,24), .datehour = c(dh1,dh2)),
+    tibble::tibble(ID = 1L, time = c(0,24), evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = c(dh1,dh2))
+  )
+  expect_error(
+    adm_lines(amt = 100, cmt = 1, time = 24, .datehour = c(dh1,dh2)),
+    "`.time` and `.datehour` are of different length."
+  )
+
+  #3) time non-NULL, initial data without .datehour
+  #>  if all times = 0
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0) %>%
+      adm_lines(amt = 200, cmt = 1, time = 0, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L, .datehour = dh1)
+  )
+  #>  if initial time = 0, time > 0
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0) %>%
+      adm_lines(amt = 200, cmt = 1, time = 24, .datehour = dh2),
+    tibble::tibble(ID = 1L, time = c(0, 24), evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L, .datehour = c(dh1, dh2))
+  )
+  #>  if initial time > 0, time > 0
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 48) %>%
+      adm_lines(amt = 200, cmt = 1, time = 24, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = c(24, 48), evid = 1L, cmt = 1L, amt = c(200, 100), mdv = 1L, .datehour = c(dh1, dh2))
+  )
+  #>  if initial time > 0, time = 0
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 48) %>%
+      adm_lines(amt = 200, cmt = 1, time = 0, .datehour = dh1),
+    tibble::tibble(ID = 1L, time = c(0, 48), evid = 1L, cmt = 1L, amt = c(200, 100), mdv = 1L, .datehour = c(dh1, dh3))
+  )
+
+  #4) time non-NULL, initial data with .datehour
+  #> new time/datehour matching, but consistent so ok
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 0, .datehour = dh1) %>%
+      adm_lines(amt = 200, cmt = 1, time = 24, .datehour = dh2),
+    tibble::tibble(ID = 1L, time = c(0, 24), evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L, .datehour = c(dh1, dh2))
+  )
+  expect_equal(
+    adm_lines(amt = 100, cmt = 1, time = 48, .datehour = dh3) %>%
+      adm_lines(amt = 200, cmt = 1, time = 24, .datehour = dh2),
+    tibble::tibble(ID = 1L, time = c(24, 48), evid = 1L, cmt = 1L, amt = c(200, 100), mdv = 1L, .datehour = c(dh2, dh3))
+  )
+  #> new time/datehour matching, but consistent so ok
+  expect_error(
+    adm_lines(amt = 100, cmt = 1, time = 48, .datehour = dh3) %>%
+      adm_lines(amt = 200, cmt = 1, time = 9999, .datehour = dh2),
+    "`time` and `.datehour` are inconsistent with values already in the initial dataset."
+  )
 })

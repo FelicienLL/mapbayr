@@ -159,14 +159,14 @@ adm_lines.data.frame <- function(x,
   } else { # -> .datehour is non NULL
     .datehour <- parse_datehour(.datehour)
     if(is.null(time)){
-      if(nrow(old_data) == 0){
+      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
         dh0 <- min(.datehour)
         time <- as.double.difftime(.datehour - dh0, units = "hours")
       } else { # old dataset exists
         if(is.null(old_data[[".datehour"]])){
           stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
         } else {
-          old_dh0 <- min(old_data[[".datehour"]])
+          old_dh0 <- cur_dh0(old_data)
           dh0 <- min(.datehour, old_dh0)
           delta_dh <- as.double.difftime(old_dh0 - dh0, units = "hours")
           old_data$time <- old_data$time + delta_dh
@@ -178,8 +178,10 @@ adm_lines.data.frame <- function(x,
       if(nrow(old_data) == 0 || is.null(old_data[[".datehour"]])){
           dh0 <- unique(.datehour - time * 60 * 60)
           if(length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
-      } else {
-        stop("Both `time` and `.datehour` are non-NULL, but `time` and `.datehour` already match each other in the initial dataset. Please use one or the other.")
+      } else {# old dataset exists and has .datehour
+        old_dh0 <- cur_dh0(old_data)
+        new_dh0 <- unique(.datehour - time * 60 * 60)
+        if(any(old_dh0 != new_dh0)) stop("`time` and `.datehour` are inconsistent with values already in the initial dataset.")
       }
     }
   }
@@ -553,7 +555,7 @@ rearrange_nmdata <- function(x, dh0 = NULL){
   # Fill .datehour if exists or requested
   if(any(!is.null(x[[".datehour"]]), !is.null(dh0))){
     if(is.null(dh0)){
-      dh0 <- min(x[[".datehour"]], na.rm = TRUE)
+      dh0 <- cur_dh0(x, na.rm = TRUE)
     }
     x[[".datehour"]] <- dh0 + x$time*60*60
   }
@@ -619,3 +621,7 @@ parse_datehour <- function(x){
   stop("Cannot parse `.datehour`. No valid format found.")
 }
 
+cur_dh0 <- function(x, na.rm = FALSE){
+  if(is.null(x[[".datehour"]])) return(NULL)
+  min(x$.datehour, na.rm = na.rm) - x$time[which.min(x$.datehour)] * 60 * 60
+}
