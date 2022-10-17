@@ -51,13 +51,6 @@ test_that("AOLA TOLA works", {
 
 })
 
-test_that("fill is NOCB", {
-  dat <- adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
-    add_covariates(BW = c(90, 85, 80), SEX = 0) %>%
-    obs_lines(time = 36, DV = .0123, cmt = 2)
-  expect_equal(dat$BW, c(90, 85, 80, 80))
-})
-
 test_that("cannot have '.datehour'",{
   dat <- adm_lines(amt = 100, cmt = 1)
   expect_error(add_covariates(dat, .datehour = "123"), "Cannot have a covariate named: .datehour")
