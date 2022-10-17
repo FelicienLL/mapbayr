@@ -92,7 +92,7 @@ test_that("obs_lines.mrgmod works", {
                               DV = c(1, 10, 2, NA, 3, 30), mdv = c(0L, 0L, 0L, 1L, 0L, 0L)))
 })
 
-test_that(".datehour works", {
+test_that(".datehour works in obs_lines()", {
   dh1 <- as.POSIXct("2022/01/01 10:00:00", tz = "UTC")
   dh2 <- as.POSIXct("2022/01/02 10:00:00", tz = "UTC")
   expect_equal(
@@ -100,5 +100,4 @@ test_that(".datehour works", {
       obs_lines(cmt = 2, .datehour = dh2, DV = 456),
     tibble::tibble(ID = 1L, time = c(0,24), evid = 0L, cmt = 2L, DV = c(123,456), mdv = 0L, .datehour = c(dh1, dh2))
     )
-  # Other extensive tests about .datehour in "test-adm_lines.R"
 })

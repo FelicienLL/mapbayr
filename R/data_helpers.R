@@ -526,6 +526,7 @@ add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA
 
 AOLA <- function(x){
   x %>%
+    arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
     mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
     fill(.data$AOLA) %>%
@@ -535,7 +536,7 @@ AOLA <- function(x){
 TOLA <- function(x){
   x %>%
     realize_addl() %>%
-    arrange(.data$ID, .data$time, -.data$evid, .data$cmt) %>%
+    arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
     mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
     fill(.data$TOLA) %>%
@@ -658,11 +659,12 @@ parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c
 cur_dh0 <- function(x, na.rm = FALSE){
   if(is.null(x[[".datehour"]])) return(NULL)
   which_min_datehour <- which.min(x$.datehour)
-  if(length(which_min_datehour)==0) return(as.POSIXct(NA))
+  if(length(which_min_datehour)==0) return(as.POSIXct(NA, tz = "UTC"))
   suppressWarnings(min(x$.datehour, na.rm = na.rm)) - x$time[which_min_datehour] * 60 * 60
 }
 
-datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
+datehour_manager <- function(old_data, time, .datehour){
+  dh0 <- NULL
   if(is.null(.datehour)){
     if(is.null(time)){
       if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
@@ -713,7 +715,7 @@ datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
 }
 
 forbidden_covariate <- function(x, cov){
-  if(any(names(x) == cov)) stop("Cannot have a covariate named: ", cov)
+  if(any(names(x) %in% cov)) stop("Cannot have a covariate named: ", paste(cov, collapse = " "))
 }
 
 
