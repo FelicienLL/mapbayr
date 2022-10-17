@@ -262,3 +262,12 @@ test_that(".datehour works", {
   expect_s3_class(est, "mapbayests")
 
 })
+
+test_that("filter.mrgmod works", {
+  mod <- mrgsolve::mcode("mod", "$CMT FOO", compile = FALSE)
+  dat <- mod %>%
+    adm_lines(amt = c(100, 200, 300), cmt = 1) %>%
+    filter(amt != 200) %>%
+    get_data()
+  expect_equal(dat$amt, c(100, 300))
+})

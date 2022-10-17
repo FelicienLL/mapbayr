@@ -2,7 +2,6 @@ test_that("parse_datehour works", {
   options(mapbayr.datehour = NULL)
   dh1 <- as.POSIXct("2022-02-02 22:33:44", tz = "UTC")
   dh2 <- as.POSIXct("2022-02-02 22:33:00", tz = "UTC")
-  d1 <- as.POSIXct("2022-02-02 00:00:00", tz = "UTC")
 
   # POSITct
   expect_equal(parse_datehour(x = dh1), dh1)
@@ -16,14 +15,12 @@ test_that("parse_datehour works", {
   # default formats
   expect_equal(parse_datehour(x = "2022-02-02 22:33:44"), dh1)
   expect_equal(parse_datehour(x = "2022-02-02 22:33"), dh2)
-  expect_equal(parse_datehour(x = "2022-02-02"), d1)
   expect_equal(parse_datehour(x = "02-02-2022 22:33:44"), dh1)
   expect_equal(parse_datehour(x = "02-02-2022 22:33"), dh2)
-  expect_equal(parse_datehour(x = "02-02-2022"), d1)
 
   #through options with adm_lines/obs_lines
 
-  expect_error(adm_lines(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1), "Cannot parse `.datehour`. No valid format found.")
+  expect_equal(adm_lines(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1)$time, NA_real_)
   options(mapbayr.datehour = "HM dmY")
   expect_equal(
     adm_lines(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1),

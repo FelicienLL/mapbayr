@@ -6,8 +6,8 @@
 \usage{
 parse_datehour(
   x,
-  orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "Ymd",
-    "dmY HMS", "dmY HM", "dmY"))
+  orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "dmY HMS",
+    "dmY HM"))
 )
 }
 \arguments{
@@ -25,20 +25,23 @@ A wrapper around functions of \code{lubridate}, mainly in order to transform cha
 # POSITct are returned as is.
 parse_datehour(x = as.POSIXct("2022-02-02 22:22:22", tz = "UTC"))
 
-# numeric are passed to `lubridate::as_datetime()`.
+# Numerics are passed to `lubridate::as_datetime()`.
 parse_datehour(1643840542)
 
-# characters are passed to `lubridate::parse_date_time()`.
+# Characters are passed to `lubridate::parse_date_time()`.
 # The format used will be the one defined in `orders`
 parse_datehour(x = "2022-02-02 22:22:22", orders = "Ymd HMS")
 parse_datehour(x = "02-02-2022 22:22", orders = "dmY HM")
 
 # By default, the following formats will be subsequently tried:
-# "Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"#'
+# "Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"
 
-# Alternatively, set a format through `options(mapbayr.datehour)`
-# Convenient for the use `.datehour` in  [adm_lines()] and [obs_lines()]
-\dontrun{adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)}
+# Alternatively, set a format through `options(mapbayr.datehour)`.
+# Convenient for the use `.datehour` in  `adm_lines()` and `obs_lines()`.
+
+# Following format will return NA:
+adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+
 options(mapbayr.datehour = "HM dmY")
 adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 options(mapbayr.datehour = NULL)

@@ -568,7 +568,7 @@ rearrange_nmdata <- function(x, dh0 = NULL){
   x <- relocate(x, any_of(nmtran))
 
   # Fill covariates (NOCB)
-  non_nmtran_variables <- names(x)[!names(x) %in% c(nmtran, "AOLA", "TOLA")]
+  non_nmtran_variables <- names(x)[!names(x) %in% c(nmtran, "AOLA", "TOLA", ".datehour")]
   x <- x %>%
     group_by(.data$ID) %>%
     fill(any_of(non_nmtran_variables), .direction = "updown") %>%
@@ -613,25 +613,28 @@ rearrange_nmdata <- function(x, dh0 = NULL){
 #' # POSITct are returned as is.
 #' parse_datehour(x = as.POSIXct("2022-02-02 22:22:22", tz = "UTC"))
 #'
-#' # numeric are passed to `lubridate::as_datetime()`.
+#' # Numerics are passed to `lubridate::as_datetime()`.
 #' parse_datehour(1643840542)
 #'
-#' # characters are passed to `lubridate::parse_date_time()`.
+#' # Characters are passed to `lubridate::parse_date_time()`.
 #' # The format used will be the one defined in `orders`
 #' parse_datehour(x = "2022-02-02 22:22:22", orders = "Ymd HMS")
 #' parse_datehour(x = "02-02-2022 22:22", orders = "dmY HM")
 #'
 #' # By default, the following formats will be subsequently tried:
-#' # "Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"#'
+#' # "Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"
 #'
-#' # Alternatively, set a format through `options(mapbayr.datehour)`
-#' # Convenient for the use `.datehour` in  [adm_lines()] and [obs_lines()]
-#' \dontrun{adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)}
+#' # Alternatively, set a format through `options(mapbayr.datehour)`.
+#' # Convenient for the use `.datehour` in  `adm_lines()` and `obs_lines()`.
+#'
+#' # Following format will return NA:
+#' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+#'
 #' options(mapbayr.datehour = "HM dmY")
 #' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 #' options(mapbayr.datehour = NULL)
 
-parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "Ymd", "dmY HMS", "dmY HM", "dmY"))){
+parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"))){
   if(inherits(x, "POSIXct")){
     return(x)
   }
@@ -648,19 +651,15 @@ parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c
   }
 
   if(is.character(x)){
-    y <- lubridate::parse_date_time(x = x, orders = orders, quiet = TRUE)
-
-    if(any(is.na(y))){
-      stop("Cannot parse `.datehour`. No valid format found.", call. = FALSE)
-    } else {
-      return(y)
-    }
+    return(lubridate::parse_date_time(x = x, orders = orders, quiet = TRUE))
   }
 }
 
 cur_dh0 <- function(x, na.rm = FALSE){
   if(is.null(x[[".datehour"]])) return(NULL)
-  min(x$.datehour, na.rm = na.rm) - x$time[which.min(x$.datehour)] * 60 * 60
+  which_min_datehour <- which.min(x$.datehour)
+  if(length(which_min_datehour)==0) return(as.POSIXct(NA))
+  suppressWarnings(min(x$.datehour, na.rm = na.rm)) - x$time[which_min_datehour] * 60 * 60
 }
 
 datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
@@ -674,19 +673,19 @@ datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
     .datehour <- parse_datehour(.datehour)
     if(is.null(time)){
       if(nrow(old_data) == 0){
-        dh0 <- min(.datehour)
+        dh0 <- suppressWarnings(min(.datehour, na.rm = TRUE))
         time <- as.double.difftime(.datehour - dh0, units = "hours")
       } else { # old dataset exists
         if(is.null(old_data[[".datehour"]])){
           if(all(old_data[["time"]] == 0)){
-            dh0 <- min(.datehour)
+            dh0 <- suppressWarnings(min(.datehour, na.rm = TRUE))
             time <- as.double.difftime(.datehour - dh0, units = "hours")
           } else { #cannot default to 0 -> stop.
             stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
           }
         } else {
-          old_dh0 <- cur_dh0(old_data)
-          dh0 <- min(.datehour, old_dh0)
+          old_dh0 <- cur_dh0(old_data, na.rm = TRUE)
+          dh0 <- suppressWarnings(min(.datehour, old_dh0, na.rm = TRUE))
           delta_dh <- as.double.difftime(old_dh0 - dh0, units = "hours")
           old_data$time <- old_data$time + delta_dh
           time <- as.double.difftime(.datehour - dh0, units = "hours")
@@ -715,4 +714,28 @@ datehour_manager <- function(old_data, time, .datehour, dh0 = NULL){
 
 forbidden_covariate <- function(x, cov){
   if(any(names(x) == cov)) stop("Cannot have a covariate named: ", cov)
+}
+
+
+#' @export
+dplyr::filter
+
+#' Filter a dataset within a mrgmod
+#'
+#' @param .data a mrgmod
+#' @param ...,.preserve additional arguments for `dplyr::filter()`
+#'
+#' @return a mrgmod
+#' @method filter mrgmod
+#' @export
+#' @examples
+#' library(magrittr)
+#' mod <- mrgsolve::mcode("mod", "$CMT FOO", compile = FALSE)
+#' mod %>%
+#'   adm_lines(amt = c(100, 200, 300), cmt = 1) %>%
+#'   filter(amt != 200) %>%
+#'   get_data()
+filter.mrgmod <- function(.data, ..., .preserve = FALSE){
+  data <- dplyr::filter(get_data.mrgmod(.data), ... = ..., .preserve = .preserve)
+  data_set(.data, data)
 }
