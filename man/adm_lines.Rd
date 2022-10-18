@@ -81,7 +81,7 @@ library(mrgsolve)
 house() \%>\%
   adm_lines(amt = 100, cmt = 1) \%>\%
   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1) \%>\%
-  mrgsim(delta =1)
+  mrgsim(delta = 1)
 
 # Default administration compartments
 # Set default administration compartments in the code with `[ADM]`

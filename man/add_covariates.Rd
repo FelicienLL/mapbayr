@@ -34,15 +34,15 @@ add_covariates(BW = 90, SEX = 0)
 }
 
 library(magrittr)
-adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(BW = c(90, 85, 80), SEX = 0)
 
 # If covariates are stored in a list, use `covariates = `
-adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
 
 # Missing values are filled with the "next observation carried backward" rule
-adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(BW = c(90, 85, 80), SEX = 0) \%>\%
   obs_lines(time = 36, DV = .0123, cmt = 2)
 # Always verify the output in case of time-varying covariates
@@ -51,7 +51,7 @@ adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) \%>\%
 adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
   obs_lines(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) \%>\%
   add_covariates(TOLA = TRUE, AOLA = TRUE) \%>\%
-  obs_lines(time = 72, cmt = 2, DV = .123) #AOLA/TOLA re-updated afterwards
+  obs_lines(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
 
 # Automatic inclusion of `TOLA`/`AOLA` if they are covariates of the model
 library(mrgsolve)

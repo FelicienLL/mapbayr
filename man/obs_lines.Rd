@@ -59,7 +59,7 @@ obs_lines(time = 12, DV = 0.12, cmt = 2)
 # Pipe-friendly addition of observation record to a pre-existing dataset
 library(magrittr)
 obs_lines(time = 12, DV = 0.12, cmt = 2) \%>\%
-  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
+  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2)
 
 # Inform times using the `.datehour` argument:
 obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) \%>\%
@@ -70,7 +70,7 @@ obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) \%>\%
 library(mrgsolve)
 house() \%>\%
   obs_lines(time = 12, DV = 0.12, cmt = 2) \%>\%
-  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2) \%>\%
+  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2) \%>\%
   mrgsim()
 
 # Default observation compartments
@@ -85,7 +85,7 @@ obs_cmt(model)
 # Thus, no need to manually specify `cmt = 2` anymore.
 model \%>\%
   obs_lines(time = 12, DV = 0.12) \%>\%
-  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0)) \%>\%
+  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0)) \%>\%
   get_data()
 
 # Automatic lines duplication if parent + metabolite defined in the model
@@ -100,8 +100,10 @@ obs_cmt(model)
 
 model \%>\%
   obs_lines(time = 12, DV = 0.12, DVmet = 120) \%>\%
-  obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
-            mdv = c(0,1,0), DVmet = c(340, 560, 780)) \%>\%
+  obs_lines(
+    time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
+    mdv = c(0, 1, 0), DVmet = c(340, 560, 780)
+  ) \%>\%
   get_data()
 }
 \seealso{
