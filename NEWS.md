@@ -6,6 +6,9 @@
 * Refactor of the code to generate more robust data sets, always rearrange for NM-TRAN compatibility.
 * stop exporting `see_data()`
 * Better documentation: Separate documentation for `adm_lines()`, `obs_lines()` and `add_covariates()`. Keep a general `data_helpers` however.
+* New argument `.datehour` in `adm_lines()` and `obs_lines()` in order to compute `time` as function of date and hours provided as character.
+* Export `parse_datehour()`
+* Export `filter.mrgmod()`, a method, wrapper around `dplyr::filter()` for dataset stored in mrgsolve model object ('mrgmod').
 
 # mapbayr 0.8.0
 
