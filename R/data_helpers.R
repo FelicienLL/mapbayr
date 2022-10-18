@@ -47,8 +47,6 @@
 NULL
 #> NULL
 
-#
-
 #' Add administration lines to a dataset
 #'
 #' @description The `adm_lines()` function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [obs_lines()] and [add_covariates()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
@@ -89,7 +87,7 @@ NULL
 #' house() %>%
 #'   adm_lines(amt = 100, cmt = 1) %>%
 #'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1) %>%
-#'   mrgsim(delta =1)
+#'   mrgsim(delta = 1)
 #'
 #' # Default administration compartments
 #' # Set default administration compartments in the code with `[ADM]`
@@ -124,7 +122,7 @@ NULL
 #'   get_data()
 #' @seealso [data_helpers]
 adm_lines <- function(x, ...) {
-  if(missing(x)) {
+  if (missing(x)) {
     adm_lines.missing(...)
   } else {
     UseMethod("adm_lines")
@@ -146,13 +144,13 @@ adm_lines.data.frame <- function(x,
                                  ii = NULL,
                                  rate = NULL,
                                  .datehour = NULL,
-                                 ...){
+                                 ...) {
   old_data <- x
 
   # ID
-  if(is.null(ID)){
+  if (is.null(ID)) {
     cur_ID <- utils::tail(old_data[["ID"]], 1)
-    if(is.null(cur_ID)){
+    if (is.null(cur_ID)) {
       ID <- 1L
     } else {
       ID <- cur_ID
@@ -160,22 +158,24 @@ adm_lines.data.frame <- function(x,
   }
 
   # Redefine time and deal with .datehour
-  datehour_answers <- datehour_manager(old_data = old_data,
-                                       time = time,
-                                       .datehour = .datehour)
+  datehour_answers <- datehour_manager(
+    old_data = old_data,
+    time = time,
+    .datehour = .datehour
+  )
   dh0 <- datehour_answers$dh0
   time <- datehour_answers$time
   .datehour <- datehour_answers$.datehour
   old_data <- datehour_answers$old_data
 
   # MATCH time & amt, and CROSS WITH cmt and rate
-  if(length(time) == length(amt)){
+  if (length(time) == length(amt)) {
     nadm <- length(time)
   } else {
     amttime <- expand.grid(amt, time)
     nadm <- nrow(amttime)
-    amt <- amttime[,1]
-    time <- amttime[,2]
+    amt <- amttime[, 1]
+    time <- amttime[, 2]
   }
   amt <- rep(amt, each = length(cmt))
   time <- rep(time, each = length(cmt))
@@ -194,7 +194,7 @@ adm_lines.data.frame <- function(x,
 #' @rdname adm_lines
 #' @method adm_lines missing
 #' @export
-adm_lines.missing <- function(...){
+adm_lines.missing <- function(...) {
   x <- as_tibble(data.frame())
   adm_lines.data.frame(x = x, ... = ...)
 }
@@ -202,15 +202,15 @@ adm_lines.missing <- function(...){
 #' @rdname adm_lines
 #' @method adm_lines mrgmod
 #' @export
-adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
-  #x = a model object
-  old_data <- get_data.mrgmod(x) #if no data: an empty 0x0 tibble, not "NULL"!
+adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
+  # x = a model object
+  old_data <- get_data.mrgmod(x) # if no data: an empty 0x0 tibble, not "NULL"!
 
-  if(is.null(rate)){
+  if (is.null(rate)) {
     zero_order_cmt <- adm_0_cmt(x)
-    if(!is.null(zero_order_cmt) && any(cmt==zero_order_cmt)){
+    if (!is.null(zero_order_cmt) && any(cmt == zero_order_cmt)) {
       rate <- rep(0, length(cmt))
-      rate[cmt==zero_order_cmt] <- -2
+      rate[cmt == zero_order_cmt] <- -2
     }
   }
 
@@ -221,10 +221,6 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 
   data_set(x, new_data)
 }
-
-
-
-
 
 #' Add observation lines to a dataset
 #'
@@ -251,7 +247,7 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #' # Pipe-friendly addition of observation record to a pre-existing dataset
 #' library(magrittr)
 #' obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2)
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2)
 #'
 #' # Inform times using the `.datehour` argument:
 #' obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) %>%
@@ -262,7 +258,7 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #' library(mrgsolve)
 #' house() %>%
 #'   obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0), cmt = 2) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2) %>%
 #'   mrgsim()
 #'
 #' # Default observation compartments
@@ -277,7 +273,7 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #' # Thus, no need to manually specify `cmt = 2` anymore.
 #' model %>%
 #'   obs_lines(time = 12, DV = 0.12) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0,1,0)) %>%
+#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0)) %>%
 #'   get_data()
 #'
 #' # Automatic lines duplication if parent + metabolite defined in the model
@@ -292,12 +288,14 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...){
 #'
 #' model %>%
 #'   obs_lines(time = 12, DV = 0.12, DVmet = 120) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
-#'             mdv = c(0,1,0), DVmet = c(340, 560, 780)) %>%
+#'   obs_lines(
+#'     time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
+#'     mdv = c(0, 1, 0), DVmet = c(340, 560, 780)
+#'   ) %>%
 #'   get_data()
 #' @seealso [data_helpers]
-obs_lines <- function(x, ...){
-  if(missing(x)) {
+obs_lines <- function(x, ...) {
+  if (missing(x)) {
     obs_lines.missing(...)
   } else {
     UseMethod("obs_lines")
@@ -315,13 +313,13 @@ obs_lines.data.frame <- function(x,
                                  DV = NA_real_,
                                  mdv = NULL,
                                  .datehour = NULL,
-                                 ...){
+                                 ...) {
   old_data <- x
 
   # ID
-  if(is.null(ID)){
+  if (is.null(ID)) {
     cur_ID <- utils::tail(old_data[["ID"]], 1)
-    if(is.null(cur_ID)){
+    if (is.null(cur_ID)) {
       ID <- 1L
     } else {
       ID <- cur_ID
@@ -329,9 +327,11 @@ obs_lines.data.frame <- function(x,
   }
 
   # Redefine time and deal with .datehour
-  datehour_answers <- datehour_manager(old_data = old_data,
-                                       time = time,
-                                       .datehour = .datehour)
+  datehour_answers <- datehour_manager(
+    old_data = old_data,
+    time = time,
+    .datehour = .datehour
+  )
   dh0 <- datehour_answers$dh0
   time <- datehour_answers$time
   .datehour <- datehour_answers$.datehour
@@ -339,21 +339,21 @@ obs_lines.data.frame <- function(x,
 
   # Match time and cmt to the length of DV (especially if DV is parent + metab)
   cmttime <- expand.grid(cmt, time)
-  #nobs <- nrow(cmttime)
-  cmt <- cmttime[,1]
-  time <- cmttime[,2]
+  # nobs <- nrow(cmttime)
+  cmt <- cmttime[, 1]
+  time <- cmttime[, 2]
 
-  #MDV
-  if(is.null(mdv)){
+  # MDV
+  if (is.null(mdv)) {
     mdv <- as.integer(is.na(DV))
   } else {
-    if(length(mdv) < length(DV)){
+    if (length(mdv) < length(DV)) {
       mdv <- rep(mdv, each = length(unique(cmt)))
     }
   }
 
   new_lines <- data.frame(ID = ID, time = time, evid = evid, cmt = cmt, DV = DV, mdv = mdv, ... = ...)
-  if(any(names(new_lines)=="DVmet")){
+  if (any(names(new_lines) == "DVmet")) {
     warning("`DVmet` column added to the data. If you expected metabolite concentrations set in `DV`, `obs_lines()` must be used with a 'mrgsolve' model.")
   }
 
@@ -364,7 +364,7 @@ obs_lines.data.frame <- function(x,
 #' @method obs_lines missing
 #' @rdname obs_lines
 #' @export
-obs_lines.missing <- function(...){
+obs_lines.missing <- function(...) {
   x <- as_tibble(data.frame())
   obs_lines.data.frame(x = x, ... = ...)
 }
@@ -372,25 +372,25 @@ obs_lines.missing <- function(...){
 #' @method obs_lines mrgmod
 #' @rdname obs_lines
 #' @export
-obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
-  #x = a model object
-  old_data <- get_data.mrgmod(x) #if no data: an empty 0x0 tibble, not "NULL"!
+obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
+  # x = a model object
+  old_data <- get_data.mrgmod(x) # if no data: an empty 0x0 tibble, not "NULL"!
 
-  #CMT
+  # CMT
   model_obs_cmt <- obs_cmt(x)
-  if(is.null(cmt)){
-    if(is.null(DVmet)){
+  if (is.null(cmt)) {
+    if (is.null(DVmet)) {
       cmt <- model_obs_cmt[1]
     } else {
       cmt <- model_obs_cmt
     }
   }
 
-  #DVmet to DV
-  if(!is.null(DVmet)){
-    if(length(cmt)!=2) stop("Define 2 observation compartments with the [OBS] tags in model code")
+  # DVmet to DV
+  if (!is.null(DVmet)) {
+    if (length(cmt) != 2) stop("Define 2 observation compartments with the [OBS] tags in model code")
     nobs <- length(DV)
-    if(nobs != length(DVmet)) stop("`DVmet` must be the same length as `DV`")
+    if (nobs != length(DVmet)) stop("`DVmet` must be the same length as `DV`")
     DV <- as.double(rbind(DV, DVmet)) # = pivot longer: DV[1] DVmet[1] DV[2] DVmet[2] etc
     DVmet <- NULL
   }
@@ -402,9 +402,6 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
 
   data_set(x, new_data)
 }
-
-
-
 
 #' Add covariate columns to a dataset
 #'
@@ -425,15 +422,15 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
 #' }
 #'
 #' library(magrittr)
-#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(BW = c(90, 85, 80), SEX = 0)
 #'
 #' # If covariates are stored in a list, use `covariates = `
-#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
 #'
 #' # Missing values are filled with the "next observation carried backward" rule
-#' adm_lines(time = c(0,24,48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(BW = c(90, 85, 80), SEX = 0) %>%
 #'   obs_lines(time = 36, DV = .0123, cmt = 2)
 #' # Always verify the output in case of time-varying covariates
@@ -442,7 +439,7 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
 #' adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
 #'   obs_lines(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) %>%
 #'   add_covariates(TOLA = TRUE, AOLA = TRUE) %>%
-#'   obs_lines(time = 72, cmt = 2, DV = .123) #AOLA/TOLA re-updated afterwards
+#'   obs_lines(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
 #'
 #' # Automatic inclusion of `TOLA`/`AOLA` if they are covariates of the model
 #' library(mrgsolve)
@@ -458,7 +455,7 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...){
 #'   get_data()
 #' @seealso [data_helpers]
 add_covariates <- function(x, ...) {
-  if(missing(x)){
+  if (missing(x)) {
     stop("Initial dataset not found. Cannot add columns to a dataset that do not exists.")
   } else {
     UseMethod("add_covariates")
@@ -468,21 +465,21 @@ add_covariates <- function(x, ...) {
 #' @method add_covariates data.frame
 #' @rdname add_covariates
 #' @export
-add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE, TOLA = FALSE){
+add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE, TOLA = FALSE) {
   old_data <- x
 
-  if(length(covariates) != 0){
+  if (length(covariates) != 0) {
     forbidden_covariate(x = covariates, cov = ".datehour")
     new_data <- bind_cols(old_data, covariates)
   } else {
     dots <- list(...)
     forbidden_covariate(x = dots, cov = ".datehour")
-    if(length(dots) != 0){
-      if((is.null(names(dots[1]))||names(dots[1])=="") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))){
+    if (length(dots) != 0) {
+      if ((is.null(names(dots[1])) || names(dots[1]) == "") & is.list(dots[[1]]) & !is.null(names(dots[[1]]))) {
         warning("A list was passed as first argument to `add_covariates()`, thus will be interpretated as a list of covariates. This behaviour will be deprecated. Please modify and use the argument add_covariates(covariates = ) explicitely.")
         new_data <- bind_cols(old_data, dots[[1]])
       } else {
-        if(any(is.null(names(dots)))){
+        if (any(is.null(names(dots)))) {
           stop("Arguments must be named (with covariates names)")
         }
         new_data <- bind_cols(old_data, dots)
@@ -491,10 +488,10 @@ add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE,
       new_data <- old_data
     }
   }
-  if(AOLA) {
+  if (AOLA) {
     new_data$AOLA <- 1
   }
-  if(TOLA) {
+  if (TOLA) {
     new_data$TOLA <- 1
   }
   rearrange_nmdata(new_data)
@@ -503,20 +500,19 @@ add_covariates.data.frame <- function(x, ..., covariates = list(), AOLA = FALSE,
 #' @method add_covariates mrgmod
 #' @rdname add_covariates
 #' @export
-add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA = NULL){
-
+add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA = NULL) {
   old_data <- get_data.mrgmod(x)
 
   # AOLA /TOLA
-  if(is.null(AOLA) | is.null(TOLA)){
+  if (is.null(AOLA) | is.null(TOLA)) {
     model_covariates <- mbr_cov_names(x)
   }
 
-  if(is.null(AOLA)){
+  if (is.null(AOLA)) {
     AOLA <- "AOLA" %in% model_covariates
   }
 
-  if(is.null(TOLA)){
+  if (is.null(TOLA)) {
     TOLA <- "TOLA" %in% model_covariates
   }
 
@@ -524,45 +520,45 @@ add_covariates.mrgmod <- function(x, ..., covariates = list(), AOLA = NULL, TOLA
   data_set(x, new_data)
 }
 
-AOLA <- function(x){
+AOLA <- function(x) {
   x %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
-    mutate(AOLA = ifelse(.data$evid %in% c(1,4), .data$amt, NA_real_)) %>%
+    mutate(AOLA = ifelse(.data$evid %in% c(1, 4), .data$amt, NA_real_)) %>%
     fill(.data$AOLA) %>%
     ungroup()
 }
 
-TOLA <- function(x){
+TOLA <- function(x) {
   x %>%
     realize_addl() %>%
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
-    mutate(TOLA = ifelse(.data$evid %in% c(1,4), .data$time, NA_real_)) %>%
+    mutate(TOLA = ifelse(.data$evid %in% c(1, 4), .data$time, NA_real_)) %>%
     fill(.data$TOLA) %>%
     ungroup()
 }
 
-NULL_remove <- function(x){
-  x[!sapply(x,is.null)]
+NULL_remove <- function(x) {
+  x[!sapply(x, is.null)]
 }
 
-rearrange_nmdata <- function(x, dh0 = NULL){
+rearrange_nmdata <- function(x, dh0 = NULL) {
   # Arrange. ADM (evid1) before OBS (evid0) if same time = recsort 3/4
-  if(!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))){
+  if (!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))) {
     x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
   }
   # Fill .datehour if exists or requested
-  if(any(!is.null(x[[".datehour"]]), !is.null(dh0))){
-    if(is.null(dh0)){
+  if (any(!is.null(x[[".datehour"]]), !is.null(dh0))) {
+    if (is.null(dh0)) {
       dh0 <- cur_dh0(x, na.rm = TRUE)
     }
-    x[[".datehour"]] <- dh0 + x$time*60*60
+    x[[".datehour"]] <- dh0 + x$time * 60 * 60
   }
 
   # Fill AOLA/TOLA if exists
-  if(!is.null(x[["AOLA"]])) x <- AOLA(x)
-  if(!is.null(x[["TOLA"]])) x <- TOLA(x)
+  if (!is.null(x[["AOLA"]])) x <- AOLA(x)
+  if (!is.null(x[["TOLA"]])) x <- TOLA(x)
 
   nmtran <- c("ID", "time", "evid", "cmt", "amt", "DV", "mdv", "ss", "addl", "ii", "rate")
   # Relocate
@@ -576,29 +572,28 @@ rearrange_nmdata <- function(x, dh0 = NULL){
     ungroup()
 
   # Type
-  if(!is.null(x[["ID"]])) x$ID <- as.integer(x$ID)
-  if(!is.null(x[["evid"]])) x$evid <- as.integer(x$evid)
-  if(!is.null(x[["cmt"]])) x$cmt <- as.integer(x$cmt)
-  if(!is.null(x[["mdv"]])) x$mdv <- as.integer(x$mdv)
-  if(!is.null(x[["ss"]])) x$ss <- as.integer(x$ss)
-  if(!is.null(x[["addl"]])) x$addl <- as.integer(x$addl)
+  if (!is.null(x[["ID"]])) x$ID <- as.integer(x$ID)
+  if (!is.null(x[["evid"]])) x$evid <- as.integer(x$evid)
+  if (!is.null(x[["cmt"]])) x$cmt <- as.integer(x$cmt)
+  if (!is.null(x[["mdv"]])) x$mdv <- as.integer(x$mdv)
+  if (!is.null(x[["ss"]])) x$ss <- as.integer(x$ss)
+  if (!is.null(x[["addl"]])) x$addl <- as.integer(x$addl)
 
-  if(!is.null(x[["DV"]])) x$DV <- as.double(x$DV)
-  if(!is.null(x[["amt"]])) x$amt <- as.double(x$amt)
-  if(!is.null(x[["time"]])) x$time <- as.double(x$time)
-  if(!is.null(x[["ii"]])) x$ii <- as.double(x$ii)
-  if(!is.null(x[["rate"]])) x$rate <- as.double(x$rate)
+  if (!is.null(x[["DV"]])) x$DV <- as.double(x$DV)
+  if (!is.null(x[["amt"]])) x$amt <- as.double(x$amt)
+  if (!is.null(x[["time"]])) x$time <- as.double(x$time)
+  if (!is.null(x[["ii"]])) x$ii <- as.double(x$ii)
+  if (!is.null(x[["rate"]])) x$rate <- as.double(x$rate)
 
 
   # If no pre-existing AMT, RATE, SS, II or ADDL in former data, lines will be filled with NA -> fill with 0 instead
-  if(!is.null(x[["amt"]]))  x$amt[is.na(x$amt)]   <- 0
-  if(!is.null(x[["addl"]])) x$addl[is.na(x$addl)] <- 0
-  if(!is.null(x[["ii"]]))   x$ii[is.na(x$ii)]     <- 0
-  if(!is.null(x[["rate"]])) x$rate[is.na(x$rate)] <- 0
-  if(!is.null(x[["ss"]]))   x$ss[is.na(x$ss)]     <- 0
+  if (!is.null(x[["amt"]])) x$amt[is.na(x$amt)] <- 0
+  if (!is.null(x[["addl"]])) x$addl[is.na(x$addl)] <- 0
+  if (!is.null(x[["ii"]])) x$ii[is.na(x$ii)] <- 0
+  if (!is.null(x[["rate"]])) x$rate[is.na(x$rate)] <- 0
+  if (!is.null(x[["ss"]])) x$ss[is.na(x$ss)] <- 0
   x
 }
-
 
 #' Parse datehour to POSIXct
 #'
@@ -634,55 +629,59 @@ rearrange_nmdata <- function(x, dh0 = NULL){
 #' options(mapbayr.datehour = "HM dmY")
 #' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 #' options(mapbayr.datehour = NULL)
-
-parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"))){
-  if(inherits(x, "POSIXct")){
+#'
+parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"))) {
+  if (inherits(x, "POSIXct")) {
     return(x)
   }
 
-  if(!requireNamespace("lubridate", quietly = TRUE)) {
+  if (!requireNamespace("lubridate", quietly = TRUE)) {
     stop(
       "Package \"lubridate\" must be installed to use `.datehour`",
       call. = FALSE
     )
   }
 
-  if(is.double(x)){
+  if (is.double(x)) {
     return(lubridate::as_datetime(x))
   }
 
-  if(is.character(x)){
+  if (is.character(x)) {
     return(lubridate::parse_date_time(x = x, orders = orders, quiet = TRUE))
   }
 }
 
-cur_dh0 <- function(x, na.rm = FALSE){
-  if(is.null(x[[".datehour"]])) return(NULL)
+cur_dh0 <- function(x, na.rm = FALSE) {
+  if (is.null(x[[".datehour"]])) {
+    return(NULL)
+  }
   which_min_datehour <- which.min(x$.datehour)
-  if(length(which_min_datehour)==0) return(as.POSIXct(NA, tz = "UTC"))
+  if (length(which_min_datehour) == 0) {
+    return(as.POSIXct(NA, tz = "UTC"))
+  }
   suppressWarnings(min(x$.datehour, na.rm = na.rm)) - x$time[which_min_datehour] * 60 * 60
 }
 
-datehour_manager <- function(old_data, time, .datehour){
+datehour_manager <- function(old_data, time, .datehour) {
   dh0 <- NULL
-  if(is.null(.datehour)){
-    if(is.null(time)){
-      if(all(old_data[["time"]] == 0) | nrow(old_data) == 0){
+  if (is.null(.datehour)) {
+    if (is.null(time)) {
+      if (all(old_data[["time"]] == 0) | nrow(old_data) == 0) {
         time <- 0
       } # else error later, a time must be provided
-    } #else : time is time and dh0 does not change if any
+    } # else : time is time and dh0 does not change if any
   } else { # -> .datehour is non NULL
     .datehour <- parse_datehour(.datehour)
-    if(is.null(time)){
-      if(nrow(old_data) == 0){
+    if (is.null(time)) {
+      if (nrow(old_data) == 0) {
         dh0 <- suppressWarnings(min(.datehour, na.rm = TRUE))
         time <- as.double.difftime(.datehour - dh0, units = "hours")
       } else { # old dataset exists
-        if(is.null(old_data[[".datehour"]])){
-          if(all(old_data[["time"]] == 0)){
+        if (is.null(old_data[[".datehour"]])) {
+          if (all(old_data[["time"]] == 0)) {
             dh0 <- suppressWarnings(min(.datehour, na.rm = TRUE))
             time <- as.double.difftime(.datehour - dh0, units = "hours")
-          } else { #cannot default to 0 -> stop.
+          } else { # cannot default to 0 -> stop.
             stop("Cannot assign when `.datehour` is in the timeline already defined by `time`.")
           }
         } else {
@@ -693,15 +692,15 @@ datehour_manager <- function(old_data, time, .datehour){
           time <- as.double.difftime(.datehour - dh0, units = "hours")
         }
       }
-    } else { #time and .datehour are non-null
-      if(length(time) != length(.datehour)) stop("`.time` and `.datehour` are of different length.")
-      if(nrow(old_data) == 0 || is.null(old_data[[".datehour"]])){
+    } else { # time and .datehour are non-null
+      if (length(time) != length(.datehour)) stop("`.time` and `.datehour` are of different length.")
+      if (nrow(old_data) == 0 || is.null(old_data[[".datehour"]])) {
         dh0 <- unique(.datehour - time * 60 * 60)
-        if(length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
-      } else {# old dataset exists and has .datehour
+        if (length(dh0) > 1) stop("Difference between values in `.datehour` are not equal to those in `time`. Cannot set a common initial time.")
+      } else { # old dataset exists and has .datehour
         old_dh0 <- cur_dh0(old_data)
         new_dh0 <- unique(.datehour - time * 60 * 60)
-        if(any(old_dh0 != new_dh0)) stop("`time` and `.datehour` are inconsistent with values already in the initial dataset.")
+        if (any(old_dh0 != new_dh0)) stop("`time` and `.datehour` are inconsistent with values already in the initial dataset.")
       }
     }
   }
@@ -714,10 +713,9 @@ datehour_manager <- function(old_data, time, .datehour){
   )
 }
 
-forbidden_covariate <- function(x, cov){
-  if(any(names(x) %in% cov)) stop("Cannot have a covariate named: ", paste(cov, collapse = " "))
+forbidden_covariate <- function(x, cov) {
+  if (any(names(x) %in% cov)) stop("Cannot have a covariate named: ", paste(cov, collapse = " "))
 }
-
 
 #' @export
 dplyr::filter
@@ -737,7 +735,7 @@ dplyr::filter
 #'   adm_lines(amt = c(100, 200, 300), cmt = 1) %>%
 #'   filter(amt != 200) %>%
 #'   get_data()
-filter.mrgmod <- function(.data, ..., .preserve = FALSE){
+filter.mrgmod <- function(.data, ..., .preserve = FALSE) {
   data <- dplyr::filter(get_data.mrgmod(.data), ... = ..., .preserve = .preserve)
   data_set(.data, data)
 }
