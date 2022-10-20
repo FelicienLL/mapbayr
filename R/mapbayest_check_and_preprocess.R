@@ -311,6 +311,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
 #'  - `idvaliddata`: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 #'  - `idDV`: a vector of (possibly log-transformed) observations
 #'  - `idcmt`: a vector of compartments where observations belong to
+#'  - `idblq`,`idlloq`: optional, a logical and numerical vector indicating if the observation is below the lower limit of quantification, and the LLOQ value, respectively
 #'
 #' @examples
 #' mod <- exmodel(add_exdata = FALSE, compile = FALSE)
@@ -353,13 +354,25 @@ preprocess.ofv.id <- function(x, iddata){
   #eg : at least one obs per id
 
   # --- Generate preprocess
-
-  idDV <- iddata$DV[iddata$mdv==0] #keep observations to fit only
+  mdv0 <- iddata$mdv==0
+  idDV <- iddata$DV[mdv0] #keep observations to fit only
   if(log_transformation(x)) idDV <- log(idDV)
-  idcmt <- iddata$cmt[iddata$mdv==0]
+  idcmt <- iddata$cmt[mdv0]
 
-  list(idvaliddata = valid_data_set(iddata, x),
-       idDV = idDV,
-       idcmt = idcmt
+  out <- list(
+    idvaliddata = valid_data_set(iddata, x),
+    idDV = idDV,
+    idcmt = idcmt
   )
+
+  idblq <- as.logical(as.data.frame(iddata)$BLQ)
+
+  if(any(idblq)){
+    out <- c(out, list(
+      idblq = idblq[mdv0],
+      idlloq = iddata$LLOQ[mdv0])
+    )
+  }
+
+  out
 }
