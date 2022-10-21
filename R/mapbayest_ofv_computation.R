@@ -93,7 +93,7 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
 
   # Deal with BLQ data
   if(any(idblq)){
-    ofv_blq <- sum(-2 * pnorm(idlloq[idblq], pred[idblq], sqrt(g2[idblq]), lower.tail = 1, log.p = 1))
+    ofv_blq <- sum(-2 * stats::pnorm(idlloq[idblq], pred[idblq], sqrt(g2[idblq]), lower.tail = 1, log.p = 1))
     ofv_obs <- ofv_kang(obs = idDV[!idblq], pred = pred[!idblq], eta = eta, var = g2[!idblq], omega_inv = omega_inv)
     return(sum(ofv_blq, ofv_obs))
   }
