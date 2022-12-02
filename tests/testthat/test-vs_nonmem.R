@@ -57,6 +57,7 @@ test_that("bar_phi works", {
 })
 
 test_that("classify works", {
+  expect_equal(as.character(classify(c(0, 0.01, 1))), c("Excellent", "Acceptable", "Discordant"))
   expect_equal(as.character(classify(c(0.0000001, 0.01, 1))), c("Excellent", "Acceptable", "Discordant"))
   cla <- classify(c(0.0000001, 0.00002, 0.005, 1), levels = c(awesome = 0, nice = 0.00001, bad = 0.01))
   expect_equal(as.character(cla), c("awesome", "nice", "nice", "bad"))

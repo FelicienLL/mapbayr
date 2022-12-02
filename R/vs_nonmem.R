@@ -126,7 +126,7 @@ classify <- function(adiff, levels = c(Excellent = 0, Acceptable = 0.001, Discor
   ans <- case_when(
     adiff > val[3] ~ nam[3],
     adiff > val[2] ~ nam[2],
-    adiff > val[1] ~ nam[1]
+    adiff >= val[1] ~ nam[1]
   )
   factor(ans, levels = nam, ordered = TRUE)
 }
