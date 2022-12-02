@@ -42,6 +42,19 @@ test_that("plot_phi works", {
   expect_equal(x_labels, c("ETA1", "ETA2", "ETA3"))
 })
 
+test_that("plot_phi() works if neta > 9", {
+  merged12 <- data.frame(
+    ID = 1,
+    type = "ETA",
+    variable = eta_names(eta(n = 12)),
+    adiff = abs(rnorm(12))
+  )
+  p <- plot_phi(merged12)
+  x_labels <- ggplot2::ggplot_build(p)$layout$panel_params[[1]]$x$get_labels()
+
+  expect_equal(x_labels, paste0("ETA", 1:12))
+})
+
 test_that("summarise_phi works", {
   expect_named(summarised, c("Performance", "count", "prop", "perc"))
   expect_equal(levels(summarised$Performance), c("Excellent", "Acceptable", "Discordant"))

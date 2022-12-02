@@ -114,6 +114,8 @@ plot_phi <- function(merged_phi, only_ETA = TRUE){
   dat <- merged_phi
   if(only_ETA) dat <- filter(dat, .data$type == "ETA")
 
+  dat$variable <- factor(dat$variable, levels = sort_etanames(unique(dat$variable)))
+
   dat %>%
     ggplot(aes(.data$variable, .data$adiff, group = .data$ID)) +
     geom_line() +

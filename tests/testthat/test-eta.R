@@ -16,6 +16,7 @@ test_that("eta works", {
 
 test_that("eta() overrides the order of eta in model object", {
 
+  expect_equal(sort_etanames(c("ETA1", "ETA33", "ETA2", "ETA11", "ETA22", "ETA3")), c("ETA1", "ETA2", "ETA3", "ETA11", "ETA22", "ETA33"))
   expect_named(sort_eta(c(ETA1 = 0, ETA33 = 0, ETA2 = 0, ETA11 = 0, ETA22 = 0, ETA3 = 0)), c("ETA1", "ETA2", "ETA3", "ETA11", "ETA22", "ETA33"), ignore.order = FALSE)
 
   expect_equal(eta(mcode("model", "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)), c(ETA1 = 0, ETA2 = 0))
