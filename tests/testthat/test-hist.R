@@ -15,3 +15,21 @@ test_that("hist.mapbayests works", {
   expect_true(str_detect(labelhist1,  "ID percentile"))
   expect_true(!str_detect(labelhist001, "ID percentile"))
 })
+
+test_that("facetting order is ok if nETA >= 10", {
+  code <- "
+$PARAM ETA1 = 0, ETA2 = 0, ETA3= 0, ETA4 = 0, ETA5 = 0,
+ETA6 = 0, ETA7 = 0, ETA8 = 0, ETA9 = 0, ETA10 = 0, ETA11 = 0, ETA12 = 0
+$OMEGA .1 .2 .3 .4 .1 .1 .1 .1 .1 .11 .11 .11
+$CMT CENT GUT
+$SIGMA 1 0
+$TABLE
+double DV = 100.0 ;
+$CAPTURE DV
+"
+  mod <- mrgsolve::mcode("mod", code)
+  dat <- exdata()
+  est <- mapbayest(mod, dat, reset = 0, verbose = FALSE)
+  H <- hist(est)
+
+})
