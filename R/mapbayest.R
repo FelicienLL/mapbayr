@@ -8,6 +8,7 @@
 #' @param data NMTRAN-like data set
 #' @param method optimization method; the default is `"L-BFGS-B"` (from `stat::optim()`), alternatively `"newuoa"` for `minqa::newuoa()`
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
+#' @param select_eta a vector of numeric values, the numbers of ETA to be estimated (default to NULL, which mean every ETA)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)
@@ -67,6 +68,7 @@ mapbayest <- function(x,
                       data = NULL,
                       method = c("L-BFGS-B", "newuoa"),
                       hessian = stats::optimHess,
+                      select_eta = NULL,
                       force_initial_eta = NULL,
                       quantile_bound = 0.001,
                       control = list(),
@@ -94,7 +96,7 @@ mapbayest <- function(x,
     check_mapbayr_modeldata(x, data)
   }
 
-  arg.optim   <- preprocess.optim(x, method = method, control = control, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
+  arg.optim   <- preprocess.optim(x, method = method, control = control, select_eta = select_eta, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
   arg.ofv.fix <- preprocess.ofv.fix(x, data)
 
   iddata <- split_mapbayr_data(data)
@@ -122,6 +124,7 @@ mapbayest <- function(x,
 
   # Start post-processing (i.e. generating output files)
   etamat <- post_eta(opt.value)
+  etamat <- fill_eta(etamat, n = nrow(arg.ofv.fix$omega_inv))
   if(!is.null(output)){
     if(output == "eta") return(etamat)
   }

@@ -193,7 +193,7 @@ split_mapbayr_data <- function(data){
 #'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
-preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
+preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   #Checks argument
 
   #method
@@ -216,6 +216,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
       initial_eta <- eta(n = netas, val = 0.01)
+      if(!is.null(select_eta)){
+        initial_eta <- initial_eta[select_eta]
+      }
     }
 
     # fn = compute_ofv
@@ -245,6 +248,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
       initial_eta <- eta(n = netas)
+      if(!is.null(select_eta)){
+        initial_eta <- initial_eta[select_eta]
+      }
     }
 
     # fn = compute_ofv, gr = NULL, hessian = FALSE
@@ -253,6 +259,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
 
     # lower, upper
     bound <- get_quantile(x, .p = quantile_bound)
+    if(!is.null(select_eta)){
+      bound <- bound[select_eta]
+    }
 
     # control = list(trace,
     #                fnscale,

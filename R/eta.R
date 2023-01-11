@@ -66,3 +66,22 @@ eta_length <- function(...){
 eta_names <- function(...){
   names(eta(...))
 }
+
+fill_eta <- function(x, n){
+  # x, a named vector of ETA, or a matrix
+  # n, single integer about the maximum etas
+  if(is.matrix(x)){
+    y <- rename_as_eta(matrix(0, nrow = nrow(x), ncol = n))
+    y[,colnames(x)] <- x
+    row.names(y) <- row.names(x)
+  } else {
+    y <- eta(n = n, value = 0)
+    y[names(x)] <- x
+  }
+  y
+}
+# fill_eta(c(ETA1 = 1, ETA3 = 0.33), n = 4)
+# mat <- matrix(1:8, ncol = 2)
+# colnames(mat) <- c("ETA2", "ETA3")
+# fill_eta(mat, n = 4)
+

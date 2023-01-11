@@ -9,6 +9,7 @@ keep_argofv <- function(x){
 do_optimization <- function(..., verbose = TRUE, reset = 50){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
+  eta_num <- as.double(sub("ETA", "", names(args$par)))
 
   optimizer <- switch(args$method,
                       "L-BFGS-B" = quietly(stats::optim),
@@ -19,7 +20,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
 
   while(nreset == 0 || (nreset <= reset && (need_new_ini | need_new_bounds))){
     if(nreset != 0 && need_new_ini){
-      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)[eta_num]
       if(verbose){
         if(nreset == 1) cat("\n")
         message("Reset with new initial values: ", paste(args$par, collapse = ' '))
@@ -27,7 +28,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
     }
 
     if(nreset != 0 && need_new_bounds){
-      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower)
+      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower)[eta_num]
       args$upper <- -args$lower
       if(verbose) {
         if(nreset == 1) cat("\n")
