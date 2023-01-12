@@ -13,7 +13,7 @@ test_that("new_ini2 works", {
 
   ini2 <- new_ini2(arg.ofv = argofv, arg.optim = argopt, run = 1)
 
-  ini3 <- new_ini3(arg.ofv = argofv, upper = argopt$upper, nreset = 1)
+  ini3 <- new_ini3(arg.ofv = argofv, upper = argopt$upper, nreset = 1, select_eta = argopt$select_eta)
 
   expect_equal(ini2, ini3)
   expect_type(ini3, "double")
@@ -21,4 +21,3 @@ test_that("new_ini2 works", {
   expect_true(all(ini3 < argopt$upper))
 
 })
-

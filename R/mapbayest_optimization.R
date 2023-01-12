@@ -9,7 +9,6 @@ keep_argofv <- function(x){
 do_optimization <- function(..., verbose = TRUE, reset = 50){
   try(rlang::caller_env(n = 2)$pb$tick(), silent = TRUE)
   args <- list(...)
-  eta_num <- as.double(sub("ETA", "", names(args$par)))
 
   optimizer <- switch(args$method,
                       "L-BFGS-B" = quietly(stats::optim),
@@ -20,7 +19,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
 
   while(nreset == 0 || (nreset <= reset && (need_new_ini | need_new_bounds))){
     if(nreset != 0 && need_new_ini){
-      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)[eta_num]
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset, select_eta = args$select_eta)
       if(verbose){
         if(nreset == 1) cat("\n")
         message("Reset with new initial values: ", paste(args$par, collapse = ' '))
@@ -28,7 +27,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
     }
 
     if(nreset != 0 && need_new_bounds){
-      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower)[eta_num]
+      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower, select_eta = args$select_eta)
       args$upper <- -args$lower
       if(verbose) {
         if(nreset == 1) cat("\n")
@@ -147,32 +146,32 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 }
 
 # 2 Returns a vector of lower bounds
-new_bounds <- function(omega_inv, lower){
-  vec_SE <- sqrt(diag(solve(omega_inv)))
+new_bounds <- function(omega_inv, lower, select_eta){
+  vec_SE <- sqrt(diag(solve(omega_inv)))[select_eta]
   P <- map2_dbl(.y = vec_SE, .x = lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
   sapply(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
-new_ini3 <- function(arg.ofv, upper, nreset){
+new_ini3 <- function(arg.ofv, upper, nreset, select_eta){
   neta <- eta_length(arg.ofv$qmod)
   nsim <- 1 + neta ^ 2
 
   # Sample eta from prior distribution
   simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+nreset)
+  simmat <- rename_as_eta(simmat)[,select_eta]
 
   # Set Out-of-bound etas to 0
   bound <- upper
   if(!(length(bound) == 1 && !is.null(bound))){ #prevent fail if bound = NULL with newuoa
-    for(i in seq_len(neta)){
+    for(i in seq_len(ncol(simmat))){
       vals <- simmat[,i]
       simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
     }
   }
 
   # Compute OFV for each vector of eta
-  colnames(simmat) <- paste0("ETA", seq_len(neta))
   list_etas <- apply(simmat, 1, as.list)
   ofvs <- sapply(list_etas, do_compute_ofv, argofv = arg.ofv)
 

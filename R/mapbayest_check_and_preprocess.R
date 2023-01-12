@@ -201,6 +201,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
   okmethod <- c("L-BFGS-B", "newuoa")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   netas <- eta_length(x)
+  if(is.null(select_eta)){
+    select_eta <- seq_len(netas)
+  }
 
   if(method == "newuoa"){
     if(!requireNamespace("minqa", quietly = TRUE)) {
@@ -215,10 +218,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas, val = 0.01)
-      if(!is.null(select_eta)){
-        initial_eta <- initial_eta[select_eta]
-      }
+      initial_eta <- eta(n = netas, val = 0.01)[select_eta]
     }
 
     # fn = compute_ofv
@@ -232,7 +232,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
       par = initial_eta,
       fn = compute_ofv,
       control = control,
-      method = method  # I still keep it for the wrappers around newuoa
+      method = method, # I still keep it for the wrappers around newuoa
+      select_eta = select_eta
     )
   }
 
@@ -247,10 +248,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas)
-      if(!is.null(select_eta)){
-        initial_eta <- initial_eta[select_eta]
-      }
+      initial_eta <- eta(n = netas)[select_eta]
     }
 
     # fn = compute_ofv, gr = NULL, hessian = FALSE
@@ -258,10 +256,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
     # method = "L-BFGS-B"
 
     # lower, upper
-    bound <- get_quantile(x, .p = quantile_bound)
-    if(!is.null(select_eta)){
-      bound <- bound[select_eta]
-    }
+    bound <- get_quantile(x, .p = quantile_bound)[select_eta]
 
     # control = list(trace,
     #                fnscale,
@@ -292,7 +287,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
       method = method,
       control = control,
       lower = bound,
-      upper = -bound
+      upper = -bound,
+      select_eta = select_eta
     )
   }
 
