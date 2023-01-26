@@ -11,21 +11,22 @@ print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
   nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
-  nETA <- eta_length(x$model)
-  ETA <- x$final_eta %>%
-    bind_rows(.id = "ID") %>%
-    as.data.frame() %>%
-    utils::head()
-  TAB <- utils::head(as.data.frame(x$mapbay_tab))
+  max_n_eta <- eta_length(x$model)
+  nETA <- length(x$arg.optim$select_eta)
 
-  cat("Model: ", NAME, "\n")
-  cat("ID :", nID, " individual(s).\n")
-  cat("OBS:", nOBS, " observation(s).\n")
-  cat("ETA:", nETA, " parameter(s) to estimate.\n\n")
+  ETA <- get_eta(x, x$arg.optim$select_eta, output = "df") %>%
+    utils::head()
+  TAB <- utils::head(x$mapbay_tab)
+
+  cat("Model:", NAME, "\n")
+  cat("ID :", nID, "individual(s).\n")
+  cat("OBS:", nOBS, "observation(s).\n")
+  cat("ETA:", nETA, "parameter(s) to estimate.\n")
+  cat("\n")
   cat("Estimates: \n")
-  print(ETA)
+  print.data.frame(ETA)
   cat("\nOutput (", nrow(x$mapbay_tab) , " lines): \n", sep = "")
-  print(TAB)
+  print.data.frame(TAB, digits = 3)
 }
 
 
