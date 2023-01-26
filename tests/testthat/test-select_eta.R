@@ -36,7 +36,7 @@ test_that("estimation and methods works", {
 })
 
 test_that("estimation and methods works", {
-  mod <- exmodel() %>% omat(mod, diag(c(0.1,0,0.3)))
+  mod <- exmodel() %>% omat(diag(c(0.1, 0, 0.3)))
   est <- mapbayest(mod)
 
   expect_equal(get_eta(est, 2), c(ETA2 = 0))
@@ -50,4 +50,18 @@ test_that("estimation and methods works", {
   expect_equal(param(use_posterior(est))$ETA2, 0)
   histo <- hist(est)
   expect_s3_class(histo, "ggplot")
+
+  # reset is ok
+
+  expect_message(mapbayest(mod, quantile_bound = 0.2), "Reset with new bounds")
+
+  argofv <- c(
+    preprocess.ofv.fix(x = mod, data = get_data(mod), select_eta = c(1,3)),
+    preprocess.ofv.id(x = mod, iddata = get_data(mod))
+  )
+
+  new_inits <- new_ini3(arg.ofv = argofv, upper = c(1,2), nreset = 1, select_eta = c(1,3))
+  expect_type(new_inits, "double")
+  expect_length(new_inits, 2)
+  expect_named(new_inits, c("ETA1", "ETA3"))
 })

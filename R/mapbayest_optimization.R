@@ -27,7 +27,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
     }
 
     if(nreset != 0 && need_new_bounds){
-      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower, select_eta = args$select_eta)
+      args$lower <- new_bounds(omega_inv = args$omega_inv, lower = args$lower)
       args$upper <- -args$lower
       if(verbose) {
         if(nreset == 1) cat("\n")
@@ -146,8 +146,8 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
 }
 
 # 2 Returns a vector of lower bounds
-new_bounds <- function(omega_inv, lower, select_eta){
-  vec_SE <- sqrt(diag(solve(omega_inv)))[select_eta]
+new_bounds <- function(omega_inv, lower){
+  vec_SE <- sqrt(diag(solve(omega_inv)))
   P <- map2_dbl(.y = vec_SE, .x = lower, .f = stats::pnorm, mean = 0)
   P <- P[1]
   new_P <- P/10
@@ -155,12 +155,11 @@ new_bounds <- function(omega_inv, lower, select_eta){
 }
 
 new_ini3 <- function(arg.ofv, upper, nreset, select_eta){
-  neta <- eta_length(arg.ofv$qmod)
-  nsim <- 1 + neta ^ 2
+  nsim <- 1 + length(select_eta) ^ 2
 
   # Sample eta from prior distribution
   simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+nreset)
-  simmat <- rename_as_eta(simmat)[,select_eta]
+  colnames(simmat) <- make_eta_names(select_eta)
 
   # Set Out-of-bound etas to 0
   bound <- upper

@@ -232,6 +232,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
     if(is.null(initial_eta)){
       initial_eta <- eta(n = netas, val = 0.01)[select_eta]
     }
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
+    }
 
     # fn = compute_ofv
 
@@ -263,6 +266,9 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
       initial_eta <- eta(n = netas)[select_eta]
     }
 
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
+    }
     # fn = compute_ofv, gr = NULL, hessian = FALSE
 
     # method = "L-BFGS-B"
