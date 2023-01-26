@@ -204,11 +204,16 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
     select_eta <- which(odiag(x) != 0)
   }
 
+  if(any(select_eta > netas)){
+    stop("Cannot select ", paste(make_eta_names(select_eta[select_eta>netas]), collapse = " "),
+         ": maximum ", netas, " ETAs defined in $PARAM.")
+  }
+
   selected_omega_zero <- intersect(which(odiag(x) == 0), select_eta)
 
   if(length(selected_omega_zero) != 0){
-    stop("Cannot estimate ", paste(make_eta_names(selected_omega_zero), collapse = " "),
-         " if the corresponding OMEGA value is equal to zero. Modify the $OMEGA block or use `mapbayest(select_eta = ...)`.",
+    stop("Cannot select ", paste(make_eta_names(selected_omega_zero), collapse = " "),
+         ": the corresponding OMEGA value is equal to zero. Modify the $OMEGA block or use `mapbayest(select_eta = ...)`.",
          call. = FALSE)
   }
 
