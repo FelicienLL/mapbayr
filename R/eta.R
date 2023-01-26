@@ -45,13 +45,21 @@ eta <- function(x, ..., n, val = 0){
   return(rename_as_eta(ans))
 }
 
+
+make_eta_names <- function(x, n){
+  if(!missing(n)){
+    x <- seq_len(n)
+  }
+  paste0("ETA", x)
+}
+
 # x, a vector or a matrix to be renamed
 rename_as_eta <- function(x){
   if(is.matrix(x)){
-    colnames(x) <- paste0("ETA", seq_len(ncol(x)))
+    colnames(x) <- make_eta_names(n = ncol(x))
     return(x)
   }
-  names(x) <- paste0("ETA", seq_along(x))
+  names(x) <- make_eta_names(n = length(x))
   x
 }
 

@@ -43,12 +43,6 @@ test_that("$OMEGA is well-specified", {
                                 $OMEGA 0.1 0.1 0.1"), check_compile = FALSE),
     "\\$OMEGA. The OMEGA matrix diagonal has length 3, but 2 ETA parameters are defined in \\$PARAM"
   )
-
-  expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0"), check_compile = FALSE),
-    "\\$OMEGA. The value of one or multiple OMEGA value is equal to 0. Cannot accept value in OMEGA equal to zero."
-  )
 })
 
 test_that("$SIGMA is well-specified", {

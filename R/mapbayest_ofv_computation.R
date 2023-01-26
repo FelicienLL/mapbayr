@@ -91,7 +91,7 @@ compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation
   g2 <- diag(H %*% sigma %*% t(H))
 
   #Compute the objective function value per se
-  ofv_kang(obs = idDV, pred = pred, eta = fill_eta(eta, n = nrow(omega_inv)), var = g2, omega_inv = omega_inv)
+  ofv_kang(obs = idDV, pred = pred, eta = eta, var = g2, omega_inv = omega_inv)
 }
 
 #' @rdname compute_ofv

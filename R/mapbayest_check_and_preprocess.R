@@ -41,7 +41,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     if(neta == 0) {
       stop('$PARAM. Cannot find parameters named "ETA1", "ETA2", etc... \nDid you forget to add these parameters in $PARAM?', call. = FALSE)
     } else {
-      expected_eta_names <- paste0("ETA", seq_along(eta_names_x))
+      expected_eta_names <- make_eta_names(n = neta)
       if(any(eta_names_x != expected_eta_names)){
         stop(paste0("$PARAM. ", neta, " ETA parameter(s) found, but not named ", paste(expected_eta_names, collapse = ", "), ". "), call. = FALSE)
       }
@@ -55,9 +55,6 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     nomega <- length(odiag_x)
     if(nomega != neta) {
       stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
-    }
-    if(any(odiag_x == 0)){
-      stop("$OMEGA. The value of one or multiple OMEGA value is equal to 0. Cannot accept value in OMEGA equal to zero.", call. = FALSE)
     }
 
     # $SIGMA
@@ -201,8 +198,18 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
   okmethod <- c("L-BFGS-B", "newuoa")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   netas <- eta_length(x)
+
+  #select_eta
   if(is.null(select_eta)){
-    select_eta <- seq_len(netas)
+    select_eta <- which(odiag(x) != 0)
+  }
+
+  selected_omega_zero <- intersect(which(odiag(x) == 0), select_eta)
+
+  if(length(selected_omega_zero) != 0){
+    stop("Cannot estimate ", paste(make_eta_names(selected_omega_zero), collapse = " "),
+         " if the corresponding OMEGA value is equal to zero. Modify the $OMEGA block or use `mapbayest(select_eta = ...)`.",
+         call. = FALSE)
   }
 
   if(method == "newuoa"){
@@ -301,6 +308,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
 #' @name preprocess.ofv
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @param select_eta numbers of the ETAs taken into account. Set the dimensions of the inversed OMEGA matrix
 #' @return A list of arguments used to compute the objective function value.
 #'
 #' The following arguments are fixed between individuals:
@@ -332,7 +340,7 @@ NULL
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
-preprocess.ofv.fix <- function(x, data){
+preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x))){
   qmod <- zero_re(x)
   qmod@end <- -1 #Make sure no modif in the time grid
   qmod@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -344,7 +352,7 @@ preprocess.ofv.fix <- function(x, data){
     qmod = qmod,
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
-    omega_inv = solve(omat(x, make = T)),
+    omega_inv = solve(omat(x, make = T)[select_eta,select_eta]),
     all_cmt = fit_cmt(x, data) #on full data
   )
 }

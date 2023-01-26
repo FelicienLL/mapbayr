@@ -97,7 +97,7 @@ mapbayest <- function(x,
   }
 
   arg.optim   <- preprocess.optim(x, method = method, control = control, select_eta = select_eta, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
-  arg.ofv.fix <- preprocess.ofv.fix(x, data)
+  arg.ofv.fix <- preprocess.ofv.fix(x, data, select_eta = arg.optim$select_eta)
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
@@ -124,7 +124,7 @@ mapbayest <- function(x,
 
   # Start post-processing (i.e. generating output files)
   etamat <- post_eta(opt.value)
-  etamat <- fill_eta(etamat, n = nrow(arg.ofv.fix$omega_inv))
+  etamat <- fill_eta(etamat, n = eta_length(x)) #all ETAs, even non-selected
   if(!is.null(output)){
     if(output == "eta") return(etamat)
   }
