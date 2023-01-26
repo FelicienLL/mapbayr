@@ -67,9 +67,17 @@ eta_names <- function(...){
   names(eta(...))
 }
 
+#' Fill a vector/matrix of ETAs
+#'
+#' @param x a named vector of ETAs, or a matrix to fill
+#' @param n the maximum number of ETAs
+#'
+#' @return a object of the same type as x, with adequate dimensions
+#' @noRd
+#' @examples
+#' fill_eta(c(ETA2 = 2, ETA4 = -4), n = 5)
 fill_eta <- function(x, n){
-  # x, a named vector of ETA, or a matrix
-  # n, single integer about the maximum etas
+  if(missing(n)) stop("n is missing")
   if(is.matrix(x)){
     y <- rename_as_eta(matrix(0, nrow = nrow(x), ncol = n))
     y[,colnames(x)] <- x
@@ -80,8 +88,5 @@ fill_eta <- function(x, n){
   }
   y
 }
-# fill_eta(c(ETA1 = 1, ETA3 = 0.33), n = 4)
-# mat <- matrix(1:8, ncol = 2)
-# colnames(mat) <- c("ETA2", "ETA3")
-# fill_eta(mat, n = 4)
+
 
