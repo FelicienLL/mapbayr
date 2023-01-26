@@ -18,7 +18,7 @@ preprocess.optim(
 
 \item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
 
-\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs)}
+\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
 
 \item{control}{a list passed to the optimizer (see \code{\link[stats:optim]{stats::optim()}} or  \code{\link[minqa:newuoa]{minqa::newuoa()}} documentation)}
 

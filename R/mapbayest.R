@@ -8,7 +8,7 @@
 #' @param data NMTRAN-like data set
 #' @param method optimization method; the default is `"L-BFGS-B"` (from `stat::optim()`), alternatively `"newuoa"` for `minqa::newuoa()`
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
-#' @param select_eta a vector of numeric values, the numbers of the ETAs to be estimated (default is `NULL`, all ETAs)
+#' @param select_eta a vector of numeric values, the numbers of the ETAs to be estimated (default is `NULL`, all ETAs non-equal to zero)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)

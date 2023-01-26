@@ -32,7 +32,7 @@ mbrest(...)
 
 \item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
 
-\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs)}
+\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
