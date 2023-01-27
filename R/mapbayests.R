@@ -11,21 +11,22 @@ print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
   nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
-  nETA <- eta_length(x$model)
-  ETA <- x$final_eta %>%
-    bind_rows(.id = "ID") %>%
-    as.data.frame() %>%
-    utils::head()
-  TAB <- utils::head(as.data.frame(x$mapbay_tab))
+  max_n_eta <- eta_length(x$model)
+  nETA <- length(x$arg.optim$select_eta)
 
-  cat("Model: ", NAME, "\n")
-  cat("ID :", nID, " individual(s).\n")
-  cat("OBS:", nOBS, " observation(s).\n")
-  cat("ETA:", nETA, " parameter(s) to estimate.\n\n")
+  ETA <- get_eta(x, x$arg.optim$select_eta, output = "df") %>%
+    utils::head()
+  TAB <- utils::head(x$mapbay_tab)
+
+  cat("Model:", NAME, "\n")
+  cat("ID :", nID, "individual(s).\n")
+  cat("OBS:", nOBS, "observation(s).\n")
+  cat("ETA:", nETA, "parameter(s) to estimate.\n")
+  cat("\n")
   cat("Estimates: \n")
-  print(ETA)
+  print.data.frame(ETA)
   cat("\nOutput (", nrow(x$mapbay_tab) , " lines): \n", sep = "")
-  print(TAB)
+  print.data.frame(TAB, digits = 3)
 }
 
 
@@ -164,14 +165,21 @@ hist.mapbayests <- function(x, ...){
   arg_tab <- data.frame(
     om = odiag(x$model),
     name = eta_names(x$model),
-    descr = eta_descr(x$model),
-    lower = x$arg.optim$lower,
-    upper = x$arg.optim$upper
-  )
+    descr = eta_descr(x$model)
+    )
+
+  if(is.null(x$arg.optim$select_eta)){ # backward compatibility
+    x$arg.optim$select_eta <- seq_len(nrow(arg_tab))
+  }
+  arg_tab$lower <- rep(NA_real_, nrow(arg_tab))
+  arg_tab$lower[x$arg.optim$select_eta] <- x$arg.optim$lower
+
+  arg_tab$upper <- rep(NA_real_, nrow(arg_tab))
+  arg_tab$upper[x$arg.optim$select_eta] <- x$arg.optim$upper
 
   # --- Density tab
-  minlow <- min(arg_tab$lower)
-  maxup <- max(arg_tab$upper)
+  minlow <- min(arg_tab$lower, na.rm = TRUE)
+  maxup <- max(arg_tab$upper, na.rm = TRUE)
   xvalues <- seq(minlow - 0.01, maxup + 0.01, 0.01)
 
   density_tab <- arg_tab %>%
@@ -198,8 +206,8 @@ hist.mapbayests <- function(x, ...){
     facet_wrap("name", labeller = labeller(name = eta_labs)) +
     geom_area(aes(x = .data$x, y = .data$value), data = density_tab, fill = "skyblue", alpha = .3) +
     geom_line(aes(x = .data$x, y = .data$value), data = density_tab) +
-    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
-    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
+    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1, na.rm = TRUE) +
+    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1, na.rm = TRUE) +
     theme_bw() +
     theme(strip.background = element_rect(fill = "white"))+
     scale_y_continuous(name = NULL, breaks = NULL, labels = NULL)+

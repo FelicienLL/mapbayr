@@ -7,6 +7,7 @@
 preprocess.optim(
   x,
   method = c("L-BFGS-B", "newuoa"),
+  select_eta = NULL,
   control = list(),
   force_initial_eta = NULL,
   quantile_bound = 0.001
@@ -16,6 +17,8 @@ preprocess.optim(
 \item{x}{the model object}
 
 \item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
+
+\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
 
 \item{control}{a list passed to the optimizer (see \code{\link[stats:optim]{stats::optim()}} or  \code{\link[minqa:newuoa]{minqa::newuoa()}} documentation)}
 

@@ -131,7 +131,7 @@ print(my_est)
 plot(my_est)
 ```
 
-```{r, plot2, fig.height=2.5, message=FALSE}
+```{r, plot2, fig.height=2.5, message=FALSE, warning=FALSE}
 hist(my_est)  
 ```
 
