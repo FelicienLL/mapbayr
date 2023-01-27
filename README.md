@@ -14,9 +14,9 @@ mapbayr is a free and open source package for *maximum a posteriori*
 bayesian estimation of PK parameters in R. Thanks to a single function,
 `mapbayest()`, you can estimate individual PK parameters from:
 
--   a population PK model (coded in
-    [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve)),
--   a data set with concentrations (NM-TRAN format).
+- a population PK model (coded in
+  [mrgsolve](https://github.com/metrumresearchgroup/mrgsolve)),
+- a data set with concentrations (NM-TRAN format).
 
 It was designed to be easily wrapped in [shiny
 apps](https://github.com/FelicienLL/mapbayr-shiny) in order to ease
@@ -140,26 +140,21 @@ computation of a posteriori outcomes of interest.
 
 ``` r
 print(my_est)
-#> Model:  Example_model 
-#> ID : 1  individual(s).
-#> OBS: 2  observation(s).
-#> ETA: 2  parameter(s) to estimate.
+#> Model: Example_model 
+#> ID : 1 individual(s).
+#> OBS: 2 observation(s).
+#> ETA: 2 parameter(s) to estimate.
 #> 
 #> Estimates: 
 #>   ID      ETA1      ETA2
 #> 1  1 0.3872104 0.1569604
 #> 
 #> Output (4 lines): 
-#>   ID time evid cmt amt rate mdv  DV     IPRED      PRED      CL BW      ETA1
-#> 1  1    0    1   1 100   20   1  NA 0.0000000 0.0000000 1.79217 90 0.3872104
-#> 2  1    6    0   1   0    0   0 3.9 4.1621701 5.1739186 1.79217 90 0.3872104
-#> 3  1   15    0   1   0    0   0 1.1 1.0867408 1.6468556 1.79217 90 0.3872104
-#> 4  1   24    0   1   0    0   1 2.0 0.5559693 0.9594398 1.79217 90 0.3872104
-#>        ETA2
-#> 1 0.1569604
-#> 2 0.1569604
-#> 3 0.1569604
-#> 4 0.1569604
+#>   ID time evid cmt amt rate mdv  DV IPRED  PRED   CL BW  ETA1  ETA2
+#> 1  1    0    1   1 100   20   1  NA 0.000 0.000 1.79 90 0.387 0.157
+#> 2  1    6    0   1   0    0   0 3.9 4.162 5.174 1.79 90 0.387 0.157
+#> 3  1   15    0   1   0    0   0 1.1 1.087 1.647 1.79 90 0.387 0.157
+#> 4  1   24    0   1   0    0   1 2.0 0.556 0.959 1.79 90 0.387 0.157
 ```
 
 ``` r
@@ -206,22 +201,22 @@ available on the [mrgsolve
 blog](https://mrgsolve.org/blog/posts/map_bayes.html). Additional
 features are:
 
--   a unique function to perform the estimation: `mapbayest()`.
--   accepts a large variety of structural models thanks to the
-    flexibility of mrgsolve
--   flexibility with random effects on parameters, accepting both
-    inter-individual and inter-occasion variability.
--   additive, proportional, mixed or exponential (without prior
-    log-transformation of data) residual error models.
--   estimate from both parent drug and metabolite simultaneously.
--   fit multiple patients stored in a single dataset.
--   functions to easily pass administration and observation information,
-    as well as plot methods to visualize predictions and parameter
-    distribution.
--   a single output object to ease post-processing, depending on the
-    purpose of the estimation.
--   several optimization algorithm available, such as “L-BFGS-B” (the
-    default) or “newuoa”.
+- a unique function to perform the estimation: `mapbayest()`.
+- accepts a large variety of structural models thanks to the flexibility
+  of mrgsolve
+- flexibility with random effects on parameters, accepting both
+  inter-individual and inter-occasion variability.
+- additive, proportional, mixed or exponential (without prior
+  log-transformation of data) residual error models.
+- estimate from both parent drug and metabolite simultaneously.
+- fit multiple patients stored in a single dataset.
+- functions to easily pass administration and observation information,
+  as well as plot methods to visualize predictions and parameter
+  distribution.
+- a single output object to ease post-processing, depending on the
+  purpose of the estimation.
+- several optimization algorithm available, such as “L-BFGS-B” (the
+  default) or “newuoa”.
 
 ## Performance
 
@@ -246,13 +241,13 @@ order to be “read” by mapbayr with the subsequent specifications:
 
 #### 1.1 ETA specifications
 
--   Mandatory:
-    -   Add as many ETA as there are parameters to estimate (i.e. the
-        length of the OMEGA matrix diagonal).
-    -   Name them as ETAn (n being the N° of ETA).
-    -   Set 0 as default value.
--   Strongly recommended:
-    -   Provide a description as a plain text
+- Mandatory:
+  - Add as many ETA as there are parameters to estimate (i.e. the length
+    of the OMEGA matrix diagonal).
+  - Name them as ETAn (n being the N° of ETA).
+  - Set 0 as default value.
+- Strongly recommended:
+  - Provide a description as a plain text
 
 ``` c
 $PARAM @annotated
@@ -265,15 +260,15 @@ ETA3 : 0 : F ()
 
 #### 1.2 Covariates
 
--   Mandatory:
-    -   Use a `@covariates` tag to record covariates in the `$PARAM`
-        block. Otherwise, you will not be allowed to pass a dataset with
-        covariates columns.
-    -   Set the reference value.
--   Strongly recommended
-    -   Provide a description as a plain text
-    -   Provide units in parentheses (or a description of 0/1 coding for
-        categorical covariates)
+- Mandatory:
+  - Use a `@covariates` tag to record covariates in the `$PARAM` block.
+    Otherwise, you will not be allowed to pass a dataset with covariates
+    columns.
+  - Set the reference value.
+- Strongly recommended
+  - Provide a description as a plain text
+  - Provide units in parentheses (or a description of 0/1 coding for
+    categorical covariates)
 
 ``` c
 $PARAM @annotated @covariates
@@ -283,21 +278,19 @@ SEX : 0 : Sex (0=Male, 1=Female)
 
 ### 2. `$CMT` block
 
--   Strongly recommended…  
-    … yet **mandatory** if you have multiple types of DV, i.e. parent
-    drug + metabolite:
-    -   A `@annotated` tag must be used to record compartments.
-    -   Write OBS in brackets to define the observation compartment(s).
-        Also used by `obs_lines()` to fill the ‘cmt’ column in your
-        dataset.
-    -   Write ADM in brackets to define “default” administration
-        compartment(s). This information is not used for optimization
-        process and the `mapbayest()` function. The information is
-        mandatory if you use `adm_lines()` to build your dataset in
-        order to automatically set the value of the ‘cmt’ column.
-        Especially useful if you use a model with an absorption from
-        several depot compartment requiring to duplicate administrations
-        lines in the data set.
+- Strongly recommended…  
+  … yet **mandatory** if you have multiple types of DV, i.e. parent
+  drug + metabolite:
+  - A `@annotated` tag must be used to record compartments.
+  - Write OBS in brackets to define the observation compartment(s). Also
+    used by `obs_lines()` to fill the ‘cmt’ column in your dataset.
+  - Write ADM in brackets to define “default” administration
+    compartment(s). This information is not used for optimization
+    process and the `mapbayest()` function. The information is mandatory
+    if you use `adm_lines()` to build your dataset in order to
+    automatically set the value of the ‘cmt’ column. Especially useful
+    if you use a model with an absorption from several depot compartment
+    requiring to duplicate administrations lines in the data set.
 
 ``` c
 //example: model with dual zero and first order absorption in compartment 1 & 2, respectively, and observation of parent drug + metabolite 
@@ -310,12 +303,11 @@ CENT_MET : methylexamplinib central [OBS]
 
 ### 3. `$OMEGA` block
 
--   Mandatory:
-    -   The length of the omega matrix must be the same as the number of
-        ETAn provided in `$PARAM`.
-    -   The order of the omega values must correspond to the order of
-        the ETAs provided in `$PARAM`. This cannot be checked by mapbayr
-        !
+- Mandatory:
+  - The length of the omega matrix must be the same as the number of
+    ETAn provided in `$PARAM`.
+  - The order of the omega values must correspond to the order of the
+    ETAs provided in `$PARAM`. This cannot be checked by mapbayr !
 
 ``` c
 $OMEGA
@@ -383,24 +375,23 @@ $SIGMA @block
 
 ### 6. `$TABLE` block or `$ERROR` block
 
--   Mandatory:
-    -   Refer the concentration variable to fit as `DV`. Mind the code,
-        especially if concentrations are observed in multiple
-        compartments.
-    -   Express log-additive error models as exponential. This way,
-        concentrations will automatically be log-transformed during the
-        optimization process, with no necessity to prior log-transform
-        your concentration.
+- Mandatory:
+  - Refer the concentration variable to fit as `DV`. Mind the code,
+    especially if concentrations are observed in multiple compartments.
+  - Express log-additive error models as exponential. This way,
+    concentrations will automatically be log-transformed during the
+    optimization process, with no necessity to prior log-transform your
+    concentration.
 
 ``` c
 $TABLE
 double DV  = (CENTRAL / VC) * exp(EPS(2)) ;
 ```
 
--   For fitting parent drug and metabolite simultaneously, refer to them
-    as PAR and MET, and define DV accordingly (only DV will be used
-    during the optimization process, but PAR and MET variables are
-    mandatory for post-processing internal functions)
+- For fitting parent drug and metabolite simultaneously, refer to them
+  as PAR and MET, and define DV accordingly (only DV will be used during
+  the optimization process, but PAR and MET variables are mandatory for
+  post-processing internal functions)
 
 ``` c
 $TABLE
@@ -420,14 +411,13 @@ and simulate random effects.
 
 ### 7. `$MAIN` block
 
--   Mandatory:
-    -   Double every expression containing ETA information, with ETAn
-        (will be used for optimization of parameters) and ETA(n)
-        (generated for simulations with random effects like a “regular”
-        mrgsolve model)
-    -   Mind the attribution to the good ETAn and ETA(n) as respect to
-        the information you provided in `$PARAM` and `$OMEGA`. This
-        cannot be checked by mapbayr !
+- Mandatory:
+  - Double every expression containing ETA information, with ETAn (will
+    be used for optimization of parameters) and ETA(n) (generated for
+    simulations with random effects like a “regular” mrgsolve model)
+  - Mind the attribution to the good ETAn and ETA(n) as respect to the
+    information you provided in `$PARAM` and `$OMEGA`. This cannot be
+    checked by mapbayr !
 
 ``` c
 $PK
@@ -436,17 +426,17 @@ double CL = TVCL * exp(ETA1 + ETA(1))
 
 ### 8. `$CAPTURE` block
 
--   Mandatory:
-    -   DV must be captured
-    -   For models with parent + metabolite, PAR and MET must be
-        captured too.
-    -   Do not capture variables called IPRED and PRED (they will be
-        returned by `mapbayest()` anyway)
-    -   Do not capture any ETAn (ETA1, ETA2 etc…) (they will be returned
-        by `mapbayest()` anyway)
--   Strongly recommended:
-    -   Capture a posteriori values of parameters you are interested in
-        (e.g. CL)
+- Mandatory:
+  - DV must be captured
+  - For models with parent + metabolite, PAR and MET must be captured
+    too.
+  - Do not capture variables called IPRED and PRED (they will be
+    returned by `mapbayest()` anyway)
+  - Do not capture any ETAn (ETA1, ETA2 etc…) (they will be returned by
+    `mapbayest()` anyway)
+- Strongly recommended:
+  - Capture a posteriori values of parameters you are interested in
+    (e.g. CL)
 
 ``` c
 $CAPTURE DV PAR MET CL

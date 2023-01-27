@@ -9,6 +9,10 @@
 * New argument `.datehour` in `adm_lines()` and `obs_lines()` in order to compute `time` as function of date and hours provided as character.
 * Export `parse_datehour()`
 * Export `filter.mrgmod()`, a method, wrapper around `dplyr::filter()` for dataset stored in mrgsolve model object ('mrgmod').
+* New argument `select_eta` in `mapbayest()` in order to select the ETAs to estimate. Default are ETAs related to a OMEGA not equal to zero. Non-selected ETAs will be fixed to zero. 
+* OMEGA values equal to zero are allowed and will be ignored during the estimations steps thanks to the new `select_eta` argument.
+* Modification of the final estimation object: `arg.optim` now has a `select_eta` element, `arg.ofv.fix$omega_inv` now has the dimensions of the number of ETAs selected.
+* Small changes in the `print` method.
 
 # mapbayr 0.8.0
 

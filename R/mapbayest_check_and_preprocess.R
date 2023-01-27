@@ -41,7 +41,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     if(neta == 0) {
       stop('$PARAM. Cannot find parameters named "ETA1", "ETA2", etc... \nDid you forget to add these parameters in $PARAM?', call. = FALSE)
     } else {
-      expected_eta_names <- paste0("ETA", seq_along(eta_names_x))
+      expected_eta_names <- make_eta_names(n = neta)
       if(any(eta_names_x != expected_eta_names)){
         stop(paste0("$PARAM. ", neta, " ETA parameter(s) found, but not named ", paste(expected_eta_names, collapse = ", "), ". "), call. = FALSE)
       }
@@ -55,9 +55,6 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     nomega <- length(odiag_x)
     if(nomega != neta) {
       stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
-    }
-    if(any(odiag_x == 0)){
-      stop("$OMEGA. The value of one or multiple OMEGA value is equal to 0. Cannot accept value in OMEGA equal to zero.", call. = FALSE)
     }
 
     # $SIGMA
@@ -193,7 +190,7 @@ split_mapbayr_data <- function(data){
 #'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
-preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
+preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   #Checks argument
 
   #method
@@ -201,6 +198,24 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
   okmethod <- c("L-BFGS-B", "newuoa")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   netas <- eta_length(x)
+
+  #select_eta
+  if(is.null(select_eta)){
+    select_eta <- which(odiag(x) != 0)
+  }
+
+  if(any(select_eta > netas)){
+    stop("Cannot select ", paste(make_eta_names(select_eta[select_eta>netas]), collapse = " "),
+         ": maximum ", netas, " ETAs defined in $PARAM.")
+  }
+
+  selected_omega_zero <- intersect(which(odiag(x) == 0), select_eta)
+
+  if(length(selected_omega_zero) != 0){
+    stop("Cannot select ", paste(make_eta_names(selected_omega_zero), collapse = " "),
+         ": the corresponding OMEGA value is equal to zero. Modify the $OMEGA block or use `mapbayest(select_eta = ...)`.",
+         call. = FALSE)
+  }
 
   if(method == "newuoa"){
     if(!requireNamespace("minqa", quietly = TRUE)) {
@@ -215,7 +230,10 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas, val = 0.01)
+      initial_eta <- eta(n = netas, val = 0.01)[select_eta]
+    }
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
     }
 
     # fn = compute_ofv
@@ -229,7 +247,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
       par = initial_eta,
       fn = compute_ofv,
       control = control,
-      method = method  # I still keep it for the wrappers around newuoa
+      method = method, # I still keep it for the wrappers around newuoa
+      select_eta = select_eta
     )
   }
 
@@ -244,15 +263,18 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas)
+      initial_eta <- eta(n = netas)[select_eta]
     }
 
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
+    }
     # fn = compute_ofv, gr = NULL, hessian = FALSE
 
     # method = "L-BFGS-B"
 
     # lower, upper
-    bound <- get_quantile(x, .p = quantile_bound)
+    bound <- get_quantile(x, .p = quantile_bound)[select_eta]
 
     # control = list(trace,
     #                fnscale,
@@ -283,7 +305,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
       method = method,
       control = control,
       lower = bound,
-      upper = -bound
+      upper = -bound,
+      select_eta = select_eta
     )
   }
 
@@ -296,6 +319,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
 #' @name preprocess.ofv
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @param select_eta numbers of the ETAs taken into account. Set the dimensions of the inversed OMEGA matrix
 #' @return A list of arguments used to compute the objective function value.
 #'
 #' The following arguments are fixed between individuals:
@@ -327,7 +351,7 @@ NULL
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
-preprocess.ofv.fix <- function(x, data){
+preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x))){
   qmod <- zero_re(x)
   qmod@end <- -1 #Make sure no modif in the time grid
   qmod@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -339,7 +363,7 @@ preprocess.ofv.fix <- function(x, data){
     qmod = qmod,
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
-    omega_inv = solve(omat(x, make = T)),
+    omega_inv = solve(omat(x, make = T)[select_eta,select_eta]),
     all_cmt = fit_cmt(x, data) #on full data
   )
 }

@@ -45,13 +45,21 @@ eta <- function(x, ..., n, val = 0){
   return(rename_as_eta(ans))
 }
 
+
+make_eta_names <- function(x, n){
+  if(!missing(n)){
+    x <- seq_len(n)
+  }
+  paste0("ETA", x)
+}
+
 # x, a vector or a matrix to be renamed
 rename_as_eta <- function(x){
   if(is.matrix(x)){
-    colnames(x) <- paste0("ETA", seq_len(ncol(x)))
+    colnames(x) <- make_eta_names(n = ncol(x))
     return(x)
   }
-  names(x) <- paste0("ETA", seq_along(x))
+  names(x) <- make_eta_names(n = length(x))
   x
 }
 
@@ -72,3 +80,27 @@ eta_length <- function(...){
 eta_names <- function(...){
   names(eta(...))
 }
+
+#' Fill a vector/matrix of ETAs
+#'
+#' @param x a named vector of ETAs, or a matrix to fill
+#' @param n the maximum number of ETAs
+#'
+#' @return a object of the same type as x, with adequate dimensions
+#' @noRd
+#' @examples
+#' fill_eta(c(ETA2 = 2, ETA4 = -4), n = 5)
+fill_eta <- function(x, n){
+  if(missing(n)) stop("n is missing")
+  if(is.matrix(x)){
+    y <- rename_as_eta(matrix(0, nrow = nrow(x), ncol = n))
+    y[,colnames(x)] <- x
+    row.names(y) <- row.names(x)
+  } else {
+    y <- eta(n = n, value = 0)
+    y[names(x)] <- x
+  }
+  y
+}
+
+

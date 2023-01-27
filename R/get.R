@@ -264,9 +264,11 @@ get_phi.mapbayests <- function(x, ...){
       bind_rows()
   }
 
-  phitab <- x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
+  phitab <- x %>%
+    get_eta(output = "df") %>%
+    mutate(OBJ = x$opt.value$value) %>%
     bind_cols(covphi) %>%
-    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
+    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), .data$OBJ) %>%
     mutate(ID = as.double(.data$ID)) %>%
     mutate(SUBJECT_NO = as.double(rank(.data$ID, ties.method = "first")), .before = 1) %>%
     as_tibble()
