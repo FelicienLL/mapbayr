@@ -31,5 +31,9 @@ $CAPTURE DV
   dat <- exdata()
   est <- mapbayest(mod, dat, reset = 0, verbose = FALSE)
   H <- hist(est)
-
+  layout <- ggplot2::ggplot_build(H)$layout
+  test_names <- layout$layout[names(layout$facet$params$facets)]$name
+  expected_names <- make_eta_names(n = 12)
+  expect_equal(levels(test_names), expected_names)
+  expect_equal(as.character(test_names), expected_names)
 })
