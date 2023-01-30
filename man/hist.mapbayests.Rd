@@ -4,10 +4,12 @@
 \alias{hist.mapbayests}
 \title{Plot posterior distribution of bayesian estimates}
 \usage{
-\method{hist}{mapbayests}(x, ...)
+\method{hist}{mapbayests}(x, select_eta = x$arg.optim$select_eta, ...)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
+
+\item{select_eta}{a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).}
 
 \item{...}{additional arguments (not used)}
 }
@@ -23,6 +25,15 @@ For additional modifications, you can add extra \verb{+function(...)} in order t
 }
 \examples{
 est <- mapbayest(exmodel(ID = 1))
-hist(est) +
+
+# Default Method
+h <- hist(est)
+
+# Can be modified with `ggplot2`
+h +
   ggplot2::labs(title = "Awesome estimations")
+
+# Select the ETAs
+hist(est, select_eta = c(1,3))
+
 }
