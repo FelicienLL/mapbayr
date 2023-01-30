@@ -17,6 +17,8 @@
 * New argument `lambda` in `mapbayest()` in order to modify the weight of prior model (#174)
 * Internal: Fix deprecations related to 'tidyverse' packages (#171).
 * Depends on ggplot2 > 3.4.0
+* New `adm_rows()` instead of `adm_lines()`, and `obs_rows()` instead of `obs_lines()`. (#175)
+* `adm_lines()` and `obs_lines()` are now deprecated. 
 
 # mapbayr 0.8.0
 

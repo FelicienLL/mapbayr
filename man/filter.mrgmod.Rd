@@ -21,7 +21,7 @@ Filter a dataset within a mrgmod
 library(magrittr)
 mod <- mrgsolve::mcode("mod", "$CMT FOO", compile = FALSE)
 mod \%>\%
-  adm_lines(amt = c(100, 200, 300), cmt = 1) \%>\%
+  adm_rows(amt = c(100, 200, 300), cmt = 1) \%>\%
   filter(amt != 200) \%>\%
   get_data()
 }

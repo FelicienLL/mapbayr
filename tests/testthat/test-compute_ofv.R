@@ -34,8 +34,8 @@ test_that("h matrix computation works", {
 
   # e.g. time = 0 with oral drug
   est <- exmodel(add_exdata = F) %>%
-    adm_lines(amt = 100) %>%
-    obs_lines(time = c(0, 10), DV = c(.1, 1)) %>%
+    adm_rows(amt = 100) %>%
+    obs_rows(time = c(0, 10), DV = c(.1, 1)) %>%
     mapbayest(output = "df")
 
   expect_equal(est$IPRED, c(0, 0, 0.9244), tolerance = 0.001)
@@ -170,8 +170,8 @@ $CAPTURE DV ALAG1 D1
   mod141 <- mcode("mod141",code141, quiet = TRUE)
 
   dat141 <- mod141 %>%
-    adm_lines(amt = 1000, cmt = 1, ss = 1, ii = 24) %>%
-    obs_lines(time = c(1,4), DV = c(26, 52), cmt = 2) %>%
+    adm_rows(amt = 1000, cmt = 1, ss = 1, ii = 24) %>%
+    obs_rows(time = c(1,4), DV = c(26, 52), cmt = 2) %>%
     get_data()
 
   argofv141 <- c(

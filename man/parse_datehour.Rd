@@ -37,13 +37,13 @@ parse_datehour(x = "02-02-2022 22:22", orders = "dmY HM")
 # "Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"
 
 # Alternatively, set a format through `options(mapbayr.datehour)`.
-# Convenient for the use `.datehour` in  `adm_lines()` and `obs_lines()`.
+# Convenient for the use `.datehour` in  `adm_rows()` and `obs_rows()`.
 
 # Following format will return NA:
-adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+adm_rows(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 
 options(mapbayr.datehour = "HM dmY")
-adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+adm_rows(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 options(mapbayr.datehour = NULL)
 
 }
