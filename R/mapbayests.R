@@ -141,7 +141,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' Plot posterior distribution of bayesian estimates
 #'
 #' @param x A \code{mapbayests} object.
-#' @param select_eta number of the ETAs to plot.
+#' @param select_eta number of the ETAs to plot (default are the ETAs estimated).
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -155,7 +155,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'   ggplot2::labs(title = "Awesome estimations")
 #' @method hist mapbayests
 #' @export
-hist.mapbayests <- function(x, select_eta = NULL, ...){
+hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
 
   max_eta <- eta_length(x$model)
   select_eta_est <- x$arg.optim$select_eta
@@ -166,8 +166,14 @@ hist.mapbayests <- function(x, select_eta = NULL, ...){
   }
 
   select_eta_hist <- select_eta
+
   if(is.null(select_eta_hist)){
     select_eta_hist <- select_eta_est
+  }
+
+  if(any(select_eta_hist > max_eta)){
+      stop("Cannot select ", paste(make_eta_names(select_eta_hist[select_eta_hist>max_eta]), collapse = " "),
+           ": maximum ", max_eta, " ETAs defined in $PARAM.")
   }
 
   common_eta <- intersect(select_eta_est, select_eta_hist)

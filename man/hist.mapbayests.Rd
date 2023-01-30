@@ -4,12 +4,12 @@
 \alias{hist.mapbayests}
 \title{Plot posterior distribution of bayesian estimates}
 \usage{
-\method{hist}{mapbayests}(x, select_eta = NULL, ...)
+\method{hist}{mapbayests}(x, select_eta = x$arg.optim$select_eta, ...)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
-\item{select_eta}{number of the ETAs to plot.}
+\item{select_eta}{number of the ETAs to plot (default are the ETAs estimated).}
 
 \item{...}{additional arguments (not used)}
 }

@@ -69,4 +69,10 @@ test_that("select_eta argument works", {
     fetch_facet_names(hist(est135, select_eta = c(2,4,6))),
     factor(x = make_eta_names(c(2,4,6)), levels = make_eta_names(c(2,4,6)))
   )
+
+  # Error if select > max ETA
+  expect_error(
+    fetch_facet_names(hist(est135, select_eta = c(13, 14))),
+    "Cannot select ETA13 ETA14: maximum 12 ETAs defined in \\$PARAM."
+  )
 })
