@@ -185,8 +185,6 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
            ": maximum ", max_eta, " ETAs defined in $PARAM.")
   }
 
-  common_eta <- intersect(select_eta_est, select_eta_hist)
-
   # --- Arguments tab
   # First on all ETAs for simplicity of indexation
   arg_tab <- data.frame(
