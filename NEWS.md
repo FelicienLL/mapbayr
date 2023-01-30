@@ -15,6 +15,8 @@
 * Small changes in the `print` method.
 * New argument `select_eta` in `hist()` in order to select the ETAs to plot. Default are ETAs estimated (#167).
 * New argument `lambda` in `mapbayest()` in order to modify the weight of prior model (#174)
+* Internal: Fix deprecations related to 'tidyverse' packages (#171).
+* Depends on ggplot2 > 3.4.0
 
 # mapbayr 0.8.0
 
