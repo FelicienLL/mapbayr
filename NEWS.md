@@ -13,6 +13,7 @@
 * OMEGA values equal to zero are allowed and will be ignored during the estimations steps thanks to the new `select_eta` argument.
 * Modification of the final estimation object: `arg.optim` now has a `select_eta` element, `arg.ofv.fix$omega_inv` now has the dimensions of the number of ETAs selected.
 * Small changes in the `print` method.
+* New argument `select_eta` in `hist()` in order to select the ETAs to plot. Default are ETAs estimated (#167).
 
 # mapbayr 0.8.0
 

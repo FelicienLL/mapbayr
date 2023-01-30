@@ -141,7 +141,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' Plot posterior distribution of bayesian estimates
 #'
 #' @param x A \code{mapbayests} object.
-#' @param select_eta number of the ETAs to plot (default are the ETAs estimated).
+#' @param select_eta a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -151,8 +151,17 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'
 #' @examples
 #' est <- mapbayest(exmodel(ID = 1))
-#' hist(est) +
+#'
+#' # Default Method
+#' h <- hist(est)
+#'
+#' # Can be modified with `ggplot2`
+#' h +
 #'   ggplot2::labs(title = "Awesome estimations")
+#'
+#' # Select the ETAs
+#' hist(est, select_eta = c(1,3))
+#'
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
@@ -191,11 +200,11 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
   arg_tab$lower <- bound
   arg_tab$upper <- -bound
 
-  # Update bound with those currently used in estimation if ever
+  # Updates bound with those currently used in estimation if ever
   arg_tab$lower[select_eta_est] <- x$arg.optim$lower
   arg_tab$upper[select_eta_est] <- x$arg.optim$upper
 
-  #Then filter select eta for the plot
+  # Then filter the selected ETAs for the plot
   arg_tab <- arg_tab[select_eta_hist,]
 
   # --- Eta tab
