@@ -141,6 +141,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' Plot posterior distribution of bayesian estimates
 #'
 #' @param x A \code{mapbayests} object.
+#' @param select_eta number of the ETAs to plot.
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -154,26 +155,46 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'   ggplot2::labs(title = "Awesome estimations")
 #' @method hist mapbayests
 #' @export
-hist.mapbayests <- function(x, ...){
+hist.mapbayests <- function(x, select_eta = NULL, ...){
+
+  max_eta <- eta_length(x$model)
+  select_eta_est <- x$arg.optim$select_eta
+
+  # --- What ETA do we want?
+  if(is.null(select_eta_est)){ # For backward compatibility (< 0.9)
+    select_eta_est <- seq_len(max_eta)
+  }
+
+  select_eta_hist <- select_eta
+  if(is.null(select_eta_hist)){
+    select_eta_hist <- select_eta_est
+  }
+
+  common_eta <- intersect(select_eta_est, select_eta_hist)
+
   # --- Arguments tab
+  # First on all ETAs for simplicity of indexation
   arg_tab <- data.frame(
     om = odiag(x$model),
     name = eta_names(x$model),
     descr = eta_descr(x$model)
     )
 
-  if(is.null(x$arg.optim$select_eta)){ # backward compatibility
-    x$arg.optim$select_eta <- seq_len(nrow(arg_tab))
-  }
-  arg_tab$lower <- rep(NA_real_, nrow(arg_tab))
-  arg_tab$lower[x$arg.optim$select_eta] <- x$arg.optim$lower
+  # Default bounds to 0.1% - 99.9%
+  bound <- get_quantile(x$model, .p = 0.001)
+  arg_tab$lower <- bound
+  arg_tab$upper <- -bound
 
-  arg_tab$upper <- rep(NA_real_, nrow(arg_tab))
-  arg_tab$upper[x$arg.optim$select_eta] <- x$arg.optim$upper
+  # Update bound with those currently used in estimation if ever
+  arg_tab$lower[select_eta_est] <- x$arg.optim$lower
+  arg_tab$upper[select_eta_est] <- x$arg.optim$upper
+
+  #Then filter select eta for the plot
+  arg_tab <- arg_tab[select_eta_hist,]
 
   # --- Eta tab
   eta_tab <- get_eta(x, output = "df") %>%
-    select(-.data$ID) %>%
+    select(all_of(arg_tab$name)) %>%
     pivot_longer(everything())
 
   # --- Density tab
@@ -193,7 +214,10 @@ hist.mapbayests <- function(x, ...){
 
   # --- one ID
   if(length(x$final_eta) == 1){
-    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), stats::pnorm, mean = 0)
+    percentile <- map2_dbl(get_eta.mapbayests(x, select_eta_hist, output = "num"),
+                           sqrt(arg_tab$om),
+                           stats::pnorm,
+                           mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
   }
