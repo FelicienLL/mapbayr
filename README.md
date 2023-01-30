@@ -116,16 +116,16 @@ my_est <- mapbayest(my_model, data = my_data)
 ```
 
 As building dataset into a NM-TRAN format can be painful, you can use
-pipe-friendly `obs_lines()`, `adm_lines()` and `add_covariates()`
+pipe-friendly `obs_rows()`, `adm_rows()` and `add_covariates()`
 functions in order to pass administration and observation information,
 and perform the estimation subsequently.
 
 ``` r
 my_est <- my_model %>% 
-  adm_lines(time = 0, amt = 100, rate = 20) %>% 
-  obs_lines(time = 6, DV = 3.9) %>% 
-  obs_lines(time = 20, DV = 1.1) %>% 
-  obs_lines(time = 24, DV = 2, mdv = 1) %>% 
+  adm_rows(time = 0, amt = 100, rate = 20) %>% 
+  obs_rows(time = 6, DV = 3.9) %>% 
+  obs_rows(time = 20, DV = 1.1) %>% 
+  obs_rows(time = 24, DV = 2, mdv = 1) %>% 
   add_covariates(BW = 90) %>% 
   mapbayest()
 ```
@@ -283,11 +283,11 @@ SEX : 0 : Sex (0=Male, 1=Female)
   drug + metabolite:
   - A `@annotated` tag must be used to record compartments.
   - Write OBS in brackets to define the observation compartment(s). Also
-    used by `obs_lines()` to fill the ‘cmt’ column in your dataset.
+    used by `obs_rows()` to fill the ‘cmt’ column in your dataset.
   - Write ADM in brackets to define “default” administration
     compartment(s). This information is not used for optimization
     process and the `mapbayest()` function. The information is mandatory
-    if you use `adm_lines()` to build your dataset in order to
+    if you use `adm_rows()` to build your dataset in order to
     automatically set the value of the ‘cmt’ column. Especially useful
     if you use a model with an absorption from several depot compartment
     requiring to duplicate administrations lines in the data set.

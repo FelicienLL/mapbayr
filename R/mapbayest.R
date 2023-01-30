@@ -162,12 +162,3 @@ mapbayest <- function(x,
 
   return(out)
 }
-
-#' Estimate parameters (maximum a posteriori)
-#' @param ... passed to mapbayest
-#' @export
-#' @rdname mapbayest
-mbrest <- function(...){
-  .Deprecated("mapbayest")
-  mapbayest(...)
-}

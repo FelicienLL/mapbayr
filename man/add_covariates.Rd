@@ -25,7 +25,7 @@ add_covariates(x, ...)
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).
 }
 \description{
-The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_lines]{adm_lines()}} and \code{\link[=obs_lines]{obs_lines()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in \link{data_helpers}.
+The \code{add_covariates()} function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with \code{\link[=adm_rows]{adm_rows()}} and \code{\link[=obs_rows]{obs_rows()}}, it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in \link{data_helpers}.
 }
 \examples{
 # Cannot start from scratch
@@ -34,24 +34,24 @@ add_covariates(BW = 90, SEX = 0)
 }
 
 library(magrittr)
-adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(BW = c(90, 85, 80), SEX = 0)
 
 # If covariates are stored in a list, use `covariates = `
-adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
 
 # Missing values are filled with the "next observation carried backward" rule
-adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
+adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) \%>\%
   add_covariates(BW = c(90, 85, 80), SEX = 0) \%>\%
-  obs_lines(time = 36, DV = .0123, cmt = 2)
+  obs_rows(time = 36, DV = .0123, cmt = 2)
 # Always verify the output in case of time-varying covariates
 
 # Possibility to add Time and Amount of last administration as covariates
-adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
-  obs_lines(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) \%>\%
+adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
+  obs_rows(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) \%>\%
   add_covariates(TOLA = TRUE, AOLA = TRUE) \%>\%
-  obs_lines(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
+  obs_rows(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
 
 # Automatic inclusion of `TOLA`/`AOLA` if they are covariates of the model
 library(mrgsolve)
@@ -62,7 +62,7 @@ AOLA : 0 : Amount Last Adm
 ", compile = FALSE)
 
 model \%>\%
-  adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
+  adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) \%>\%
   add_covariates() \%>\%
   get_data()
 }

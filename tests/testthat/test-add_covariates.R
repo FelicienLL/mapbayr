@@ -1,5 +1,5 @@
-dat <- adm_lines(amt = 1000, cmt = 1) %>%
-  obs_lines(time = 24, DV = 123, cmt = 1)
+dat <- adm_rows(amt = 1000, cmt = 1) %>%
+  obs_rows(time = 24, DV = 123, cmt = 1)
 
 test_that("covariates can be called through `...` or `covariates = list()`", {
   expected_cov <- as_tibble(data.frame(BW = rep(123, 2), SEX = 0))
@@ -30,7 +30,7 @@ test_that("AOLA TOLA works", {
   #updates afterwards
   dat2 <- dat %>%
     add_covariates(AOLA = TRUE, TOLA = TRUE) %>%
-    adm_lines(time = 48, cmt = 1, amt = 2000)
+    adm_rows(time = 48, cmt = 1, amt = 2000)
 
   expect_equal(dat2[,c("AOLA", "TOLA")], tibble::tibble(AOLA = c(1000, 1000, 2000), TOLA = c(0,0, 48)))
 
@@ -42,7 +42,7 @@ test_that("AOLA TOLA works", {
 
   #automatic if AOLA/TOLA are cov
   dat3 <- model %>%
-    adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+    adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
     add_covariates() %>%
     get_data()
 
@@ -52,7 +52,7 @@ test_that("AOLA TOLA works", {
 })
 
 test_that("cannot have '.datehour'",{
-  dat <- adm_lines(amt = 100, cmt = 1)
+  dat <- adm_rows(amt = 100, cmt = 1)
   expect_error(add_covariates(dat, .datehour = "123"), "Cannot have a covariate named: .datehour")
   expect_error(add_covariates(dat, covariates = list(.datehour = "123")), "Cannot have a covariate named: .datehour")
 })

@@ -2,7 +2,6 @@
 % Please edit documentation in R/mapbayest.R
 \name{mapbayest}
 \alias{mapbayest}
-\alias{mbrest}
 \title{Estimate parameters (maximum a posteriori)}
 \usage{
 mapbayest(
@@ -22,8 +21,6 @@ mapbayest(
   output = NULL,
   ...
 )
-
-mbrest(...)
 }
 \arguments{
 \item{x}{the model object}
@@ -54,7 +51,7 @@ mbrest(...)
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 
-\item{...}{passed to mapbayest}
+\item{...}{for compatibility (not used)}
 }
 \value{
 a mapbayests object. Basically a list containing:

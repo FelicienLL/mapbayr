@@ -4,13 +4,13 @@
 \alias{data_helpers}
 \title{Data helpers: functions to build the dataset}
 \description{
-Use \code{\link[=adm_lines]{adm_lines()}}, \code{\link[=obs_lines]{obs_lines()}} and \code{\link[=add_covariates]{add_covariates()}} to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
+Use \code{\link[=adm_rows]{adm_rows()}}, \code{\link[=obs_rows]{obs_rows()}} and \code{\link[=add_covariates]{add_covariates()}} to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
 }
 \details{
 Instead of importing a '.csv' file, or painfully build a data set with a call to \code{data.frame()} and mind how to format the data, you can pass information about:
 \itemize{
-\item administrations with \code{\link[=adm_lines]{adm_lines()}},
-\item observations with \code{\link[=obs_lines]{obs_lines()}},
+\item administrations with \code{\link[=adm_rows]{adm_rows()}},
+\item observations with \code{\link[=obs_rows]{obs_rows()}},
 \item covariates with \code{\link[=add_covariates]{add_covariates()}},
 }
 
@@ -30,14 +30,14 @@ The latter is particularly useful in order to:
 library(magrittr)
 # First option: work with a data.frame
 
-adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12) \%>\%
-  obs_lines(time = c(12.3, 45.6), DV = c(.111, .222), cmt = 2) \%>\%
-  obs_lines(time = 48, cmt = 2) \%>\%
+adm_rows(amt = 1000, cmt = 1, addl = 4, ii = 12) \%>\%
+  obs_rows(time = c(12.3, 45.6), DV = c(.111, .222), cmt = 2) \%>\%
+  obs_rows(time = 48, cmt = 2) \%>\%
   add_covariates(BW = 90, SEX = 0, TOLA = TRUE)
 
 # You can even inform "time" using date and hours:
-adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") \%>\%
-  obs_lines(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
+adm_rows(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") \%>\%
+  obs_rows(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
 
 # Second option: work with a dataset within a 'mrgsolve' model
 mod <- exmodel(add_exdata = FALSE)
@@ -46,8 +46,8 @@ adm_cmt(mod)
 obs_cmt(mod)
 
 mod \%>\%
-  adm_lines(amt = 10000) \%>\%
-  obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) \%>\%
+  adm_rows(amt = 10000) \%>\%
+  obs_rows(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) \%>\%
   # get_data() # for curiosity, you can extract the data set at this step
   mapbayest()
 

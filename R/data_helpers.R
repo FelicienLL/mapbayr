@@ -1,12 +1,12 @@
 #' Data helpers: functions to build the dataset
 #'
 #' @name data_helpers
-#' @description Use [adm_lines()], [obs_lines()] and [add_covariates()] to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
+#' @description Use [adm_rows()], [obs_rows()] and [add_covariates()] to create or modify a dataset from scratch, from a pre-existing dataset, or from a dataset stored into a 'mrgsolve' model.
 #' @details
 #' Instead of importing a '.csv' file, or painfully build a data set with a call to `data.frame()` and mind how to format the data, you can pass information about:
 #'
-#' * administrations with [adm_lines()],
-#' * observations with [obs_lines()],
+#' * administrations with [adm_rows()],
+#' * observations with [obs_rows()],
 #' * covariates with [add_covariates()],
 #'
 #' all being called jointly with a pipe (`%>%` or `|>`).
@@ -23,14 +23,14 @@
 #' library(magrittr)
 #' # First option: work with a data.frame
 #'
-#' adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12) %>%
-#'   obs_lines(time = c(12.3, 45.6), DV = c(.111, .222), cmt = 2) %>%
-#'   obs_lines(time = 48, cmt = 2) %>%
+#' adm_rows(amt = 1000, cmt = 1, addl = 4, ii = 12) %>%
+#'   obs_rows(time = c(12.3, 45.6), DV = c(.111, .222), cmt = 2) %>%
+#'   obs_rows(time = 48, cmt = 2) %>%
 #'   add_covariates(BW = 90, SEX = 0, TOLA = TRUE)
 #'
 #' # You can even inform "time" using date and hours:
-#' adm_lines(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") %>%
-#'   obs_lines(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
+#' adm_rows(amt = 1000, cmt = 1, addl = 4, ii = 12, .datehour = "2022-01-01 11:11:11") %>%
+#'   obs_rows(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
 #'
 #' # Second option: work with a dataset within a 'mrgsolve' model
 #' mod <- exmodel(add_exdata = FALSE)
@@ -39,8 +39,8 @@
 #' obs_cmt(mod)
 #'
 #' mod %>%
-#'   adm_lines(amt = 10000) %>%
-#'   obs_lines(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) %>%
+#'   adm_rows(amt = 10000) %>%
+#'   obs_rows(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) %>%
 #'   # get_data() # for curiosity, you can extract the data set at this step
 #'   mapbayest()
 #'
@@ -49,7 +49,7 @@ NULL
 
 #' Add administration lines to a dataset
 #'
-#' @description The `adm_lines()` function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [obs_lines()] and [add_covariates()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
+#' @description The `adm_rows()` function adds an one or several administration lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [obs_rows()] and [add_covariates()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
 #'
 #' @param x either a data.frame or a 'mrgsolve' model object
 #' @param ID subject ID (default is 1)
@@ -70,23 +70,23 @@ NULL
 #'
 #' @examples
 #' # Create a dataset from scratch
-#' adm_lines(amt = 100, cmt = 1)
+#' adm_rows(amt = 100, cmt = 1)
 #'
 #' # Pipe-friendly addition of administration record to a pre-existing dataset
 #' library(magrittr)
-#' adm_lines(amt = 100, cmt = 1) %>%
-#'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1)
+#' adm_rows(amt = 100, cmt = 1) %>%
+#'   adm_rows(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1)
 #'
 #' # Inform times using the `.datehour` argument:
-#' adm_lines(.datehour = "2020-01-01 11:11", amt = 100, cmt = 1) %>%
-#'   adm_lines(.datehour = "2020-01-02 22:22", amt = 200, cmt = 1) %>%
-#'   adm_lines(time = 48, amt = 300, cmt = 1)
+#' adm_rows(.datehour = "2020-01-01 11:11", amt = 100, cmt = 1) %>%
+#'   adm_rows(.datehour = "2020-01-02 22:22", amt = 200, cmt = 1) %>%
+#'   adm_rows(time = 48, amt = 300, cmt = 1)
 #'
 #' # Start from a 'mrgsolve' model
 #' library(mrgsolve)
 #' house() %>%
-#'   adm_lines(amt = 100, cmt = 1) %>%
-#'   adm_lines(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1) %>%
+#'   adm_rows(amt = 100, cmt = 1) %>%
+#'   adm_rows(time = 3, amt = 200, cmt = 1, addl = 3, ii = 1) %>%
 #'   mrgsim(delta = 1)
 #'
 #' # Default administration compartments
@@ -100,8 +100,8 @@ NULL
 #'
 #' # Thus, no need to manually specify `cmt = 1` anymore.
 #' model %>%
-#'   adm_lines(amt = 100) %>%
-#'   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) %>%
+#'   adm_rows(amt = 100) %>%
+#'   adm_rows(time = 3, amt = 200, addl = 3, ii = 1) %>%
 #'   get_data()
 #'
 #' # Automatic lines duplication if multiple depot compartments
@@ -117,22 +117,22 @@ NULL
 #' adm_cmt(model)
 #'
 #' model %>%
-#'   adm_lines(amt = 100) %>%
-#'   adm_lines(time = 3, amt = 200, addl = 3, ii = 1) %>%
+#'   adm_rows(amt = 100) %>%
+#'   adm_rows(time = 3, amt = 200, addl = 3, ii = 1) %>%
 #'   get_data()
 #' @seealso [data_helpers]
-adm_lines <- function(x, ...) {
+adm_rows <- function(x, ...) {
   if (missing(x)) {
-    adm_lines.missing(...)
+    adm_rows.missing(...)
   } else {
-    UseMethod("adm_lines")
+    UseMethod("adm_rows")
   }
 }
 
-#' @rdname adm_lines
-#' @method adm_lines data.frame
+#' @rdname adm_rows
+#' @method adm_rows data.frame
 #' @export
-adm_lines.data.frame <- function(x,
+adm_rows.data.frame <- function(x,
                                  ID = NULL,
                                  time = NULL,
                                  evid = 1L,
@@ -191,18 +191,18 @@ adm_lines.data.frame <- function(x,
   rearrange_nmdata(new_data, dh0 = dh0)
 }
 
-#' @rdname adm_lines
-#' @method adm_lines missing
+#' @rdname adm_rows
+#' @method adm_rows missing
 #' @export
-adm_lines.missing <- function(...) {
+adm_rows.missing <- function(...) {
   x <- as_tibble(data.frame())
-  adm_lines.data.frame(x = x, ... = ...)
+  adm_rows.data.frame(x = x, ... = ...)
 }
 
-#' @rdname adm_lines
-#' @method adm_lines mrgmod
+#' @rdname adm_rows
+#' @method adm_rows mrgmod
 #' @export
-adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
+adm_rows.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
   # x = a model object
   old_data <- get_data.mrgmod(x) # if no data: an empty 0x0 tibble, not "NULL"!
 
@@ -217,14 +217,14 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
   args <- list(x = old_data, cmt = cmt, rate = rate, ... = ...)
   args <- NULL_remove(args)
 
-  new_data <- do.call(adm_lines.data.frame, args)
+  new_data <- do.call(adm_rows.data.frame, args)
 
   data_set(x, new_data)
 }
 
 #' Add observation lines to a dataset
 #'
-#' @description The `obs_lines()` function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [adm_lines()] and [add_covariates()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
+#' @description The `obs_rows()` function adds an one or several observation lines to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [adm_rows()] and [add_covariates()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
 #'
 #' @param x either a data.frame or a 'mrgsolve' model object
 #' @param ID subject ID (default is 1)
@@ -242,23 +242,23 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
 #'
 #' @examples
 #' # Create a dataset from scratch
-#' obs_lines(time = 12, DV = 0.12, cmt = 2)
+#' obs_rows(time = 12, DV = 0.12, cmt = 2)
 #'
 #' # Pipe-friendly addition of observation record to a pre-existing dataset
 #' library(magrittr)
-#' obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2)
+#' obs_rows(time = 12, DV = 0.12, cmt = 2) %>%
+#'   obs_rows(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2)
 #'
 #' # Inform times using the `.datehour` argument:
-#' obs_lines(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) %>%
-#'   obs_lines(.datehour = "2020-01-02 22:22", DV = 0.34, cmt = 1) %>%
-#'   obs_lines(time = 48, DV = 0.56, cmt = 1)
+#' obs_rows(.datehour = "2020-01-01 11:11", DV = 0.12, cmt = 1) %>%
+#'   obs_rows(.datehour = "2020-01-02 22:22", DV = 0.34, cmt = 1) %>%
+#'   obs_rows(time = 48, DV = 0.56, cmt = 1)
 #'
 #' # Start from a 'mrgsolve' model
 #' library(mrgsolve)
 #' house() %>%
-#'   obs_lines(time = 12, DV = 0.12, cmt = 2) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2) %>%
+#'   obs_rows(time = 12, DV = 0.12, cmt = 2) %>%
+#'   obs_rows(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0), cmt = 2) %>%
 #'   mrgsim()
 #'
 #' # Default observation compartments
@@ -272,8 +272,8 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
 #'
 #' # Thus, no need to manually specify `cmt = 2` anymore.
 #' model %>%
-#'   obs_lines(time = 12, DV = 0.12) %>%
-#'   obs_lines(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0)) %>%
+#'   obs_rows(time = 12, DV = 0.12) %>%
+#'   obs_rows(time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78), mdv = c(0, 1, 0)) %>%
 #'   get_data()
 #'
 #' # Automatic lines duplication if parent + metabolite defined in the model
@@ -287,25 +287,25 @@ adm_lines.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
 #' obs_cmt(model)
 #'
 #' model %>%
-#'   obs_lines(time = 12, DV = 0.12, DVmet = 120) %>%
-#'   obs_lines(
+#'   obs_rows(time = 12, DV = 0.12, DVmet = 120) %>%
+#'   obs_rows(
 #'     time = c(24, 36, 48), DV = c(0.34, 0.56, 0.78),
 #'     mdv = c(0, 1, 0), DVmet = c(340, 560, 780)
 #'   ) %>%
 #'   get_data()
 #' @seealso [data_helpers]
-obs_lines <- function(x, ...) {
+obs_rows <- function(x, ...) {
   if (missing(x)) {
-    obs_lines.missing(...)
+    obs_rows.missing(...)
   } else {
-    UseMethod("obs_lines")
+    UseMethod("obs_rows")
   }
 }
 
-#' @method obs_lines data.frame
-#' @rdname obs_lines
+#' @method obs_rows data.frame
+#' @rdname obs_rows
 #' @export
-obs_lines.data.frame <- function(x,
+obs_rows.data.frame <- function(x,
                                  ID = NULL,
                                  time = NULL,
                                  evid = 0L,
@@ -354,25 +354,25 @@ obs_lines.data.frame <- function(x,
 
   new_lines <- data.frame(ID = ID, time = time, evid = evid, cmt = cmt, DV = DV, mdv = mdv, ... = ...)
   if (any(names(new_lines) == "DVmet")) {
-    warning("`DVmet` column added to the data. If you expected metabolite concentrations set in `DV`, `obs_lines()` must be used with a 'mrgsolve' model.")
+    warning("`DVmet` column added to the data. If you expected metabolite concentrations set in `DV`, `obs_rows()` must be used with a 'mrgsolve' model.")
   }
 
   new_data <- bind_rows(old_data, new_lines)
   rearrange_nmdata(new_data, dh0 = dh0)
 }
 
-#' @method obs_lines missing
-#' @rdname obs_lines
+#' @method obs_rows missing
+#' @rdname obs_rows
 #' @export
-obs_lines.missing <- function(...) {
+obs_rows.missing <- function(...) {
   x <- as_tibble(data.frame())
-  obs_lines.data.frame(x = x, ... = ...)
+  obs_rows.data.frame(x = x, ... = ...)
 }
 
-#' @method obs_lines mrgmod
-#' @rdname obs_lines
+#' @method obs_rows mrgmod
+#' @rdname obs_rows
 #' @export
-obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
+obs_rows.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
   # x = a model object
   old_data <- get_data.mrgmod(x) # if no data: an empty 0x0 tibble, not "NULL"!
 
@@ -398,14 +398,14 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
   args <- list(x = old_data, cmt = cmt, DV = DV, ... = ...)
   args <- NULL_remove(args)
 
-  new_data <- do.call(obs_lines.data.frame, args)
+  new_data <- do.call(obs_rows.data.frame, args)
 
   data_set(x, new_data)
 }
 
 #' Add covariate columns to a dataset
 #'
-#' @description The `add_covariates()` function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [adm_lines()] and [obs_lines()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
+#' @description The `add_covariates()` function adds an one or several covariate columns to a dataset provided as a proper data.frame or within a 'mrgsolve' model. Used in combination with [adm_rows()] and [obs_rows()], it helps the creation of datasets in the proper format for simulations with 'mrgsolve' or parameter estimation with 'mapbayr', as explained in [data_helpers].
 #'
 #' @param x either a data.frame or a 'mrgsolve' model object
 #' @param ... covariates values to add to the data. For each variable, supply a vector of length 1 or with the same number of rows. Ignored if `covariates` argument is used.
@@ -422,24 +422,24 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
 #' }
 #'
 #' library(magrittr)
-#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(BW = c(90, 85, 80), SEX = 0)
 #'
 #' # If covariates are stored in a list, use `covariates = `
-#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(covariates = list(BW = c(90, 85, 80), SEX = 0))
 #'
 #' # Missing values are filled with the "next observation carried backward" rule
-#' adm_lines(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
+#' adm_rows(time = c(0, 24, 48), cmt = 1, amt = c(100, 200, 300)) %>%
 #'   add_covariates(BW = c(90, 85, 80), SEX = 0) %>%
-#'   obs_lines(time = 36, DV = .0123, cmt = 2)
+#'   obs_rows(time = 36, DV = .0123, cmt = 2)
 #' # Always verify the output in case of time-varying covariates
 #'
 #' # Possibility to add Time and Amount of last administration as covariates
-#' adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
-#'   obs_lines(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) %>%
+#' adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+#'   obs_rows(time = c(8, 16, 32, 40), cmt = 2, DV = runif(4)) %>%
 #'   add_covariates(TOLA = TRUE, AOLA = TRUE) %>%
-#'   obs_lines(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
+#'   obs_rows(time = 72, cmt = 2, DV = .123) # AOLA/TOLA re-updated afterwards
 #'
 #' # Automatic inclusion of `TOLA`/`AOLA` if they are covariates of the model
 #' library(mrgsolve)
@@ -450,7 +450,7 @@ obs_lines.mrgmod <- function(x, cmt = NULL, DV = NA_real_, DVmet = NULL, ...) {
 #' ", compile = FALSE)
 #'
 #' model %>%
-#'   adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
+#'   adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = 1) %>%
 #'   add_covariates() %>%
 #'   get_data()
 #' @seealso [data_helpers]
@@ -621,13 +621,13 @@ rearrange_nmdata <- function(x, dh0 = NULL) {
 #' # "Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"
 #'
 #' # Alternatively, set a format through `options(mapbayr.datehour)`.
-#' # Convenient for the use `.datehour` in  `adm_lines()` and `obs_lines()`.
+#' # Convenient for the use `.datehour` in  `adm_rows()` and `obs_rows()`.
 #'
 #' # Following format will return NA:
-#' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+#' adm_rows(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 #'
 #' options(mapbayr.datehour = "HM dmY")
-#' adm_lines(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
+#' adm_rows(.datehour = "22:22 02-02-2022", amt = 100, cmt = 1)
 #' options(mapbayr.datehour = NULL)
 #'
 parse_datehour <- function(x, orders = getOption("mapbayr.datehour", default = c("Ymd HMS", "Ymd HM", "dmY HMS", "dmY HM"))) {
@@ -732,7 +732,7 @@ dplyr::filter
 #' library(magrittr)
 #' mod <- mrgsolve::mcode("mod", "$CMT FOO", compile = FALSE)
 #' mod %>%
-#'   adm_lines(amt = c(100, 200, 300), cmt = 1) %>%
+#'   adm_rows(amt = c(100, 200, 300), cmt = 1) %>%
 #'   filter(amt != 200) %>%
 #'   get_data()
 filter.mrgmod <- function(.data, ..., .preserve = FALSE) {
