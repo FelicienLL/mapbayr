@@ -14,6 +14,7 @@
 * Modification of the final estimation object: `arg.optim` now has a `select_eta` element, `arg.ofv.fix$omega_inv` now has the dimensions of the number of ETAs selected.
 * Small changes in the `print` method.
 * New argument `select_eta` in `hist()` in order to select the ETAs to plot. Default are ETAs estimated (#167).
+* New argument `lambda` in `mapbayest()` in order to modify the weight of prior model (#174)
 
 # mapbayr 0.8.0
 

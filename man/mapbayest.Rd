@@ -11,6 +11,7 @@ mapbayest(
   method = c("L-BFGS-B", "newuoa"),
   hessian = stats::optimHess,
   select_eta = NULL,
+  lambda = 1,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -18,7 +19,8 @@ mapbayest(
   verbose = TRUE,
   progress = TRUE,
   reset = 50,
-  output = NULL
+  output = NULL,
+  ...
 )
 
 mbrest(...)
@@ -33,6 +35,8 @@ mbrest(...)
 \item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
 
 \item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
+
+\item{lambda}{a numeric value, the weight applied to the model prior (default is 1)}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 

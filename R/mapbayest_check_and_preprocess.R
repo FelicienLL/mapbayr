@@ -319,6 +319,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
 #' @param select_eta numbers of the ETAs taken into account. Set the dimensions of the inversed OMEGA matrix
+#' @param lambda a numeric value, the weight applied to the model prior (default is 1)
 #' @return A list of arguments used to compute the objective function value.
 #'
 #' The following arguments are fixed between individuals:
@@ -350,7 +351,7 @@ NULL
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
-preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x))){
+preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x)), lambda = 1){
   qmod <- zero_re(x)
   qmod@end <- -1 #Make sure no modif in the time grid
   qmod@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -358,12 +359,17 @@ preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x))){
   qmod@Icap <- which(x@capL== "DV") # Only return DV among $captured items
   qmod@capL <- "DV"
 
+  if(length(lambda) != 1){
+    stop("\"lambda\" must be of length 1.", call. = FALSE)
+  }
+
   list(
     qmod = qmod,
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
     omega_inv = solve(omat(x, make = T)[select_eta,select_eta]),
-    all_cmt = fit_cmt(x, data) #on full data
+    all_cmt = fit_cmt(x, data), #on full data
+    lambda = lambda
   )
 }
 
