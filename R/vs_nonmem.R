@@ -94,8 +94,8 @@ merge_phi <- function(mapbayr_phi, nonmem_phi){
   )
 
   full_join(
-    pivot_longer(mapbayr_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "mapbayr"),
-    pivot_longer(nonmem_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "nonmem"),
+    pivot_longer(mapbayr_phi, cols = -c("SUBJECT_NO", "ID"), names_to = "variable", values_to = "mapbayr"),
+    pivot_longer(nonmem_phi, cols = -c("SUBJECT_NO", "ID"), names_to = "variable", values_to = "nonmem"),
     by = c("SUBJECT_NO", "ID", "variable")
   ) %>%
     mutate(type = case_when(

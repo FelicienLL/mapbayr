@@ -525,7 +525,7 @@ AOLA <- function(x) {
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
     mutate(AOLA = ifelse(.data$evid %in% c(1, 4), .data$amt, NA_real_)) %>%
-    fill(.data$AOLA) %>%
+    fill("AOLA") %>%
     ungroup()
 }
 
@@ -535,7 +535,7 @@ TOLA <- function(x) {
     arrange(.data$ID, .data$time, desc(.data$evid), .data$cmt) %>%
     group_by(.data$ID) %>%
     mutate(TOLA = ifelse(.data$evid %in% c(1, 4), .data$time, NA_real_)) %>%
-    fill(.data$TOLA) %>%
+    fill("TOLA") %>%
     ungroup()
 }
 

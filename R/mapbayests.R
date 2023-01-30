@@ -371,8 +371,8 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
         errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
         initpreds <- map2(initpreds, errors, ~mutate(.x,
-                                                     value_low = .data[["value"]] - .y,
-                                                     value_up = .data[["value"]] + .y))
+                                                     value_low = .data$value - .y,
+                                                     value_up = .data$value + .y))
       }
 
       if(ci_method == "simulations"){

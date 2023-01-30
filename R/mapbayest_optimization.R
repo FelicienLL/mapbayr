@@ -140,7 +140,7 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
       c(unlist(x), OFV = ofv)
     }) %>%
     dplyr::slice_min(.data$OFV, with_ties = FALSE) %>%           # Keep the lowest one
-    select(-.data$OFV) %>%
+    select(-"OFV") %>%
     unlist() %>%
     round(6)
 }

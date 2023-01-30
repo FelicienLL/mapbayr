@@ -17,7 +17,7 @@ post_mapbay_tab <- function(x, data, etamat){
   dataposthoc <- dataeta(data = data, eta = etamat)
   capturednames <- outvars(x)$capture
   posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
-    rename(IPRED = .data[["DV"]]) %>%
+    rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 
   mapbay_tab <- cbind(dataposthoc, PRED = pred, posthocsims)
