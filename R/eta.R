@@ -63,8 +63,14 @@ rename_as_eta <- function(x){
   x
 }
 
+sort_etanames <- function(x){
+  #x a vector of characters to sort
+  x[order(as.numeric(gsub("ETA", "", x)))]
+}
+
 sort_eta <- function(x){
-  x[order(as.numeric(gsub("ETA", "", names(x))))]
+  #x a vector of named numerical values
+  x[sort_etanames(names(x))]
 }
 
 eta_length <- function(...){

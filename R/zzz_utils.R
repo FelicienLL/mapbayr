@@ -64,3 +64,10 @@ namephicov <- function(n){
 devalid_data_set <- function(x){
   as_tibble(x[,colnames(x)!="..zeros.."])
 }
+
+etanames_as_nonmem <- function(x){
+  xl <- grepl("\\d{2,}", x)
+  x[xl] <- gsub(pattern = "ETA", replacement = "ET", x = x[xl])
+  x
+}
+

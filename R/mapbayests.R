@@ -155,12 +155,6 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, ...){
-
-  # --- Eta tab
-  eta_tab <- x$final_eta %>%
-    bind_rows() %>%
-    pivot_longer(everything())
-
   # --- Arguments tab
   arg_tab <- data.frame(
     om = odiag(x$model),
@@ -177,22 +171,26 @@ hist.mapbayests <- function(x, ...){
   arg_tab$upper <- rep(NA_real_, nrow(arg_tab))
   arg_tab$upper[x$arg.optim$select_eta] <- x$arg.optim$upper
 
+  # --- Eta tab
+  eta_tab <- get_eta(x, output = "df") %>%
+    select(-.data$ID) %>%
+    pivot_longer(everything())
+
   # --- Density tab
   minlow <- min(arg_tab$lower, na.rm = TRUE)
   maxup <- max(arg_tab$upper, na.rm = TRUE)
   xvalues <- seq(minlow - 0.01, maxup + 0.01, 0.01)
 
-  density_tab <- arg_tab %>%
-    select(.name = .data$name,.om = .data$om) %>%
-    pmap_dfr(function(.name, .om){
-      data.frame(name = .name,
-                 x = xvalues,
-                 value = stats::dnorm(xvalues, mean = 0, sd = sqrt(.om)))
-    })
+  density_tab <- data.frame(
+    name = rep(arg_tab$name, each = length(xvalues)),
+    x = rep(xvalues, length(arg_tab$name)),
+    value = unlist(lapply(X = sqrt(arg_tab$om), FUN = stats::dnorm, x = xvalues, mean = 0))
+  )
 
   # --- Labels
   eta_labs <- paste0(arg_tab$descr,
                      "\nIIV = ", my_percent(sqrt(arg_tab$om)))
+
   # --- one ID
   if(length(x$final_eta) == 1){
     percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), stats::pnorm, mean = 0)
@@ -201,6 +199,9 @@ hist.mapbayests <- function(x, ...){
   }
 
   names(eta_labs) <- arg_tab$name
+  density_tab$name <- factor(density_tab$name, arg_tab$name)
+  eta_tab$name <- factor(eta_tab$name, arg_tab$name)
+  arg_tab$name <- factor(arg_tab$name, arg_tab$name)
 
   ggplot() +
     facet_wrap("name", labeller = labeller(name = eta_labs)) +

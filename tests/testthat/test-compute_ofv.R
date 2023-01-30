@@ -31,9 +31,16 @@ test_that("h matrix computation works", {
 
   expectmat[1,1] <- 1
   expect_equal(h(pred = c(0, 40, 200, 20), cmt = c(2, 3, 2, 3), all_cmt = c(2, 3)), expectmat)
+
+  # e.g. time = 0 with oral drug
+  est <- exmodel(add_exdata = F) %>%
+    adm_lines(amt = 100) %>%
+    obs_lines(time = c(0, 10), DV = c(.1, 1)) %>%
+    mapbayest(output = "df")
+
+  expect_equal(est$IPRED, c(0, 0, 0.9244), tolerance = 0.001)
+
 })
-
-
 
 test_that("compute basic ofv", {
   expecteta <- c(
