@@ -1,4 +1,4 @@
-# mapbayr Development version
+# mapbayr 0.9.0
 * `eta()` properly sorts vectors of length superior to 9 (#159).
 * `add_covariates()` accepts empty arguments. 
 * `use_posterior()` works if covariates had not been defind in data (#160).
