@@ -185,3 +185,14 @@ $CAPTURE DV ALAG1 D1
   ofv2 <- do_compute_ofv(eta = c(ETA1 = 2, ETA2 = 2), argofv141)
   expect_equal(ofv2, 1E10)
 })
+
+test_that("lambda argument works", {
+  par <- eta(runif(3))
+  ofv_ref <- do_compute_ofv(par, argofv = arg.ofv)
+
+  arg.ofv2 <- arg.ofv
+  arg.ofv2$lambda <- NULL
+
+  expect_lt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 0.01), ofv_ref)
+  expect_gt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 10), ofv_ref)
+})

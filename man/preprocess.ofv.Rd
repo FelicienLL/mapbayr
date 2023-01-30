@@ -6,7 +6,7 @@
 \alias{preprocess.ofv.id}
 \title{Preprocess model and data for ofv computation}
 \usage{
-preprocess.ofv.fix(x, data, select_eta = seq_along(eta(x)))
+preprocess.ofv.fix(x, data, select_eta = seq_along(eta(x)), lambda = 1)
 
 preprocess.ofv.id(x, iddata)
 }
@@ -16,6 +16,8 @@ preprocess.ofv.id(x, iddata)
 \item{data, iddata}{NMTRAN-like data set. iddata is likely a dataset of one individual}
 
 \item{select_eta}{numbers of the ETAs taken into account. Set the dimensions of the inversed OMEGA matrix}
+
+\item{lambda}{a numeric value, the weight applied to the model prior (default is 1)}
 }
 \value{
 A list of arguments used to compute the objective function value.

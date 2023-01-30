@@ -9,6 +9,7 @@
 #' @param method optimization method; the default is `"L-BFGS-B"` (from `stat::optim()`), alternatively `"newuoa"` for `minqa::newuoa()`
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param select_eta a vector of numeric values, the numbers of the ETAs to be estimated (default is `NULL`, all ETAs non-equal to zero)
+#' @param lambda a numeric value, the weight applied to the model prior (default is 1)
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)
@@ -17,6 +18,7 @@
 #' @param progress print a progress bar (a logical, default is `TRUE`)
 #' @param reset maximum allowed reset of the optimizer with new initial eta values if numerical difficulties, or with new bounds (L-BFGS-B) if estimate equal to a bound. (a numeric, default is 50)
 #' @param output if `NULL` (the default) a mapbayests object is returned; if `df` a \emph{mapbay_tab} dataframe is returned
+#' @param ... for compatibility (not used)
 #'
 #' @return a mapbayests object. Basically a list containing:
 #'  - model: the model object
@@ -69,6 +71,7 @@ mapbayest <- function(x,
                       method = c("L-BFGS-B", "newuoa"),
                       hessian = stats::optimHess,
                       select_eta = NULL,
+                      lambda = 1,
                       force_initial_eta = NULL,
                       quantile_bound = 0.001,
                       control = list(),
@@ -76,7 +79,8 @@ mapbayest <- function(x,
                       verbose = TRUE,
                       progress = TRUE,
                       reset = 50,
-                      output = NULL
+                      output = NULL,
+                      ...
 ){
 
   # Start checks and pre-processing (i.e. generating arguments passed to the optimizer)
@@ -97,7 +101,7 @@ mapbayest <- function(x,
   }
 
   arg.optim   <- preprocess.optim(x, method = method, control = control, select_eta = select_eta, force_initial_eta = force_initial_eta, quantile_bound = quantile_bound)
-  arg.ofv.fix <- preprocess.ofv.fix(x, data, select_eta = arg.optim$select_eta)
+  arg.ofv.fix <- preprocess.ofv.fix(x, data, select_eta = arg.optim$select_eta, lambda = lambda)
 
   iddata <- split_mapbayr_data(data)
   arg.ofv.id  <- map(iddata, preprocess.ofv.id, x = x)
