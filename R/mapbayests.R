@@ -244,15 +244,15 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
     facet_wrap("name", labeller = labeller(name = eta_labs)) +
     geom_area(aes(x = .data$x, y = .data$value), data = density_tab, fill = "skyblue", alpha = .3) +
     geom_line(aes(x = .data$x, y = .data$value), data = density_tab) +
-    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1, na.rm = TRUE) +
-    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1, na.rm = TRUE) +
+    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
+    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
     theme_bw() +
     theme(strip.background = element_rect(fill = "white"))+
     scale_y_continuous(name = NULL, breaks = NULL, labels = NULL)+
     scale_x_continuous(name = NULL, n.breaks = 10)+
     coord_cartesian(ylim = c(NA, max(density_tab$value)))+
     geom_rug(aes(x = .data$value), data = eta_tab)+
-    geom_histogram(aes(x = .data$value, y = .data$..density..), data = eta_tab, alpha = .8, col = 'black', bins = 50)
+    geom_histogram(aes(x = .data$value, y = after_stat(.data$density)), data = eta_tab, alpha = .8, col = 'black', bins = 50)
 }
 
 
@@ -371,8 +371,8 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
         errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
         initpreds <- map2(initpreds, errors, ~mutate(.x,
-                                                     value_low = .data[["value"]] - .y,
-                                                     value_up = .data[["value"]] + .y))
+                                                     value_low = .data$value - .y,
+                                                     value_up = .data$value + .y))
       }
 
       if(ci_method == "simulations"){

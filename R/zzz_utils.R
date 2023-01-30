@@ -2,7 +2,7 @@
 
 #' @importFrom dplyr across all_of any_of arrange as_tibble bind_cols bind_rows case_when desc distinct everything filter full_join group_by
 #' @importFrom dplyr left_join mutate pull relocate rename rename_with select slice starts_with summarise ungroup vars
-#' @importFrom ggplot2 %+replace% aes coord_cartesian element_rect facet_grid facet_wrap labeller geom_area geom_histogram geom_hline geom_line
+#' @importFrom ggplot2 %+replace% aes after_stat coord_cartesian element_rect facet_grid facet_wrap labeller geom_area geom_histogram geom_hline geom_line
 #' @importFrom ggplot2 geom_point geom_ribbon geom_rug geom_segment geom_vline ggplot label_both labs theme_bw scale_x_continuous scale_y_continuous
 #' @importFrom ggplot2 scale_y_log10 scale_fill_manual scale_shape_manual scale_color_manual scale_linetype_manual stat_function theme
 #' @importFrom magrittr %>%
