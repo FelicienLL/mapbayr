@@ -11,6 +11,7 @@ mapbayest(
   hessian = stats::optimHess,
   select_eta = NULL,
   lambda = 1,
+  lloq = NULL,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -34,6 +35,8 @@ mapbayest(
 \item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
 
 \item{lambda}{a numeric value, the weight applied to the model prior (default is 1)}
+
+\item{lloq}{a numeric value, the lower limit of quantification. If not NULL, \code{LLOQ} and \code{BLQ} (below limit of quantification) variables will be added to the data. The related records will be censored with the M3 method. Ignored if \code{LLOQ} already in the data.}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
