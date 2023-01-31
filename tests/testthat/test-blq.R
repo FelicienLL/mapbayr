@@ -13,9 +13,9 @@ capture DV = (CENT/V1) * (1 + EPS(1)) + EPS(2);"
 
 pchelle_mod <- mcode("pchelle_mod", pchelle_code)
 
-id1 <- adm_lines(cmt = 1, amt = 100, rate = 1200, LLOQ = 1) %>%
-  obs_lines(cmt = 1, DV = c(75, 25, 7), time = c(1, 6, 24), BLQ = 0) %>%
-  obs_lines(cmt = 1, DV = -1, time = 48, BLQ = 1)
+id1 <- adm_rows(cmt = 1, amt = 100, rate = 1200, LLOQ = 1) %>%
+  obs_rows(cmt = 1, DV = c(75, 25, 7), time = c(1, 6, 24), BLQ = 0) %>%
+  obs_rows(cmt = 1, DV = -1, time = 48, BLQ = 1)
 pchelle_data <- bind_rows(id1, mutate(id1, ID = 2, BLQ = 0, DV = abs(DV)))
 
 test_that("blq works on pchelle example", {
