@@ -19,7 +19,7 @@ do_optimization <- function(..., verbose = TRUE, reset = 50){
 
   while(nreset == 0 || (nreset <= reset && (need_new_ini | need_new_bounds))){
     if(nreset != 0 && need_new_ini){
-      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset)
+      args$par <- new_ini3(arg.ofv = keep_argofv(args), upper = args$upper, nreset = nreset, select_eta = args$select_eta)
       if(verbose){
         if(nreset == 1) cat("\n")
         message("Reset with new initial values: ", paste(args$par, collapse = ' '))
@@ -140,7 +140,7 @@ new_ini2 <- function(arg.ofv, arg.optim, run){
       c(unlist(x), OFV = ofv)
     }) %>%
     dplyr::slice_min(.data$OFV, with_ties = FALSE) %>%           # Keep the lowest one
-    select(-.data$OFV) %>%
+    select(-"OFV") %>%
     unlist() %>%
     round(6)
 }
@@ -154,24 +154,23 @@ new_bounds <- function(omega_inv, lower){
   sapply(vec_SE, stats::qnorm, p = new_P, mean = 0)
 }
 
-new_ini3 <- function(arg.ofv, upper, nreset){
-  neta <- eta_length(arg.ofv$qmod)
-  nsim <- 1 + neta ^ 2
+new_ini3 <- function(arg.ofv, upper, nreset, select_eta){
+  nsim <- 1 + length(select_eta) ^ 2
 
   # Sample eta from prior distribution
   simmat <- mvgauss(solve(arg.ofv$omega_inv), n = nsim, seed = 1+nreset)
+  colnames(simmat) <- make_eta_names(select_eta)
 
   # Set Out-of-bound etas to 0
   bound <- upper
   if(!(length(bound) == 1 && !is.null(bound))){ #prevent fail if bound = NULL with newuoa
-    for(i in seq_len(neta)){
+    for(i in seq_len(ncol(simmat))){
       vals <- simmat[,i]
       simmat[,i] <- ifelse(abs(vals) > bound[i], 0, vals)
     }
   }
 
   # Compute OFV for each vector of eta
-  colnames(simmat) <- paste0("ETA", seq_len(neta))
   list_etas <- apply(simmat, 1, as.list)
   ofvs <- sapply(list_etas, do_compute_ofv, argofv = arg.ofv)
 

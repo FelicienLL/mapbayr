@@ -94,8 +94,8 @@ merge_phi <- function(mapbayr_phi, nonmem_phi){
   )
 
   full_join(
-    pivot_longer(mapbayr_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "mapbayr"),
-    pivot_longer(nonmem_phi, cols = -c(.data$SUBJECT_NO, .data$ID), names_to = "variable", values_to = "nonmem"),
+    pivot_longer(mapbayr_phi, cols = -c("SUBJECT_NO", "ID"), names_to = "variable", values_to = "mapbayr"),
+    pivot_longer(nonmem_phi, cols = -c("SUBJECT_NO", "ID"), names_to = "variable", values_to = "nonmem"),
     by = c("SUBJECT_NO", "ID", "variable")
   ) %>%
     mutate(type = case_when(
@@ -114,6 +114,8 @@ plot_phi <- function(merged_phi, only_ETA = TRUE){
   dat <- merged_phi
   if(only_ETA) dat <- filter(dat, .data$type == "ETA")
 
+  dat$variable <- factor(dat$variable, levels = sort_etanames(unique(dat$variable)))
+
   dat %>%
     ggplot(aes(.data$variable, .data$adiff, group = .data$ID)) +
     geom_line() +
@@ -126,7 +128,7 @@ classify <- function(adiff, levels = c(Excellent = 0, Acceptable = 0.001, Discor
   ans <- case_when(
     adiff > val[3] ~ nam[3],
     adiff > val[2] ~ nam[2],
-    adiff > val[1] ~ nam[1]
+    adiff >= val[1] ~ nam[1]
   )
   factor(ans, levels = nam, ordered = TRUE)
 }

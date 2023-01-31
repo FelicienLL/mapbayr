@@ -17,7 +17,7 @@ post_mapbay_tab <- function(x, data, etamat){
   dataposthoc <- dataeta(data = data, eta = etamat)
   capturednames <- outvars(x)$capture
   posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
-    rename(IPRED = .data[["DV"]]) %>%
+    rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 
   mapbay_tab <- cbind(dataposthoc, PRED = pred, posthocsims)
@@ -51,17 +51,22 @@ post_covariance <- function(arg.ofv.id, final_eta, x, hessian, arg.optim, arg.of
     fp <- function(p){ #obj fun value as function of param
       arg <- c(arg.ofv.fix, arg.ofv.id)
       eta <- p
-      names(eta) <- eta_names(x)
+      names(eta) <- make_eta_names(x = arg.optim$select_eta)
       arg$eta <- eta
       do.call(compute_ofv, arg)
     }
 
-    all_args_to_pass <- list(par = final_eta,
+    all_args_to_pass <- list(par = final_eta[arg.optim$select_eta],
                              fn = fp,
                              control = arg.optim$control)
     actual_args <- all_args_to_pass[intersect(names(all_args_to_pass), accepted_args)]
     hess <- do.call(hessian, args = actual_args)
-    covariance <- unname(2 * safe_solve(hess)$result)
+    covariance_selected <- unname(2 * safe_solve(hess)$result)
+
+    # fill with 0 for non-selected ETAs
+    covariance <- matrix(0, ncol = eta_length(x), nrow = eta_length(x))
+    covariance[arg.optim$select_eta, arg.optim$select_eta] <- covariance_selected
+    covariance
 
   } else {
     covariance <- matrix(NA_real_)

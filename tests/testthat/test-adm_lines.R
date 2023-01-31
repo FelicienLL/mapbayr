@@ -1,34 +1,34 @@
-test_that("adm_lines.data.frame works", {
+test_that("adm_rows.data.frame works", {
   # Single
-  expect_equal(adm_lines(time = 24, amt = 100, cmt = 1),
+  expect_equal(adm_rows(time = 24, amt = 100, cmt = 1),
                tibble::tibble(ID = 1L, time = 24, evid = 1L, cmt = 1L, amt = 100, mdv = 1L))
   # 1 multiple
-  expect_equal(adm_lines(time = c(0, 24), amt = 100, cmt = 1),
+  expect_equal(adm_rows(time = c(0, 24), amt = 100, cmt = 1),
                tibble::tibble(ID = 1L, time = c(0, 24), evid = 1L, cmt = 1L, amt = 100, mdv = 1L))
-  expect_equal(adm_lines(time = 24, amt = c(100, 200), cmt = 1),
+  expect_equal(adm_rows(time = 24, amt = c(100, 200), cmt = 1),
                tibble::tibble(ID = 1L, time = 24, evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L))
-  expect_equal(adm_lines(time = 24, amt = 100, cmt = c(1,2)),
+  expect_equal(adm_rows(time = 24, amt = 100, cmt = c(1,2)),
                tibble::tibble(ID = 1L, time = 24, evid = 1L, cmt = c(1L, 2L), amt = 100, mdv = 1L))
 
   # 2 multiple
-  expect_equal(adm_lines(time = c(0, 24), amt = c(100, 200), cmt = 1),
+  expect_equal(adm_rows(time = c(0, 24), amt = c(100, 200), cmt = 1),
                tibble::tibble(ID = 1L, time = c(0, 24), evid = 1L, cmt = 1L, amt = c(100, 200), mdv = 1L))
-  expect_equal(adm_lines(time = 24, amt = c(100, 200), cmt = c(1,2)),  # CROSS!
+  expect_equal(adm_rows(time = 24, amt = c(100, 200), cmt = c(1,2)),  # CROSS!
                tibble::tibble(ID = 1L, time = 24, evid = 1L, cmt = c(1L, 1L, 2L, 2L), amt = c(100, 200, 100, 200), mdv = 1L))
-  expect_equal(adm_lines(time = c(0,24), amt = 100, cmt = c(1,2)), # CROSS!
+  expect_equal(adm_rows(time = c(0,24), amt = 100, cmt = c(1,2)), # CROSS!
                tibble::tibble(ID = 1L, time = c(0, 0, 24, 24), evid = 1L, cmt = c(1L, 2L, 1L, 2L), amt = 100, mdv = 1L))
 
   # 3 multiple
-  expect_equal(adm_lines(time = c(0,24), amt = c(100, 200), cmt = c(1,2)),
+  expect_equal(adm_rows(time = c(0,24), amt = c(100, 200), cmt = c(1,2)),
                tibble::tibble(ID = 1L, time = c(0, 0, 24, 24), evid = 1L, cmt = c(1L, 2L, 1L, 2L), amt = c(100, 100, 200, 200), mdv = 1L))
-  expect_equal(adm_lines(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = c(1,2)),
+  expect_equal(adm_rows(time = c(0, 24, 48), amt = c(100, 200, 300), cmt = c(1,2)),
                tibble::tibble(ID = 1L, time = c(0, 0, 24, 24, 48, 48), evid = 1L, cmt = c(1L, 2L, 1L, 2L, 1L, 2L), amt = c(100, 100, 200, 200, 300, 300), mdv = 1L))
 
   # Invalid number of arguments (length of vector cannot be recycled) : rarely expected, ability to cross administrations...
-  expect_error(adm_lines(time = c(0,24), amt = c(100, 200, 300), rate = c(0,0,-2,0,0), cmt = 1), "Size")
+  expect_error(adm_rows(time = c(0,24), amt = c(100, 200, 300), rate = c(0,0,-2,0,0), cmt = 1), "Size")
 
   # Passing a covariate
-  expect_equal(adm_lines(amt = 100, cmt = 1, BLA = 999)$BLA, 999)
+  expect_equal(adm_rows(amt = 100, cmt = 1, BLA = 999)$BLA, 999)
 
 })
 
@@ -74,38 +74,38 @@ test_that("example models are suitable for these tests", {
 })
 
 test_that("detection of default administration compartment is good",{
-  expect_error(get_data(adm_lines(mod0, amt = 100))[["cmt"]], 'argument "cmt" is missing, with no default')
-  expect_equal(get_data(adm_lines(mod1, amt = 100))[["cmt"]], c(1,2))
-  expect_equal(get_data(adm_lines(mod2, amt = 100))[["cmt"]], 1)
-  expect_equal(get_data(adm_lines(mod3, amt = 100))[["cmt"]], 1)
+  expect_error(get_data(adm_rows(mod0, amt = 100))[["cmt"]], 'argument "cmt" is missing, with no default')
+  expect_equal(get_data(adm_rows(mod1, amt = 100))[["cmt"]], c(1,2))
+  expect_equal(get_data(adm_rows(mod2, amt = 100))[["cmt"]], 1)
+  expect_equal(get_data(adm_rows(mod3, amt = 100))[["cmt"]], 1)
 })
 
 test_that("explicit cmt works well",{
-  expect_equal(get_data(adm_lines(mod1, amt = 100, cmt = 1))[["cmt"]], 1)
-  expect_equal(get_data(adm_lines(mod1, amt = 100, cmt = c(3, -99)))[["cmt"]], c(-99, 3)) #arrange by cmt number !
+  expect_equal(get_data(adm_rows(mod1, amt = 100, cmt = 1))[["cmt"]], 1)
+  expect_equal(get_data(adm_rows(mod1, amt = 100, cmt = c(3, -99)))[["cmt"]], c(-99, 3)) #arrange by cmt number !
 })
 
 test_that("rate incrementation is ok",{
-  expect_equal(get_data(adm_lines(mod1, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = c(1,2), rate = c(0, -2)))
-  expect_equal(get_data(adm_lines(mod2, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = 1, rate = -2))
-  expect_null(get_data(adm_lines(mod3, amt = 100))[["rate"]])
+  expect_equal(get_data(adm_rows(mod1, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = c(1,2), rate = c(0, -2)))
+  expect_equal(get_data(adm_rows(mod2, amt = 100))[c("cmt","rate")], tibble::tibble(cmt = 1, rate = -2))
+  expect_null(get_data(adm_rows(mod3, amt = 100))[["rate"]])
 })
 
 test_that("rate incrementation is ok with explicit cmt",{
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = 3))[["rate"]], NULL)
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99)))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = c(0, -2 , 0)))
+  expect_equal(get_data(adm_rows(mod2, amt = 100, cmt = 3))[["rate"]], NULL)
+  expect_equal(get_data(adm_rows(mod2, amt = 100, cmt = c(1, 3, -99)))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = c(0, -2 , 0)))
 })
 
 test_that("rate incrementation is ok with explicit rate",{
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = 3, rate = 150))[["rate"]], 150)
-  expect_equal(get_data(adm_lines(mod2, amt = 100, cmt = c(1, 3, -99), rate = 150))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = 150))
+  expect_equal(get_data(adm_rows(mod2, amt = 100, cmt = 3, rate = 150))[["rate"]], 150)
+  expect_equal(get_data(adm_rows(mod2, amt = 100, cmt = c(1, 3, -99), rate = 150))[c("cmt","rate")], tibble::tibble(cmt = c(-99, 1, 3), rate = 150))
 })
 
 test_that("ID increment ok", {
-  actual_data <- adm_lines(amt = 100, cmt = 1) %>%
-    adm_lines(ID = 3, time = 1, amt = 100, cmt = 1) %>%
-    adm_lines(time = 2, amt = 100, cmt = 1) %>%
-    adm_lines(ID = 1, time = 3, amt = 100, cmt = 1)
+  actual_data <- adm_rows(amt = 100, cmt = 1) %>%
+    adm_rows(ID = 3, time = 1, amt = 100, cmt = 1) %>%
+    adm_rows(time = 2, amt = 100, cmt = 1) %>%
+    adm_rows(ID = 1, time = 3, amt = 100, cmt = 1)
 
   expect_equal(actual_data,
                tibble::tibble(ID = c(1L, 1L, 3L, 3L), time = c(0,3,1,2), evid = 1L, cmt = 1L, amt = 100, mdv = 1L))
@@ -113,29 +113,29 @@ test_that("ID increment ok", {
 })
 
 test_that("realize addl works", {
-  expect_equal(nrow(adm_lines(amt = 100, cmt = 1, addl = 9, ii = 24, realize_addl = TRUE)), 10)
+  expect_equal(nrow(adm_rows(amt = 100, cmt = 1, addl = 9, ii = 24, realize_addl = TRUE)), 10)
 })
 
 test_that("no NA in SS, ADDL, RATE or II",{
   data1 <- mod1 %>%
-    adm_lines(time = 0, amt = 10000) %>%
-    adm_lines(time = 72, amt = 10000, addl = 2, ii = 24, realize_addl = TRUE) %>%
+    adm_rows(time = 0, amt = 10000) %>%
+    adm_rows(time = 72, amt = 10000, addl = 2, ii = 24, realize_addl = TRUE) %>%
     get_data()
 
   expect_false(any(is.na(data1$addl)))
   expect_false(any(is.na(data1$ii)))
 
   data2 <- mod2 %>%
-    adm_lines(time = 0, amt = 10000, ss = 1, ii = 24) %>%
-    adm_lines(time = 72, amt = 10000) %>%
+    adm_rows(time = 0, amt = 10000, ss = 1, ii = 24) %>%
+    adm_rows(time = 72, amt = 10000) %>%
     get_data()
 
   expect_false(any(is.na(data2$ss)))
   expect_false(any(is.na(data2$ii)))
 
   data3 <- mod3 %>%
-    adm_lines(time = 0, amt = 100, rate = 20) %>%
-    adm_lines(time = 24, amt = 100) %>%
+    adm_rows(time = 0, amt = 100, rate = 20) %>%
+    adm_rows(time = 24, amt = 100) %>%
     get_data()
 
   expect_false(any(is.na(data3$rate)))
@@ -152,9 +152,9 @@ test_that("cur_dh0 works", {
   expect_equal(cur_dh0(data.frame(time = c(24), .datehour = c(dh2))), dh1)
 })
 
-test_that(".datehour works in adm_lines()", {
+test_that(".datehour works in adm_rows()", {
   expect_equal(
-    adm_lines(amt = 100, cmt = 1, .datehour = dh1),
+    adm_rows(amt = 100, cmt = 1, .datehour = dh1),
     tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1L, amt = 100, mdv = 1L, .datehour = dh1)
   )
 })

@@ -7,12 +7,13 @@ test_that("non-allowed method are detected", {
 
 test_that("it creates defaults args for L-BFGS-B", {
   args <- preprocess.optim(mod, "L-BFGS-B")
-  expect_named(args, c("par", "fn", "method", "control", "lower", "upper"))
+  expect_named(args, c("par", "fn", "method", "control", "lower", "upper", "select_eta"))
   expect_equal(args$par, c(ETA1 = 0, ETA2 = 0, ETA3 = 0))
   expect_equal(args$fn, mapbayr::compute_ofv)
   expect_equal(args$method, "L-BFGS-B")
   expect_equal(args$control, list(trace = 0, maxit = 9999, fnscale = 0.001, lmm = 7))
   expect_equal(args$lower, -args$upper)
+  expect_equal(args$select_eta, c(1,2,3))
 })
 
 test_that("it modifies args for L-BFGS-B", {
@@ -30,11 +31,12 @@ test_that("it modifies args for L-BFGS-B", {
 
 test_that("it creates defaults args for newuoa", {
   args <- preprocess.optim(mod, "newuoa")
-  expect_named(args, c("par", "fn", "control", "method"))
+  expect_named(args, c("par", "fn", "control", "method", "select_eta"))
   expect_equal(args$par, c(ETA1 = 0.01, ETA2 = 0.01, ETA3 = 0.01))
   expect_equal(args$fn, mapbayr::compute_ofv)
   expect_equal(args$method, "newuoa")
   expect_equal(args$control, list(iprint = 0))
+  expect_equal(args$select_eta, c(1,2,3))
 })
 
 test_that("it modifies args for newuoa", {

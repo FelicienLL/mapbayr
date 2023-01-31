@@ -31,9 +31,16 @@ test_that("h matrix computation works", {
 
   expectmat[1,1] <- 1
   expect_equal(h(pred = c(0, 40, 200, 20), cmt = c(2, 3, 2, 3), all_cmt = c(2, 3)), expectmat)
+
+  # e.g. time = 0 with oral drug
+  est <- exmodel(add_exdata = F) %>%
+    adm_rows(amt = 100) %>%
+    obs_rows(time = c(0, 10), DV = c(.1, 1)) %>%
+    mapbayest(output = "df")
+
+  expect_equal(est$IPRED, c(0, 0, 0.9244), tolerance = 0.001)
+
 })
-
-
 
 test_that("compute basic ofv", {
   expecteta <- c(
@@ -163,8 +170,8 @@ $CAPTURE DV ALAG1 D1
   mod141 <- mcode("mod141",code141, quiet = TRUE)
 
   dat141 <- mod141 %>%
-    adm_lines(amt = 1000, cmt = 1, ss = 1, ii = 24) %>%
-    obs_lines(time = c(1,4), DV = c(26, 52), cmt = 2) %>%
+    adm_rows(amt = 1000, cmt = 1, ss = 1, ii = 24) %>%
+    obs_rows(time = c(1,4), DV = c(26, 52), cmt = 2) %>%
     get_data()
 
   argofv141 <- c(
@@ -177,4 +184,15 @@ $CAPTURE DV ALAG1 D1
 
   ofv2 <- do_compute_ofv(eta = c(ETA1 = 2, ETA2 = 2), argofv141)
   expect_equal(ofv2, 1E10)
+})
+
+test_that("lambda argument works", {
+  par <- eta(runif(3))
+  ofv_ref <- do_compute_ofv(par, argofv = arg.ofv)
+
+  arg.ofv2 <- arg.ofv
+  arg.ofv2$lambda <- NULL
+
+  expect_lt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 0.01), ofv_ref)
+  expect_gt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 10), ofv_ref)
 })

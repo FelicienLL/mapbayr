@@ -213,13 +213,13 @@ get_param.mapbayests <- function(x, ..., output = NULL, keep_ID = NULL, keep_nam
   }
 
   par_tab <- x$mapbay_tab %>%
-    select(.data$ID, any_of(ok_names)) %>%
+    select("ID", any_of(ok_names)) %>%
     group_by(.data$ID) %>%
     slice(1) %>%
     ungroup() %>%
     as.data.frame()
 
-  if(!.keep_ID) par_tab <- select(par_tab, -.data$ID)
+  if(!.keep_ID) par_tab <- select(par_tab, -"ID")
   if(!.keep_names) par_tab <- unname(par_tab)
 
   par <- switch (.out,
@@ -264,12 +264,18 @@ get_phi.mapbayests <- function(x, ...){
       bind_rows()
   }
 
-  x$opt.value[,c("ID",eta_names(x$model), "value")] %>%
+  phitab <- x %>%
+    get_eta(output = "df") %>%
+    mutate(OBJ = x$opt.value$value) %>%
     bind_cols(covphi) %>%
-    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), OBJ = .data$value) %>%
+    select(all_of("ID"), starts_with("ETA"), starts_with("ETC"), "OBJ") %>%
     mutate(ID = as.double(.data$ID)) %>%
     mutate(SUBJECT_NO = as.double(rank(.data$ID, ties.method = "first")), .before = 1) %>%
     as_tibble()
+
+  names(phitab) <- etanames_as_nonmem(names(phitab))
+
+  phitab
 }
 
 

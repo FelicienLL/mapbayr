@@ -11,21 +11,22 @@ print.mapbayests <- function(x, ...){
   NAME <- x$model@model
   nID <- length(x$arg.ofv.id)
   nOBS <- x$arg.ofv.id %>% map("idDV") %>% unname() %>% simplify() %>% length()
-  nETA <- eta_length(x$model)
-  ETA <- x$final_eta %>%
-    bind_rows(.id = "ID") %>%
-    as.data.frame() %>%
-    utils::head()
-  TAB <- utils::head(as.data.frame(x$mapbay_tab))
+  max_n_eta <- eta_length(x$model)
+  nETA <- length(x$arg.optim$select_eta)
 
-  cat("Model: ", NAME, "\n")
-  cat("ID :", nID, " individual(s).\n")
-  cat("OBS:", nOBS, " observation(s).\n")
-  cat("ETA:", nETA, " parameter(s) to estimate.\n\n")
+  ETA <- get_eta(x, x$arg.optim$select_eta, output = "df") %>%
+    utils::head()
+  TAB <- utils::head(x$mapbay_tab)
+
+  cat("Model:", NAME, "\n")
+  cat("ID :", nID, "individual(s).\n")
+  cat("OBS:", nOBS, "observation(s).\n")
+  cat("ETA:", nETA, "parameter(s) to estimate.\n")
+  cat("\n")
   cat("Estimates: \n")
-  print(ETA)
+  print.data.frame(ETA)
   cat("\nOutput (", nrow(x$mapbay_tab) , " lines): \n", sep = "")
-  print(TAB)
+  print.data.frame(TAB, digits = 3)
 }
 
 
@@ -140,6 +141,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' Plot posterior distribution of bayesian estimates
 #'
 #' @param x A \code{mapbayests} object.
+#' @param select_eta a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -149,64 +151,108 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'
 #' @examples
 #' est <- mapbayest(exmodel(ID = 1))
-#' hist(est) +
+#'
+#' # Default Method
+#' h <- hist(est)
+#'
+#' # Can be modified with `ggplot2`
+#' h +
 #'   ggplot2::labs(title = "Awesome estimations")
+#'
+#' # Select the ETAs
+#' hist(est, select_eta = c(1,3))
+#'
 #' @method hist mapbayests
 #' @export
-hist.mapbayests <- function(x, ...){
+hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
 
-  # --- Eta tab
-  eta_tab <- x$final_eta %>%
-    bind_rows() %>%
-    pivot_longer(everything())
+  max_eta <- eta_length(x$model)
+  select_eta_est <- x$arg.optim$select_eta
+
+  # --- What ETA do we want?
+  if(is.null(select_eta_est)){ # For backward compatibility (< 0.9)
+    select_eta_est <- seq_len(max_eta)
+  }
+
+  select_eta_hist <- select_eta
+
+  if(is.null(select_eta_hist)){
+    select_eta_hist <- select_eta_est
+  }
+
+  if(any(select_eta_hist > max_eta)){
+      stop("Cannot select ", paste(make_eta_names(select_eta_hist[select_eta_hist>max_eta]), collapse = " "),
+           ": maximum ", max_eta, " ETAs defined in $PARAM.")
+  }
 
   # --- Arguments tab
+  # First on all ETAs for simplicity of indexation
   arg_tab <- data.frame(
     om = odiag(x$model),
     name = eta_names(x$model),
-    descr = eta_descr(x$model),
-    lower = x$arg.optim$lower,
-    upper = x$arg.optim$upper
-  )
+    descr = eta_descr(x$model)
+    )
+
+  # Default bounds to 0.1% - 99.9%
+  bound <- get_quantile(x$model, .p = 0.001)
+  arg_tab$lower <- bound
+  arg_tab$upper <- -bound
+
+  # Updates bound with those currently used in estimation if ever
+  arg_tab$lower[select_eta_est] <- x$arg.optim$lower
+  arg_tab$upper[select_eta_est] <- x$arg.optim$upper
+
+  # Then filter the selected ETAs for the plot
+  arg_tab <- arg_tab[select_eta_hist,]
+
+  # --- Eta tab
+  eta_tab <- get_eta(x, output = "df") %>%
+    select(all_of(arg_tab$name)) %>%
+    pivot_longer(everything())
 
   # --- Density tab
-  minlow <- min(arg_tab$lower)
-  maxup <- max(arg_tab$upper)
+  minlow <- min(arg_tab$lower, na.rm = TRUE)
+  maxup <- max(arg_tab$upper, na.rm = TRUE)
   xvalues <- seq(minlow - 0.01, maxup + 0.01, 0.01)
 
-  density_tab <- arg_tab %>%
-    select(.name = .data$name,.om = .data$om) %>%
-    pmap_dfr(function(.name, .om){
-      data.frame(name = .name,
-                 x = xvalues,
-                 value = stats::dnorm(xvalues, mean = 0, sd = sqrt(.om)))
-    })
+  density_tab <- data.frame(
+    name = rep(arg_tab$name, each = length(xvalues)),
+    x = rep(xvalues, length(arg_tab$name)),
+    value = unlist(lapply(X = sqrt(arg_tab$om), FUN = stats::dnorm, x = xvalues, mean = 0))
+  )
 
   # --- Labels
   eta_labs <- paste0(arg_tab$descr,
                      "\nIIV = ", my_percent(sqrt(arg_tab$om)))
+
   # --- one ID
   if(length(x$final_eta) == 1){
-    percentile <- map2_dbl(x$final_eta[[1]], sqrt(arg_tab$om), stats::pnorm, mean = 0)
+    percentile <- map2_dbl(get_eta.mapbayests(x, select_eta_hist, output = "num"),
+                           sqrt(arg_tab$om),
+                           stats::pnorm,
+                           mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
   }
 
   names(eta_labs) <- arg_tab$name
+  density_tab$name <- factor(density_tab$name, arg_tab$name)
+  eta_tab$name <- factor(eta_tab$name, arg_tab$name)
+  arg_tab$name <- factor(arg_tab$name, arg_tab$name)
 
   ggplot() +
     facet_wrap("name", labeller = labeller(name = eta_labs)) +
     geom_area(aes(x = .data$x, y = .data$value), data = density_tab, fill = "skyblue", alpha = .3) +
     geom_line(aes(x = .data$x, y = .data$value), data = density_tab) +
-    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
-    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, size = 1) +
+    geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
+    geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
     theme_bw() +
     theme(strip.background = element_rect(fill = "white"))+
     scale_y_continuous(name = NULL, breaks = NULL, labels = NULL)+
     scale_x_continuous(name = NULL, n.breaks = 10)+
     coord_cartesian(ylim = c(NA, max(density_tab$value)))+
     geom_rug(aes(x = .data$value), data = eta_tab)+
-    geom_histogram(aes(x = .data$value, y = .data$..density..), data = eta_tab, alpha = .8, col = 'black', bins = 50)
+    geom_histogram(aes(x = .data$value, y = after_stat(.data$density)), data = eta_tab, alpha = .8, col = 'black', bins = 50)
 }
 
 
@@ -325,8 +371,8 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
         varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
         errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
         initpreds <- map2(initpreds, errors, ~mutate(.x,
-                                                     value_low = .data[["value"]] - .y,
-                                                     value_up = .data[["value"]] + .y))
+                                                     value_low = .data$value - .y,
+                                                     value_up = .data$value + .y))
       }
 
       if(ci_method == "simulations"){

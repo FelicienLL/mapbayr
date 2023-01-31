@@ -18,12 +18,12 @@ test_that("parse_datehour works", {
   expect_equal(parse_datehour(x = "02-02-2022 22:33:44"), dh1)
   expect_equal(parse_datehour(x = "02-02-2022 22:33"), dh2)
 
-  #through options with adm_lines/obs_lines
+  #through options with adm_rows/obs_rows
 
-  expect_equal(adm_lines(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1)$time, NA_real_)
+  expect_equal(adm_rows(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1)$time, NA_real_)
   options(mapbayr.datehour = "HM dmY")
   expect_equal(
-    adm_lines(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1),
+    adm_rows(.datehour = "22:33 02-02-2022", amt = 100, cmt = 1),
     tibble::tibble(ID = 1L, time = 0, evid = 1L, cmt = 1, amt = 100, mdv = 1L, .datehour = dh2)
   )
   options(mapbayr.datehour = NULL)
