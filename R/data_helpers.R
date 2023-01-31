@@ -62,7 +62,7 @@ NULL
 #' @param ss steady-state (optional, is this dose the last of an infinity of administration? Yes, 1, or no, 0)
 #' @param ii inter-dose interval (optional, use it with `ss` and `addl`)
 #' @param rate rate of administration (optional, set to -2 if you model zero-order infusion. See `examples`.)
-#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will udpate the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
+#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will update the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
 #' @param ... additional columns or arguments for [mrgsolve::ev()]
 #'
 #' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with [get_data()]).
@@ -157,7 +157,7 @@ adm_rows.data.frame <- function(x,
     }
   }
 
-  # Redefine time and deal with .datehour
+  # Redefine time and deal with `.datehour`
   datehour_answers <- datehour_manager(
     old_data = old_data,
     time = time,
@@ -234,8 +234,8 @@ adm_rows.mrgmod <- function(x, cmt = adm_cmt(x), rate = NULL, ...) {
 #' @param DV dependent value, i.e. observed concentration.
 #' @param mdv missing dependent value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)
 #' @param ... additional columns
-#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will udpate the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
-#' @param DVmet second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if `x` is a 'mrgsolve' model where two `[OBS]` compartments were defined (see `examples`)
+#' @param .datehour a object of class POSIXct, a number or a character vector that can be passed to [parse_datehour()]. Using `.datehour` will update the value of `time` in the dataset, with units in hours. Mind consistency with the `time` argument.
+#' @param DVmet second observation at the same time (e.g. a metabolite, "DVmet") observed jointly with parent drug ("DV"). Works only if `x` is a 'mrgsolve' model where two `[OBS]` compartments were defined (see `examples`)
 #'
 #' @return a data.frame, or a 'mrgsolve' model with a dataset in the `@args$data` slot (accessible with [get_data()]).
 #' @export
@@ -595,12 +595,12 @@ rearrange_nmdata <- function(x, dh0 = NULL) {
   x
 }
 
-#' Parse datehour to POSIXct
+#' Parse value to "POSIXct"
 #'
-#' @description A wrapper around functions of `lubridate`, mainly in order to transform characters into a datetime (POSIXct) format.
+#' @description A wrapper around functions of `lubridate`, mainly in order to transform characters into a date-time ("POSIXct") format.
 #'
 #' @param x a numeric or a character.
-#' @param orders format specification for x, passed tp [lubridate::parse_date_time()]
+#' @param orders format specification for x, passed to [lubridate::parse_date_time()]
 #'
 #' @return a POSIXct
 #' @export

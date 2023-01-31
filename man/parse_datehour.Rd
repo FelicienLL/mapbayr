@@ -2,7 +2,7 @@
 % Please edit documentation in R/data_helpers.R
 \name{parse_datehour}
 \alias{parse_datehour}
-\title{Parse datehour to POSIXct}
+\title{Parse value to "POSIXct"}
 \usage{
 parse_datehour(
   x,
@@ -13,13 +13,13 @@ parse_datehour(
 \arguments{
 \item{x}{a numeric or a character.}
 
-\item{orders}{format specification for x, passed tp \code{\link[lubridate:parse_date_time]{lubridate::parse_date_time()}}}
+\item{orders}{format specification for x, passed to \code{\link[lubridate:parse_date_time]{lubridate::parse_date_time()}}}
 }
 \value{
 a POSIXct
 }
 \description{
-A wrapper around functions of \code{lubridate}, mainly in order to transform characters into a datetime (POSIXct) format.
+A wrapper around functions of \code{lubridate}, mainly in order to transform characters into a date-time ("POSIXct") format.
 }
 \examples{
 # POSITct are returned as is.

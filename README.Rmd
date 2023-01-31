@@ -167,6 +167,9 @@ mapbayr is a generalization of the "MAP Bayes estimation" tutorial available on 
 * functions to easily pass administration and observation information, as well as plot methods to visualize predictions and parameter distribution.
 * a single output object to ease post-processing, depending on the purpose of the estimation.
 * several optimization algorithm available, such as "L-BFGS-B" (the default) or "newuoa".
+* handling data below the limit of quantification.
+* estimate only a subset of ETAs defined in the model.
+* flatten priors to favor observed data.
 
 ## Performance
 
@@ -310,7 +313,7 @@ Note that mapbayr does not strictly rely on this `$ERROR` block to define the re
 
 ```{c, eval = F}
 $PK
-double CL = TVCL * exp(ETA1 + ETA(1))
+double CL = TVCL * exp(ETA1 + ETA(1)) ;
 ```
 
 

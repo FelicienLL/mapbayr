@@ -12,10 +12,13 @@ CPT
 cmt'
 CMD
 cpp
+csv
 dealed
+deprecations
 df
 doi
 DV
+DVmet
 ETAn
 ETAs
 et
@@ -23,9 +26,11 @@ ev
 github
 iddata
 ini
+inversed
 IPRED
 iteratively
 KA
+LLOQ
 Louedec
 mapbay
 mapbayest
@@ -53,6 +58,7 @@ optim
 param
 pharmacokinetic
 Pharmacometrics
+POSIXct
 posteriori
 Posteriori
 postprocess

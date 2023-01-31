@@ -217,6 +217,9 @@ features are:
   purpose of the estimation.
 - several optimization algorithm available, such as “L-BFGS-B” (the
   default) or “newuoa”.
+- handling data below the limit of quantification.
+- estimate only a subset of ETAs defined in the model.
+- flatten priors to favor observed data.
 
 ## Performance
 
@@ -421,7 +424,7 @@ and simulate random effects.
 
 ``` c
 $PK
-double CL = TVCL * exp(ETA1 + ETA(1))
+double CL = TVCL * exp(ETA1 + ETA(1)) ;
 ```
 
 ### 8. `$CAPTURE` block

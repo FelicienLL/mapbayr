@@ -42,9 +42,9 @@ obs_rows(x, ...)
 
 \item{mdv}{missing dependent value (default is 0 a non-missing concentration value to take into account for parameter estimation, 1 otherwise)}
 
-\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will udpate the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
+\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will update the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
 
-\item{DVmet}{second observation at the same time, often a metabolite ("DVmet") observed jointly with parent drug ("DV"). Works only if \code{x} is a 'mrgsolve' model where two \verb{[OBS]} compartments were defined (see \code{examples})}
+\item{DVmet}{second observation at the same time (e.g. a metabolite, "DVmet") observed jointly with parent drug ("DV"). Works only if \code{x} is a 'mrgsolve' model where two \verb{[OBS]} compartments were defined (see \code{examples})}
 }
 \value{
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).

@@ -54,7 +54,7 @@ adm_rows(x, ...)
 
 \item{rate}{rate of administration (optional, set to -2 if you model zero-order infusion. See \code{examples}.)}
 
-\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will udpate the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
+\item{.datehour}{a object of class POSIXct, a number or a character vector that can be passed to \code{\link[=parse_datehour]{parse_datehour()}}. Using \code{.datehour} will update the value of \code{time} in the dataset, with units in hours. Mind consistency with the \code{time} argument.}
 }
 \value{
 a data.frame, or a 'mrgsolve' model with a dataset in the \verb{@args$data} slot (accessible with \code{\link[=get_data]{get_data()}}).

@@ -1,30 +1,56 @@
 # mapbayr 0.9.0
-* `eta()` properly sorts vectors of length superior to 9 (#159).
-* `add_covariates()` accepts empty arguments. 
-* `use_posterior()` works if covariates had not been defind in data (#160).
-* exports `adm_lines.data.frame()`, `adm_lines.missing()`, `obs_lines.data.frame()`, `obs_lines.missing()`, `add_covariates.data.frame()`. This means users can now create a dataset from scratch, or modify a data.frame without the need to start from a mrgmod.
-* Refactor of the code to generate more robust data sets, always rearrange for NM-TRAN compatibility.
-* stop exporting `see_data()`
-* Better documentation: Separate documentation for `adm_lines()`, `obs_lines()` and `add_covariates()`. Keep a general `data_helpers` however.
-* New argument `.datehour` in `adm_lines()` and `obs_lines()` in order to compute `time` as function of date and hours provided as character.
-* Export `parse_datehour()`
+
+## New features
+
+### Data Helpers
+* New `adm_rows()` and `obs_rows()` replace and improve `adm_lines()` and `obs_lines()`, respectively. See `?data_helpers` for a comprehensive documentation (#175).  
+* In `adm_rows()`, `obs_rows()`, and `add_covariates()`, the first argument `x`:  
+  - can be missing, which enables the creation of a new dataset from scratch.
+  - accepts a data.frame, which enables the modification of a pre-existing dataset (#155). For example: 
+    ```R
+    adm_rows(amt = 100, cmt = 1) %>% 
+      obs_rows(time = 24, cmt = 2, DV = 0.123)
+    ```
+  - still accepts an 'mrgsolve' model, which enables the modification of a dataset stored in the model arguments.
+* In `adm_rows()` and `obs_rows()`, new argument `.datehour` in order to compute `time` as function of date and hours provided as character. The value passed to `.datehour` is parsed with `parse_datehour()` into a date-time value ("POSIXct"). For example: 
+  ```R
+  obs_rows(.datehour = c("2023/02/01 12:00", "2023/02/01 12:34"), DV = c(0.123, 0.456), cmt = 1)
+  ```
+* Data helpers now always rearrange data to fulfill the NM-TRAN compatibility and readability: filling missing covariate values with the last observation carried forward rule, relocation of NM-TRAN variables in the first positions etc...
+
+### Below Limit of Quantification
+* Data below the limit of quantification can now be handled with the so-called "M3 method" which consists in computing the likelihood of being below the limit of quantification. This is achieved when the variables `LLOQ` (lower limit of quantification, e.g. 0.22 mg/L) and `BLQ` (below limit of quantification, e.g. 1 or 0) are in the data (@pchelle, #182).
+* This can be achieved by:  
+  - adding the variables `LLOQ` and `BLQ` to the data by yourself.
+  - adding the variable `LLOQ` to the data by yourself: `BLQ` will automatically be inferred from `LLOQ` and `DV`.
+  - using `mapbayest(lloq = )` to automatically add the `LLOQ` and `BLQ` variables in the data.
+* In `mapbayest()`, new argument `lloq` in order to add a variable `LLOQ` to the data. For example: `mapbayest(model, data, lloq = 0.22)`.
+
+### Estimation features
+* In `mapbayest()`, new argument `select_eta` in order to select the numbers of the ETAs to estimate. Default are ETAs related to an OMEGA not equal to zero. Non-selected ETAs will not be estimated and returned equal to zero. This can be useful in order to ignore the estimation of ETAs not of interest, e.g. in case of inter-occasion variability or non-identifiability. For example: `mapbayest(model, data, select_eta = c(1,3))` (#170).
+
+* In `mapbayest()`, new argument `lambda` in order to modify the weight of the priors in the Bayesian estimation. This could be useful in order to flatten the priors with the objective to favor observed data instead of *a priori* information. For example: `mapbayest(model, data, lambda = 0.1)` to decrease the weight of priors of a ten-fold (#174).
+
+## Minor changes and bug fixes
+* Export `adm_rows.data.frame()`, `adm_rows.missing()`, `adm_rows.mrgmod()`, `obs_rows.data.frame()`, `obs_rows.missing()`, `obs_rows.mrgmod()`, and `add_covariates.data.frame()`, as new methods for data helpers. 
+* Export `parse_datehour()`, used to parse arguments passed to `.datehour` in `adm_rows()` and `obs_rows()`.
 * Export `filter.mrgmod()`, a method, wrapper around `dplyr::filter()` for dataset stored in mrgsolve model object ('mrgmod').
-* New argument `select_eta` in `mapbayest()` in order to select the ETAs to estimate. Default are ETAs related to a OMEGA not equal to zero. Non-selected ETAs will be fixed to zero. 
-* OMEGA values equal to zero are allowed and will be ignored during the estimations steps thanks to the new `select_eta` argument.
-* Modification of the final estimation object: `arg.optim` now has a `select_eta` element, `arg.ofv.fix$omega_inv` now has the dimensions of the number of ETAs selected.
-* Small changes in the `print` method.
-* New argument `select_eta` in `hist()` in order to select the ETAs to plot. Default are ETAs estimated (#167).
-* New argument `lambda` in `mapbayest()` in order to modify the weight of prior model (#174)
-* Internal: Fix deprecations related to 'tidyverse' packages (#171).
-* Depends on ggplot2 > 3.4.0
-* New `adm_rows()` instead of `adm_lines()`, and `obs_rows()` instead of `obs_lines()`. (#175)
-* `adm_lines()` and `obs_lines()` are now deprecated. 
-* Data below the limit of quantification can be handled with the so-called "M3 method" which consists in computing the likelihhod of being below the limit of quantification (#182, thanks @pchelle).   
-This is achieved if the variables `LLOQ` (lower limit of quantification, e.g. 2 ng/mL) and `BLQ` (below limit of quantification, e.g. 0 or 1) are in the data. Thus, you can:  
-  - add the variables `LLOQ` and `BLQ` to the data by yourself.
-  - only add the variable `LLOQ` to the data by yourself: `BLQ` will be inferred from `LLOQ` and `DV`.
-  - use `mapbayest(lloq = )` to automatically add the `LLOQ` and `BLQ` variables in the data.
-* New argument `lloq` in mapbayest() in order to add a variable `LLOQ` in the data.
+* Deprecate `adm_lines()` and `obs_lines()`. Stop exporting `adm_lines.mrgmod()` and `obs_lines.mrgmod()`.
+* Stop exporting `see_data()`. Was deprecated since 0.4. Use `get_data()` instead.
+* Suggests `lubridate`.
+* In the final estimation object, new `arg.optim$select_eta` element, `arg.ofv.fix$omega_inv` now has the dimensions of the number of ETAs selected.
+* OMEGA values equal to zero are allowed in the model and will be ignored during the estimations steps thanks to the new `select_eta` argument. This condition is not tested anymore with `check_mapbayr_model()`.
+* `print.mapbayests()`, now only shows the estimated ETAs.
+* In `hist()`, new argument `select_eta` in order to select the ETAs to plot. Default are ETAs estimated with `mapbayest()` (#167).
+* `eta()` properly sorts vectors of length superior to 9 (#159).
+* `use_posterior()` works if covariates had not been defined in data (#160).
+* In `hist()`, `get_phi()` and `plot_phi()`, ETAs are now properly re-ordered if they are more than 9 (#165).
+* Classification of absolute difference equal to zero now works (#166).
+* Observations at time = 0 are now allowed (#168).
+* Fix deprecations related to `tidyverse` packages (#171).
+* Depends on `ggplot2 >= 3.4.0`.
+* `add_covariates()` accepts empty arguments. 
+* In `mapbayest()`, new argument `...` in order to fix compatibility issues, not used yet.
 
 # mapbayr 0.8.0
 
