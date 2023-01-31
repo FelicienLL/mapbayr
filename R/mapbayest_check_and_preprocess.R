@@ -109,7 +109,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
   return(invisible(TRUE))
 }
 
-check_mapbayr_data <- function(data){
+check_mapbayr_data <- function(data, lloq = NULL){
   # Is there any data?
   if(is.null(data)) stop("No data provided", call. = F)
 
@@ -137,6 +137,54 @@ check_mapbayr_data <- function(data){
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
   if(any(data$mdv==0 & is.na(data$DV))) stop("DV cannot be missing (NA) on an observation line (mdv = 0)", call. = F)
+
+  # Do we take mapbayest(lloq = ) into account?
+  if(is.null(data[["LLOQ"]])){
+    if(!is.null(lloq)){
+      if(!(is.double(lloq) & length(lloq)==1)){
+        stop("\"lloq\" must be a single numeric value.")
+      }
+      data$LLOQ <- NA_real_
+      data$LLOQ[data$mdv == 0] <- lloq
+      data <- relocate(data, "LLOQ", .after = "DV")
+    }
+  } else {
+    if(!is.null(lloq)){
+      warning("LLOQ variable found in data: argument passed to `mapbayest(lloq = )` will be ignored.")
+    }
+  }
+
+  # Are LLOQ requirement respected?
+  if(!is.null(data[["LLOQ"]])){
+    data_lloq_values <- unique(data$LLOQ[data$mdv==0])
+    if(any(is.na(data_lloq_values))){
+      stop("Missing values of LLOQ found at an observation record")
+    }
+  }
+
+  # Do we need/have a BLQ column?
+  if(is.null(data[["BLQ"]])){
+    if(!is.null(data[["LLOQ"]])){
+      data$BLQ <- as.integer(data$DV < data$LLOQ)
+      data <- relocate(data, "BLQ", .after = "LLOQ")
+    }
+  }
+
+  # Are BLQ requirement respected?
+  if(!is.null(data[["BLQ"]])){
+    if(is.null(data[["LLOQ"]])){
+      warning("BLQ variable found in the data, but not LLOQ.")
+    }
+
+    data_blq_values <- unique(data$BLQ[data$mdv==0])
+    if(any(is.na(data_blq_values))){
+      stop("Missing values of BLQ found at an observation record")
+    }
+    if(any(! data_blq_values %in% c(0,1))){
+      stop("BLQ values in the data not all equal to 0 or 1")
+    }
+  }
+
   return(data)
 }
 
@@ -394,7 +442,7 @@ preprocess.ofv.id <- function(x, iddata){
     idcmt = idcmt
   )
 
-  idblq <- as.logical(as.data.frame(iddata)$BLQ)
+  idblq <- as.logical(iddata[["BLQ"]])
 
   if(any(idblq)){
     out <- c(out, list(

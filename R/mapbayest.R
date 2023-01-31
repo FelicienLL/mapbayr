@@ -10,6 +10,7 @@
 #' @param hessian function used to compute the Hessian and variance-covariance matrix with (default is `stats::optimHess`, alternatively use `nlmixr::nlmixrHess`)
 #' @param select_eta a vector of numeric values, the numbers of the ETAs to be estimated (default is `NULL`, all ETAs non-equal to zero)
 #' @param lambda a numeric value, the weight applied to the model prior (default is 1)
+#' @param lloq a numeric value, the lower limit of quantification. If not NULL, `LLOQ` and `BLQ` (below limit of quantification) variables will be added to the data. The related records will be censored with the M3 method. Ignored if `LLOQ` already in the data.
 #' @param force_initial_eta a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")
 #' @param quantile_bound a numeric value representing the quantile of the normal distribution admitted to define the bounds for L-BFGS-B (default is 0.001, i.e. 0.1%)
 #' @param control a list passed to the optimizer (see [stats::optim()] or  [minqa::newuoa()] documentation)
@@ -72,6 +73,7 @@ mapbayest <- function(x,
                       hessian = stats::optimHess,
                       select_eta = NULL,
                       lambda = 1,
+                      lloq = NULL,
                       force_initial_eta = NULL,
                       quantile_bound = 0.001,
                       control = list(),
@@ -96,7 +98,7 @@ mapbayest <- function(x,
   x@args$data <- NULL #empty the data slot in model object
 
   if(check){
-    data <- check_mapbayr_data(data)
+    data <- check_mapbayr_data(data, lloq = lloq)
     check_mapbayr_modeldata(x, data)
   }
 
