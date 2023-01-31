@@ -36,6 +36,7 @@ The following arguments differs between individuals:
 \item \code{idvaliddata}: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 \item \code{idDV}: a vector of (possibly log-transformed) observations
 \item \code{idcmt}: a vector of compartments where observations belong to
+\item \code{idblq},\code{idlloq}: optional, a logical and numerical vector indicating if the observation is below the lower limit of quantification, and the LLOQ value, respectively
 }
 }
 \description{

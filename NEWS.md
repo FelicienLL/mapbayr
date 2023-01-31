@@ -19,6 +19,12 @@
 * Depends on ggplot2 > 3.4.0
 * New `adm_rows()` instead of `adm_lines()`, and `obs_rows()` instead of `obs_lines()`. (#175)
 * `adm_lines()` and `obs_lines()` are now deprecated. 
+* Data below the limit of quantification can be handled with the so-called "M3 method" which consists in computing the likelihhod of being below the limit of quantification (#182, thanks @pchelle).   
+This is achieved if the variables `LLOQ` (lower limit of quantification, e.g. 2 ng/mL) and `BLQ` (below limit of quantification, e.g. 0 or 1) are in the data. Thus, you can:  
+  - add the variables `LLOQ` and `BLQ` to the data by yourself.
+  - only add the variable `LLOQ` to the data by yourself: `BLQ` will be inferred from `LLOQ` and `DV`.
+  - use `mapbayest(lloq = )` to automatically add the `LLOQ` and `BLQ` variables in the data.
+* New argument `lloq` in mapbayest() in order to add a variable `LLOQ` in the data.
 
 # mapbayr 0.8.0
 
