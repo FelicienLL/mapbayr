@@ -150,6 +150,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #' For additional modifications, you can add extra `+function(...)` in order to modify the plot as a regular `ggplot2` object.
 #'
 #' @examples
+#' \donttest{
 #' est <- mapbayest(exmodel(ID = 1))
 #'
 #' # Default Method
@@ -161,7 +162,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'
 #' # Select the ETAs
 #' hist(est, select_eta = c(1,3))
-#'
+#'}
 #' @method hist mapbayests
 #' @export
 hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){

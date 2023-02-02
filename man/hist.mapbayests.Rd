@@ -24,6 +24,7 @@ Use this function to plot the results of the estimations, in the form of histogr
 For additional modifications, you can add extra \verb{+function(...)} in order to modify the plot as a regular \code{ggplot2} object.
 }
 \examples{
+\donttest{
 est <- mapbayest(exmodel(ID = 1))
 
 # Default Method
@@ -35,5 +36,5 @@ h +
 
 # Select the ETAs
 hist(est, select_eta = c(1,3))
-
+}
 }

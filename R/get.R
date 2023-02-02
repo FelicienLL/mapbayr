@@ -8,6 +8,7 @@
 #' @description Helpful functions to get content from a `mrgmod` object (i.e. data) or from a `mapbayests` object (`data`, `eta`, `cov`, `param`, `phi`).
 #'
 #' @examples
+#' \donttest{
 #' # From a model object (mrgmod)
 #' mod <- exmodel(ID = 1:2, cache = FALSE, capture = "CL")
 #' get_data(mod)
@@ -25,7 +26,7 @@
 #' get_param(est)
 #'
 #' get_phi(est)
-#'
+#'}
 NULL
 #> NULL
 

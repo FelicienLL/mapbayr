@@ -33,6 +33,7 @@
 #'   obs_rows(.datehour = "2022-01-02 22:22:22", DV = 0.111, cmt = 2)
 #'
 #' # Second option: work with a dataset within a 'mrgsolve' model
+#' \donttest{
 #' mod <- exmodel(add_exdata = FALSE)
 #' # call `mrgsolve::see(mod)` to see how default compartment were coded
 #' adm_cmt(mod)
@@ -43,6 +44,7 @@
 #'   obs_rows(time = c(1.5, 4.4, 7.5, 24.6), DV = c(91.2904, 110.826, 79.384, 20.6671)) %>%
 #'   # get_data() # for curiosity, you can extract the data set at this step
 #'   mapbayest()
+#' }
 #'
 NULL
 #> NULL
