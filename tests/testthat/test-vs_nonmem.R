@@ -2,11 +2,18 @@ nmphi <- read_nmphi(system.file("nm001", "run001.phi", package = "mapbayr"))
 merged <- merge_phi(mapbayr_phi = get_phi(est001), nonmem_phi = nmphi)
 summarised <- summarise_phi(merged)
 
+nmphi20 <- read_nmphi(system.file("run20eta.phi", package = "mapbayr"))
+
 test_that("read_nmphi works", {
   expect_equal(nrow(nmphi), 8)
   expect_equal(nmphi$SUBJECT_NO, 1:8)
   expect_equal(nmphi$ID, 1:8)
   expect_named(nmphi, c("SUBJECT_NO", "ID", "ETA1", "ETA2", "ETA3", "ETC1_1", "ETC2_1", "ETC2_2", "ETC3_1", "ETC3_2", "ETC3_3", "OBJ"))
+
+  expect_named(nmphi20[,1:22], c("SUBJECT_NO", "ID", "ETA1", "ETA2", "ETA3", "ETA4", "ETA5",
+                          "ETA6", "ETA7", "ETA8", "ETA9", "ETA10", "ETA11", "ETA12", "ETA13",
+                          "ETA14", "ETA15", "ETA16", "ETA17", "ETA18", "ETA19", "ETA20"))
+
 })
 
 test_that("merge_phi works", {

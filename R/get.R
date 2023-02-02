@@ -264,7 +264,7 @@ get_phi.mapbayests <- function(x, ...){
       bind_rows()
   }
 
-  phitab <- x %>%
+  x %>%
     get_eta(output = "df") %>%
     mutate(OBJ = x$opt.value$value) %>%
     bind_cols(covphi) %>%
@@ -272,10 +272,6 @@ get_phi.mapbayests <- function(x, ...){
     mutate(ID = as.double(.data$ID)) %>%
     mutate(SUBJECT_NO = as.double(rank(.data$ID, ties.method = "first")), .before = 1) %>%
     as_tibble()
-
-  names(phitab) <- etanames_as_nonmem(names(phitab))
-
-  phitab
 }
 
 
