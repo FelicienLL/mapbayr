@@ -41,7 +41,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     if(neta == 0) {
       stop('$PARAM. Cannot find parameters named "ETA1", "ETA2", etc... \nDid you forget to add these parameters in $PARAM?', call. = FALSE)
     } else {
-      expected_eta_names <- paste0("ETA", seq_along(eta_names_x))
+      expected_eta_names <- make_eta_names(n = neta)
       if(any(eta_names_x != expected_eta_names)){
         stop(paste0("$PARAM. ", neta, " ETA parameter(s) found, but not named ", paste(expected_eta_names, collapse = ", "), ". "), call. = FALSE)
       }
@@ -55,9 +55,6 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     nomega <- length(odiag_x)
     if(nomega != neta) {
       stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
-    }
-    if(any(odiag_x == 0)){
-      stop("$OMEGA. The value of one or multiple OMEGA value is equal to 0. Cannot accept value in OMEGA equal to zero.", call. = FALSE)
     }
 
     # $SIGMA
@@ -112,9 +109,12 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
   return(invisible(TRUE))
 }
 
-check_mapbayr_data <- function(data){
+check_mapbayr_data <- function(data, lloq = NULL){
   # Is there any data?
   if(is.null(data)) stop("No data provided", call. = F)
+
+  # Remove .datehour, if any
+  data[[".datehour"]] <- NULL
 
   # Are all column numerics
   non_num <- names(data)[!sapply(data, is.numeric)]
@@ -136,8 +136,55 @@ check_mapbayr_data <- function(data){
 
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
-  if(nrow(filter(data, .data$time == 0, .data$mdv == 0)) > 0)  stop("Observation line (mdv = 0) not accepted at time = 0", call. = F)
   if(any(data$mdv==0 & is.na(data$DV))) stop("DV cannot be missing (NA) on an observation line (mdv = 0)", call. = F)
+
+  # Do we take mapbayest(lloq = ) into account?
+  if(is.null(data[["LLOQ"]])){
+    if(!is.null(lloq)){
+      if(!(is.double(lloq) & length(lloq)==1)){
+        stop("\"lloq\" must be a single numeric value.")
+      }
+      data$LLOQ <- NA_real_
+      data$LLOQ[data$mdv == 0] <- lloq
+      data <- relocate(data, "LLOQ", .after = "DV")
+    }
+  } else {
+    if(!is.null(lloq)){
+      warning("LLOQ variable found in data: argument passed to `mapbayest(lloq = )` will be ignored.")
+    }
+  }
+
+  # Are LLOQ requirement respected?
+  if(!is.null(data[["LLOQ"]])){
+    data_lloq_values <- unique(data$LLOQ[data$mdv==0])
+    if(any(is.na(data_lloq_values))){
+      stop("Missing values of LLOQ found at an observation record")
+    }
+  }
+
+  # Do we need/have a BLQ column?
+  if(is.null(data[["BLQ"]])){
+    if(!is.null(data[["LLOQ"]])){
+      data$BLQ <- as.integer(data$DV < data$LLOQ)
+      data <- relocate(data, "BLQ", .after = "LLOQ")
+    }
+  }
+
+  # Are BLQ requirement respected?
+  if(!is.null(data[["BLQ"]])){
+    if(is.null(data[["LLOQ"]])){
+      warning("BLQ variable found in the data, but not LLOQ.")
+    }
+
+    data_blq_values <- unique(data$BLQ[data$mdv==0])
+    if(any(is.na(data_blq_values))){
+      stop("Missing values of BLQ found at an observation record")
+    }
+    if(any(! data_blq_values %in% c(0,1))){
+      stop("BLQ values in the data not all equal to 0 or 1")
+    }
+  }
+
   return(data)
 }
 
@@ -190,7 +237,7 @@ split_mapbayr_data <- function(data){
 #'
 #' @return a list of named arguments passed to optimizer (i.e. arg.optim)
 #' @export
-preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
+preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = NULL, control = list(), force_initial_eta = NULL, quantile_bound = 0.001){
   #Checks argument
 
   #method
@@ -198,6 +245,24 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
   okmethod <- c("L-BFGS-B", "newuoa")
   if(!method %in% okmethod) stop(paste("Accepted methods:", paste(okmethod, collapse = ", "), '.'))
   netas <- eta_length(x)
+
+  #select_eta
+  if(is.null(select_eta)){
+    select_eta <- which(odiag(x) != 0)
+  }
+
+  if(any(select_eta > netas)){
+    stop("Cannot select ", paste(make_eta_names(select_eta[select_eta>netas]), collapse = " "),
+         ": maximum ", netas, " ETAs defined in $PARAM.")
+  }
+
+  selected_omega_zero <- intersect(which(odiag(x) == 0), select_eta)
+
+  if(length(selected_omega_zero) != 0){
+    stop("Cannot select ", paste(make_eta_names(selected_omega_zero), collapse = " "),
+         ": the corresponding OMEGA value is equal to zero. Modify the $OMEGA block or use `mapbayest(select_eta = ...)`.",
+         call. = FALSE)
+  }
 
   if(method == "newuoa"){
     if(!requireNamespace("minqa", quietly = TRUE)) {
@@ -212,7 +277,10 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas, val = 0.01)
+      initial_eta <- eta(n = netas, val = 0.01)[select_eta]
+    }
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
     }
 
     # fn = compute_ofv
@@ -226,7 +294,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
       par = initial_eta,
       fn = compute_ofv,
       control = control,
-      method = method  # I still keep it for the wrappers around newuoa
+      method = method, # I still keep it for the wrappers around newuoa
+      select_eta = select_eta
     )
   }
 
@@ -241,15 +310,18 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
     # par
     initial_eta <- force_initial_eta
     if(is.null(initial_eta)){
-      initial_eta <- eta(n = netas)
+      initial_eta <- eta(n = netas)[select_eta]
     }
 
+    if(is.null(names(initial_eta))){
+      names(initial_eta) <- make_eta_names(x = select_eta)
+    }
     # fn = compute_ofv, gr = NULL, hessian = FALSE
 
     # method = "L-BFGS-B"
 
     # lower, upper
-    bound <- get_quantile(x, .p = quantile_bound)
+    bound <- get_quantile(x, .p = quantile_bound)[select_eta]
 
     # control = list(trace,
     #                fnscale,
@@ -280,7 +352,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
       method = method,
       control = control,
       lower = bound,
-      upper = -bound
+      upper = -bound,
+      select_eta = select_eta
     )
   }
 
@@ -293,6 +366,8 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
 #' @name preprocess.ofv
 #' @param x the model object
 #' @param data,iddata NMTRAN-like data set. iddata is likely a dataset of one individual
+#' @param select_eta numbers of the ETAs taken into account. Set the dimensions of the inversed OMEGA matrix
+#' @param lambda a numeric value, the weight applied to the model prior (default is 1)
 #' @return A list of arguments used to compute the objective function value.
 #'
 #' The following arguments are fixed between individuals:
@@ -308,6 +383,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), control = list
 #'  - `idvaliddata`: a matrix, individual data set (with administrations and covariates), validated with \code{\link[mrgsolve]{valid_data_set}}
 #'  - `idDV`: a vector of (possibly log-transformed) observations
 #'  - `idcmt`: a vector of compartments where observations belong to
+#'  - `idblq`,`idlloq`: optional, a logical and numerical vector indicating if the observation is below the lower limit of quantification, and the LLOQ value, respectively
 #'
 #' @examples
 #' mod <- exmodel(add_exdata = FALSE, compile = FALSE)
@@ -324,7 +400,7 @@ NULL
 #' Preprocess fix arguments for ofv computation
 #' @rdname preprocess.ofv
 #' @export
-preprocess.ofv.fix <- function(x, data){
+preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x)), lambda = 1){
   qmod <- zero_re(x)
   qmod@end <- -1 #Make sure no modif in the time grid
   qmod@cmtL <- character(0) # Do not return amounts in compartments in the output
@@ -332,12 +408,17 @@ preprocess.ofv.fix <- function(x, data){
   qmod@Icap <- which(x@capL== "DV") # Only return DV among $captured items
   qmod@capL <- "DV"
 
+  if(length(lambda) != 1){
+    stop("\"lambda\" must be of length 1.", call. = FALSE)
+  }
+
   list(
     qmod = qmod,
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
-    omega_inv = solve(omat(x, make = T)),
-    all_cmt = fit_cmt(x, data) #on full data
+    omega_inv = solve(omat(x, make = T)[select_eta,select_eta]),
+    all_cmt = fit_cmt(x, data), #on full data
+    lambda = lambda
   )
 }
 
@@ -350,13 +431,25 @@ preprocess.ofv.id <- function(x, iddata){
   #eg : at least one obs per id
 
   # --- Generate preprocess
-
-  idDV <- iddata$DV[iddata$mdv==0] #keep observations to fit only
+  mdv0 <- iddata$mdv==0
+  idDV <- iddata$DV[mdv0] #keep observations to fit only
   if(log_transformation(x)) idDV <- log(idDV)
-  idcmt <- iddata$cmt[iddata$mdv==0]
+  idcmt <- iddata$cmt[mdv0]
 
-  list(idvaliddata = valid_data_set(iddata, x),
-       idDV = idDV,
-       idcmt = idcmt
+  out <- list(
+    idvaliddata = valid_data_set(iddata, x),
+    idDV = idDV,
+    idcmt = idcmt
   )
+
+  idblq <- as.logical(iddata[["BLQ"]])
+
+  if(any(idblq)){
+    out <- c(out, list(
+      idblq = idblq[mdv0],
+      idlloq = iddata$LLOQ[mdv0])
+    )
+  }
+
+  out
 }

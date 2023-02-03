@@ -19,3 +19,13 @@ test_that("no error if covariance does not exists", {
   phi_old <- as.data.frame(get_phi(est001_old))
   expect_equal(phi_old$ETC1_1, rep(NA_real_, 8))
 })
+
+test_that("ETA is ET if n>9", {
+  expect_equal(
+    etanames_as_nonmem(c("ETA1", "ETA12", "ETC1", "ETC22")),
+    c("ETA1", "ET12", "ETC1", "ETC22")
+  )
+})
+
+
+

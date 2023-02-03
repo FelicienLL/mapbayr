@@ -67,10 +67,10 @@ DV : Concentration central
 
 
   data739 <- model %>%
-    adm_lines(amt = 1000, addl = 20, ii = 24) %>%
-    obs_lines(time = 40, DV = 76) %>%
-    obs_lines(time = 381, DV = 151) %>%
-    obs_lines(time = 528, DV = 94) %>%
+    adm_rows(amt = 1000, addl = 20, ii = 24) %>%
+    obs_rows(time = 40, DV = 76) %>%
+    obs_rows(time = 381, DV = 151) %>%
+    obs_rows(time = 528, DV = 94) %>%
     get_data()
 
   #no problem with newuoa :
@@ -162,8 +162,8 @@ $CAPTURE DV CL
 
   mod1 <- mcode("mod1", code1)
   est1 <- mod1 %>%
-    adm_lines(amt = 100, cmt = 1) %>%
-    obs_lines(time = c(1, 6), DV = c(1.095, 1.643), cmt = 2) %>%
+    adm_rows(amt = 100, cmt = 1) %>%
+    obs_rows(time = c(1, 6), DV = c(1.095, 1.643), cmt = 2) %>%
     mapbayest(verbose = FALSE)
 
   expect_equal(est1$opt.value$nreset, 0)
@@ -206,8 +206,8 @@ $CAPTURE DV
 "
   mod1 <- mrgsolve::mcode("mod1", code1)
   data1 <- mod1 %>%
-    adm_lines(amt = 100) %>%
-    obs_lines(time = c(1, 2, 6, 8), DV = c(0.87, 1.15, 1.07, 0.96)*10) %>% #Observations ten-fold higher than typical profile
+    adm_rows(amt = 100) %>%
+    obs_rows(time = c(1, 2, 6, 8), DV = c(0.87, 1.15, 1.07, 0.96)*10) %>% #Observations ten-fold higher than typical profile
     get_data()
   invisible(capture.output(expect_message(est1 <- mapbayest(mod1, data1), "Reset with new bounds")))
   expect_gt(unname(abs(get_eta(est1, 1))), est1$arg.optim$lower[1])

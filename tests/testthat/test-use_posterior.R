@@ -1,6 +1,6 @@
 test_that("use_posterior obeys to update_x arguments", {
-
-  est301 <- mapbayest(exmodel(301))
+  mod301 <- exmodel(301)
+  est301 <- mapbayest(mod301)
   defaultposterior <- use_posterior(est301, .zero_re = "none")
 
   expect_equal(defaultposterior$ETA1, 0.397629671)
@@ -26,6 +26,11 @@ test_that("use_posterior obeys to update_x arguments", {
 
   expect_equal(use_posterior(est301, update_eta = FALSE)$ETA1, 0)
   expect_equal(use_posterior(est301, update_eta = TRUE)$ETA1, 0.397629671)
+
+  dat301_missingSEX <- get_data(mod301)
+  dat301_missingSEX$SEX <- NULL
+
+  expect_equal(use_posterior(mapbayest(mod301, dat301_missingSEX))$SEX, 0)
 
 })
 
@@ -75,3 +80,4 @@ test_that("multi ID", {
   expect_equal(post001[[1]]$ETA1, 0.40505701)
   expect_equal(post001[[2]]$ETA1, -0.145365840)
 })
+

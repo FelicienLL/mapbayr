@@ -149,11 +149,12 @@ test_that("eta_descr works", {
   #etas are reordered
   mod87quat <- mcode("mod87bis",
                     "$PARAM @annotated
+                    ETA11 : 0 : Volume
                     ETA2 : 0 :
                     ETA1 : 0 : Clearance
                     $PARAM @annotated @covariate
                     BW : 50 : Body weight (kg)", compile = FALSE)
 
-  expect_equal(eta_descr(mod87quat), c("Clearance", "ETA2"))
+  expect_equal(eta_descr(mod87quat), c("Clearance", "ETA2", "Volume"))
 
 })

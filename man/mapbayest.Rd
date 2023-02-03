@@ -2,7 +2,6 @@
 % Please edit documentation in R/mapbayest.R
 \name{mapbayest}
 \alias{mapbayest}
-\alias{mbrest}
 \title{Estimate parameters (maximum a posteriori)}
 \usage{
 mapbayest(
@@ -10,6 +9,9 @@ mapbayest(
   data = NULL,
   method = c("L-BFGS-B", "newuoa"),
   hessian = stats::optimHess,
+  select_eta = NULL,
+  lambda = 1,
+  lloq = NULL,
   force_initial_eta = NULL,
   quantile_bound = 0.001,
   control = list(),
@@ -17,10 +19,9 @@ mapbayest(
   verbose = TRUE,
   progress = TRUE,
   reset = 50,
-  output = NULL
+  output = NULL,
+  ...
 )
-
-mbrest(...)
 }
 \arguments{
 \item{x}{the model object}
@@ -30,6 +31,12 @@ mbrest(...)
 \item{method}{optimization method; the default is \code{"L-BFGS-B"} (from \code{stat::optim()}), alternatively \code{"newuoa"} for \code{minqa::newuoa()}}
 
 \item{hessian}{function used to compute the Hessian and variance-covariance matrix with (default is \code{stats::optimHess}, alternatively use \code{nlmixr::nlmixrHess})}
+
+\item{select_eta}{a vector of numeric values, the numbers of the ETAs to be estimated (default is \code{NULL}, all ETAs non-equal to zero)}
+
+\item{lambda}{a numeric value, the weight applied to the model prior (default is 1)}
+
+\item{lloq}{a numeric value, the lower limit of quantification. If not NULL, \code{LLOQ} and \code{BLQ} (below limit of quantification) variables will be added to the data. The related records will be censored with the M3 method. Ignored if \code{LLOQ} already in the data.}
 
 \item{force_initial_eta}{a vector of numeric values to start the estimation from (default to 0 for "L-BFGS-B")}
 
@@ -47,7 +54,7 @@ mbrest(...)
 
 \item{output}{if \code{NULL} (the default) a mapbayests object is returned; if \code{df} a \emph{mapbay_tab} dataframe is returned}
 
-\item{...}{passed to mapbayest}
+\item{...}{for compatibility (not used)}
 }
 \value{
 a mapbayests object. Basically a list containing:

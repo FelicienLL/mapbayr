@@ -57,6 +57,7 @@ the class of the object returned depends on the function, and on their arguments
 Helpful functions to get content from a \code{mrgmod} object (i.e. data) or from a \code{mapbayests} object (\code{data}, \code{eta}, \code{cov}, \code{param}, \code{phi}).
 }
 \examples{
+\donttest{
 # From a model object (mrgmod)
 mod <- exmodel(ID = 1:2, cache = FALSE, capture = "CL")
 get_data(mod)
@@ -74,5 +75,5 @@ get_cov(est)
 get_param(est)
 
 get_phi(est)
-
+}
 }
