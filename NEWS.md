@@ -1,3 +1,6 @@
+# mapbayr development version
+* Now postprocesses datasets with >=2 missing covariates (#185)
+
 # mapbayr 0.9.0
 
 ## New features

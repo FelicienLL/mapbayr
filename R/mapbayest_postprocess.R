@@ -29,9 +29,7 @@ post_mapbay_tab <- function(x, data, etamat){
   missing_covs <- all_covs[!all_covs %in% c(captured_covs, data_covs)]
 
   if(length(missing_covs) > 0){
-    missing_cov_vals <- param(x)[[missing_covs]]
-    names(missing_cov_vals) <- missing_covs
-    mapbay_tab <- cbind(mapbay_tab, as.data.frame(as.list(missing_cov_vals)))
+    mapbay_tab <- cbind(mapbay_tab, param(x)[missing_covs])
   }
 
   # RELOCATE NAMES
