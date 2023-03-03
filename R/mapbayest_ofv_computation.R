@@ -20,6 +20,34 @@ qparam <- function(x, p){
   return(x)
 }
 
+#' Update parameters through (valid) data
+#'
+#' @param validdata a matrix of class "valid_data_set"
+#' @param eta a named vector of eta values
+#'
+#' @return a matrix of class "valid_data_set"
+#' @noRd
+merge_validdata_eta <- function(validdata, eta){
+  ncol_validdata <- ncol(validdata)
+  nrow_validdata <- nrow(validdata)
+
+  proper_data <- validdata[,-ncol_validdata]
+  zeros <- validdata[,ncol_validdata, drop = FALSE]
+  eta_matrix <- matrix(
+    data = eta,
+    nrow = nrow_validdata,
+    ncol = length(eta),
+    byrow = TRUE, #faster than data = rep(eta, each = nrow)
+    dimnames = list(NULL,
+                    names(eta)
+    )
+  )
+
+  ans <- cbind(proper_data, eta_matrix, zeros)
+  class(ans) <- c("valid_data_set", "matrix")
+  ans
+}
+
 #' Compute the H matrix
 #'
 #' @description Partial derivative of predictions with respect to epsilon
@@ -76,6 +104,7 @@ ofv_kang <- function(obs, pred, eta, var, omega_inv, lambda = 1){
 compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation, lambda = 1, idvaliddata, idDV, idcmt, idblq = NULL, idlloq = NULL, ...){
   #Update ETA values
   qmod <- qparam(x = qmod, p = eta)
+  #idvaliddata <- merge_validdata_eta(validdata = idvaliddata, eta = eta)
 
   #Predict concentrations
   pred <- tryCatch(f(qmod = qmod, data = idvaliddata), silent = TRUE, error = function(x)NA)
