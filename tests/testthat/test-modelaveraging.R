@@ -1,25 +1,19 @@
-same_data <- function(x){
+same_data_and_est <- function(x){
   x %>%
     adm_rows(ID = 2, time = 0, amt = 100, addl = 3, ii = 24) %>%
     obs_rows(ID = 2, time = 96, DV = 1) %>%
     adm_rows(ID = 9, time = 0, amt = 200, addl = 3, ii = 24) %>%
-    obs_rows(ID = 9, time = 96, DV = 1)
+    obs_rows(ID = 9, time = 96, DV = 1) %>%
+    mapbayest()
 }
 
 est1 <- exmodel(1, add_exdata = F) %>%
   param(TVCL = 4) %>%
-  same_data() %>%
-  mapbayest()
+  same_data_and_est()
 
 est6 <- exmodel(6, add_exdata = F) %>%
   param(TVCL = 1) %>%
-  same_data() %>%
-  mapbayest()
-
-est401 <- exmodel(401, add_exdata = F) %>%
-  param(TVCL = 10) %>%
-  same_data() %>%
-  mapbayest()
+  same_data_and_est()
 
 
 test_that("get_LL works", {
