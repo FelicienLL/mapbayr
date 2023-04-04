@@ -72,6 +72,14 @@ test_that("model_averaging works", {
   est1bis <- est1
   est1bis$opt.value$ID <- c("2222", "9")
   expect_error(model_averaging(est1bis, est6), "Subject IDs are not the same")
+
+  expect_message(ans <- model_averaging(est1, estlist = list(est1, est6)), "estlist not NULL")
+  expect_equal(ans, m1, tolerance = 0.001)
+
+  expect_equal(model_averaging(est1), matrix(c(1,1), dimnames = list(c("2", "9"), NULL)))
+  est1ter <- est1
+  est1ter$opt.value <- est1ter$opt.value[1,]
+  expect_equal(model_averaging(est1ter), matrix(c(1), dimnames = list(c("2"), NULL)))
 })
 
 

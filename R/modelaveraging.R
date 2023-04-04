@@ -14,8 +14,14 @@ get_AIC <- function(x){
 }
 
 model_averaging <- function(..., scheme = c("LL", "AIC"), estlist = NULL){
+  dots <- list(...)
+
   if(is.null(estlist)){
-    estlist <- list(...)
+    estlist <- dots
+  } else {
+    if(length(dots) > 0){
+      message("estlist not NULL, arguments passed to ... will be ignored")
+    }
   }
 
   if(!all(sapply(estlist, inherits, "mapbayests"))){
