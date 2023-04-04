@@ -68,6 +68,10 @@ test_that("model_averaging works", {
                  dimnames = list(c("2", "9"), NULL)),
                tolerance = 0.001
   )
+
+  est1bis <- est1
+  est1bis$opt.value$ID <- c("2222", "9")
+  expect_error(model_averaging(est1bis, est6), "Subject IDs are not the same")
 })
 
 

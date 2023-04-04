@@ -26,6 +26,12 @@ model_averaging <- function(..., scheme = c("LL", "AIC"), modlist = NULL){
     stop("All objects passed to `model_averaging() must be `mapbayests` class object", add_msg)
   }
 
+  IDs <- lapply(modlist, function(x){x$opt.value$ID})
+
+  if(length(unique(IDs)) != 1){
+    stop("Subject IDs are not the same between estimation objects")
+  }
+
   scheme <- scheme[1]
 
   scheme_fn <- switch(scheme,
