@@ -1,4 +1,4 @@
-get_LL <- function(x, LL = TRUE, colname = NULL){
+get_LL <- function(x, LL = TRUE){
   opt <- x$opt.value
   ans <- matrix(opt$value, dimnames = list(opt$ID, NULL))
   if(LL){
@@ -7,8 +7,13 @@ get_LL <- function(x, LL = TRUE, colname = NULL){
   ans
 }
 
+get_AIC <- function(x){
+  OFV <- get_LL(x, LL = FALSE)
+  k <- sum(grepl("ETA", names(x$opt.value)))
+  exp(-0.5 * OFV - k)
+}
 
-model_averaging <- function(..., modlist = NULL){
+model_averaging <- function(..., scheme = c("LL", "AIC"), modlist = NULL){
   if(is.null(modlist)){
     modlist <- list(...)
   }
@@ -21,9 +26,15 @@ model_averaging <- function(..., modlist = NULL){
     stop("All objects passed to `model_averaging() must be `mapbayests` class object", add_msg)
   }
 
+  scheme <- scheme[1]
+
+  scheme_fn <- switch(scheme,
+                      LL = get_LL,
+                      AIC = get_AIC)
+
   values <- do.call(
     cbind,
-    lapply(modlist, get_LL) #no sapply to keep rownames
+    lapply(modlist, scheme_fn) #no sapply to keep rownames
   )
   colnames(values) <- names(modlist)
 

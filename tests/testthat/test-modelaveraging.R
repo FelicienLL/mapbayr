@@ -21,6 +21,29 @@ est401 <- exmodel(401, add_exdata = F) %>%
   same_data() %>%
   mapbayest()
 
+
+test_that("get_LL works", {
+  expect_equal(
+    get_LL(est1),
+    matrix(c(3.294, 4.565), dimnames = list(c(2,9), NULL)),
+    tolerance = 0.001
+  )
+
+  expect_equal(
+    get_LL(est1, LL = FALSE),
+    matrix(c(-2.384, -3.037), dimnames = list(c(2,9), NULL)),
+    tolerance = 0.001
+  )
+})
+
+test_that("get_AIC works", {
+  expect_equal(
+    get_AIC(est1),
+    matrix(c(0.164, 0.227), dimnames = list(c(2,9), NULL)),
+    tolerance = 0.001
+  )
+})
+
 test_that("model_averaging works", {
 
   m0 <- matrix(c(0.8564, 0.9833, 0.1436, 0.0167), nrow = 2)
@@ -37,6 +60,14 @@ test_that("model_averaging works", {
 
   expect_error(model_averaging("foo", est1, "bar"), "All objects passed to")
   expect_error(model_averaging(list(est1, B = est6)), "Did you forget")
+
+  expect_equal(model_averaging(est1, est6, scheme = "AIC"),
+               matrix(
+                 c(0.9419, 0.9938, 0.0581, 0.00619),
+                 nrow = 2,
+                 dimnames = list(c("2", "9"), NULL)),
+               tolerance = 0.001
+  )
 })
 
 
