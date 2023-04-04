@@ -13,20 +13,20 @@ get_AIC <- function(x){
   exp(-0.5 * OFV - k)
 }
 
-model_averaging <- function(..., scheme = c("LL", "AIC"), modlist = NULL){
-  if(is.null(modlist)){
-    modlist <- list(...)
+model_averaging <- function(..., scheme = c("LL", "AIC"), estlist = NULL){
+  if(is.null(estlist)){
+    estlist <- list(...)
   }
 
-  if(!all(sapply(modlist, inherits, "mapbayests"))){
+  if(!all(sapply(estlist, inherits, "mapbayests"))){
     add_msg <- NULL
-    if(all(sapply(modlist[[1]], inherits, "mapbayests"))){
-      add_msg <- "\n Did you forget the argument `modlist = `?"
+    if(all(sapply(estlist[[1]], inherits, "mapbayests"))){
+      add_msg <- "\n Did you forget the argument `estlist = `?"
     }
     stop("All objects passed to `model_averaging() must be `mapbayests` class object", add_msg)
   }
 
-  IDs <- lapply(modlist, function(x){x$opt.value$ID})
+  IDs <- lapply(estlist, function(x){x$opt.value$ID})
 
   if(length(unique(IDs)) != 1){
     stop("Subject IDs are not the same between estimation objects")
@@ -40,9 +40,9 @@ model_averaging <- function(..., scheme = c("LL", "AIC"), modlist = NULL){
 
   values <- do.call(
     cbind,
-    lapply(modlist, scheme_fn) #no sapply to keep rownames
+    lapply(estlist, scheme_fn) #no sapply to keep rownames
   )
-  colnames(values) <- names(modlist)
+  colnames(values) <- names(estlist)
 
   values / rowSums(values)
 }

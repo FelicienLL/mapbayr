@@ -51,12 +51,12 @@ test_that("model_averaging works", {
   m1 <- m0
   rownames(m1) <- c(2,9)
   expect_equal(model_averaging(est1, est6), m1, tolerance = 0.001)
-  expect_equal(model_averaging(modlist = list(est1, est6)), m1, tolerance = 0.001)
+  expect_equal(model_averaging(estlist = list(est1, est6)), m1, tolerance = 0.001)
 
   m2 <- m1
   colnames(m2) <- c("", "B")
   expect_equal(model_averaging(est1, B = est6), m2, tolerance = 0.001)
-  expect_equal(model_averaging(modlist = list(est1, B = est6)), m2, tolerance = 0.001)
+  expect_equal(model_averaging(estlist = list(est1, B = est6)), m2, tolerance = 0.001)
 
   expect_error(model_averaging("foo", est1, "bar"), "All objects passed to")
   expect_error(model_averaging(list(est1, B = est6)), "Did you forget")
