@@ -74,10 +74,12 @@ test_that("model_averaging works", {
   est1ter <- est1
   est1ter$opt.value <- est1ter$opt.value[1,]
   expect_equal(model_averaging(est1ter), matrix(c(1), dimnames = list(c("2"), NULL)))
+
+  expect_length(model_averaging(est1, est1, est1, simplify = FALSE), 2)
+  expect_s3_class(model_averaging(est1, est1, est1, simplify = FALSE), NA)
+  expect_type(model_averaging(est1, est1, est1, simplify = FALSE), "list")
+
 })
-
-
-
 
 
 

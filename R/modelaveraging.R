@@ -30,6 +30,7 @@ get_AIC <- function(x){
 #' @param ... estimation objects generated from [mapbayest()] to compute weight from
 #' @param scheme scheme weight, either "LL" or "AIC"
 #' @param estlist a list of estimation objects. Overrides `...`
+#' @param simplify a logical, if TRUE (the default) returns a matrix, alternatively a list as long as the number of individuals
 #'
 #' @return a matrix of numeric, the weight of the estimation. There is one row per subject ID, one column per model. Consequently, the sum of each row is 1. Named estimation objects (either in `...` or in `estlist`) will be used as column names in the output.
 #' @export
@@ -58,7 +59,10 @@ get_AIC <- function(x){
 #' model_averaging(CL2 = est1, CL10 = est2)
 #' model_averaging(estlist = list(A = est1, B = est2, est1))
 #'
-model_averaging <- function(..., scheme = c("LL", "AIC"), estlist = NULL){
+model_averaging <- function(...,
+                            scheme = c("LL", "AIC"),
+                            estlist = NULL,
+                            simplify = TRUE){
   dots <- list(...)
 
   if(is.null(estlist)){
@@ -89,11 +93,15 @@ model_averaging <- function(..., scheme = c("LL", "AIC"), estlist = NULL){
                       LL = get_LL,
                       AIC = get_AIC)
 
-  values <- do.call(
-    cbind,
-    lapply(estlist, scheme_fn) #no sapply to keep rownames
-  )
+  values <- lapply(estlist, scheme_fn) #no sapply to keep rownames
+  values <- do.call(cbind, values)
   colnames(values) <- names(estlist)
 
-  values / rowSums(values)
+  if(simplify){
+    ans <- values / rowSums(values)
+  } else {
+    ans <- apply(values, 1, function(x) x/sum(x), simplify = FALSE)
+  }
+
+  return(ans)
 }
