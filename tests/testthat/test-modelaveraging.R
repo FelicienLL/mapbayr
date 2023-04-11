@@ -123,5 +123,10 @@ test_that("do_model_averaging() works", {
   )
 })
 
-
-
+test_that("model_averaging works", {
+  expect_equal(
+    model_averaging(est1, est6, output_function = ~select(filter(as_tibble(.x), mdv == 0), ID, time, IPRED)),
+    data.frame(ID = c(2, 9), time = c(96, 96), IPRED = c(0.938,0.961)),
+    tolerance = 0.001
+  )
+})
