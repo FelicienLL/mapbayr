@@ -30,7 +30,6 @@ get_AIC <- function(x){
 #' @param ... estimation objects generated from [mapbayest()] to compute weight from
 #' @param scheme scheme weight, either "LL" or "AIC"
 #' @param estlist a list of estimation objects. Overrides `...`
-#' @param simplify a logical, if TRUE (the default) returns a matrix, alternatively a list as long as the number of individuals
 #'
 #' @return a matrix of numeric, the weight of the estimation. There is one row per subject ID, one column per model. Consequently, the sum of each row is 1. Named estimation objects (either in `...` or in `estlist`) will be used as column names in the output.
 #' @export
@@ -97,4 +96,41 @@ compute_weights <- function(...,
   colnames(values) <- names(estlist)
   values / rowSums(values)
 
+}
+
+apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
+                          iweights #a vector of weights, one per model, for 1 ID
+){
+
+  list_weighted_itabs <- mapply(
+    FUN = `*`,
+    itabs,
+    iweights,
+    SIMPLIFY = FALSE
+  )
+
+  Reduce(
+    f = `+`,
+    x = list_weighted_itabs)
+
+}
+
+do_model_averaging <- function(list_of_tabs, weights_matrix){
+
+  # Need to work to the individual level
+  # Transpose list of tables to a list of (individual) list of tables
+  tabs <- list_of_tabs %>%
+    map(split_mapbayr_data) %>%
+    purrr::list_transpose(simplify = FALSE)
+
+  # Turn matrix in to a list of individual vectors
+  weights <- asplit(weights_matrix, 1)
+
+  # Apply weights to each individual
+  map2(
+    .x = tabs,
+    .y = weights,
+    .f = apply_weights
+    ) %>%
+    bind_rows()
 }

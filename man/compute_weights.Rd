@@ -12,8 +12,6 @@ compute_weights(..., scheme = c("LL", "AIC"), estlist = NULL)
 \item{scheme}{scheme weight, either "LL" or "AIC"}
 
 \item{estlist}{a list of estimation objects. Overrides \code{...}}
-
-\item{simplify}{a logical, if TRUE (the default) returns a matrix, alternatively a list as long as the number of individuals}
 }
 \value{
 a matrix of numeric, the weight of the estimation. There is one row per subject ID, one column per model. Consequently, the sum of each row is 1. Named estimation objects (either in \code{...} or in \code{estlist}) will be used as column names in the output.

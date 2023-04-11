@@ -74,8 +74,53 @@ test_that("compute_weights works", {
   est1ter <- est1
   est1ter$opt.value <- est1ter$opt.value[1,]
   expect_equal(compute_weights(est1ter), matrix(c(1), dimnames = list(c("2"), NULL)))
+})
 
 
+test_that("apply_weights() works", {
+  #can average a data.frame
+  tabs <- list(
+    e1 = data.frame(ID = 1, time = c(0, 24), IPRED = c(100, 1000)),
+    e2 = data.frame(ID = 1, time = c(0, 24), IPRED = c(200, 2000))
+  )
+  expect_equal(
+    apply_weights(itabs = tabs, iweights = c(0.8, 0.2)),
+    data.frame(ID = 1, time = c(0, 24), IPRED = c(120, 1200))
+    # c(0.8*100 + 0.2*200, 0.8*1000 + 0.2*2000)
+  )
+
+  #can average a list of vectors
+  expect_equal(
+    apply_weights(itabs = list(c(100, 1000), c(200, 2000)), iweights = c(0.8, 0.2)),
+    c(120, 1200)
+  )
+
+  #can average a single value
+  expect_equal(
+    apply_weights(itabs = c(100, 200), iweights = c(0.8, 0.2)),
+    120
+  )
+})
+
+test_that("do_model_averaging() works", {
+  tabs <- list(
+    A = data.frame(ID = c(1, 1, 2, 2),
+                   time = c(0, 24, 0, 24),
+                   IPRED = c(100, 200, 1000, 2000)),
+    B = data.frame(ID = c(1, 1, 2, 2),
+                   time = c(0, 24, 0, 24),
+                   IPRED = c(80, 150, 900, 2200))
+  )
+
+  mat <- matrix(c(0.75, 0.9, 0.25, 0.1), nrow = 2,
+                dimnames = list(c(1,2), c("A", "B")))
+
+  expect_equal(
+    do_model_averaging(list_of_tabs = tabs, weights_matrix = mat),
+    data.frame(ID = c(1, 1, 2, 2), time = c(0, 24, 0, 24),
+               IPRED = c(95, 187.5, 990, 2020))
+
+  )
 })
 
 
