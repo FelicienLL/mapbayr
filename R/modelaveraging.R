@@ -56,13 +56,12 @@ get_AIC <- function(x){
 #'   mrgsolve::param(TVCL = 10) %>%
 #'   same_data_and_est()
 #'
-#' model_averaging(CL2 = est1, CL10 = est2)
-#' model_averaging(estlist = list(A = est1, B = est2, est1))
+#' compute_weights(CL2 = est1, CL10 = est2)
+#' compute_weights(estlist = list(A = est1, B = est2, est1))
 #'
-model_averaging <- function(...,
+compute_weights <- function(...,
                             scheme = c("LL", "AIC"),
-                            estlist = NULL,
-                            simplify = TRUE){
+                            estlist = NULL){
   dots <- list(...)
 
   if(is.null(estlist)){
@@ -78,7 +77,7 @@ model_averaging <- function(...,
     if(all(sapply(estlist[[1]], inherits, "mapbayests"))){
       add_msg <- "\n Did you forget to call explicitely `estlist = `?"
     }
-    stop("All objects passed to `model_averaging() must be `mapbayests` class object", add_msg)
+    stop("All objects passed to `compute_weights() must be `mapbayests` class object", add_msg)
   }
 
   IDs <- lapply(estlist, function(x){x$opt.value$ID})
@@ -96,12 +95,6 @@ model_averaging <- function(...,
   values <- lapply(estlist, scheme_fn) #no sapply to keep rownames
   values <- do.call(cbind, values)
   colnames(values) <- names(estlist)
+  values / rowSums(values)
 
-  if(simplify){
-    ans <- values / rowSums(values)
-  } else {
-    ans <- apply(values, 1, function(x) x/sum(x), simplify = FALSE)
-  }
-
-  return(ans)
 }

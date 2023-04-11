@@ -38,24 +38,24 @@ test_that("get_AIC works", {
   )
 })
 
-test_that("model_averaging works", {
+test_that("compute_weights works", {
 
   m0 <- matrix(c(0.8564, 0.9833, 0.1436, 0.0167), nrow = 2)
 
   m1 <- m0
   rownames(m1) <- c(2,9)
-  expect_equal(model_averaging(est1, est6), m1, tolerance = 0.001)
-  expect_equal(model_averaging(estlist = list(est1, est6)), m1, tolerance = 0.001)
+  expect_equal(compute_weights(est1, est6), m1, tolerance = 0.001)
+  expect_equal(compute_weights(estlist = list(est1, est6)), m1, tolerance = 0.001)
 
   m2 <- m1
   colnames(m2) <- c("", "B")
-  expect_equal(model_averaging(est1, B = est6), m2, tolerance = 0.001)
-  expect_equal(model_averaging(estlist = list(est1, B = est6)), m2, tolerance = 0.001)
+  expect_equal(compute_weights(est1, B = est6), m2, tolerance = 0.001)
+  expect_equal(compute_weights(estlist = list(est1, B = est6)), m2, tolerance = 0.001)
 
-  expect_error(model_averaging("foo", est1, "bar"), "All objects passed to")
-  expect_error(model_averaging(list(est1, B = est6)), "Did you forget")
+  expect_error(compute_weights("foo", est1, "bar"), "All objects passed to")
+  expect_error(compute_weights(list(est1, B = est6)), "Did you forget")
 
-  expect_equal(model_averaging(est1, est6, scheme = "AIC"),
+  expect_equal(compute_weights(est1, est6, scheme = "AIC"),
                matrix(
                  c(0.9419, 0.9938, 0.0581, 0.00619),
                  nrow = 2,
@@ -65,19 +65,16 @@ test_that("model_averaging works", {
 
   est1bis <- est1
   est1bis$opt.value$ID <- c("2222", "9")
-  expect_error(model_averaging(est1bis, est6), "Subject IDs are not the same")
+  expect_error(compute_weights(est1bis, est6), "Subject IDs are not the same")
 
-  expect_message(ans <- model_averaging(est1, estlist = list(est1, est6)), "estlist not NULL")
+  expect_message(ans <- compute_weights(est1, estlist = list(est1, est6)), "estlist not NULL")
   expect_equal(ans, m1, tolerance = 0.001)
 
-  expect_equal(model_averaging(est1), matrix(c(1,1), dimnames = list(c("2", "9"), NULL)))
+  expect_equal(compute_weights(est1), matrix(c(1,1), dimnames = list(c("2", "9"), NULL)))
   est1ter <- est1
   est1ter$opt.value <- est1ter$opt.value[1,]
-  expect_equal(model_averaging(est1ter), matrix(c(1), dimnames = list(c("2"), NULL)))
+  expect_equal(compute_weights(est1ter), matrix(c(1), dimnames = list(c("2"), NULL)))
 
-  expect_length(model_averaging(est1, est1, est1, simplify = FALSE), 2)
-  expect_s3_class(model_averaging(est1, est1, est1, simplify = FALSE), NA)
-  expect_type(model_averaging(est1, est1, est1, simplify = FALSE), "list")
 
 })
 
