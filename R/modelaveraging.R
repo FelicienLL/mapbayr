@@ -3,7 +3,7 @@
 #' @description
 #' Model Averaging consists in analyzing the same data with different models
 #' and to average their predictions.
-#' In order to perform weigthed means of clearance predictions, (or
+#' In order to perform weighted means of clearance predictions, (or
 #' concentrations, or any metric of interest), it is necessary to compute
 #' the "weight" of each estimation.
 #' It is informed by the likelihood of estimation.
@@ -12,15 +12,15 @@
 #' The method was previously described by Uster et al
 #' [(Clinical Pharmacology and Therapeutics, 2021)](https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.2065).
 #'
-#' @param ... estimation objects generated from [mapbayest()] to compute weight from
-#' @param output_function a unique function that take any estimation object and return a table with controled variables, dimensions and attributes.
+#' @param ... estimation objects generated from [mapbayest()] to compute weight from it
+#' @param output_function a unique function that takes any estimation object and returns a table with controlled variables, dimensions and attributes.
 #' @param scheme scheme weight, either "LL" or "AIC"
 #' @param estlist a list of estimation objects. Overrides `...`
 #' @param list_of_tabs,weights_matrix respectively outputs of the `output_function` and [compute_weights()]
 #'
 #' @return
 #' * [model_averaging()] and [do_model_averaging()]: a data.frame of the same dimensions and attributes as the outputs
-#' * [compute_weights()]: a matrix with IDs as rows and estimations as columns
+#' * [compute_weights()]: a matrix with IDs as rows and estimation weights as columns
 #' @export
 #'
 #' @examples
@@ -78,6 +78,49 @@ model_averaging <- function(...,
   do_model_averaging(tabs, weights)
 }
 
+process_est_objects <- function(..., estlist = NULL){
+  dots <- list(...)
+
+  if(is.null(estlist)){
+    estlist <- dots
+  } else {
+    if(length(dots) > 0){
+      message("estlist not NULL, arguments passed to `...` will be ignored")
+    }
+  }
+
+  if(!all(sapply(estlist, inherits, "mapbayests"))){
+    add_msg <- NULL
+    if(all(sapply(estlist[[1]], inherits, "mapbayests"))){
+      add_msg <- "\n Did you forget to call explicitely `estlist = `?"
+    }
+    stop("All objects passed to `compute_weights()` must be `mapbayests` class object", add_msg)
+  }
+
+  IDs <- lapply(estlist, function(x){x$opt.value$ID})
+
+  if(length(unique(IDs)) != 1){
+    stop("Subject IDs are not the same between estimation objects")
+  }
+
+  return(estlist)
+}
+
+get_LL <- function(x, LL = TRUE){
+  opt <- x$opt.value
+  ans <- matrix(opt$value, dimnames = list(opt$ID, NULL))
+  if(LL){
+    ans <- exp(-0.5 * ans)
+  }
+  ans
+}
+
+get_AIC <- function(x){
+  OFV <- get_LL(x, LL = FALSE)
+  k <- sum(grepl("ETA", names(x$opt.value)))
+  exp(-0.5 * OFV - k)
+}
+
 #' @rdname model_averaging
 #' @export
 compute_weights <- function(...,
@@ -96,6 +139,23 @@ compute_weights <- function(...,
   values <- do.call(cbind, values)
   colnames(values) <- names(estlist)
   values / rowSums(values)
+
+}
+
+apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
+                          iweights #a vector of weights, one per model, for 1 ID
+){
+
+  list_weighted_itabs <- mapply(
+    FUN = `*`,
+    itabs,
+    iweights,
+    SIMPLIFY = FALSE
+  )
+
+  Reduce(
+    f = `+`,
+    x = list_weighted_itabs)
 
 }
 
@@ -119,64 +179,4 @@ do_model_averaging <- function(list_of_tabs, weights_matrix){
     .f = apply_weights
     ) %>%
     bind_rows()
-}
-
-get_LL <- function(x, LL = TRUE){
-  opt <- x$opt.value
-  ans <- matrix(opt$value, dimnames = list(opt$ID, NULL))
-  if(LL){
-    ans <- exp(-0.5 * ans)
-  }
-  ans
-}
-
-get_AIC <- function(x){
-  OFV <- get_LL(x, LL = FALSE)
-  k <- sum(grepl("ETA", names(x$opt.value)))
-  exp(-0.5 * OFV - k)
-}
-
-process_est_objects <- function(..., estlist = NULL){
-  dots <- list(...)
-
-  if(is.null(estlist)){
-    estlist <- dots
-  } else {
-    if(length(dots) > 0){
-      message("estlist not NULL, arguments passed to `...` will be ignored")
-    }
-  }
-
-  if(!all(sapply(estlist, inherits, "mapbayests"))){
-    add_msg <- NULL
-    if(all(sapply(estlist[[1]], inherits, "mapbayests"))){
-      add_msg <- "\n Did you forget to call explicitely `estlist = `?"
-    }
-    stop("All objects passed to `compute_weights() must be `mapbayests` class object", add_msg)
-  }
-
-  IDs <- lapply(estlist, function(x){x$opt.value$ID})
-
-  if(length(unique(IDs)) != 1){
-    stop("Subject IDs are not the same between estimation objects")
-  }
-
-  return(estlist)
-}
-
-apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
-                          iweights #a vector of weights, one per model, for 1 ID
-){
-
-  list_weighted_itabs <- mapply(
-    FUN = `*`,
-    itabs,
-    iweights,
-    SIMPLIFY = FALSE
-  )
-
-  Reduce(
-    f = `+`,
-    x = list_weighted_itabs)
-
 }
