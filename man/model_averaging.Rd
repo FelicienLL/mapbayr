@@ -18,9 +18,9 @@ compute_weights(..., scheme = c("LL", "AIC"), estlist = NULL)
 do_model_averaging(list_of_tabs, weights_matrix)
 }
 \arguments{
-\item{...}{estimation objects generated from \code{\link[=mapbayest]{mapbayest()}} to compute weight from}
+\item{...}{estimation objects generated from \code{\link[=mapbayest]{mapbayest()}} to compute weight from it}
 
-\item{output_function}{a unique function that take any estimation object and return a table with controled variables, dimensions and attributes.}
+\item{output_function}{a unique function that takes any estimation object and returns a table with controlled variables, dimensions and attributes.}
 
 \item{scheme}{scheme weight, either "LL" or "AIC"}
 
@@ -31,13 +31,13 @@ do_model_averaging(list_of_tabs, weights_matrix)
 \value{
 \itemize{
 \item \code{\link[=model_averaging]{model_averaging()}} and \code{\link[=do_model_averaging]{do_model_averaging()}}: a data.frame of the same dimensions and attributes as the outputs
-\item \code{\link[=compute_weights]{compute_weights()}}: a matrix with IDs as rows and estimations as columns
+\item \code{\link[=compute_weights]{compute_weights()}}: a matrix with IDs as rows and estimation weights as columns
 }
 }
 \description{
 Model Averaging consists in analyzing the same data with different models
 and to average their predictions.
-In order to perform weigthed means of clearance predictions, (or
+In order to perform weighted means of clearance predictions, (or
 concentrations, or any metric of interest), it is necessary to compute
 the "weight" of each estimation.
 It is informed by the likelihood of estimation.
