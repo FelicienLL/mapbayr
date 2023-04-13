@@ -1,5 +1,6 @@
 # mapbayr development version
 * Now postprocesses datasets with >=2 missing covariates (#185)
+* New `model_averaging()` to make averaged predictions over estimations made from several models. Also exports `do_model_averaging()` and `compute_weights()` for low-level implementation.
 
 # mapbayr 0.9.0
 
