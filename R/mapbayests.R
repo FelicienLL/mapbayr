@@ -66,75 +66,16 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' @method plot mapbayests
 #' @export
 plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
-  #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-    #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
     x <- augment(x, ...)
   }
 
-  theme_custom <- function(...) {
-    theme_bw(...) %+replace%
-      theme(legend.position = "bottom",
-            strip.background = element_rect(fill="white")
-      )
-  }
-
-  predictions <- x$aug_tab %>%
-    filter(.data$type %in% PREDICTION) %>%
-    mutate(PREDICTION  = .data$type)
-
-  gg <- predictions %>%
-    ggplot(aes(.data$time, .data$value)) +
-    geom_line(aes(col = .data$PREDICTION, linetype = .data$PREDICTION)) +
-    theme_custom()+
-    scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
-    scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
-
-  if(!is.null(predictions[["value_low"]]) & !is.null(predictions[["value_up"]])){
-    data_ribbon <- predictions %>%
-      filter(!(is.na(.data$value_low) & is.na(.data$value_up)))
-
-    gg <- gg +
-      geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
-      scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
-  }
-
-  observations <- x$mapbay_tab %>%
-    filter(.data$evid==0, !(.data$mdv==1 & is.na(.data$DV))) %>%
-    mutate(MDV = as.factor(.data$mdv))
-
-  #MDV
-  if(any(observations$mdv == 1)){
-    gg <- gg+
-      geom_point(data = observations, aes(y = .data$DV, shape = .data$MDV), fill = "black", size = 3)+
-      scale_shape_manual(values= c(`0` = 21, `1` = 1))
-  } else {
-    gg <- gg+
-      geom_point(data = observations, aes(y = .data$DV), fill = "black", size = 3, pch = 21)
-  }
-
-  #Facetting
-
-  one_cmt <- length(obs_cmt(x$model)) == 1
-  one_ID <- length(x$arg.ofv.id) == 1
-
-  if(all(!one_cmt, !one_ID)) {
-    gg <- gg+
-      facet_grid(ID~cmt, scales = "free", labeller = label_both)
-  }
-
-  if(all(one_cmt, !one_ID)) {
-    gg <- gg+
-      facet_grid(ID~., scales = "free", labeller = label_both)
-  }
-
-  if(all(!one_cmt, one_ID)) {
-    gg <- gg+
-      facet_grid(.~cmt, scales = "free", labeller = label_both)
-  }
-
-  return(gg)
+  mapbayr_plot(
+    x$aug_tab,
+    filter(x$mapbay_tab, .data$evid==0, !(.data$mdv==1 & is.na(.data$DV))),
+    PREDICTION = PREDICTION
+  )
 
 }
 
