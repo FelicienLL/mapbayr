@@ -42,8 +42,10 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
       fill = .data$MODEL
     )
 
-    model_names <- unique(predictions$MODEL)
-    coloration_values <- model_coloration(model_names, MODEL_color)
+    coloration_values <- model_coloration(
+      model_names = unique(predictions$MODEL),
+      forced_colorations = MODEL_color
+    )
   }
 
   gg <- predictions %>%
@@ -67,7 +69,8 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
   validate_obs_tab(obs_tab)
 
   observations <- obs_tab %>%
-    filter(.data$evid %in% c(0,2))
+    filter(.data$evid %in% c(0,2))%>%
+    mutate(MDV = factor(.data$mdv, levels = c(0,1)))
 
   cmt_in_obstab <- unique(observations$cmt)
 
@@ -84,13 +87,11 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
   if(any(observations$mdv == 1)){
     gg <- gg +
       geom_point(
-        data = observations %>%
-          mutate(MDV = factor(.data$mdv, levels = c(0,1))),
-        mapping = aes(
-          y = .data$DV,
-          shape = .data$MDV
-        ),
-        fill = "black", size = 3) +
+        mapping = aes(y = .data$DV, shape = .data$MDV),
+        data = observations,
+        fill = "black",
+        size = 3
+      ) +
       scale_shape_manual(values= c(`0` = 21, `1` = 1))
   } else {
     gg <- gg +
