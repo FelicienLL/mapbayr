@@ -10,9 +10,9 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
     predictions$name <- factor(predictions$name, c("PAR", "MET"))
   }
 
-  if(is.null(predictions[["MODEL"]])){
-    predictions$MODEL <- "Model"
-  }
+  # if(){
+  #   predictions$MODEL <- "Model"
+  # }
 
   theme_custom <- function(...) {
     theme_bw(...) %+replace%
@@ -23,7 +23,7 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
 
   nmodels <- length(unique(predictions$MODEL))
 
-  if(nmodels == 1){
+  if(is.null(predictions[["MODEL"]])){
     aes_lines <- aes(
       col = .data$PREDICTION,
       linetype = .data$PREDICTION
