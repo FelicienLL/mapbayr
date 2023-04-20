@@ -30,6 +30,7 @@ Suggests:
     knitr,
     lubridate,
     minqa,
+    scales,
     testthat (>= 3.0.0),
     tibble
 Depends: 

@@ -133,6 +133,13 @@ validate_obs_tab <- function(x){
 }
 
 model_coloration <- function(model_names, forced_colorations = NULL){
+  if(!requireNamespace("scales", quietly = TRUE)) {
+    stop(
+      "Package \"scales\" must be installed to use the `MODEL_color` argument.",
+      call. = FALSE
+    )
+  }
+
   model_names <- sort(model_names)
   cols <- scales::hue_pal()(length(model_names))
   names(cols) <- model_names
