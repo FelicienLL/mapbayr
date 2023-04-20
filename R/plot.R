@@ -1,4 +1,4 @@
-mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
+mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODEL_color = NULL){
 
   validate_aug_tab(aug_tab)
 
@@ -10,18 +10,12 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
     predictions$name <- factor(predictions$name, c("PAR", "MET"))
   }
 
-  # if(){
-  #   predictions$MODEL <- "Model"
-  # }
-
   theme_custom <- function(...) {
     theme_bw(...) %+replace%
       theme(legend.position = "bottom",
-            strip.background = element_rect(fill="white")
+            strip.background = element_rect(fill = "white")
       )
   }
-
-  nmodels <- length(unique(predictions$MODEL))
 
   if(is.null(predictions[["MODEL"]])){
     aes_lines <- aes(
@@ -48,7 +42,8 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
       fill = .data$MODEL
     )
 
-    coloration_values <- scales::hue_pal()(nmodels)
+    model_names <- unique(predictions$MODEL)
+    coloration_values <- model_coloration(model_names, MODEL_color)
   }
 
   gg <- predictions %>%
@@ -72,7 +67,7 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED")){
   validate_obs_tab(obs_tab)
 
   observations <- obs_tab %>%
-    filter(evid %in% c(0,2))
+    filter(.data$evid %in% c(0,2))
 
   cmt_in_obstab <- unique(observations$cmt)
 
@@ -135,4 +130,18 @@ validate_obs_tab <- function(x){
   stopifnot(
     all(c("ID", "time", "evid", "DV", "cmt", "mdv") %in% names(x))
   )
+}
+
+model_coloration <- function(model_names, forced_colorations = NULL){
+  model_names <- sort(model_names)
+  cols <- scales::hue_pal()(length(model_names))
+  names(cols) <- model_names
+
+  if(!is.null(forced_colorations)){
+    forced_colorations <- forced_colorations[sort(names(forced_colorations))]
+    common <- intersect(names(cols), names(forced_colorations))
+    cols[names(cols)%in%common] <- forced_colorations[names(forced_colorations) %in% common]
+  }
+
+  cols
 }
