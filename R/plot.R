@@ -46,13 +46,6 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
     predictions$name <- factor(predictions$name, c("PAR", "MET"))
   }
 
-  theme_custom <- function(...) {
-    theme_bw(...) %+replace%
-      theme(legend.position = "bottom",
-            strip.background = element_rect(fill = "white")
-      )
-  }
-
   if(is.null(predictions[["MODEL"]])){
     aes_lines <- aes(
       col = .data$PREDICTION,
@@ -87,7 +80,11 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
   gg <- predictions %>%
     ggplot(aes(.data$time, .data$value)) +
     geom_line(aes_lines) +
-    theme_custom()+
+    theme_bw() +
+    theme(
+      legend.position = "bottom",
+      strip.background = element_rect(fill = "white")
+    ) +
     scale_color_manual(values = coloration_values) +
     scale_linetype_manual(values = c(IPRED = 1, PRED = 2))
 
