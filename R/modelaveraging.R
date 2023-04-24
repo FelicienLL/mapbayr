@@ -145,48 +145,51 @@ compute_weights <- function(...,
 apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
                           iweights #a vector of weights, one per model, for 1 ID
 ){
-
-  first_tab <- itabs[[1]]
-
-  sapply(itabs, are_comparable, first_tab)
-
-  numeric_variables <- sapply(first_tab, is.numeric)
-
   list_weighted_itabs <- mapply(
     FUN = `*`,
-    lapply(itabs, `[`, numeric_variables),
+    itabs,
     iweights,
     SIMPLIFY = FALSE
   )
 
-  first_tab[numeric_variables] <- Reduce(
+  Reduce(
     f = `+`,
     x = list_weighted_itabs
   )
-
-  first_tab
 }
 
 #' @rdname model_averaging
 #' @export
 do_model_averaging <- function(list_of_tabs, weights_matrix){
 
+  first_tab <- list_of_tabs[[1]]
+  numeric_variables <- sapply(first_tab, is.numeric)
+
+  # Ensure comparison between tables
+  sapply(list_of_tabs, are_comparable, first_tab)
+
   # Need to work to the individual level
   # Transpose list of tables to a list of (individual) list of tables
   tabs <- list_of_tabs %>%
     map(split_mapbayr_data) %>%
+    map(~ map(.x, `[`, numeric_variables)) %>% #cannot do before split in case ID is not numeric
     purrr::list_transpose(simplify = FALSE)
 
   # Turn matrix in to a list of individual vectors
   weights <- asplit(weights_matrix, 1)
 
   # Apply weights to each individual
-  map2(
+  ans <- map2(
     .x = tabs,
     .y = weights,
     .f = apply_weights
     ) %>%
     bind_rows()
+
+  first_tab[numeric_variables] <- ans
+
+  first_tab
+
 }
 
 are_comparable <- function(a, b){
