@@ -121,11 +121,25 @@ test_that("do_model_averaging() works", {
                IPRED = c(95, 187.5, 990, 2020))
 
   )
+
+  # Even with non-numeric column #197
+
+  Achar <- data.frame(ID = rep(1:2, each = 2), type = rep(c("PRED", "IPRED"), 2), num = runif(4))
+  Bchar <- mutate(Achar, num = runif(4))
+
+  expect_error(are_comparable(Achar, "foo")) # type of object
+  expect_error(are_comparable(Achar, mutate(Bchar, foo = 1))) # number of variables
+  expect_error(are_comparable(Achar, mutate(Bchar, ID = "foo"))) # type of variable
+  expect_error(are_comparable(Achar, mutate(Bchar, type = "foo"))) # content of non-numeric variables
+
+  do_model_averaging(list_of_tabs = list(A = Achar, B = Bchar),
+                     weights_matrix = mat)
+
 })
 
 test_that("model_averaging works", {
   expect_equal(
-    model_averaging(est1, est6, output_function = ~select(filter(as_tibble(.x), mdv == 0), ID, time, IPRED)),
+    model_averaging(est1, est6, output_function = ~select(filter(as.data.frame(.x), mdv == 0), ID, time, IPRED)),
     data.frame(ID = c(2, 9), time = c(96, 96), IPRED = c(0.938,0.961)),
     tolerance = 0.001
   )

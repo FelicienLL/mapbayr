@@ -146,17 +146,25 @@ apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
                           iweights #a vector of weights, one per model, for 1 ID
 ){
 
+  first_tab <- itabs[[1]]
+
+  sapply(itabs, are_comparable, first_tab)
+
+  numeric_variables <- sapply(first_tab, is.numeric)
+
   list_weighted_itabs <- mapply(
     FUN = `*`,
-    itabs,
+    lapply(itabs, `[`, numeric_variables),
     iweights,
     SIMPLIFY = FALSE
   )
 
-  Reduce(
+  first_tab[numeric_variables] <- Reduce(
     f = `+`,
-    x = list_weighted_itabs)
+    x = list_weighted_itabs
+  )
 
+  first_tab
 }
 
 #' @rdname model_averaging
@@ -179,4 +187,24 @@ do_model_averaging <- function(list_of_tabs, weights_matrix){
     .f = apply_weights
     ) %>%
     bind_rows()
+}
+
+are_comparable <- function(a, b){
+  stopifnot(all.equal(
+    attributes(a),
+    attributes(b)
+    ))
+
+  stopifnot(all.equal(
+    sapply(a, class),
+    sapply(b, class)
+    ))
+
+  if(inherits(a, "data.frame")){
+    stopifnot(all.equal(
+      a[!sapply(a, is.numeric)],
+      b[!sapply(b, is.numeric)]
+    ))
+  }
+
 }
