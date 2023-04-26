@@ -2,6 +2,8 @@
 * Now postprocesses datasets with >=2 missing covariates (#185)
 * New `model_averaging()` to make averaged predictions over estimations made from several models. Also exports `do_model_averaging()` and `compute_weights()` for low-level implementation.
 * Model averaging can now be performed on data frame with non-numeric columns. #197
+* New `mapbayr_plot()` in order to plot results from tables (data.frame). This is the function now called by `plot.mapbayests()` internally. Can plot the results of multiple estimation object (informed in the column "MODEL"), useful when model averaging is performed. Argument `MODEL_color` to force the color of a model on the plot. 
+
 
 # mapbayr 0.9.0
 
