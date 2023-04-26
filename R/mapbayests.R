@@ -258,8 +258,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   }
 
   if(is.null(delta)){
-    .delta <- (end - start)/200 #approximately 200 points per graph
-    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    delta <- compute_delta(start = start, end = end)
     #A vector. For each ID, possibly a different delta.
   }
 
@@ -341,6 +340,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
 
   class(x) <- "mapbayests"
   return(x)
+}
+
+compute_delta <- function(start = 0, end = 24){
+  # at least 200 points per graph
+  # round delta to the lower 10 (0.1, 1, 10 etc...)
+  10^(floor(log10(abs((end - start)/200))))
 }
 
 data_nid <- function(data, n){
