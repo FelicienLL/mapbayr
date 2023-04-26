@@ -8,6 +8,7 @@
 * The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows (@LauraMvn, #193).
 * With data helpers, the `.datehour` column is updated after `realize_addl` is being called (@LauraMvn, #194).
 * Add Laura Morvan @LauraMvn as contributor.
+* "ETA" parameters cannot be longer declared as "@covariates" to avoid hazardous behaviours (@jbwoillard, #187).
 
 # mapbayr 0.9.0
 
