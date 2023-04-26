@@ -4,7 +4,9 @@
 * Model averaging can now be performed on data frame with non-numeric columns. #197
 * New `mapbayr_plot()` in order to plot results from tables (data.frame). This is the function now called by `plot.mapbayests()` internally. Can plot the results of multiple estimation object (informed in the column "MODEL"), useful when model averaging is performed. Argument `MODEL_color` to force the color of a model on the plot. 
 * By default, `augment()` now simulates at least 200 points per individual. Fix a bug where delta was mis-calculated and strange-looking plots were sometimes generated. (#191)
-* `hist()` now shows the values of eta-shrinkage in multiple subjects setting. New argument `shk` to control the definition of shrinkage, either based on standard deviation ("sd") or on variance ("var"). 
+* `hist()` now shows the values of eta-shrinkage in multiple subjects setting. New argument `shk` to control the definition of shrinkage, either based on standard deviation ("sd") or on variance ("var"). (#192)
+* The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows. (#193) 
+
 
 # mapbayr 0.9.0
 
