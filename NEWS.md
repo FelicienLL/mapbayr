@@ -6,6 +6,7 @@
 * By default, `augment()` now simulates at least 200 points per individual. Fix a bug where delta was mis-calculated and strange-looking plots were sometimes generated. (#191)
 * `hist()` now shows the values of eta-shrinkage in multiple subjects setting. New argument `shk` to control the definition of shrinkage, either based on standard deviation ("sd") or on variance ("var"). (#192)
 * The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows. (#193) 
+* With data helpers, the `.datehour` column is updated after `realize_addl` is being called. (#194)
 
 
 # mapbayr 0.9.0

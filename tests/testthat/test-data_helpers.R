@@ -248,6 +248,18 @@ test_that(".datehour works", {
   )
 })
 
+test_that(".datehour works jointly with AOLA/TOLA", {
+  mod_datehour <- mrgsolve::mcode("modTOLA",
+                                  "$PARAM @annotated @covariates
+                                  TOLA : 0 : time last adm", compile = FALSE)
+
+  data_datehour <-mod_datehour %>%
+    adm_rows(amt = 100, cmt = 1, addl = 3, ii = 24, .datehour = "12/12/2012 12:12") %>%
+    add_covariates() %>%
+    get_data()
+
+  expect_equal(data_datehour[[".datehour"]], parse_datehour(paste0("2012/12/", 12:15, " 12:12:00")))
+})
 
 test_that("AOLA/TOLA works", {
   dat <- tibble::tibble(ID = c(1L, 1L, 1L, 1L, 1L, 3L, 3L, 3L, 3L),
