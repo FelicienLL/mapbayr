@@ -1,3 +1,15 @@
+# mapbayr development version
+* Now postprocesses datasets with >=2 missing covariates (#185)
+* New `model_averaging()` to make averaged predictions over estimations made from several models. Also exports `do_model_averaging()` and `compute_weights()` for low-level implementation.
+* Model averaging can now be performed on data frame with non-numeric columns. #197
+* New `mapbayr_plot()` in order to plot results from tables (data.frame). This is the function now called by `plot.mapbayests()` internally. Can plot the results of multiple estimation object (informed in the column "MODEL"), useful when model averaging is performed. Argument `MODEL_color` to force the color of a model on the plot. 
+* By default, `augment()` now simulates at least 200 points per individual. Fix a bug where delta was mis-calculated and strange-looking plots were sometimes generated (@LauraMvn, #191).
+* `hist()` now shows the values of eta-shrinkage in multiple subjects setting. New argument `shk` to control the definition of shrinkage, either based on standard deviation ("sd") or on variance ("var") (@LauraMvn, #192).
+* The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows (@LauraMvn, #193).
+* With data helpers, the `.datehour` column is updated after `realize_addl` is being called (@LauraMvn, #194).
+* Add Laura Morvan @LauraMvn as contributor.
+* "ETA" parameters cannot be longer declared as "@covariates" to avoid hazardous behaviours (@jbwoillard, #187).
+
 # mapbayr 0.9.0
 
 ## New features

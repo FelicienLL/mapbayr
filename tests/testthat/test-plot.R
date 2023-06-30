@@ -18,3 +18,22 @@ test_that("can choose type of prediction", {
   expect_s3_class(plot(est1, PREDICTION = "IPRED"), "ggplot")
   expect_s3_class(plot(est1, PREDICTION = "PRED"), "ggplot")
 })
+
+# est <- mapbayest(exmodel(401))
+# au <- augment(est)$aug_tab
+# au2 <- au %>% mutate(value = value * 2, cmt = cmt+1)
+# auau <- bind_rows(MACHIN = au, BIDULE = au2, .id = "MODEL")
+# OBS <- as.data.frame(est) %>% filter(evid == 0)
+# OBS[5,"mdv"] <- 1
+# auau <- bind_rows(auau, mutate(auau, ID = 2, value = value+50))
+#
+# mapbayr_plot(mutate(au, MODEL = "trucmuche"), OBS)
+# mapbayr_plot(auau, OBS)
+# mapbayr_plot(auau, OBS, PREDICTION = "PRED")
+# mapbayr_plot(auau, OBS, MODEL_color = c(MACHIN = "black", BIDULE = "blue"))
+#
+# model_coloration(model_names = c("Yu", "Imbs 2014", "Imbs2016", "Average", "truc"))
+# model_coloration(
+#   model_names = c("Yu", "Imbs 2014", "Imbs2016", "Average", "truc"),
+#   forced_colorations = c(Average = "black")
+# )

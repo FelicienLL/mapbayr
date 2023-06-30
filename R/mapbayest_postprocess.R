@@ -11,12 +11,15 @@ dataeta <- function(data, eta){
 
 post_mapbay_tab <- function(x, data, etamat){
   # PRED
-  pred <- mrgsim_df(zero_re(x), data, Req = "DV")[["DV"]]
+  pred <- mrgsim_df(zero_re(x), data, Req = "DV", end = -1)[["DV"]]
 
   # IPRED and POST HOC parameters
   dataposthoc <- dataeta(data = data, eta = etamat)
   capturednames <- outvars(x)$capture
-  posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
+  posthocsims <- mrgsim_df(zero_re(x),
+                           dataposthoc,
+                           Req = capturednames,
+                           end = -1) %>%
     rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 
@@ -29,9 +32,7 @@ post_mapbay_tab <- function(x, data, etamat){
   missing_covs <- all_covs[!all_covs %in% c(captured_covs, data_covs)]
 
   if(length(missing_covs) > 0){
-    missing_cov_vals <- param(x)[[missing_covs]]
-    names(missing_cov_vals) <- missing_covs
-    mapbay_tab <- cbind(mapbay_tab, as.data.frame(as.list(missing_cov_vals)))
+    mapbay_tab <- cbind(mapbay_tab, param(x)[missing_covs])
   }
 
   # RELOCATE NAMES

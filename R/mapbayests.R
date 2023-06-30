@@ -66,75 +66,16 @@ as.data.frame.mapbayests <- function(x, row.names = NULL, optional = FALSE, ...)
 #' @method plot mapbayests
 #' @export
 plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
-  #  if(!inherits(x, "mapbayests")) stop("Provided object is not a mapbayests class object")
 
   if(is.null(x$aug_tab)){
-    #  message("$aug_tab automatically provided. Consider executing augment() manually to save computational time or access options.")
     x <- augment(x, ...)
   }
 
-  theme_custom <- function(...) {
-    theme_bw(...) %+replace%
-      theme(legend.position = "bottom",
-            strip.background = element_rect(fill="white")
-      )
-  }
-
-  predictions <- x$aug_tab %>%
-    filter(.data$type %in% PREDICTION) %>%
-    mutate(PREDICTION  = .data$type)
-
-  gg <- predictions %>%
-    ggplot(aes(.data$time, .data$value)) +
-    geom_line(aes(col = .data$PREDICTION, linetype = .data$PREDICTION)) +
-    theme_custom()+
-    scale_color_manual(values= c(IPRED = "black", PRED = "deepskyblue1")) +
-    scale_linetype_manual(values= c(IPRED = 1, PRED = 2))
-
-  if(!is.null(predictions[["value_low"]]) & !is.null(predictions[["value_up"]])){
-    data_ribbon <- predictions %>%
-      filter(!(is.na(.data$value_low) & is.na(.data$value_up)))
-
-    gg <- gg +
-      geom_ribbon(aes(ymin = .data$value_low, ymax = .data$value_up, fill = .data$PREDICTION), data = data_ribbon, alpha = 0.3) +
-      scale_fill_manual(values= c(IPRED = "black", PRED = "deepskyblue1"))
-  }
-
-  observations <- x$mapbay_tab %>%
-    filter(.data$evid==0, !(.data$mdv==1 & is.na(.data$DV))) %>%
-    mutate(MDV = as.factor(.data$mdv))
-
-  #MDV
-  if(any(observations$mdv == 1)){
-    gg <- gg+
-      geom_point(data = observations, aes(y = .data$DV, shape = .data$MDV), fill = "black", size = 3)+
-      scale_shape_manual(values= c(`0` = 21, `1` = 1))
-  } else {
-    gg <- gg+
-      geom_point(data = observations, aes(y = .data$DV), fill = "black", size = 3, pch = 21)
-  }
-
-  #Facetting
-
-  one_cmt <- length(obs_cmt(x$model)) == 1
-  one_ID <- length(x$arg.ofv.id) == 1
-
-  if(all(!one_cmt, !one_ID)) {
-    gg <- gg+
-      facet_grid(ID~cmt, scales = "free", labeller = label_both)
-  }
-
-  if(all(one_cmt, !one_ID)) {
-    gg <- gg+
-      facet_grid(ID~., scales = "free", labeller = label_both)
-  }
-
-  if(all(!one_cmt, one_ID)) {
-    gg <- gg+
-      facet_grid(.~cmt, scales = "free", labeller = label_both)
-  }
-
-  return(gg)
+  mapbayr_plot(
+    x$aug_tab,
+    filter(x$mapbay_tab, .data$evid==0, !(.data$mdv==1 & is.na(.data$DV))),
+    PREDICTION = PREDICTION
+  )
 
 }
 
@@ -142,6 +83,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'
 #' @param x A \code{mapbayests} object.
 #' @param select_eta a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).
+#' @param shk method to compute the shrinkage if multiple subjects are analyzed. Possible values are "sd" (based on the ratio of standard deviation like in 'NONMEM'), "var" (based on the ratio of variances like 'Monolix'), or NA (do not show the shrinkage)
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -165,7 +107,10 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'}
 #' @method hist mapbayests
 #' @export
-hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
+hist.mapbayests <- function(x,
+                            select_eta = x$arg.optim$select_eta,
+                            shk = c("sd", "var", NA),
+                            ...){
 
   max_eta <- eta_length(x$model)
   select_eta_est <- x$arg.optim$select_eta
@@ -234,6 +179,25 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
                            mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
+  } else {
+    shk <- shk[1]
+    if(!is.na(shk)){
+      variances <- eta_tab %>%
+        group_by(.data$name) %>%
+        summarise(VAR = stats::var(.data$value)) %>%
+        ungroup()
+      shk_tab <- left_join(arg_tab, variances, by = "name")
+
+      if(shk == "var"){
+        shrinkage <- 1 - (shk_tab$VAR / shk_tab$om)
+      }
+
+      if(shk == "sd"){
+        shrinkage <- 1 - (sqrt(shk_tab$VAR) / sqrt(shk_tab$om))
+      }
+      eta_labs <- paste0(eta_labs,
+                         "\nSHK = ", my_percent(shrinkage))
+    }
   }
 
   names(eta_labs) <- arg_tab$name
@@ -248,7 +212,9 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
     geom_segment(aes(x = .data$lower, xend = .data$lower), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
     geom_segment(aes(x = .data$upper, xend = .data$upper), y = -0.03, yend = .1, data = arg_tab, linetype = 1, linewidth = 1, na.rm = TRUE) +
     theme_bw() +
-    theme(strip.background = element_rect(fill = "white"))+
+    theme(
+      strip.background = element_rect(fill = "white")
+      ) +
     scale_y_continuous(name = NULL, breaks = NULL, labels = NULL)+
     scale_x_continuous(name = NULL, n.breaks = 10)+
     coord_cartesian(ylim = c(NA, max(density_tab$value)))+
@@ -315,8 +281,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   }
 
   if(is.null(delta)){
-    .delta <- (end - start)/200 #approximately 200 points per graph
-    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    delta <- compute_delta(start = start, end = end)
     #A vector. For each ID, possibly a different delta.
   }
 
@@ -398,6 +363,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
 
   class(x) <- "mapbayests"
   return(x)
+}
+
+compute_delta <- function(start = 0, end = 24){
+  # at least 200 points per graph
+  # round delta to the lower 10 (0.1, 1, 10 etc...)
+  10^(floor(log10(abs((end - start)/200))))
 }
 
 data_nid <- function(data, n){
