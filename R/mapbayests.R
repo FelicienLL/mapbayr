@@ -83,6 +83,7 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'
 #' @param x A \code{mapbayests} object.
 #' @param select_eta a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).
+#' @param shk method to compute the shrinkage if multiple subjects are analyzed. Possible values are "sd" (based on the ratio of standard deviation like in 'NONMEM'), "var" (based on the ratio of variances like 'Monolix'), or NA (do not show the shrinkage)
 #' @param ... additional arguments (not used)
 #' @return a `ggplot` object.
 #'
@@ -106,7 +107,10 @@ plot.mapbayests <- function(x, ..., PREDICTION = c("IPRED", "PRED")){
 #'}
 #' @method hist mapbayests
 #' @export
-hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
+hist.mapbayests <- function(x,
+                            select_eta = x$arg.optim$select_eta,
+                            shk = c("sd", "var", NA),
+                            ...){
 
   max_eta <- eta_length(x$model)
   select_eta_est <- x$arg.optim$select_eta
@@ -175,6 +179,25 @@ hist.mapbayests <- function(x, select_eta = x$arg.optim$select_eta, ...){
                            mean = 0)
     eta_labs <- paste0(eta_labs,
                        "\nID percentile = ", my_percent(percentile))
+  } else {
+    shk <- shk[1]
+    if(!is.na(shk)){
+      variances <- eta_tab %>%
+        group_by(.data$name) %>%
+        summarise(VAR = stats::var(.data$value)) %>%
+        ungroup()
+      shk_tab <- left_join(arg_tab, variances, by = "name")
+
+      if(shk == "var"){
+        shrinkage <- 1 - (shk_tab$VAR / shk_tab$om)
+      }
+
+      if(shk == "sd"){
+        shrinkage <- 1 - (sqrt(shk_tab$VAR) / sqrt(shk_tab$om))
+      }
+      eta_labs <- paste0(eta_labs,
+                         "\nSHK = ", my_percent(shrinkage))
+    }
   }
 
   names(eta_labs) <- arg_tab$name
@@ -258,8 +281,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   }
 
   if(is.null(delta)){
-    .delta <- (end - start)/200 #approximately 200 points per graph
-    delta <- 10^(round(log10(abs(.delta)))) #rounded to the closer 10 (0.1, 1, 10 etc...)
+    delta <- compute_delta(start = start, end = end)
     #A vector. For each ID, possibly a different delta.
   }
 
@@ -341,6 +363,12 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
 
   class(x) <- "mapbayests"
   return(x)
+}
+
+compute_delta <- function(start = 0, end = 24){
+  # at least 200 points per graph
+  # round delta to the lower 10 (0.1, 1, 10 etc...)
+  10^(floor(log10(abs((end - start)/200))))
 }
 
 data_nid <- function(data, n){

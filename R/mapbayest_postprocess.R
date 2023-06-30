@@ -11,12 +11,15 @@ dataeta <- function(data, eta){
 
 post_mapbay_tab <- function(x, data, etamat){
   # PRED
-  pred <- mrgsim_df(zero_re(x), data, Req = "DV")[["DV"]]
+  pred <- mrgsim_df(zero_re(x), data, Req = "DV", end = -1)[["DV"]]
 
   # IPRED and POST HOC parameters
   dataposthoc <- dataeta(data = data, eta = etamat)
   capturednames <- outvars(x)$capture
-  posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
+  posthocsims <- mrgsim_df(zero_re(x),
+                           dataposthoc,
+                           Req = capturednames,
+                           end = -1) %>%
     rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 

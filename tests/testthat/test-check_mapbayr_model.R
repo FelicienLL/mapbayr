@@ -35,6 +35,13 @@ test_that("$PARAM is well-specified", {
     check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0.1"), check_compile = FALSE),
     "\\$PARAM. The value of one or multiple ETA parameter\\(s\\) is not 0."
   )
+
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM @covariates
+                               ETA1 = 0"), check_compile = FALSE),
+    "\\$PARAM. One or several ETA parameter\\(s\\) are declared as `@covariates`, which is not allowed."
+  )
+
 })
 
 test_that("$OMEGA is well-specified", {

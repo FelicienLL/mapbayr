@@ -50,6 +50,10 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
       }
     }
 
+    if(length(intersect(mbr_cov_names(x), eta_names_x)) > 0){
+      stop("$PARAM. One or several ETA parameter(s) are declared as `@covariates`, which is not allowed.", call. = FALSE)
+    }
+
     # $OMEGA
     odiag_x <- odiag(x)
     nomega <- length(odiag_x)
