@@ -23,12 +23,16 @@ length1 <- function(x){
   }
 }
 
-prepare_augment <- function(data_list, eta_list, cov_list = NULL, ci_delta = FALSE, start = NULL, end = NULL, delta = NULL){
+prepare_augment <- function(data_list,
+                            eta_list,
+                            cov_list = NULL, # List of posterior covariance matrices
+                            ci_delta = FALSE,
+                            start = NULL, end = NULL, delta = NULL){
   args <- expand_grid(
     type = c("IPRED", "PRED"), # "type" first, then the table
     tibble::tibble(
-      data = data_list,
       ORIGID = as.numeric(names(data_list)),
+      data = data_list,
       tgrid = mapply(
         FUN = infer_tgrid,
         data = data_list,
@@ -39,7 +43,10 @@ prepare_augment <- function(data_list, eta_list, cov_list = NULL, ci_delta = FAL
     )
   )
 
-  args$eta <- c(eta_list, map(eta_list, `*`, 0))
+  args$eta <- c(
+    eta_list, # for IPRED
+    map(eta_list, `*`, 0) # for PRED
+    )
 
   if(ci_delta){
     args <- expand_grid(
@@ -49,7 +56,10 @@ prepare_augment <- function(data_list, eta_list, cov_list = NULL, ci_delta = FAL
       mutate(eta = map2(eta, ci_delta, stepeta))
   } else {
     if(!is.null(cov_list)){
-      args$new_omega <- c(cov_list, replicate(nrow(args)/2, NULL, simplify = FALSE))
+      args$new_omega <- c(
+        cov_list, # for IPRED
+        replicate(nrow(args)/2, NULL, simplify = FALSE) # for PRED
+      )
     }
   }
 
@@ -65,8 +75,7 @@ stepeta <- function(eta, i, step = 1e-8){
 
 
 reframe_augment <- function(tab, cov_list = NULL, iiv_mat = NULL, ci_width = 90){
-  tab <- tab %>%
-    pivot_longer(any_of(c("DV", "PAR", "MET")))
+  tab <- pivot_longer(tab, any_of(c("DV", "PAR", "MET")))
 
   if(all(tab$ORIGID == tab$ID)){
     tab$ORIGID <- NULL
@@ -97,7 +106,12 @@ reframe_augment <- function(tab, cov_list = NULL, iiv_mat = NULL, ci_width = 90)
 
       paramvarcov <- c(cov_list, replicate(length(cov_list), iiv_mat, simplify = FALSE))
 
-      errors <- mapply(function(.x, .y) znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))), jacobians, paramvarcov)
+      errors <- mapply(
+        FUN = function(.x, .y) znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))),
+        jacobians,
+        paramvarcov,
+        SIMPLIFY = FALSE
+        )
 
       errors <- unlist(errors, use.names = FALSE)
 

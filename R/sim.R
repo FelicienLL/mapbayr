@@ -9,8 +9,8 @@ do_mapbayr_sim <- function(
     ...,
     eta = NULL,
     nrep = NULL,
-    new_omega = omat(zero_re(x)), # NULL = use in the model, default to zero_re
-    new_sigma = smat(zero_re(x))  # NULL = use in the model, default to zero_re
+    new_omega = omat(zero_re(x)), # NULL = use in the model, default to zero_re. Used only if nrep is non-NULL
+    new_sigma = smat(zero_re(x))  # NULL = use in the model, default to zero_re. Used only if nrep is non-NULL
 ){
 
   k <- 1
@@ -51,16 +51,18 @@ do_mapbayr_sim <- function(
         data = rep(eta, nrep),
         ncol = ncol(eta),
         byrow = TRUE,
-      ) # nrow = n(original ID) x n(replicates)
-    }
+      )
+      # Replicated individual point estimates
+      # nrow = n(original ID) x n(replicates)
 
-    if(any(omat(x, make = TRUE) != 0)){
-      eta_sim_matrix <- mvgauss(
-        mat = omat(x, make = TRUE),
-        n = nrep * nID
-      ) # nrow = n(original ID) x n(replicates)
+      if(any(omat(x, make = TRUE) != 0)){ # Add "noise" around point estimates
+        eta_sim_matrix <- mvgauss(
+          mat = omat(x, make = TRUE),
+          n = nrep * nID
+        ) # nrow = n(original ID) x n(replicates)
 
-      eta_matrix <- eta_matrix + eta_sim_matrix
+        eta_matrix <- eta_matrix + eta_sim_matrix
+      }
     }
 
     eta_matrix <- rename_as_eta(eta_matrix) * k # ETA(1)/2 + ETA1/2

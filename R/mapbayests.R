@@ -260,124 +260,71 @@ augment <- function (x, ...) UseMethod("augment")
 #'
 #' @export
 augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta = NULL, ci = FALSE, ci_width = 90, ci_method = "delta", ci_sims = 500, ...){
+  # Data
   if(is.null(data)){
-    idata <- get_data.mapbayests(x, output = "list")
+    data_list <- get_data.mapbayests(x, output = "list")
   } else {
-    idata <- data %>%
+    data_list <- data %>%
       check_mapbayr_data() %>%
       split_mapbayr_data()
   }
 
-  if(is.null(start)){
-    start <- unname(sapply(idata, function(x) min(x$time)))
-    #A vector. For each ID, possibly a different start time.
-  }
-
-  if(is.null(end)){
-    end <- unname(sapply(idata, function(x) max(x$time)))
-    #A vector. For each ID, possibly a different end time.
-    end <- end * 1.2
-    #By default, +20% of last obs or dosing.
-  }
-
-  if(is.null(delta)){
-    delta <- compute_delta(start = start, end = end)
-    #A vector. For each ID, possibly a different delta.
-  }
-
-  fitcmt <- fit_cmt(x$model, get_data(x))
-
-  if(length(fitcmt) > 1){
-    toreq <- "PAR,MET"
-  } else {
-    toreq <- "DV"
-  }
-
-  tocarry <- c("evid")
-
-  do_sims <- function(mods, data = idata, ...){
-    sims <- list(
-      x = mods,
-      data = data, start = start, end = end, delta = delta
-    ) %>%
-      pmap(mrgsim_df, carry_out = tocarry, Request = toreq, recsort = 3, obsaug = TRUE, ... = ...)
-
-    map(sims, ~ .x %>%
-      filter(.data$evid %in% c(0,2)) %>%
-      select(-any_of("cmt")) %>% #should not be carried normally but who knows...
-      pivot_longer(any_of(c("DV", "PAR", "MET"))) %>%
-      mutate(cmt = ifelse(.data$name %in% c("DV", "PAR"), fitcmt[1], fitcmt[2])) %>%
-      arrange(.data$ID, .data$time, .data$cmt)
-      )
-  }
-
-  do_augment <- function(x, type, ...){
-    stopifnot(type %in% c("ipred", "pred"))
-
-    mods <- switch(type,
-                   "ipred" = use_posterior(x, update_eta = TRUE, update_omega = TRUE, update_cov = FALSE, simplify = FALSE),
-                   "pred" = use_posterior(x, update_eta = FALSE, update_omega = FALSE, update_cov = FALSE, simplify = FALSE, .zero_re = "sigma"))
-
-    initpreds <- do_sims(map(mods, zero_re), ... = ...)
-
-    if(ci){
-      if(ci_method == "delta"){
-        etanames <- eta_names(mods[[1]])
-        init_etas <- map(mods, ~unlist(param(.x)[etanames]))
-        dsteps <- log(1+1e-8) #directly add 1e-8 because working on eta so will return into a multiplicative effect on parameter scale
-        new_etas <- map2(init_etas, dsteps, ~.x+.y)
-        new_models_etas <- map2(mods, new_etas, function(M,E){
-          map(seq_along(E), ~zero_re(param(M, E[.x]))) %>% set_names(etanames)
-        }) %>% transpose()
-        new_preds <- map(new_models_etas, do_sims,  ... = ...) %>% transpose() #1 item = 1 indiv
-        jacobians <- list(new_preds, dsteps, initpreds) %>% #1 item = 1 indiv
-          pmap(function(new, step, ini){
-            map2_dfc(new, step, ~(.x[["value"]]-ini[["value"]])/.y) %>% as.matrix()
-          })
-        varcovs <- map(mods, omat, make = TRUE) #IIV or uncertainty, depending on the update
-        errors <- map2(jacobians, varcovs, ~ znorm(ci_width) * sqrt(diag(.x %*% .y %*% t(.x))))
-        initpreds <- map2(initpreds, errors, ~mutate(.x,
-                                                     value_low = .data$value - .y,
-                                                     value_up = .data$value + .y))
-      }
-
-      if(ci_method == "simulations"){
-        new_idatas <- map(idata, data_nid, n = ci_sims)
-        new_sims <- do_sims(mods, data = new_idatas, ... = ...)
-        LOW <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, ci2q(ci_width))) %>% pull("v"))
-        UP <- map(new_sims, ~ .x %>% prepare_summarise() %>% summarise(v = quantile(.data$value, 1-ci2q(ci_width))) %>% pull("v"))
-        initpreds <- pmap(list(initpreds, LOW, UP), function(ini, low, up){
-          mutate(ini, value_low = low, value_up = up)
-        })
-      }
+  # Confidence interval
+  nrep <- NULL
+  cov_list <- NULL
+  ci_delta <- FALSE
+  iiv_mat <- NULL
+  if(ci == TRUE){
+    cov_list <- get_cov(x, simplify = FALSE)
+    if(ci_method == "simulations"){
+      nrep <- ci_sims
     }
-    initpreds
+    if(ci_method == "delta"){
+      ci_delta <- TRUE
+      iiv_mat <- omat(x$model, make = TRUE)
+    }
   }
 
-  ipred <- do_augment(x, type = "ipred", ... = ...) %>% bind_rows()
-  pred  <- do_augment(x, type = "pred", ... = ...) %>% bind_rows()
+  # Arguments Table
+  args_tab <- prepare_augment(
+    data_list = data_list,
+    eta_list = get_eta(x, output = "list"),
+    cov_list = cov_list,
+    ci_delta = ci_delta,
+    start = start, end = end, delta = delta
+  )
 
-  x$aug_tab <- bind_rows(list(IPRED = ipred, PRED = pred), .id = "type") %>%
-    as_tibble() %>%
-    arrange(.data$ID, .data$time, .data$cmt, .data$type)
+  # Request "PAR+MET" or "DV"?
+  if(all(c("PAR", "MET") %in% outvars(x$model)$capture)){
+    Request <- c("PAR", "MET")
+  } else {
+    Request <- "DV"
+  }
 
+  keys <- c("type", "ORIGID", "ci_delta")
+
+  # Simulate
+  sims <- args_tab %>%
+    select(any_of(keys)) %>%
+    mutate(sim = pmap( #mutate() in order to nest the results
+      .l = select(args_tab, -any_of(keys)),
+      .f = do_mapbayr_sim,
+      x = x$model,
+      recsort = 3,
+      obsaug = TRUE,
+      obsonly = TRUE,
+      carry_out = "a.u.g",
+      Request = Request,
+      ... = ...,
+      nrep = nrep
+    )
+    )
+  sims <- tidyr::unnest(data = sims, cols = "sim")
+
+  # Post process
+  ans <- reframe_augment(sims, cov_list = cov_list, iiv_mat = iiv_mat, ci_width = ci_width)
+
+  x$aug_tab <- ans
   class(x) <- "mapbayests"
   return(x)
-}
-
-compute_delta <- function(start = 0, end = 24){
-  # at least 200 points per graph
-  # round delta to the lower 10 (0.1, 1, 10 etc...)
-  10^(floor(log10(abs((end - start)/200))))
-}
-
-data_nid <- function(data, n){
-  bind_rows(lapply(seq_len(n), function(x) mutate(data, ID = x)))
-}
-
-prepare_summarise <- function(data){
-  data %>%
-    group_by(.data$ID) %>%
-    mutate(rowID = rank(.data$ID, ties.method = "first")) %>%
-    group_by(.data$rowID)
 }
