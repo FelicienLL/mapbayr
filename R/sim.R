@@ -117,7 +117,7 @@ do_mapbayr_sim <- function(
     if(is.matrix(data_to_sim)){
       data_to_sim <- merge_datamatrix_etamatrix(data_to_sim, eta_matrix)
     } else {
-      data_to_sim <- dataeta(data_to_sim, eta_matrix)
+      data_to_sim <- merge_datadf_etamatrix(data_to_sim, eta_matrix)
     }
 
     etasrc <- "data.all"
@@ -133,42 +133,4 @@ do_mapbayr_sim <- function(
   )
 
   ans
-}
-
-has_eta_param <- function(x){
-  all(
-    make_eta_names(n = length(odiag(x))) %in% grep('ETA\\d+', names(x@param), value = TRUE)
-  )
-}
-
-replicate_data <- function(data, nrep){
-  repeated_data <- sapply(data, rep, nrep)
-
-  new_IDs <- interaction(
-    repeated_data[,"ID"],
-    rep(seq_len(nrep), each = nrow(data))
-  )
-
-  repeated_data[,"ID"] <- as.numeric(new_IDs)
-  repeated_data
-}
-
-merge_datamatrix_etamatrix <- function(data_matrix, eta_matrix){
-  unique_ids <- unique(data_matrix[,"ID"])
-  nrow_per_id <- tabulate(data_matrix[,"ID"])
-
-  eta_matrix_big <- mapply(function(id, rowcount){
-    matrix(
-      data = rep(eta_matrix[id,], rowcount),
-      ncol = ncol(eta_matrix),
-      byrow = TRUE
-    )},
-    id = unique_ids,
-    rowcount = nrow_per_id,
-    SIMPLIFY = FALSE
-  ) %>%
-    do.call(what = rbind) %>%
-    rename_as_eta()
-
-  cbind(data_matrix, eta_matrix_big)
 }

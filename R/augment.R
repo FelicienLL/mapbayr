@@ -79,8 +79,6 @@ prepare_augment <- function(data_list,
   args
 }
 
-
-
 reframe_augment <- function(tab,
                             cov_list = NULL, # List of posterior covariance matrices
                             iiv_mat = NULL, # Original matrix of IIV
