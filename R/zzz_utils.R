@@ -51,12 +51,6 @@ eta_from_opt <- function(x){
   }
 }
 
-ci2q <- function(ci) (1-(ci/100))/2
-znorm <- function(ci){
-  stopifnot(is.numeric(ci), ci > 0, ci < 100)
-  stats::qnorm(1-ci2q(ci))
-}
-
 namephicov <- function(n){
   unlist(map(seq_len(n), ~ paste0("ETC",.x,"_",unlist(combn(.x, 1, simplify = FALSE)))))
 }

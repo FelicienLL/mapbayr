@@ -1,16 +1,54 @@
+#' Simulate with mapbayr
+#'
+#' @description A wrapper around [mrgsolve::mrgsim()] for results generated from [mapbayest()]. Exported for the purpose of utility but might be prone to changes.
+#'
+#' @param x the model object
+#' @param data NMTRAN-like data set
+#' @param recsort record sorting flag. Defaulted to 3. See [mrgsolve::mrgsim()].
+#' @param output type of object returned. Defaulted to `"df"` for a data.frame. See [mrgsolve::mrgsim()].
+#' @param ... passed to [mrgsolve::mrgsim()].
+#' @param eta a matrix of individual point estimates of ETA. Most likely obtained with [get_eta()].
+#' @param nrep number of replicates. If used, the original "ID" in the data will be replaced by unique identifiers.
+#' @param new_omega,new_sigma New "omega" and "sigma" matrices to use instead of those defined in "$OMEGA" and "$SIGMA".
+#'
+#' @return An output from [mrgsolve::mrgsim()].
+#' @export
+#'
+#' @examples
+#' library(mrgsolve)
+#' mod <- exmodel(1, exdata = FALSE)
+#' dat <- exdata(ID = c(1,2))
+#'
+#' # Classic framework
+#' set.seed(123)
+#' do_mapbayr_sim(x = mod, data = dat, Request = "DV")
+#'
+#' # No random effect
+#' do_mapbayr_sim(x = zero_re(mod), data = dat)
+#' do_mapbayr_sim(x = mod, data = dat, new_omega = "zero_re")
+#'
+#' # New random effects
+#' ## New omega matrix
+#' do_mapbayr_sim(x = mod, data = dat, new_omega = dmat(0.1, 0.03, 0.01), nrep = 10)
+#'
+#' ## Matrix with "eta" as mean and "new_omega" as variance covariance matrix
+#' etamat <- get_eta(est001, output = "num")[1:2,]
+#'
+#' do_mapbayr_sim(
+#'   x = mod, data = dat, nrep = 10,
+#'   eta = etamat, new_omega = dmat(0.1, 0.03, 0.01)
+#' )
+#'
 do_mapbayr_sim <- function(
     x,
     data,
-    carry_out = character(0),
-    obsaug = FALSE,
     recsort = 3,
     output = "df",
-    Request = character(0),
     ...,
     eta = NULL,
     nrep = NULL,
-    new_omega = omat(zero_re(x)), # NULL = use in the model, default to zero_re. Used only if nrep is non-NULL
-    new_sigma = smat(zero_re(x))  # NULL = use in the model, default to zero_re. Used only if nrep is non-NULL
+    new_omega = NULL, # NULL = keep from the model "x". Accepts a matrix. And also "zero_re", used only if nrep is non-NULL
+    new_sigma = NULL  # NULL = keep from the model "x". Accepts a matrix. And also "zero_re", used only if nrep is non-NULL
 ){
 
   k <- 1
@@ -20,12 +58,22 @@ do_mapbayr_sim <- function(
 
   if(!is.null(new_omega)){
     x <- mrgsolve::collapse_omega(x)
-    x <- mrgsolve::omat(x, new_omega)
+    if(is.matrix(new_omega)){
+      x <- mrgsolve::omat(x, new_omega)
+    }
+    if(all(new_omega == "zero_re")){
+      x <- zero_re(x, "omega")
+    }
   }
 
   if(!is.null(new_sigma)){
     x <- mrgsolve::collapse_sigma(x)
-    x <- mrgsolve::smat(x, new_sigma)
+    if(is.matrix(new_sigma)){
+      x <- mrgsolve::smat(x, new_sigma)
+    }
+    if(all(new_sigma == "zero_re")){
+      x <- zero_re(x, "sigma")
+    }
   }
 
   data_to_sim <- data
@@ -78,11 +126,8 @@ do_mapbayr_sim <- function(
   ans <- mrgsim(
     x = x,
     data = data_to_sim,
-    carry_out = carry_out,
-    obsaug = obsaug,
     recsort = recsort,
     output = output,
-    Request = Request,
     ... = ...,
     etasrc = etasrc
   )

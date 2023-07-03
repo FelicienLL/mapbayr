@@ -316,7 +316,8 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
       carry_out = "a.u.g",
       Request = Request,
       ... = ...,
-      nrep = nrep
+      nrep = nrep,
+      new_sigma = "zero_re"
     )
     )
   sims <- tidyr::unnest(data = sims, cols = "sim")

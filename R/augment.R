@@ -23,6 +23,19 @@ length1 <- function(x){
   }
 }
 
+ci2q <- function(ci) (1-(ci/100))/2
+
+znorm <- function(ci){
+  stopifnot(is.numeric(ci), ci > 0, ci < 100)
+  stats::qnorm(1-ci2q(ci))
+}
+
+stepeta <- function(eta, i, step = 1e-8){
+  if(i == "REF") return(eta)
+  eta[i] <- eta[i] + log(1 + step)
+  eta
+}
+
 prepare_augment <- function(data_list,
                             eta_list,
                             cov_list = NULL, # List of posterior covariance matrices
@@ -67,14 +80,11 @@ prepare_augment <- function(data_list,
 }
 
 
-stepeta <- function(eta, i, step = 1e-8){
-  if(i == "REF") return(eta)
-  eta[i] <- eta[i] + log(1 + step)
-  eta
-}
 
-
-reframe_augment <- function(tab, cov_list = NULL, iiv_mat = NULL, ci_width = 90){
+reframe_augment <- function(tab,
+                            cov_list = NULL, # List of posterior covariance matrices
+                            iiv_mat = NULL, # Original matrix of IIV
+                            ci_width = 90){ #90%
   tab <- pivot_longer(tab, any_of(c("DV", "PAR", "MET")))
 
   if(all(tab$ORIGID == tab$ID)){
