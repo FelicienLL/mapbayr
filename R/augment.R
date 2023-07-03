@@ -131,7 +131,7 @@ reframe_augment <- function(tab, cov_list = NULL, iiv_mat = NULL, ci_width = 90)
         value = stats::quantile(.data$value, 0.50), # in last position
         .groups = "drop"
       ) %>%
-      rename(ID = .data$ORIGID)
+      rename(ID = "ORIGID")
   }
 
   tab %>%

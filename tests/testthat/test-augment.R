@@ -56,7 +56,7 @@ test_that("delta argument works", {
   expect_lt(nrow(a3$aug_tab), 4000) #auto delta = 100
 
   # fix 191
-  expect_equal(compute_delta(0, 700), 1)
+  expect_equal(infer_tgrid(start = 0, end = 700)@delta, 1)
   #plot(est, end = 700)
 })
 
