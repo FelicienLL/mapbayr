@@ -12,6 +12,8 @@
 * New `do_mapbayr_sims()` as an engine to simulate from estimations results. Experimental. Now mostly useful for internal or programmatic uses, but might be extended in the future.
 * Refactor `augment()`. Now easier to debug and much more faster.
 * Refactor merging functions between dataset and ETA matrices.
+* Refactor OFV computation: parameters (ETA) are now passed through the data set and not through $PARAM.
+* Now depends on mrgsolve (>= 1.0.8) to benefit from the "etasrc" specification.
 
 # mapbayr 0.9.0
 
