@@ -156,7 +156,7 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
 
 validate_aug_tab <- function(x){
   stopifnot(
-    all(c("type", "ID", "time", "name", "value", "cmt") %in% names(x))
+    all(c("type", "ID", "time", "name", "value") %in% names(x))
   )
 }
 

@@ -179,3 +179,15 @@ test_that("$CAPTURE is well-specified", {
     "\\$CAPTURE. Cannot find PAR and MET in captured items. They must be captured if multiple types of DV are fitted \\(more than one pair of sigma provided in \\$SIGMA\\)"
   )
 })
+
+test_that("has_eta_param() works", {
+  expect_true(has_eta_param(mcode2("
+  $PARAM ETA1 = 0, ETA2 = 0
+  $OMEGA 1 2 3")
+  ))
+
+  expect_false(has_eta_param(mcode2("
+  $PARAM CL = 1, V2 = 30
+  $OMEGA 1 2 3")
+  ))
+})
