@@ -84,7 +84,7 @@ test_that("confidence interval works", {
   set.seed(1)
   A2a <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
   set.seed(2)
-  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "sim", ci_sims = 10)$aug_tab
 
   expect_true(all(A2a$value_low[A2a$time!=0] != A2b$value_low[A2a$time!=0]))
 

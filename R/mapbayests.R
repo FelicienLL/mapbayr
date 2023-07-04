@@ -276,7 +276,7 @@ augment.mapbayests <- function(x, data = NULL, start = NULL, end = NULL, delta =
   iiv_mat <- NULL
   if(ci == TRUE){
     cov_list <- get_cov(x, simplify = FALSE)
-    if(ci_method == "simulations"){
+    if(grepl(pattern = "sim", x = ci_method)){
       nrep <- ci_sims
     }
     if(ci_method == "delta"){

@@ -9,6 +9,9 @@
 * With data helpers, the `.datehour` column is updated after `realize_addl` is being called (@LauraMvn, #194).
 * Add Laura Morvan @LauraMvn as contributor.
 * "ETA" parameters cannot be longer declared as "@covariates" to avoid hazardous behaviours (@jbwoillard, #187).
+* New `do_mapbayr_sims()` as an engine to simulate from estimations results. Experimental. Now mostly useful for internal or programmatic uses, but might be extended in the future.
+* Refactor `augment()`. Now easier to debug and much more faster.
+* Refactor merging functions between dataset and ETA matrices.
 
 # mapbayr 0.9.0
 

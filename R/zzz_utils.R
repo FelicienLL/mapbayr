@@ -66,7 +66,7 @@ etanames_as_nonmem <- function(x){
 }
 
 has_eta_param <- function(x){
-  all(
+  any(
     make_eta_names(n = length(odiag(x))) %in% grep('ETA\\d+', names(x@param), value = TRUE)
   )
 }
