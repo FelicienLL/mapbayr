@@ -1,15 +1,3 @@
-replicate_data <- function(data, nrep){
-  repeated_data <- sapply(data, rep, nrep)
-
-  new_IDs <- interaction(
-    repeated_data[,"ID"],
-    rep(seq_len(nrep), each = nrow(data))
-  )
-
-  repeated_data[,"ID"] <- as.numeric(new_IDs)
-  repeated_data
-}
-
 predcorr <- function(Yij, PREDbin, PREDij){
   pcYij <- Yij * PREDbin / PREDij
   pcYij[Yij==0 & PREDij==0] <- 0

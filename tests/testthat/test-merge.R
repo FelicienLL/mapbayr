@@ -34,7 +34,12 @@ test_that("merge_datamatrix_etamatrix works", {
 })
 
 test_that("replicate_data works", {
-  repdat <- replicate_data(data = datadf, nrep = 3)
-  expect_true(inherits(repdat, "matrix"))
-  expect_equal(unique(repdat[,"ID"]), as.double(1:6))
+  expect_equal(
+    replicate_data(data.frame(ID = c(1,1,2,3,3,3), time = c(0,24,0,0,24,48)), n = 2),
+    matrix(c(
+      c(1,1,2,3,3,3,4,4,5,6,6,6),
+      c(0,24,0,0,24,48,0,24,0,0,24,48)
+    ), ncol = 2, dimnames = list(NULL, c("ID","time"))
+    )
+  )
 })
