@@ -2,21 +2,17 @@ post_eta <- function(x){
   do.call(rbind, sapply(x, eta_from_opt, simplify = F))
 }
 
-dataeta <- function(data, eta){
-  #data a data set
-  #eta a matrix of eta (no ID column)
-  left_join(x = data, y = mutate(as.data.frame(eta), ID = as.double(rownames(eta))), by = "ID")
-}
-
-
 post_mapbay_tab <- function(x, data, etamat){
   # PRED
-  pred <- mrgsim_df(zero_re(x), data, Req = "DV")[["DV"]]
+  pred <- mrgsim_df(zero_re(x), data, Req = "DV", end = -1)[["DV"]]
 
   # IPRED and POST HOC parameters
-  dataposthoc <- dataeta(data = data, eta = etamat)
+  dataposthoc <- merge_datadf_etamatrix(data_df = data, eta_matrix = etamat)
   capturednames <- outvars(x)$capture
-  posthocsims <- mrgsim_df(zero_re(x), dataposthoc, Req = capturednames) %>%
+  posthocsims <- mrgsim_df(zero_re(x),
+                           dataposthoc,
+                           Req = capturednames,
+                           end = -1) %>%
     rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 

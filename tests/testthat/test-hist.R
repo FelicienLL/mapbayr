@@ -20,6 +20,10 @@ fetch_facet_names <- function(x){
   layout$layout[names(layout$facet$params$facets)]$name
 }
 
+fetch_facet_labels <- function(x){
+  eval(quote(pairlist(...)), envir = environment(x[["facet"]][["params"]][["labeller"]]))
+}
+
 test_that("hist.mapbayests works", {
   expect_s3_class(hist_hist$layers[[1]]$geom, "GeomArea")
   expect_s3_class(hist_hist$layers[[2]]$geom, "GeomLine")
@@ -27,6 +31,36 @@ test_that("hist.mapbayests works", {
   expect_s3_class(hist_hist$layers[[4]]$geom, "GeomSegment")
   expect_s3_class(hist_hist$layers[[5]]$geom, "GeomRug")
   expect_s3_class(hist_hist$layers[[6]]$geom, "GeomBar")
+})
+
+test_that("ID percentile is shown if n ID == 1", {
+  label_hist <- fetch_facet_labels(hist_hist)[["name"]][["ETA1"]]
+  expect_true(str_detect(label_hist, "ID percentile"))
+})
+
+test_that("SHK is shown if n ID > 1", {
+  hist001 <- hist(est001)
+  labelhist001 <- fetch_facet_labels(hist001)[["name"]]
+  expect_true(all(!str_detect(labelhist001, "ID percentile")))
+
+  # Default = based on SD
+  expect_true(str_detect(labelhist001["ETA1"], "SHK = 23%"))
+
+  # SD based
+  hist_shk_sd <- hist(est001, shk = "sd")
+  label_sd <- fetch_facet_labels(hist_shk_sd)[["name"]]
+  expect_true(str_detect(label_sd["ETA1"], "SHK = 23%"))
+
+  # VAR based
+  hist_shk_var <- hist(est001, shk = "var")
+  label_var <- fetch_facet_labels(hist_shk_var)[["name"]]
+  expect_true(str_detect(label_var["ETA1"], "SHK = 40%"))
+
+  # NA
+  hist_shk_na <- hist(est001, shk = NA)
+  label_na <- fetch_facet_labels(hist_shk_na)[["name"]]
+  expect_equal(label_na["ETA1"], c(ETA1 = "CL\nIIV = 45%"))
+
 })
 
 test_that("ID percentile is not shown if n ID > 1", {
