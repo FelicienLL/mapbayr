@@ -550,6 +550,11 @@ rearrange_nmdata <- function(x, dh0 = NULL) {
   if (!any(is.null(x[["ID"]]), is.null(x[["time"]]), is.null(x[["evid"]]), is.null(x[["cmt"]]))) {
     x <- arrange(x, .data$ID, .data$time, desc(.data$evid), .data$cmt)
   }
+
+  # Fill AOLA/TOLA if exists
+  if (!is.null(x[["AOLA"]])) x <- AOLA(x)
+  if (!is.null(x[["TOLA"]])) x <- TOLA(x)
+
   # Fill .datehour if exists or requested
   if (any(!is.null(x[[".datehour"]]), !is.null(dh0))) {
     if (is.null(dh0)) {
@@ -557,10 +562,6 @@ rearrange_nmdata <- function(x, dh0 = NULL) {
     }
     x[[".datehour"]] <- dh0 + x$time * 60 * 60
   }
-
-  # Fill AOLA/TOLA if exists
-  if (!is.null(x[["AOLA"]])) x <- AOLA(x)
-  if (!is.null(x[["TOLA"]])) x <- TOLA(x)
 
   nmtran <- c("ID", "time", "evid", "cmt", "amt", "DV", "mdv", "ss", "addl", "ii", "rate")
   # Relocate

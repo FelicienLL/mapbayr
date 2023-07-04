@@ -39,7 +39,7 @@ test_that("end argument works", {
 
   a3 <- augment(est, end = 400)
   expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==1]), 400)
-  expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==1]), 400)
+  expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==3]), 400)
 
   expect_error(augment(est, start = c(0, 100), end = c(100, 200)), NA)
 
@@ -54,6 +54,10 @@ test_that("delta argument works", {
 
   a3 <- augment(est, end = 40000) # if end is high, no sim with small delta
   expect_lt(nrow(a3$aug_tab), 4000) #auto delta = 100
+
+  # fix 191
+  expect_equal(infer_tgrid(start = 0, end = 700)@delta, 1)
+  #plot(est, end = 700)
 })
 
 test_that("first prediction is not null if SS=1", {
@@ -80,7 +84,7 @@ test_that("confidence interval works", {
   set.seed(1)
   A2a <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
   set.seed(2)
-  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "sim", ci_sims = 10)$aug_tab
 
   expect_true(all(A2a$value_low[A2a$time!=0] != A2b$value_low[A2a$time!=0]))
 

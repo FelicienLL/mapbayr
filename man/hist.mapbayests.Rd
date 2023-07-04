@@ -4,12 +4,14 @@
 \alias{hist.mapbayests}
 \title{Plot posterior distribution of bayesian estimates}
 \usage{
-\method{hist}{mapbayests}(x, select_eta = x$arg.optim$select_eta, ...)
+\method{hist}{mapbayests}(x, select_eta = x$arg.optim$select_eta, shk = c("sd", "var", NA), ...)
 }
 \arguments{
 \item{x}{A \code{mapbayests} object.}
 
 \item{select_eta}{a vector of numeric values, the numbers of the ETAs to show (default are estimated ETAs).}
+
+\item{shk}{method to compute the shrinkage if multiple subjects are analyzed. Possible values are "sd" (based on the ratio of standard deviation like in 'NONMEM'), "var" (based on the ratio of variances like 'Monolix'), or NA (do not show the shrinkage)}
 
 \item{...}{additional arguments (not used)}
 }
