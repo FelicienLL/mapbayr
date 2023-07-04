@@ -20,21 +20,34 @@ qparam <- function(x, p){
   return(x)
 }
 
-#' Update parameters through (valid) data
+#' Merge (validated) data with infered ETA
 #'
+#' @details
+#' At the estimation step, data must be "validated" according to [mrgsolve::valid_data_set()].
+#' It is a matrix, with a "valid_data_set" class, and a last column called "..zeros.."
+#' The current function binds a matrix of ETA to a "valid" data set, as efficiently as possible.
 #' @param validdata a matrix of class "valid_data_set"
 #' @param eta a named vector of eta values
+#' @param k multiply "eta" by k = 0.5 because eta are taken into account twice (through $PARAM and $OMEGA/etasrc)
 #'
 #' @return a matrix of class "valid_data_set"
 #' @noRd
-merge_validdata_eta <- function(validdata, eta){
+#' @examples
+#' val <- mrgsolve::valid_data_set(exdata(1), exmodel(1))
+#' eta <- eta(runif(3))
+#'
+#' merged <- merge_validdata_eta(val, eta)
+#' mrgsolve:::is.valid_data_set(merged)
+#'
+merge_validdata_eta <- function(validdata, eta, k = 0.5){
+  eta <- unlist(eta) #is sometime passed as a list
   ncol_validdata <- ncol(validdata)
   nrow_validdata <- nrow(validdata)
 
-  proper_data <- validdata[,-ncol_validdata]
+  proper_data <- validdata[,-ncol_validdata, drop = FALSE]
   zeros <- validdata[,ncol_validdata, drop = FALSE]
   eta_matrix <- matrix(
-    data = eta,
+    data = eta * k,
     nrow = nrow_validdata,
     ncol = length(eta),
     byrow = TRUE, #faster than data = rep(eta, each = nrow)
@@ -44,6 +57,7 @@ merge_validdata_eta <- function(validdata, eta){
   )
 
   ans <- cbind(proper_data, eta_matrix, zeros)
+  # cannot use mrgsolve::valid_data_set() because it needs a model object
   class(ans) <- c("valid_data_set", "matrix")
   ans
 }
@@ -77,7 +91,7 @@ h <- function(pred, cmt, all_cmt, ...){
 }
 
 f <- function(qmod, data){
-  output <- mrgsim_q(x = qmod, data = data, output = "df")
+  output <- mrgsim_q(x = qmod, data = data, output = "df", etasrc = "data")
   output$DV[data[,"mdv"]==0]
 }
 
@@ -103,8 +117,7 @@ ofv_kang <- function(obs, pred, eta, var, omega_inv, lambda = 1){
 #' @export
 compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation, lambda = 1, idvaliddata, idDV, idcmt, idblq = NULL, idlloq = NULL, ...){
   #Update ETA values
-  qmod <- qparam(x = qmod, p = eta)
-  #idvaliddata <- merge_validdata_eta(validdata = idvaliddata, eta = eta)
+  idvaliddata <- merge_validdata_eta(validdata = idvaliddata, eta = eta, k = 0.5)
 
   #Predict concentrations
   pred <- tryCatch(f(qmod = qmod, data = idvaliddata), silent = TRUE, error = function(x)NA)

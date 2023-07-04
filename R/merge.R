@@ -1,3 +1,9 @@
+merge_datadf_etavec <- function(data_df, eta_vec){
+  #data_df = a data set
+  #eta_vec = a vector of eta
+  bind_cols(data_df, as.list(eta_vec))
+}
+
 merge_datadf_etamatrix <- function(data_df, eta_matrix){
   #data_df = a data set
   #eta_matrix = a matrix of eta (no ID column)
