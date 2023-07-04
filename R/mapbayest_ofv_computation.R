@@ -1,25 +1,3 @@
-#' Quick parameter update
-#'
-#' @param x model object
-#' @param p a named list/vector of parameters to update
-#'
-#' @return model object
-#'
-#' @details
-#' Faster update of parameters inside the model object. Useful in the context of parameter optimization, otherwise consider the regular `param()` because speed comes at the cost of safety.
-#' @noRd
-#' @examples
-#' library(mrgsolve)
-#' ho <- house()
-#' \dontrun{
-#' system.time(replicate(1000, param(ho, c(CL = .1, VC = 1))))
-#' system.time(replicate(1000, qparam(ho, c(CL = .1, VC = 1))))
-#' }
-qparam <- function(x, p){
-  x@param@data[names(p)] <- as.double(p)
-  return(x)
-}
-
 #' Merge (validated) data with infered ETA
 #'
 #' @details
