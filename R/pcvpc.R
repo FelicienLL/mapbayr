@@ -4,13 +4,9 @@ predcorr <- function(Yij, PREDbin, PREDij){
   pcYij
 }
 
-define_bin <- function(x, stratify_on){
-  x$roundidv <- round(x$idv)
-  if(is.null(stratify_on)){
-    ans <- x$roundidv
-  } else {
-    ans <- do.call(interaction, list(x[, c("roundidv", stratify_on)], sep = "_"))
-  }
+define_bin <- function(x, stratify_on, delta = delta){
+  x$roundidv <- floor(x$idv / delta) * delta
+  ans <- do.call(interaction, list(x[, c("roundidv", "name" , stratify_on)], sep = "_"))
   return(as.character(ans))
 }
 
@@ -52,24 +48,32 @@ vpc_sim <- function(x,
       .l = sim_args,
       .f = do_mapbayr_sim,
       x = x,
-      carry_out = c("a.u.g", stratify_on),
+      carry_out = c("a.u.g", stratify_on, idv),
       Request = Request,
       tad = idv == "tad",
       ... = ...,
       new_omega = NULL, #stochastic simulations
       nrep = nrep # with n replicates
     )
-  )
+  ) %>%
+    pivot_sims()
 
-  OBSTAB <- data %>% as_tibble
-  OBSTAB$idv <- stochastic_sim[[idv]][stochastic_sim$a.u.g==0 & stochastic_sim$ID == 1]
-  OBSTAB <- OBSTAB[OBSTAB$evid == 0, ]
-  OBSTAB$bin <- define_bin(OBSTAB, stratify_on = stratify_on)
+  OBSTAB <- data
+
+  OBSTAB$idv <- filter(stochastic_sim,
+    .data$a.u.g == 0,
+    .data$ID == 1,
+    .data$name == unique(.data$name)[1]
+    )[[idv]]
+
+  OBSTAB <- reframe_observations(OBSTAB)
+
+  OBSTAB$bin <- define_bin(OBSTAB, stratify_on = stratify_on, delta = delta)
 
   stochastic_sim <- bind_rows(stochastic_sim) %>% as_tibble
   SIMTAB <- stochastic_sim[stochastic_sim$a.u.g == 1, ]
   SIMTAB$idv <- SIMTAB[[idv]]
-  SIMTAB$bin <- define_bin(SIMTAB, stratify_on = stratify_on)
+  SIMTAB$bin <- define_bin(SIMTAB, stratify_on = stratify_on, delta = delta)
 
   if(pcvpc){
     typical_sim <- bind_rows(
@@ -77,41 +81,47 @@ vpc_sim <- function(x,
         .l = sim_args,
         .f = do_mapbayr_sim,
         x = x,
-        carry_out = c("a.u.g", stratify_on),
+        carry_out = c("a.u.g", stratify_on, idv),
         Request = Request,
         tad = idv == "tad",
         ... = ...,
         new_omega = "zero_re", # typical simulations
         nrep = NULL # no replicates
       )
-    )
+    ) %>%
+      pivot_sims()
 
     typical_sim$idv <- typical_sim[[idv]]
-    typical_sim$bin[typical_sim$a.u.g==0] <- define_bin(typical_sim[typical_sim$a.u.g==0,], stratify_on = stratify_on)
-    typical_sim$bin[typical_sim$a.u.g==1] <- define_bin(typical_sim[typical_sim$a.u.g==1,], stratify_on = stratify_on)
+    typical_sim[["bin"]][typical_sim$a.u.g==0] <- define_bin(typical_sim[typical_sim$a.u.g==0,], stratify_on = stratify_on, delta = delta)
+    typical_sim[["bin"]][typical_sim$a.u.g==1] <- define_bin(typical_sim[typical_sim$a.u.g==1,], stratify_on = stratify_on, delta = delta)
 
     # Median PRED tab
 
     medpredtab <- typical_sim %>%
-      filter(a.u.g == 1) %>%
-      group_by(bin) %>%
-      summarise(PREDbin = median(DV))
+      filter(.data$a.u.g == 1) %>%
+      group_by(.data$bin) %>%
+      summarise(PREDbin = stats::median(.data$value))
 
     SIMTAB <- SIMTAB %>%
       left_join(medpredtab, by = "bin") %>%
-      arrange(ID) %>%
-      mutate(DV = predcorr(
-        Yij = DV,
-        PREDbin = PREDbin,
-        PREDij = rep(typical_sim$DV[typical_sim$a.u.g==1],nrep)
+      arrange(.data$ID) %>%
+      mutate(value = predcorr(
+        Yij = .data$value,
+        PREDbin = .data$PREDbin,
+        PREDij = rep(typical_sim$value[typical_sim$a.u.g==1], nrep)
       )
       )
+
     OBSTAB <- OBSTAB %>%
       left_join(medpredtab, by = "bin") %>%
-      mutate(DV = predcorr(
-        Yij = DV,
-        PREDbin = PREDbin,
-        PREDij = typical_sim$DV[typical_sim$a.u.g==0][data$evid==0]
+      mutate(value = predcorr(
+        Yij = .data$value,
+        PREDbin = .data$PREDbin,
+        PREDij = filter(
+          typical_sim,
+          .data$a.u.g == 0,
+          .data$name == unique(.data$name)[1]
+        )$value[data$evid == 0]
       )
       )
   }
@@ -127,29 +137,39 @@ vpc_sim <- function(x,
 
 vpc_plot <- function(vpc_sim, stratify_on = vpc_sim$stratify_on, idv = vpc_sim$idv){
   dataplot <- vpc_sim$SIMTAB %>%
-    filter(idv < max(vpc_sim$OBSTAB$idv)+2) %>%
-    group_by(across(all_of(c("bin", "idv", vpc_sim$stratify_on)))) %>%
-    summarise(Q05 = quantile(DV, 0.05),
-              Q10 = quantile(DV, 0.10),
-              Q25 = quantile(DV, 0.25),
-              Q50 = quantile(DV, 0.50),
-              Q75 = quantile(DV, 0.75),
-              Q90 = quantile(DV, 0.90),
-              Q95 = quantile(DV, 0.95)
+    group_by(across(all_of(c("bin", "idv", "name", vpc_sim$stratify_on)))) %>%
+    summarise(
+      Q05 = stats::quantile(.data$value, 0.05),
+      Q10 = stats::quantile(.data$value, 0.10),
+      Q25 = stats::quantile(.data$value, 0.25),
+      Q50 = stats::quantile(.data$value, 0.50),
+      Q75 = stats::quantile(.data$value, 0.75),
+      Q90 = stats::quantile(.data$value, 0.90),
+      Q95 = stats::quantile(.data$value, 0.95)
     )
 
   p <- dataplot %>%
-    ggplot(aes(idv)) +
-    geom_line(aes(y = Q50)) +
-    geom_ribbon(aes(ymin = Q05, ymax = Q95), alpha = .2, fill = "blue") +
-    geom_ribbon(aes(ymin = Q10, ymax = Q90), alpha = .2, fill = "blue") +
-    geom_ribbon(aes(ymin = Q25, ymax = Q75), alpha = .2, fill = "blue") +
-    ggplot2::geom_text(aes(y = DV, label = ID), data = vpc_sim$OBSTAB) +
-    labs(x = idv)
+    ggplot(aes(.data$idv)) +
+    geom_line(aes(y = .data$Q50)) +
+    geom_ribbon(aes(ymin = .data$Q05, ymax = .data$Q95), alpha = .2, fill = "blue") +
+    geom_ribbon(aes(ymin = .data$Q10, ymax = .data$Q90), alpha = .2, fill = "blue") +
+    geom_ribbon(aes(ymin = .data$Q25, ymax = .data$Q75), alpha = .2, fill = "blue") +
+    geom_point(aes(y = .data$value), data = vpc_sim$OBSTAB) +
+    labs(x = idv, y = "value")
+
+  strats <- character(0)
+
+  if(length(unique(vpc_sim$SIMTAB$name)) != 1){
+    strats <- c(strats, "name")
+  }
 
   if(!is.null(stratify_on)){
+    strats <- c(strats, stratify_on)
+  }
+
+  if(length(strats) >= 1){
     p <- p +
-      facet_wrap(stratify_on, labeller = label_both)
+      facet_wrap(strats, labeller = label_both)
   }
 
   p

@@ -83,7 +83,8 @@ reframe_augment <- function(tab,
                             cov_list = NULL, # List of posterior covariance matrices
                             iiv_mat = NULL, # Original matrix of IIV
                             ci_width = 90){ #90%
-  tab <- pivot_longer(tab, any_of(c("DV", "PAR", "MET")))
+
+  tab <- pivot_sims(tab)
 
   if(all(tab$ORIGID == tab$ID)){
     tab$ORIGID <- NULL
@@ -144,4 +145,12 @@ reframe_augment <- function(tab,
 
   tab %>%
     arrange(.data$ID, .data$time, .data$name, .data$type)
+}
+
+pivot_sims <- function(data, variables = c("DV", "PAR", "MET")){
+  pivot_longer(
+    data = data,
+    cols = any_of(variables),
+    names_transform = list(name = ~ factor(.x, levels = variables))
+  )
 }

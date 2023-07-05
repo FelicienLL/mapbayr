@@ -10,7 +10,7 @@
 #'
 #' @examples
 #' aug <- data.frame(
-#'   ID = 1, name = "DV", cmt = 2, time = rep(c(0,8,16,24), each = 2),
+#'   ID = 1, name = factor("DV"), cmt = 2, time = rep(c(0,8,16,24), each = 2),
 #'   type = rep(c("PRED", "IPRED"), 4), value = c(0,0, 1, 2, 4, 8, 2, 4)
 #'   )
 #'
@@ -36,15 +36,24 @@
 #'
 mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODEL_color = NULL){
 
+  # Predictions table
+
   validate_aug_tab(aug_tab)
 
   predictions <- aug_tab %>%
     filter(.data$type %in% PREDICTION) %>%
     mutate(PREDICTION = .data$type)
 
-  if(all(unique(predictions$name) %in% c("PAR", "MET"))){
-    predictions$name <- factor(predictions$name, c("PAR", "MET"))
-  }
+  predictions_names <- sort(unique(predictions$name)) # either DV, PAR, MET, or PAR+MET
+
+  # Observations table
+
+  observations <- reframe_observations(
+    obs_tab = obs_tab,
+    predictions_names = predictions_names
+  )
+
+  # ggplot object
 
   if(is.null(predictions[["MODEL"]])){
     aes_lines <- aes(
@@ -97,30 +106,11 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
       scale_fill_manual(values = coloration_values)
   }
 
-  # Observations
-
-  validate_obs_tab(obs_tab)
-
-  observations <- obs_tab %>%
-    filter(.data$evid %in% c(0,2))%>%
-    mutate(MDV = factor(.data$mdv, levels = c(0,1)))
-
-  cmt_in_obstab <- unique(observations$cmt)
-
-  if(length(cmt_in_obstab) == 1){
-    observations$name <- unique(predictions$name) #either DV, but PARENT alone also...
-  } else {
-    observations$name <- ""
-    observations$name[observations$cmt == min(cmt_in_obstab)] <- "PAR"
-    observations$name[observations$name != "PAR"] <- "MET"
-    observations$name <- factor(observations$name, c("PAR", "MET"))
-  }
-
   #MDV
   if(any(observations$mdv == 1)){
     gg <- gg +
       geom_point(
-        mapping = aes(y = .data$DV, shape = .data$MDV),
+        mapping = aes(shape = .data$MDV),
         data = observations,
         fill = "black",
         size = 3
@@ -128,7 +118,7 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
       scale_shape_manual(values= c(`0` = 21, `1` = 1))
   } else {
     gg <- gg +
-      geom_point(data = observations, aes(y = .data$DV), fill = "black", size = 3, pch = 21)
+      geom_point(data = observations, fill = "black", size = 3, pch = 21)
   }
 
   #Facetting
@@ -156,8 +146,11 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
 
 validate_aug_tab <- function(x){
   stopifnot(
-    all(c("type", "ID", "time", "name", "value") %in% names(x))
+    all(c("type", "ID", "time", "name", "value") %in% names(x)),
+    is.factor(x$name),
+    all(levels(x$name) %in% c("DV", "PAR", "MET"))
   )
+
 }
 
 validate_obs_tab <- function(x){
@@ -185,4 +178,35 @@ model_coloration <- function(model_names, forced_colorations = NULL){
   }
 
   cols
+}
+
+reframe_observations <- function(obs_tab, predictions_names = NULL){
+
+  validate_obs_tab(obs_tab)
+
+  observations <- obs_tab
+
+  observations <- observations[observations$evid %in% c(0,2), ]
+  observations$MDV <- factor(observations$mdv, levels = c(0,1))
+
+  cmt_in_obstab <- unique(observations$cmt)
+
+  if(length(cmt_in_obstab) == 1){
+    if(is.null(predictions_names)){
+      observations[["name"]] <- "DV"
+    } else {
+      observations[["name"]] <- as.character(predictions_names[1])
+    }
+  } else {
+    if(is.null(predictions_names)){
+      predictions_names <- c("PAR", "MET")
+    }
+    observations[["name"]][observations$cmt == cmt_in_obstab[1]] <- as.character(predictions_names[1])
+    observations[["name"]][observations$cmt == cmt_in_obstab[2]] <- as.character(predictions_names[2])
+  }
+
+  observations[["name"]] <- factor(observations$name, levels = c("DV", "PAR", "MET"))
+  names(observations)[names(observations) == "DV"] <- "value"
+
+  observations
 }
