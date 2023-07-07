@@ -119,7 +119,6 @@ vpc_sim <- function(x,
     pivot_sims()
 
   # Prepare OBSERVED data
-
   OBSTAB <- data
 
   ## Define independant variable (tad, time...)
@@ -195,7 +194,7 @@ vpc_sim <- function(x,
           typical_sim,
           .data$a.u.g == 0,
           .data$name == unique(.data$name)[1]
-        )$value[data$evid == 0]
+        )$value[data$evid %in% c(0, 2)]
       )
       )
   }
