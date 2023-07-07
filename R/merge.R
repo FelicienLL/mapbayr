@@ -40,6 +40,9 @@ merge_datamatrix_etamatrix <- function(data_matrix, eta_matrix){
 }
 
 replicate_data <- function(data, nrep){
+  # because returns a matrix, must work on numeric variables only
+  data <- data[,sapply(data, is.numeric), drop = FALSE]
+
   repeated_data <- sapply(data, rep, nrep)
 
   new_IDs <- interaction(

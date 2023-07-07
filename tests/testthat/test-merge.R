@@ -42,4 +42,10 @@ test_that("replicate_data works", {
     ), ncol = 2, dimnames = list(NULL, c("ID","time"))
     )
   )
+
+  rep2 <- replicate_data(data.frame(ID = 1, time = 0.24, evid = 0L, foo = "hello", bar = TRUE), 2)
+  expect_equal(rep2,
+               matrix(c(1, 0.24, 0, 2, 0.24, 0), ncol = 3, byrow = TRUE,
+                     dimnames = list(NULL, c("ID", "time", "evid"))))
+
 })
