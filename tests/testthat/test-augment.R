@@ -103,3 +103,31 @@ test_that("CI with multiple types of DV", {
   expect_true(all(A1a$value <= A1a$value_up))
   expect_true(all(A1a$value >= A1a$value_low))
 })
+
+
+datametabo <- data.frame(
+  ID = rep(c(1,2), each = 2),
+  time = c(0,24),
+  PAR = c(1.2, 3.4, 5.6, 7.8),
+  MET = c(.12, .34, .56, .78)
+)
+
+datadv <- data.frame(
+  ID = rep(c(1,2), each = 2),
+  time = c(0,24),
+  DV = c(1.2, 3.4, 5.6, 7.8)
+)
+
+test_that("pivot_sims() works", {
+  pivotdv <- pivot_sims(datadv)
+  expect_equal(pivotdv$ID, datadv$ID)
+  expect_equal(pivotdv$time, datadv$time)
+  expect_equal(pivotdv$name, factor(rep("DV", 4), levels = c("DV", "PAR", "MET")))
+  expect_equal(pivotdv$value, datadv$DV)
+
+  pivotmetabo <- pivot_sims(datametabo)
+  expect_equal(pivotmetabo$ID, rep(c(1,2), each = 4))
+  expect_equal(pivotmetabo$time, rep(rep(c(0,24), 2), each = 2))
+  expect_equal(pivotmetabo$name, factor(rep(c("PAR", "MET"), 4), levels = c("DV", "PAR", "MET")))
+  expect_equal(pivotmetabo$value, c(1.2, 0.12, 3.4, .34, 5.6, .56, 7.8, .78))
+})

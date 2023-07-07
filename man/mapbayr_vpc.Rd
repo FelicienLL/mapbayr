@@ -24,11 +24,11 @@ mapbayr_vpc(
 
 \item{nrep}{a numeric, the number of replicates for stochastic simulations. Default is 500.}
 
-\item{pcvpc}{a logical, if \code{TRUE} (the default) will output "prediction-corrected VPC". Advised if several levels of doses or covariates are in the dataset for instance.}
+\item{pcvpc}{a logical, if \code{TRUE} (the default) will output "prediction-corrected VPC" (see Details).}
 
 \item{idv}{a character indicating the variable used as independant variable. Default is "time", alternatively use "tad" to automatically compute the time after last dose.}
 
-\item{stratify_on}{a character (vector) indicating the variables of the data used to stratify the results. Variables must be numerical (as they are passed to \code{\link[mrgsolve:carry_out]{mrgsolve::carry_out()}})}
+\item{stratify_on}{a character (vector) indicating the variables of the data used to stratify the results. Variables must be numeric (as they are passed to \code{\link[mrgsolve:carry_out]{mrgsolve::carry_out()}})}
 
 \item{start, end, delta, ...}{passed to \code{\link[mrgsolve:mrgsim]{mrgsolve::mrgsim()}}}
 }
@@ -37,6 +37,15 @@ a ggplot2 object, results of the VPC
 }
 \description{
 Visual Predicted Checks
+}
+\details{
+\itemize{
+\item Prediction-corrected VPC
+}
+
+By default, VPC are prediction corrected (Bergstrand et al (2011) \url{doi:10.1208/s12248-011-9255-z}.
+This correction is advised if several levels of doses or covariates are in the dataset for instance.
+Note that the implemented correction formula does not take into account the 'lower bound' term (\emph{lbij}), nor the log-transformed variables.
 }
 \examples{
 library(mrgsolve)

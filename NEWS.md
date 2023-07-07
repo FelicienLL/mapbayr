@@ -14,6 +14,7 @@
 * Refactor merging functions between dataset and ETA matrices.
 * Refactor OFV computation: parameters (ETA) are now passed through the data set and not through $PARAM.
 * Now depends on mrgsolve (>= 1.0.8) to benefit from the "etasrc" specification.
+* New `mapbayr_vpc()` to perform prediction-corrected visual predictive checks (`pcvpc`) from a given model and dataset. Control the independant variable (`idv`), and the stratify on a numeric variable in the dataset (`stratify_on`).
 
 # mapbayr 0.9.0
 

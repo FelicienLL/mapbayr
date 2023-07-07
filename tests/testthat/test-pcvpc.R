@@ -50,4 +50,10 @@ test_that("vpc_sim() works", {
   vpcsim4 <- vpc_sim(mod, data, nrep = 10, start = 72, end = 96, delta = 0.1)
   expect_equal(unique(vpcsim4$SIMTAB$time), seq(72, 96, 0.1))
 
+  data$char <- "foo"
+  expect_error(
+    vpc_sim(mod, data, stratify_on = "char", nrep = 10),
+    "Variables defined with `stratify_on` are not all numeric"
+  )
+
 })

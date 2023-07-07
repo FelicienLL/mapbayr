@@ -3,10 +3,17 @@
 #' @param x the model object
 #' @param data NMTRAN-like data set
 #' @param nrep a numeric, the number of replicates for stochastic simulations. Default is 500.
-#' @param pcvpc a logical, if `TRUE` (the default) will output "prediction-corrected VPC". Advised if several levels of doses or covariates are in the dataset for instance.
+#' @param pcvpc a logical, if `TRUE` (the default) will output "prediction-corrected VPC" (see Details).
 #' @param idv a character indicating the variable used as independant variable. Default is "time", alternatively use "tad" to automatically compute the time after last dose.
-#' @param stratify_on a character (vector) indicating the variables of the data used to stratify the results. Variables must be numerical (as they are passed to [mrgsolve::carry_out()])
+#' @param stratify_on a character (vector) indicating the variables of the data used to stratify the results. Variables must be numeric (as they are passed to [mrgsolve::carry_out()])
 #' @param start,end,delta,... passed to [mrgsolve::mrgsim()]
+#'
+#' @details
+#' * Prediction-corrected VPC
+#'
+#' By default, VPC are prediction corrected (Bergstrand et al (2011) <doi:10.1208/s12248-011-9255-z>.
+#' This correction is advised if several levels of doses or covariates are in the dataset for instance.
+#' Note that the implemented correction formula does not take into account the 'lower bound' term (*lbij*), nor the log-transformed variables.
 #'
 #' @return a ggplot2 object, results of the VPC
 #' @export
@@ -88,6 +95,11 @@ vpc_sim <- function(x,
     Request <- c("PAR", "MET")
   } else {
     Request <- "DV"
+  }
+
+  # Check stratification
+  if(!all(sapply(data[,stratify_on], is.numeric))){
+    stop("Variables defined with `stratify_on` are not all numeric")
   }
 
   # Perform stochastic simulations
