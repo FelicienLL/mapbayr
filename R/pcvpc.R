@@ -123,11 +123,11 @@ vpc_sim <- function(x,
 
   ## Define independant variable (tad, time...)
 
-  OBSTAB$idv <- filter(stochastic_sim,
-                       .data$a.u.g == 0,
-                       .data$ID == 1,
-                       .data$name == unique(.data$name)[1]
-  )[[idv]]
+  keep_aug_0 <- stochastic_sim$a.u.g == 0
+  keep_firstreplicate <- stochastic_sim$ID == 1
+  keep_uniqueoutput <- stochastic_sim$name == stochastic_sim$name[1]
+
+  OBSTAB$idv <- stochastic_sim[[idv]][keep_aug_0 & keep_firstreplicate & keep_uniqueoutput]
 
   ## Reframe (keep evid=0, name/value with PAR/MET)
   OBSTAB <- reframe_observations(OBSTAB)
