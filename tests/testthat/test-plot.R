@@ -29,24 +29,25 @@ test_that("can choose type of prediction", {
 
 test_that("reframe_observation() works", {
   data1 <- obs_rows(time = 0, DV = c(0.12, 1.2), cmt = c(1, 2)) %>%
-    obs_rows(time = 24, DV = c(0.34, 3.4), cmt = c(1, 2), evid = 2) %>%
+    obs_rows(time = 24, DV = c(0.34, NA), cmt = c(1, 2), evid = 2) %>%
     obs_rows(time = 48, DV = c(0.56, 5.6), cmt = c(1, 2), mdv = c(0,1)) %>%
     obs_rows(ID = 2, time = 0, DV = c(0.78, 7.8), cmt = c(1,2)) %>%
     adm_rows(time = 24, amt = 100, cmt = 1)
 
   ref1 <- reframe_observations(data1)
-  expect_equal(nrow(ref1), 8)
+  expect_equal(nrow(ref1), 8-1)
   expect_equal(unique(ref1$evid), c(0,2))
   expect_equal(levels(ref1$MDV), c("0","1"))
   expect_equal(levels(ref1$name), c("DV","PAR", "MET"))
-  expect_equal(as.character(ref1$name), rep(c("PAR", "MET"), 4))
-  expect_equal(data1$DV[1:8], ref1$value)
+  expect_equal(as.character(ref1$name), rep(c("PAR", "MET"), 4)[-4])
+  expect_equal(ref1$value,data1$DV[c(1:3,5:8)])
 
   ref2 <- reframe_observations(data1[1,])
   expect_equal(as.character(ref2$name), "DV")
 
   ref3 <- reframe_observations(data1[1,], predictions_names = c("PAR", "MET"))
   expect_equal(as.character(ref3$name), "PAR")
+
 })
 
 test_that("mapbayr_plot works", {

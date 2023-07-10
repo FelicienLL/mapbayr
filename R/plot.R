@@ -213,6 +213,7 @@ reframe_observations <- function(obs_tab, predictions_names = NULL){
 
   observations[["name"]] <- factor(observations$name, levels = c("DV", "PAR", "MET"))
   names(observations)[names(observations) == "DV"] <- "value"
+  observations <- observations[!is.na(observations[["value"]]),]
 
   observations
 }
