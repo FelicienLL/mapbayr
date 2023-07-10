@@ -33,7 +33,7 @@ mapbayr_vpc(
 \item{start, end, delta, ...}{passed to \code{\link[mrgsolve:mrgsim]{mrgsolve::mrgsim()}}}
 }
 \value{
-a ggplot2 object, results of the VPC
+a ggplot2 object, results of the VPC. The median and the 50\%, 80\% and 90\% prediction intervals of the simulated distributions are reported.
 }
 \description{
 Visual Predicted Checks
