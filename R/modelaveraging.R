@@ -184,10 +184,12 @@ apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
     SIMPLIFY = FALSE
   )
 
-  Reduce(
+  final_tab <- Reduce(
     f = `+`,
     x = list_weighted_itabs
   )
+
+  round(final_tab, 12) # Fix floating point errors.
 }
 
 #' @rdname model_averaging
@@ -195,10 +197,11 @@ apply_weights <- function(itabs, #list of tabs, one per model, one ID per tab
 do_model_averaging <- function(list_of_tabs, weights_matrix){
 
   first_tab <- list_of_tabs[[1]]
-  numeric_variables <- sapply(first_tab, is.numeric)
-
   # Ensure comparison between tables
   sapply(list_of_tabs, are_comparable, first_tab)
+
+  # Will apply weighted mean on numeric variables only
+  numeric_variables <- sapply(first_tab, is.numeric)
 
   # Need to work to the individual level
   # Transpose list of tables to a list of (individual) list of tables

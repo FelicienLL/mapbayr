@@ -92,10 +92,10 @@ do_model_averaging(
   )
 
 # If you do not want to perform an average of the full table, you can specify
-# a function that takes the estimation object as an input and that returns
-# you value(s) of interest: a single prediction, a clearance value, a full
+# a function that takes the estimation object as an input and returns
+# value(s) of interest: a single prediction, a clearance value, a full
 # table of augmented predictions... as long as the structure of the final
-# object is the same whatever the models
+# object is the same whatever the model.
 
 reframe <- function(est){
   # From any estimation object, return a table with ID, time and predictions
