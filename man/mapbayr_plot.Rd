@@ -28,7 +28,7 @@ Make mapbayr plot
 }
 \examples{
 aug <- data.frame(
-  ID = 1, name = "DV", cmt = 2, time = rep(c(0,8,16,24), each = 2),
+  ID = 1, name = factor("DV"), cmt = 2, time = rep(c(0,8,16,24), each = 2),
   type = rep(c("PRED", "IPRED"), 4), value = c(0,0, 1, 2, 4, 8, 2, 4)
   )
 
