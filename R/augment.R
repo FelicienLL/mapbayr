@@ -8,6 +8,10 @@ infer_tgrid <- function(data, start = NULL, end = NULL, delta = NULL){
     end <- tmax + (tmax - start) * 0.2
   }
 
+  if(start == 0 & end == 0){
+    end <- 24
+  }
+
   if(is.null(delta)){
     delta <- 10^(floor(log10(abs((end - start)/200))))
   }

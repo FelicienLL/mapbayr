@@ -6,21 +6,28 @@ test_that("plot works", {
 
 test_that("no warning if DV is NA and mdv = 1", {
   # Fix 114
-  est$mapbay_tab[5, "mdv"] <- 1
-  est$mapbay_tab[5, "DV"] <- NA
-  expect_warning(plot(est), NA)
+  est2 <- est
+  est2$mapbay_tab[5, "mdv"] <- 1
+  est2$mapbay_tab[5, "DV"] <- NA
+  expect_warning(plot(est2), NA)
 })
 
 test_that("can choose type of prediction", {
-  #112
-  est1 <- exmodel(ID = 1) %>% mapbayest()
-  expect_s3_class(plot(est1), "ggplot")
-  expect_s3_class(plot(est1, PREDICTION = "IPRED"), "ggplot")
-  expect_s3_class(plot(est1, PREDICTION = "PRED"), "ggplot")
+  # Fix 112
+  p_PREDIPRED <- plot(est)
+  expect_s3_class(p_PREDIPRED, "ggplot")
+  expect_equal(unique(p_PREDIPRED$data$PREDICTION), c("IPRED", "PRED"))
+
+  p_PRED <- plot(est, PREDICTION = "PRED")
+  expect_s3_class(p_PRED, "ggplot")
+  expect_equal(unique(p_PRED$data$PREDICTION), "PRED")
+
+  p_IPRED <- plot(est, PREDICTION = "IPRED")
+  expect_s3_class(p_IPRED, "ggplot")
+  expect_equal(unique(p_IPRED$data$PREDICTION), "IPRED")
 })
 
 test_that("reframe_observation() works", {
-
   data1 <- obs_rows(time = 0, DV = c(0.12, 1.2), cmt = c(1, 2)) %>%
     obs_rows(time = 24, DV = c(0.34, 3.4), cmt = c(1, 2), evid = 2) %>%
     obs_rows(time = 48, DV = c(0.56, 5.6), cmt = c(1, 2), mdv = c(0,1)) %>%
@@ -42,22 +49,40 @@ test_that("reframe_observation() works", {
   expect_equal(as.character(ref3$name), "PAR")
 })
 
+test_that("mapbayr_plot works", {
+  aug <- data.frame(
+    ID = 1, name = factor("DV"), cmt = 2, time = rep(c(0,8,16,24), each = 2),
+    type = rep(c("PRED", "IPRED"), 4), value = c(0, 0, 1, 2, 4, 8, 2, 4)
+  )
 
-# est <- mapbayest(exmodel(401))
-# au <- augment(est)$aug_tab
-# au2 <- au %>% mutate(value = value * 2, cmt = cmt+1)
-# auau <- bind_rows(MACHIN = au, BIDULE = au2, .id = "MODEL")
-# OBS <- as.data.frame(est) %>% filter(evid == 0)
-# OBS[5,"mdv"] <- 1
-# auau <- bind_rows(auau, mutate(auau, ID = 2, value = value+50))
-#
-# mapbayr_plot(mutate(au, MODEL = "trucmuche"), OBS)
-# mapbayr_plot(auau, OBS)
-# mapbayr_plot(auau, OBS, PREDICTION = "PRED")
-# mapbayr_plot(auau, OBS, MODEL_color = c(MACHIN = "black", BIDULE = "blue"))
-#
-# model_coloration(model_names = c("Yu", "Imbs 2014", "Imbs2016", "Average", "truc"))
-# model_coloration(
-#   model_names = c("Yu", "Imbs 2014", "Imbs2016", "Average", "truc"),
-#   forced_colorations = c(Average = "black")
-# )
+  obs <- data.frame(
+    ID = 1, time = c(6, 20), evid = 0,
+    mdv = c(0,1), DV = c(0.5, 5), cmt = 2
+  )
+
+  # with no obs
+
+  expect_true(
+    any(unlist(sapply(map(mapbayr_plot(aug, obs)$layers, "geom"), class)) == "GeomPoint")
+  )
+  expect_false(
+    any(unlist(sapply(map(mapbayr_plot(aug, obs = NULL)$layers, "geom"), class)) == "GeomPoint")
+  )
+
+  # Multimodel
+
+  aug2 <- dplyr::bind_rows(
+    FOO = aug,
+    BAZ = dplyr::mutate(aug, value = value * 2),
+    BAR = dplyr::mutate(aug, value = value * 3),
+    .id = "MODEL"
+  )
+
+  expect_s3_class(mapbayr_plot(aug2, PREDICTION = "IPRED"), "ggplot")
+  expect_s3_class(mapbayr_plot(aug2, PREDICTION = "IPRED",
+                               MODEL_color = c(BAZ = "pink",
+                                               BAR = "yellow",
+                                               FLL = "red")), # does not exist
+                  "ggplot")
+
+})
