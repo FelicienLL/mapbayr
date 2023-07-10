@@ -88,7 +88,7 @@ vpc_sim <- function(x,
     delta = delta,
     end = end,
     start = start
-    )
+  )
 
   # Request
   if(any(c("PAR", "MET") %in% outvars(x)$capture)){
@@ -184,7 +184,6 @@ vpc_sim <- function(x,
       )
       )
     # Apply correction, on OBSTAB
-
     OBSTAB <- OBSTAB %>%
       left_join(medpredtab, by = "bin") %>%
       mutate(value = predcorr(
@@ -194,7 +193,7 @@ vpc_sim <- function(x,
           typical_sim,
           .data$a.u.g == 0,
           .data$name == unique(.data$name)[1]
-        )$value[data$evid %in% c(0, 2)]
+        )$value[data$evid %in% c(0, 2) & !is.na(data$DV)]
       )
       )
   }
