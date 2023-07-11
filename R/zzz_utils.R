@@ -56,7 +56,7 @@ namephicov <- function(n){
 }
 
 devalid_data_set <- function(x){
-  as_tibble(x[,colnames(x)!="..zeros.."])
+  as_tibble(x[, colnames(x)!="..zeros..", drop = FALSE])
 }
 
 etanames_as_nonmem <- function(x){

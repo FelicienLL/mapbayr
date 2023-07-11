@@ -25,7 +25,7 @@
 #' aug2 <- dplyr::bind_rows(
 #'   FOO = aug,
 #'   BAZ = dplyr::mutate(aug, value = value * 2),
-#'   BAR = dplyr::mutate(aug, value = value *3 ),
+#'   BAR = dplyr::mutate(aug, value = value * 3),
 #'   .id = "MODEL"
 #'   )
 #'
@@ -34,7 +34,7 @@
 #' mapbayr_plot(aug2, obs, PREDICTION = "IPRED", MODEL_color = c(FOO = "black"))
 #'
 #'
-mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODEL_color = NULL){
+mapbayr_plot <- function(aug_tab, obs_tab = NULL, PREDICTION = c("IPRED", "PRED"), MODEL_color = NULL){
 
   # Predictions table
 
@@ -48,10 +48,14 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
 
   # Observations table
 
-  observations <- reframe_observations(
-    obs_tab = obs_tab,
-    predictions_names = predictions_names
-  )
+  if(!is.null(obs_tab)){
+    observations <- reframe_observations(
+      obs_tab = obs_tab,
+      predictions_names = predictions_names
+    )
+  } else {
+    observations <- NULL
+  }
 
   # ggplot object
 
@@ -107,24 +111,26 @@ mapbayr_plot <- function(aug_tab, obs_tab, PREDICTION = c("IPRED", "PRED"), MODE
   }
 
   #MDV
-  if(any(observations$mdv == 1)){
-    gg <- gg +
-      geom_point(
-        mapping = aes(shape = .data$MDV),
-        data = observations,
-        fill = "black",
-        size = 3
-      ) +
-      scale_shape_manual(values= c(`0` = 21, `1` = 1))
-  } else {
-    gg <- gg +
-      geom_point(data = observations, fill = "black", size = 3, pch = 21)
+  if(!is.null(observations)){
+    if(any(observations$mdv == 1)){
+      gg <- gg +
+        geom_point(
+          mapping = aes(shape = .data$MDV),
+          data = observations,
+          fill = "black",
+          size = 3
+        ) +
+        scale_shape_manual(values= c(`0` = 21, `1` = 1))
+    } else {
+      gg <- gg +
+        geom_point(data = observations, fill = "black", size = 3, pch = 21)
+    }
   }
 
   #Facetting
 
-  one_cmt <- (length(unique(predictions$name)) == 1) & (length(unique(observations$name)) == 1)
-  one_ID <- (length(unique(predictions$ID)) == 1) & (length(unique(observations$ID)) == 1)
+  one_cmt <- (length(unique(predictions$name)) == 1) & (length(unique(observations$name)) <= 1)
+  one_ID <- (length(unique(predictions$ID)) == 1) & (length(unique(observations$ID)) <= 1)
 
   if(all(!one_cmt, !one_ID)) {
     gg <- gg+
@@ -207,6 +213,7 @@ reframe_observations <- function(obs_tab, predictions_names = NULL){
 
   observations[["name"]] <- factor(observations$name, levels = c("DV", "PAR", "MET"))
   names(observations)[names(observations) == "DV"] <- "value"
+  observations <- observations[!is.na(observations[["value"]]),]
 
   observations
 }

@@ -100,6 +100,14 @@ test_that("apply_weights() works", {
     apply_weights(itabs = c(100, 200), iweights = c(0.8, 0.2)),
     120
   )
+
+  # Floating point
+  expect_identical(
+    apply_weights(
+      itabs = rep(100, 3),
+      iweights = c(0.412623597764275, 0.572771241632721, 0.0146051606030037)
+    ), 100
+  )
 })
 
 test_that("do_model_averaging() works", {

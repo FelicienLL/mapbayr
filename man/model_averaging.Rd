@@ -18,7 +18,7 @@ compute_weights(..., scheme = c("LL", "AIC"), estlist = NULL)
 do_model_averaging(list_of_tabs, weights_matrix)
 }
 \arguments{
-\item{...}{estimation objects generated from \code{\link[=mapbayest]{mapbayest()}} to compute weight from it}
+\item{...}{estimation objects generated with \code{\link[=mapbayest]{mapbayest()}}, from which the weights will be computed}
 
 \item{output_function}{a unique function that takes any estimation object and returns a table with controlled variables, dimensions and attributes.}
 
@@ -48,42 +48,74 @@ The method was previously described by Uster et al
 }
 \examples{
 library(magrittr)
-same_data_and_est <- function(x){
-  x \%>\%
-    adm_rows(ID = 2, time = 0, amt = 100, addl = 3, ii = 24) \%>\%
-    obs_rows(ID = 2, time = 96, DV = 1) \%>\%
-    adm_rows(ID = 9, time = 0, amt = 200, addl = 3, ii = 24) \%>\%
-    obs_rows(ID = 9, time = 96, DV = 2) \%>\%
-    mapbayest()
-  }
+library(mrgsolve)
 
-create_output <- function(x){
-  x <- as.data.frame(x)
-  x[x$mdv == 0,c("ID", "time", "DV", "IPRED")]
-  }
+# Three different models: A, B, and C.
+modA <- exmodel(1, add_exdata = FALSE)
+modB <- param(modA, TVCL = 2, TVVC = 30)
+modC <- param(modA, TVCL = 10)
 
-mod <- exmodel(1, add_exdata = FALSE)
+# A common dataset that has 2 patients (ID 2 & 9)
+data <- adm_rows(ID = 2, time = 0, amt = 200, addl = 3, ii = 24, cmt = 1) \%>\%
+    obs_rows(ID = 2, time = 84, DV = 1.5, cmt = 2) \%>\%
+    adm_rows(ID = 9, time = 0, amt = 100, addl = 3, ii = 24, cmt = 1) \%>\%
+    obs_rows(ID = 9, time = 96, DV = 1, cmt = 2)
 
-est1 <- mod \%>\%
-  mrgsolve::param(TVCL = 2) \%>\%
-  same_data_and_est()
+# Three different estimation objects: A, B and C.
+estA <- mapbayest(modA, data)
+as.data.frame(estA)
+plot(estA) # Fit is pretty good
 
-est2 <- mod \%>\%
-  mrgsolve::param(TVCL = 10) \%>\%
-  same_data_and_est()
+estB <- mapbayest(modB, data)
+as.data.frame(estB)
+plot(estB) # Excellent fit
 
-model_averaging(
-  est1,
-  est2,
-  output_function = create_output
-  )
+estC <- mapbayest(modC, data)
+as.data.frame(estC)
+plot(estC) # Fit is worst
 
-W <- compute_weights(CL2 = est1, CL10 = est2)
-compute_weights(estlist = list(A = est1, B = est2, est1))
+# Model averaging
+model_averaging(A = estA, B = estB, C = estC)
+# Weighted average of the table return by as.data.frame(est))
 
+# Internally, it first computes the "weight" of each model such as:
+W <- compute_weights(A = estA, B = estB, C = estC)
+
+# Then multiply the prediction table with each weight such as:
 do_model_averaging(
-  list_of_tabs = list(create_output(est1), create_output(est2)),
+  list_of_tabs = list(
+    A = as.data.frame(estA),
+    B = as.data.frame(estB),
+    C = as.data.frame(estC)
+    ),
   weights_matrix = W
   )
+
+# If you do not want to perform an average of the full table, you can specify
+# a function that takes the estimation object as an input and returns
+# value(s) of interest: a single prediction, a clearance value, a full
+# table of augmented predictions... as long as the structure of the final
+# object is the same whatever the model.
+
+reframe <- function(est){
+  # From any estimation object, return a table with ID, time and predictions
+  as.data.frame(est)[,c("ID", "time", "DV", "IPRED")]
+}
+
+model_averaging(A = estA, B = estB, C = estC, output_function = reframe)
+
+# Make a plot that compares predictions
+List_aug_tab <- lapply(
+  X = list(A = estA, B = estB, C = estC),
+  FUN = \(x) augment(x)$aug_tab
+)
+List_aug_tab$.AVERAGE <- do_model_averaging(List_aug_tab, W)
+
+mapbayr_plot(
+ aug_tab = dplyr::bind_rows(List_aug_tab, .id = "MODEL"),
+ obs_tab = data,
+ PREDICTION = "IPRED",
+ MODEL_color = c(.AVERAGE = "black")
+)
 
 }

@@ -6,7 +6,7 @@
 \usage{
 mapbayr_plot(
   aug_tab,
-  obs_tab,
+  obs_tab = NULL,
   PREDICTION = c("IPRED", "PRED"),
   MODEL_color = NULL
 )
@@ -43,7 +43,7 @@ mapbayr_plot(aug, obs, PREDICTION = "IPRED")
 aug2 <- dplyr::bind_rows(
   FOO = aug,
   BAZ = dplyr::mutate(aug, value = value * 2),
-  BAR = dplyr::mutate(aug, value = value *3 ),
+  BAR = dplyr::mutate(aug, value = value * 3),
   .id = "MODEL"
   )
 

@@ -15,7 +15,7 @@
 #' This correction is advised if several levels of doses or covariates are in the dataset for instance.
 #' Note that the implemented correction formula does not take into account the 'lower bound' term (*lbij*), nor the log-transformed variables.
 #'
-#' @return a ggplot2 object, results of the VPC
+#' @return a ggplot2 object, results of the VPC. The median and the 50%, 80% and 90% prediction intervals of the simulated distributions are reported.
 #' @export
 #'
 #' @examples
@@ -88,7 +88,7 @@ vpc_sim <- function(x,
     delta = delta,
     end = end,
     start = start
-    )
+  )
 
   # Request
   if(any(c("PAR", "MET") %in% outvars(x)$capture)){
@@ -123,11 +123,11 @@ vpc_sim <- function(x,
 
   ## Define independant variable (tad, time...)
 
-  OBSTAB$idv <- filter(stochastic_sim,
-                       .data$a.u.g == 0,
-                       .data$ID == 1,
-                       .data$name == unique(.data$name)[1]
-  )[[idv]]
+  keep_aug_0 <- stochastic_sim$a.u.g == 0
+  keep_firstreplicate <- stochastic_sim$ID == 1
+  keep_uniqueoutput <- stochastic_sim$name == stochastic_sim$name[1]
+
+  OBSTAB$idv <- stochastic_sim[[idv]][keep_aug_0 & keep_firstreplicate & keep_uniqueoutput]
 
   ## Reframe (keep evid=0, name/value with PAR/MET)
   OBSTAB <- reframe_observations(OBSTAB)
@@ -184,7 +184,6 @@ vpc_sim <- function(x,
       )
       )
     # Apply correction, on OBSTAB
-
     OBSTAB <- OBSTAB %>%
       left_join(medpredtab, by = "bin") %>%
       mutate(value = predcorr(
@@ -194,7 +193,7 @@ vpc_sim <- function(x,
           typical_sim,
           .data$a.u.g == 0,
           .data$name == unique(.data$name)[1]
-        )$value[data$evid %in% c(0, 2)]
+        )$value[data$evid %in% c(0, 2) & !is.na(data$DV)]
       )
       )
   }
