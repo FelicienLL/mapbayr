@@ -76,7 +76,7 @@ plot(estC) # Fit is worst
 
 # Model averaging
 model_averaging(A = estA, B = estB, C = estC)
-# Weighted average of the table return by as.data.frame(est))
+# Weighted average of the table returned by as.data.frame(est))
 
 # Internally, it first computes the "weight" of each model such as:
 W <- compute_weights(A = estA, B = estB, C = estC)
