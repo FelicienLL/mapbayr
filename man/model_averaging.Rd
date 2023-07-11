@@ -47,12 +47,11 @@ The method was previously described by Uster et al (2021) \doi{10.1002/cpt.2065}
 }
 \examples{
 library(magrittr)
-library(mrgsolve)
 
 # Three different models: A, B, and C.
 modA <- exmodel(1, add_exdata = FALSE)
-modB <- param(modA, TVCL = 2, TVVC = 30)
-modC <- param(modA, TVCL = 10)
+modB <- mrgsolve::param(modA, TVCL = 2, TVVC = 30)
+modC <- mrgsolve::param(modA, TVCL = 10)
 
 # A common dataset that has 2 patients (ID 2 & 9)
 data <- adm_rows(ID = 2, time = 0, amt = 200, addl = 3, ii = 24, cmt = 1) \%>\%

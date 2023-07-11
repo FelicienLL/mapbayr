@@ -35,10 +35,10 @@
 #'   obs_rows(DV = 50, cmt = 2, time = 7 * 12) %>%
 #'   add_covariates(SEX = c(0,0,0,0,1,1))
 #'
-#' mapbayr_vpc(mod, data) # prediction-corrected by default
-#' mapbayr_vpc(mod, data, idv = "tad", start = 72)
-#' mapbayr_vpc(mod, data, idv = "tad", start = 72, pcvpc = FALSE)
-#' mapbayr_vpc(mod, data, idv = "tad", start = 72, stratify_on = "SEX")
+#' mapbayr_vpc(mod, data, nrep = 30) # prediction-corrected by default
+#' mapbayr_vpc(mod, data, idv = "tad", start = 72, nrep = 30)
+#' mapbayr_vpc(mod, data, pcvpc = FALSE, nrep = 30)
+#' mapbayr_vpc(mod, data, stratify_on = "SEX", nrep = 30)
 mapbayr_vpc <- function(x,
                         data = NULL,
                         nrep = 500,

@@ -22,6 +22,7 @@
 * The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows (@LauraMvn, #193).
 * With data helpers, the `.datehour` column is updated after `realize_addl` is being called (@LauraMvn, #194).
 * Dependencies: mrgsolve (>= 1.0.8) to benefit from the `etasrc` specification.
+* Suggestions: scales.
 * Add Laura Morvan @LauraMvn as contributor.
 
 # mapbayr 0.9.0
