@@ -4,6 +4,7 @@ arg
 bayesian
 behaviour
 benchmarked
+Bergstrand
 bfgs
 BW
 cmt
@@ -26,10 +27,12 @@ ev
 github
 iddata
 ini
+interpretable
 inversed
 IPRED
 iteratively
 KA
+lbij
 LLOQ
 Louedec
 mapbay
@@ -43,6 +46,7 @@ mbrplot
 MDV
 MIPD
 monocompartmental
+Monolix
 mrgmod
 mrgsim
 mrgsolve
@@ -72,9 +76,12 @@ psp
 README
 Rtools
 RStudio
+sd
 se
 ss
 summarise
 testthatted
 tibble
+Uster
 VC
+VPC

@@ -4,18 +4,18 @@
 #' @param data NMTRAN-like data set
 #' @param nrep a numeric, the number of replicates for stochastic simulations. Default is 500.
 #' @param pcvpc a logical, if `TRUE` (the default) will output "prediction-corrected VPC" (see Details).
-#' @param idv a character indicating the variable used as independant variable. Default is "time", alternatively use "tad" to automatically compute the time after last dose.
+#' @param idv a character indicating the variable used as independent variable. Default is "time", alternatively use "tad" to automatically compute the time after last dose.
 #' @param stratify_on a character (vector) indicating the variables of the data used to stratify the results. Variables must be numeric (as they are passed to [mrgsolve::carry_out()])
 #' @param start,end,delta,... passed to [mrgsolve::mrgsim()]
 #'
 #' @details
 #' * Prediction-corrected VPC
 #'
-#' By default, VPC are prediction corrected (Bergstrand et al (2011) <doi:10.1208/s12248-011-9255-z>.
+#' By default, VPC are prediction corrected (Bergstrand et al (2011) \doi{10.1208/s12248-011-9255-z}).
 #' This correction is advised if several levels of doses or covariates are in the dataset for instance.
 #' Note that the implemented correction formula does not take into account the 'lower bound' term (*lbij*), nor the log-transformed variables.
 #'
-#' @return a ggplot2 object, results of the VPC. The median and the 50%, 80% and 90% prediction intervals of the simulated distributions are reported.
+#' @return a `ggplot` object, results of the VPC. The median and the 50%, 80% and 90% prediction intervals of the simulated distributions are reported.
 #' @export
 #'
 #' @examples
@@ -121,7 +121,7 @@ vpc_sim <- function(x,
   # Prepare OBSERVED data
   OBSTAB <- data
 
-  ## Define independant variable (tad, time...)
+  ## Define independent variable (tad, time...)
 
   keep_aug_0 <- stochastic_sim$a.u.g == 0
   keep_firstreplicate <- stochastic_sim$ID == 1

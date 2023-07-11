@@ -43,8 +43,7 @@ the "weight" of each estimation.
 It is informed by the likelihood of estimation.
 Two weighting scheme are currently implemented, one based on the log-
 likelihood ("LL", the default), the other on the Akaike criterion ("AIC").
-The method was previously described by Uster et al
-\href{https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.2065}{(Clinical Pharmacology and Therapeutics, 2021)}.
+The method was previously described by Uster et al (2021) \doi{10.1002/cpt.2065}.
 }
 \examples{
 library(magrittr)

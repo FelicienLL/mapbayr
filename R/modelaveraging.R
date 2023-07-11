@@ -9,8 +9,7 @@
 #' It is informed by the likelihood of estimation.
 #' Two weighting scheme are currently implemented, one based on the log-
 #' likelihood ("LL", the default), the other on the Akaike criterion ("AIC").
-#' The method was previously described by Uster et al
-#' [(Clinical Pharmacology and Therapeutics, 2021)](https://ascpt.onlinelibrary.wiley.com/doi/full/10.1002/cpt.2065).
+#' The method was previously described by Uster et al (2021) \doi{10.1002/cpt.2065}.
 #'
 #' @param ... estimation objects generated with [mapbayest()], from which the weights will be computed
 #' @param output_function a unique function that takes any estimation object and returns a table with controlled variables, dimensions and attributes.
