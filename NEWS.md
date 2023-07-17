@@ -1,3 +1,30 @@
+# mapbayr 0.10.0
+
+## New features
+
+### Model averaging
+
+* New `model_averaging()` to make averaged predictions over estimations performed from several models. Also exports `do_model_averaging()` and `compute_weights()` for low-level implementations.
+
+### Prediction-corrected Visual Predictive Checks
+
+* New `mapbayr_vpc()` to make prediction-corrected visual predictive checks (`pcvpc`) from a given model and dataset. Control the independent variable (`idv`), and the stratification on a numeric variable in the dataset (`stratify_on`).
+
+## Minor changes and Bug Fixes
+* `hist()` method (`hist.mapbayests()`) now shows the values of eta-shrinkage in multiple subjects setting. New argument `shk` to control the definition of shrinkage, either based on the standard deviation (`"sd"`) or on the variance (`"var"`) (@LauraMvn, #192).
+* New `mapbayr_plot()` in order to plot results from tables (data.frame). This is the function now called by `plot.mapbayests()` internally. Can plot the results of multiple estimation object (informed in the column "MODEL"), useful when model averaging is performed. Argument `MODEL_color` to force the color of a model on the plot. 
+* New `do_mapbayr_sims()` as an engine to simulate from estimation results. Experimental. Now mostly useful for internal or programmatic uses, but might be extended in the future.
+* Refactor `augment.mapbayests()`. Now easier to debug and much more faster, especially when uncertainty on predictions is required.
+* Refactor OFV computation: parameters ("ETA") are now passed through the data set and not through `$PARAM`, however the definition on "ETA" in `$PARAM` remains mandatory.
+* Now postprocesses datasets with >=2 missing covariates (#185).
+* "ETA" parameters cannot be longer declared as "@covariates" in `$PARAM` to avoid hazardous behaviours (@jbwoillard, #187).
+* By default, `augment()` now simulates at least 200 points per individual. Fix a bug where delta was miscalculated and strange-looking plots were sometimes generated (@LauraMvn, #191).
+* The `mapbay_tab` now has the same number of rows as original data especially if it did not have observation rows (@LauraMvn, #193).
+* With data helpers, the `.datehour` column is updated after `realize_addl` is being called (@LauraMvn, #194).
+* Dependencies: mrgsolve (>= 1.0.8) to benefit from the `etasrc` specification.
+* Suggestions: scales.
+* Add Laura Morvan @LauraMvn as contributor.
+
 # mapbayr 0.9.0
 
 ## New features

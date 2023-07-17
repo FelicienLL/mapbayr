@@ -19,7 +19,7 @@ test_that("use_posterior obeys to update_x arguments", {
     omat(make = TRUE) %>%
     expect_equal(matrix(c(0.010656961, 0.01131633, 0.003616018,
                           0.011316334, 0.02123521, 0.016801093,
-                          0.003616018, 0.01680109, 0.129059974), nrow = 3), tolerance = 1e-6)
+                          0.003616018, 0.01680109, 0.129059974), nrow = 3), tolerance = 1e-5)
 
   expect_equal(use_posterior(est301, update_cov = FALSE)$BW, 75)
   expect_equal(use_posterior(est301, update_cov = TRUE)$BW, 77)

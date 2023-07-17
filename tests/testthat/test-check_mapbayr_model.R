@@ -35,6 +35,13 @@ test_that("$PARAM is well-specified", {
     check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0.1"), check_compile = FALSE),
     "\\$PARAM. The value of one or multiple ETA parameter\\(s\\) is not 0."
   )
+
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM @covariates
+                               ETA1 = 0"), check_compile = FALSE),
+    "\\$PARAM. One or several ETA parameter\\(s\\) are declared as `@covariates`, which is not allowed."
+  )
+
 })
 
 test_that("$OMEGA is well-specified", {
@@ -171,4 +178,16 @@ test_that("$CAPTURE is well-specified", {
                                $CAPTURE DV PAR"), check_compile = FALSE),
     "\\$CAPTURE. Cannot find PAR and MET in captured items. They must be captured if multiple types of DV are fitted \\(more than one pair of sigma provided in \\$SIGMA\\)"
   )
+})
+
+test_that("has_eta_param() works", {
+  expect_true(has_eta_param(mcode2("
+  $PARAM ETA1 = 0, ETA2 = 0
+  $OMEGA 1 2 3")
+  ))
+
+  expect_false(has_eta_param(mcode2("
+  $PARAM CL = 1, V2 = 30
+  $OMEGA 1 2 3")
+  ))
 })

@@ -4,22 +4,27 @@ arg.ofv <- c(est$arg.ofv.fix, est$arg.ofv.id[[1]])
 
 test_that("f works", {
 
+  # tweak because of the "etasrc = data"
+  etatest <- eta(runif(3))
+  arg.ofv$idvaliddata_eta <- merge_validdata_eta(arg.ofv$idvaliddata, etatest)
+  dat_eta <- merge_datadf_etavec(dat, etatest/2)
+
   #on validated data
-  expect_length(f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata), 4)
+  expect_length(f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata_eta), 4)
 
   #on non-validated data
-  expect_length(f(qmod = arg.ofv$qmod, data = dat), 4)
+  expect_length(f(qmod = arg.ofv$qmod, data = dat_eta), 4)
   expect_equal(
-    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata),
-    f(qmod = arg.ofv$qmod, data = dat)
+    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata_eta),
+    f(qmod = arg.ofv$qmod, data = dat_eta)
   )
 
   #mdv != 0 are dealed ok
-  validddatabis <- arg.ofv$idvaliddata
+  validddatabis <- arg.ofv$idvaliddata_eta
   validddatabis[5,"mdv"] <- 1
   expect_length(f(qmod = arg.ofv$qmod, data = validddatabis), 4-1)
   expect_equal(
-    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata)[1:3],
+    f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata_eta)[1:3],
     f(qmod = arg.ofv$qmod, data = validddatabis)
   )
 })
@@ -141,7 +146,7 @@ $CAPTURE DV"
     preprocess.ofv.id(mod408, dat408)
   )
   testparam <- c(ETA1 = 1.6, ETA2 = -1.6, ETA3 = 0)
-  pred <- mapbayr:::f(param(argofv$qmod, testparam), data = dat408)
+  pred <- mapbayr:::f(argofv$qmod, data = merge_datadf_etavec(dat408, testparam))
   expect_true(any(pred < 0))
   expect_true(any(is.nan(suppressWarnings(log(pred)))))
   expect_false(is.nan(do_compute_ofv(eta = testparam, argofv)))
@@ -195,4 +200,14 @@ test_that("lambda argument works", {
 
   expect_lt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 0.01), ofv_ref)
   expect_gt(do_compute_ofv(par, argofv = arg.ofv2, lambda = 10), ofv_ref)
+})
+
+test_that("merge_validdata_eta() works", {
+  val <- mrgsolve::valid_data_set(exdata(1), exmodel(1))
+  eta <- eta(runif(3))
+
+  merged <- merge_validdata_eta(val, eta)
+
+  expect_true(mrgsolve:::is.valid_data_set(merged))
+  expect_equal(ncol(merged), ncol(val)+length(eta))
 })

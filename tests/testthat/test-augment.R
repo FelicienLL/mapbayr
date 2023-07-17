@@ -39,7 +39,7 @@ test_that("end argument works", {
 
   a3 <- augment(est, end = 400)
   expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==1]), 400)
-  expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==1]), 400)
+  expect_equal(max(a3$aug_tab$time[a3$aug_tab$ID==3]), 400)
 
   expect_error(augment(est, start = c(0, 100), end = c(100, 200)), NA)
 
@@ -54,6 +54,10 @@ test_that("delta argument works", {
 
   a3 <- augment(est, end = 40000) # if end is high, no sim with small delta
   expect_lt(nrow(a3$aug_tab), 4000) #auto delta = 100
+
+  # fix 191
+  expect_equal(infer_tgrid(start = 0, end = 700)@delta, 1)
+  #plot(est, end = 700)
 })
 
 test_that("first prediction is not null if SS=1", {
@@ -80,7 +84,7 @@ test_that("confidence interval works", {
   set.seed(1)
   A2a <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
   set.seed(2)
-  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "simulations", ci_sims = 10)$aug_tab
+  A2b <- augment(est, delta = 1, ci = TRUE, ci_method = "sim", ci_sims = 10)$aug_tab
 
   expect_true(all(A2a$value_low[A2a$time!=0] != A2b$value_low[A2a$time!=0]))
 
@@ -98,4 +102,32 @@ test_that("CI with multiple types of DV", {
   expect_length(unique(A1a$ID), 2)
   expect_true(all(A1a$value <= A1a$value_up))
   expect_true(all(A1a$value >= A1a$value_low))
+})
+
+
+datametabo <- data.frame(
+  ID = rep(c(1,2), each = 2),
+  time = c(0,24),
+  PAR = c(1.2, 3.4, 5.6, 7.8),
+  MET = c(.12, .34, .56, .78)
+)
+
+datadv <- data.frame(
+  ID = rep(c(1,2), each = 2),
+  time = c(0,24),
+  DV = c(1.2, 3.4, 5.6, 7.8)
+)
+
+test_that("pivot_sims() works", {
+  pivotdv <- pivot_sims(datadv)
+  expect_equal(pivotdv$ID, datadv$ID)
+  expect_equal(pivotdv$time, datadv$time)
+  expect_equal(pivotdv$name, factor(rep("DV", 4), levels = c("DV", "PAR", "MET")))
+  expect_equal(pivotdv$value, datadv$DV)
+
+  pivotmetabo <- pivot_sims(datametabo)
+  expect_equal(pivotmetabo$ID, rep(c(1,2), each = 4))
+  expect_equal(pivotmetabo$time, rep(rep(c(0,24), 2), each = 2))
+  expect_equal(pivotmetabo$name, factor(rep(c("PAR", "MET"), 4), levels = c("DV", "PAR", "MET")))
+  expect_equal(pivotmetabo$value, c(1.2, 0.12, 3.4, .34, 5.6, .56, 7.8, .78))
 })
