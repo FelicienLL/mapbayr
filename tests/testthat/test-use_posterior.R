@@ -1,3 +1,5 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 test_that("use_posterior obeys to update_x arguments", {
   mod301 <- exmodel(301)
   est301 <- mapbayest(mod301)
@@ -70,12 +72,12 @@ test_that("zero_re in use_posterior", {
 })
 
 test_that("multi ID", {
-  post001 <- est001 %>% use_posterior(update_omega = TRUE)
+  post001 <- est001test %>% use_posterior(update_omega = TRUE)
 
   expect_length(post001, 8)
 
-  expect_equal(omat(post001[[1]], make = TRUE), get_cov(est001)[[1]], tolerance = 1e-6)
-  expect_equal(omat(post001[[2]], make = TRUE), get_cov(est001)[[2]], tolerance = 1e-6)
+  expect_equal(omat(post001[[1]], make = TRUE), get_cov(est001test)[[1]], tolerance = 1e-6)
+  expect_equal(omat(post001[[2]], make = TRUE), get_cov(est001test)[[2]], tolerance = 1e-6)
 
   expect_equal(post001[[1]]$ETA1, 0.40505701)
   expect_equal(post001[[2]]$ETA1, -0.145365840)

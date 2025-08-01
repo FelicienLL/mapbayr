@@ -1,6 +1,8 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 datadf <- exdata(1, c(1,4))
 datamatrix <- as.matrix(datadf)
-etamatrix <- get_eta(est001, output = "num")[c(1,4),]
+etamatrix <- get_eta(est001test, output = "num")[c(1,4),]
 etavec <- eta(runif(3))
 
 test_that("merge_datadf_etavec() works", {
