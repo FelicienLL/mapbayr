@@ -42,7 +42,7 @@ dxdt_CENTRAL = - K20 * CENTRAL + KA * DEPOT ;
 $CAPTURE DV CL TVCL
 "
 
-mod <- mrgsolve::mcode("mod_getparam", code_getparam)
+mod <- mrgsolve::mcode("mod_getparam", code_getparam, quiet = TRUE)
 dat <- exdata(ID = 1:2)
 est1 <- mapbayest(mod, dat[dat$ID==1,])
 est12 <- mapbayest(mod, dat)

@@ -1,3 +1,10 @@
+# mapbayr 0.10.1
+Fixes tests to allow new versions of mrgsolve to CRAN (#223):
+
+* Do not use `est001` from data/ in tests, since the latter always contains a deprecated stale mrgsolve model in it.
+* Stop creating an `ORIGID` column in the code of `mapbayr_vpc()` to prevent unnecessary `mrgsolve::update()` warnings.
+* Fix a test where "lambda" was not expected in "arg.ofv.fix"
+
 # mapbayr 0.10.0
 
 ## New features
