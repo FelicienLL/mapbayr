@@ -5,7 +5,7 @@ test_that("vpc_sim() works",{
 })
 
 test_that("vpc_sim() works", {
-  library(mrgsolve, verbose = FALSE)
+  library(mrgsolve, verbose = FALSE, warn.conflicts = FALSE)
   mod <- house() %>%
     omat(mrgsolve::dmat(rep(0.2,4)))
 
