@@ -36,11 +36,10 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     }
 
     # $PARAM
-    eta_names_x <- eta_names(x)
-    neta <- length(eta_names_x)
-    if(neta == 0) {
-      stop('$PARAM. Cannot find parameters named "ETA1", "ETA2", etc... \nDid you forget to add these parameters in $PARAM?', call. = FALSE)
-    } else {
+    if(has_eta_param(x)){
+      warning("Defining ETA1, ETA2... in $PARAM is no longer necessary and not recommended.\nRemove any ETA1, ETA2... defined in $PARAM and in $MAIN because mapbayr now relies on ETA(1), ETA(2)...")
+      eta_names_x <- eta_names(x)
+      neta <- length(eta_names_x)
       expected_eta_names <- make_eta_names(n = neta)
       if(any(eta_names_x != expected_eta_names)){
         stop(paste0("$PARAM. ", neta, " ETA parameter(s) found, but not named ", paste(expected_eta_names, collapse = ", "), ". "), call. = FALSE)
@@ -48,17 +47,13 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
       if(!all(x[eta_names_x]==0)){
         stop(paste0("$PARAM. The value of one or multiple ETA parameter(s) is not 0."), call. = FALSE)
       }
-    }
 
-    if(length(intersect(mbr_cov_names(x), eta_names_x)) > 0){
-      stop("$PARAM. One or several ETA parameter(s) are declared as `@covariates`, which is not allowed.", call. = FALSE)
-    }
-
-    # $OMEGA
-    odiag_x <- odiag(x)
-    nomega <- length(odiag_x)
-    if(nomega != neta) {
-      stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
+      # $OMEGA
+      odiag_x <- odiag(x)
+      nomega <- length(odiag_x)
+      if(nomega != neta) {
+        stop(paste0("$OMEGA. The OMEGA matrix diagonal has length ", nomega, ", but ", neta, " ETA parameters are defined in $PARAM."), call. = FALSE)
+      }
     }
 
     # $SIGMA

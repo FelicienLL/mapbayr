@@ -55,9 +55,13 @@ use_posterior <- function(x, update_omega = FALSE, update_cov = TRUE, update_eta
     }
   }
 
-
   if(isTRUE(update_eta)){
     L_mod <- map2(L_mod, get_eta(x, output = "list"), ~ param(.x, as.list(.y)))
+    rlang::inform(c(
+      "i" = "Updating `idata_set()` with individual ETA estimates.",
+      "i" = "Updating `eta_src` with \"idata\"."
+      "i" = "Use `data_set()` or `ev()` to simulate \"a posteriori\".")
+    )
   }
 
   if(is.null(.zero_re)){
