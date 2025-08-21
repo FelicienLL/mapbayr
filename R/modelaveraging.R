@@ -82,7 +82,7 @@
 #' # Make a plot that compares predictions
 #' List_aug_tab <- lapply(
 #'   X = list(A = estA, B = estB, C = estC),
-#'   FUN = \(x) augment(x)$aug_tab
+#'   FUN = function(x) augment(x)$aug_tab
 #' )
 #' List_aug_tab$.AVERAGE <- do_model_averaging(List_aug_tab, W)
 #'
