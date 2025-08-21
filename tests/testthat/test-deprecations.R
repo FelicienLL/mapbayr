@@ -1,6 +1,8 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 test_that("mbrest is deprecated", {
   expect_warning(my_mbrest <- mbrest(exmodel()), "Deprecated")
-  expect_equal(my_mbrest$mapbay_tab, filter(est001$mapbay_tab, ID == 1))
+  expect_equal(my_mbrest$mapbay_tab, filter(est001test$mapbay_tab, ID == 1))
 })
 
 test_that("adm_lines is deprecated", {

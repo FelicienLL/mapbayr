@@ -277,7 +277,6 @@ prepare_vpc_sim <- function(data, start = NULL, end = NULL, delta = 1){
   # start, end, delta = passed to mrgsim
 
   args <- tibble::tibble(data = split_mapbayr_data(data))
-  args <- mutate(args, ORIGID = names(data), .before = 1)
   args$tgrid <- sapply(args$data, infer_tgrid, delta = delta, end = end, start = start)
   args$obsaug <- TRUE
   args$new_sigma <- "zero_re"

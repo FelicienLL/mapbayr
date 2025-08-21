@@ -1,5 +1,7 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 test_that("get_phi works", {
-  phi001 <- get_phi(est001)
+  phi001 <- get_phi(est001test)
   expect_equal(nrow(phi001), 8)
   expect_equal(phi001$SUBJECT_NO, 1:8)
   expect_equal(phi001$ID, 1:8)
@@ -8,13 +10,13 @@ test_that("get_phi works", {
 
 test_that("no error if covariance does not exists", {
   # hessian = FALSE
-  est001_nohessian <- est001
+  est001_nohessian <- est001test
   est001_nohessian$covariance[c(1,3,5,8)] <- matrix(NA_real_)
   phi_nohessian <- as.data.frame(get_phi(est001_nohessian))
   expect_equal(phi_nohessian[c(1,3,5,8), "ETC1_1"], rep(NA_real_, 4))
 
   # $covariance does not exists (mapbayr < 0.6.0)
-  est001_old <- est001
+  est001_old <- est001test
   est001_old$covariance <- NULL
   phi_old <- as.data.frame(get_phi(est001_old))
   expect_equal(phi_old$ETC1_1, rep(NA_real_, 8))

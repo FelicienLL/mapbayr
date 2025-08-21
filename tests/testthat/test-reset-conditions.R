@@ -209,7 +209,9 @@ $CAPTURE DV
     adm_rows(amt = 100) %>%
     obs_rows(time = c(1, 2, 6, 8), DV = c(0.87, 1.15, 1.07, 0.96)*10) %>% #Observations ten-fold higher than typical profile
     get_data()
-  invisible(capture.output(expect_message(est1 <- mapbayest(mod1, data1), "Reset with new bounds")))
+
+  # 4 messages returned, 1 captured by testthat, the other by suppressMessages
+  suppressMessages(expect_message(est1 <- mapbayest(mod1, data1), "Reset with new bounds"))
   expect_gt(unname(abs(get_eta(est1, 1))), est1$arg.optim$lower[1])
 
   est2 <- mapbayest(mod1, data1, verbose = FALSE, reset = FALSE)

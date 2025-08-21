@@ -1,4 +1,6 @@
 moddata1 <- exmodel(compile = FALSE)
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 test_that("get_data.mrgmod works", {
   expect_s3_class(get_data(moddata1), "tbl_df")
   expect_named(get_data(moddata1), c("ID", "time", "evid", "amt", "cmt", "ii", "addl", "mdv", "DV"))
@@ -11,10 +13,10 @@ test_that("devalid_data_set works", {
 })
 
 test_that("get_data.mapbayests works", {
-  expect_s3_class(get_data(est001), "tbl_df")
-  expect_named(get_data(est001), c("ID", "time", "evid", "amt", "cmt", "ii", "addl", "mdv", "DV"))
+  expect_s3_class(get_data(est001test), "tbl_df")
+  expect_named(get_data(est001test), c("ID", "time", "evid", "amt", "cmt", "ii", "addl", "mdv", "DV"))
 
   #can return list (one element per ID)
-  expect_length(data_list <- get_data(est001, output = "list"), 8)
-  expect_equal(data_list[[1]], filter(get_data(est001, output = "df"), ID == 1))
+  expect_length(data_list <- get_data(est001test, output = "list"), 8)
+  expect_equal(data_list[[1]], filter(get_data(est001test, output = "df"), ID == 1))
 })

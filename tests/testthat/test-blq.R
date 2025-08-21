@@ -11,7 +11,7 @@ $PKMODEL cmt='CENT GUT', depot = FALSE
 $TABLE
 capture DV = (CENT/V1) * (1 + EPS(1)) + EPS(2);"
 
-pchelle_mod <- mcode("pchelle_mod", pchelle_code)
+pchelle_mod <- mcode("pchelle_mod", pchelle_code, quiet = TRUE)
 
 id1 <- adm_rows(cmt = 1, amt = 100, rate = 1200, LLOQ = 1) %>%
   obs_rows(cmt = 1, DV = c(75, 25, 7), time = c(1, 6, 24), BLQ = 0) %>%
