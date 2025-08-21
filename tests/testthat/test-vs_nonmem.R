@@ -1,5 +1,7 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 nmphi <- read_nmphi(system.file("nm001", "run001.phi", package = "mapbayr"))
-merged <- merge_phi(mapbayr_phi = get_phi(est001), nonmem_phi = nmphi)
+merged <- merge_phi(mapbayr_phi = get_phi(est001test), nonmem_phi = nmphi)
 summarised <- summarise_phi(merged)
 
 nmphi20 <- read_nmphi(system.file("run20eta.phi", package = "mapbayr"))

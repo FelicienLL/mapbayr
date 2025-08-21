@@ -1,7 +1,9 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 test_that("newuoa vs nm", {
   mod <- exmodel(ID = 1)
   est_n <- mapbayest(mod, method = "newuoa")
-  expect_equal(get_eta(est_n), get_eta(est001, output = "list")[[1]], tolerance = 0.00001)
+  expect_equal(get_eta(est_n), get_eta(est001test, output = "list")[[1]], tolerance = 0.00001)
 
   data2 <- mod %>%
     get_data() %>%

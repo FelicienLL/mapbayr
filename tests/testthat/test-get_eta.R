@@ -1,7 +1,9 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
+
 estid1 <- mapbayest(exmodel())
 test_that("default get_eta works", {
   e1 <- get_eta(estid1)
-  e8 <- get_eta(est001)
+  e8 <- get_eta(est001test)
 
   expect_length(e1, 3)
   expect_type(e1, "double")
@@ -16,7 +18,7 @@ test_that("default get_eta works", {
 
 test_that("get_eta list works", {
   e1 <- get_eta(estid1, output = "list")
-  e8 <- get_eta(est001, output = "list")
+  e8 <- get_eta(est001test, output = "list")
 
   expect_length(e1, 1)
   expect_type(e1, "list")
@@ -29,7 +31,7 @@ test_that("get_eta list works", {
 
 test_that("get_eta num works", {
   e1 <- get_eta(estid1, output = "num")
-  e8 <- get_eta(est001, output = "num")
+  e8 <- get_eta(est001test, output = "num")
 
   expect_length(e1, 3)
   expect_type(e1, "double")
@@ -42,7 +44,7 @@ test_that("get_eta num works", {
 
 test_that("get_eta df works", {
   e1 <- get_eta(estid1, output = "df")
-  e8 <- get_eta(est001, output = "df")
+  e8 <- get_eta(est001test, output = "df")
 
   expect_length(e1, 4)
   expect_s3_class(e1, "data.frame")
@@ -62,7 +64,7 @@ test_that("get_eta stops if invalid type", {
 
 test_that("eta selection works", {
   e1 <- get_eta(estid1, 1)
-  e8 <- get_eta(est001, 1)
+  e8 <- get_eta(est001test, 1)
 
   expect_length(e1, 1)
   expect_type(e1, "double")
@@ -77,7 +79,7 @@ test_that("eta selection works", {
 
 test_that("multiple eta selection works", {
   e1 <- get_eta(estid1, 1, 3)
-  e8 <- get_eta(est001, 1, 3)
+  e8 <- get_eta(est001test, 1, 3)
 
   expect_length(e1, 2)
   expect_type(e1, "double")

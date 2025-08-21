@@ -1,3 +1,4 @@
+est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
 code_hist <- "
 $PARAM
 ETA1 = 0, ETA2 = 0, ETA3= 0, ETA4 = 0, ETA5 = 0, ETA6 = 0,
@@ -10,7 +11,7 @@ double DV = 100.0 ;
 $CAPTURE DV
 "
 
-mod_hist <- mrgsolve::mcode("mod12", code_hist)
+mod_hist <- mrgsolve::mcode("mod12", code_hist, quiet=TRUE)
 dat_hist <- exdata()
 est_hist <- mapbayest(mod_hist, dat_hist, reset = 0, verbose = FALSE)
 hist_hist <- hist(est_hist)
@@ -39,7 +40,7 @@ test_that("ID percentile is shown if n ID == 1", {
 })
 
 test_that("SHK is shown if n ID > 1", {
-  hist001 <- hist(est001)
+  hist001 <- hist(est001test)
   labelhist001 <- fetch_facet_labels(hist001)[["name"]]
   expect_true(all(!str_detect(labelhist001, "ID percentile")))
 
@@ -47,17 +48,17 @@ test_that("SHK is shown if n ID > 1", {
   expect_true(str_detect(labelhist001["ETA1"], "SHK = 23%"))
 
   # SD based
-  hist_shk_sd <- hist(est001, shk = "sd")
+  hist_shk_sd <- hist(est001test, shk = "sd")
   label_sd <- fetch_facet_labels(hist_shk_sd)[["name"]]
   expect_true(str_detect(label_sd["ETA1"], "SHK = 23%"))
 
   # VAR based
-  hist_shk_var <- hist(est001, shk = "var")
+  hist_shk_var <- hist(est001test, shk = "var")
   label_var <- fetch_facet_labels(hist_shk_var)[["name"]]
   expect_true(str_detect(label_var["ETA1"], "SHK = 40%"))
 
   # NA
-  hist_shk_na <- hist(est001, shk = NA)
+  hist_shk_na <- hist(est001test, shk = NA)
   label_na <- fetch_facet_labels(hist_shk_na)[["name"]]
   expect_equal(label_na["ETA1"], c(ETA1 = "CL\nIIV = 45%"))
 
@@ -67,7 +68,7 @@ test_that("ID percentile is not shown if n ID > 1", {
   label_hist <- eval(quote(pairlist(...)), envir = environment(hist_hist[["facet"]][["params"]][["labeller"]]))[["name"]][["ETA1"]]
   expect_true(str_detect(label_hist,  "ID percentile"))
 
-  hist001 <- hist(est001)
+  hist001 <- hist(est001test)
   labelhist001 <- eval(quote(pairlist(...)), envir = environment(hist001[["facet"]][["params"]][["labeller"]]))[["name"]][["ETA1"]]
   expect_true(!str_detect(labelhist001, "ID percentile"))
 })
