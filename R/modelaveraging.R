@@ -226,10 +226,10 @@ do_model_averaging <- function(list_of_tabs, weights_matrix){
 }
 
 are_comparable <- function(a, b){
-  stopifnot(all.equal(
-    attributes(a),
-    attributes(b)
-    ))
+  stopifnot(is.null(attr.all.equal(
+    a,
+    b
+    )))
 
   stopifnot(all.equal(
     sapply(a, class),
