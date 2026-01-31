@@ -1,3 +1,7 @@
+# mapbayr 0.10.2
+
+* Internal `are_comparable()` now better checks attributes between the objects. This avoids a conflict with the upload of dplyr 1.2.0 to CRAN.
+
 # mapbayr 0.10.1
 Fixes tests to allow new versions of mrgsolve to CRAN (#223):
 
