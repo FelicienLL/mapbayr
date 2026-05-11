@@ -1,3 +1,8 @@
+# mapbayr development version
+
+* Set up github actions "check-standard"
+* Set up github pages.
+
 # mapbayr 0.10.2
 
 * Internal `are_comparable()` now better checks attributes between the objects. This avoids a conflict with the upload of dplyr 1.2.0 to CRAN.

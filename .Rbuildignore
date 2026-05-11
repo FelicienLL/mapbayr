@@ -7,3 +7,6 @@ README.Rmd
 ^data-raw$
 ^sandbox\.R$
 ^\.github$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
