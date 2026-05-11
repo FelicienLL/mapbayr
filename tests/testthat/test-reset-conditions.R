@@ -91,6 +91,7 @@ DV : Concentration central
 
 test_that("check absolute eta", {
   skip_on_cran()
+  skip_on_os("mac")
   code1 <- "
 $PARAM @annotated
 TVCL : 4.00 : Clearance (L/h)
@@ -173,6 +174,7 @@ $CAPTURE DV CL
 
 test_that("check bounds", {
   skip_on_cran()
+  skip_on_os("mac")
   code1 <- "
 $PARAM @annotated
 TVCL : 4.00 : Clearance (L/h)

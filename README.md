@@ -8,6 +8,7 @@
 [![CRAN
 status](https://www.r-pkg.org/badges/version-last-release/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
 [![](https://img.shields.io/badge/Citation-CPT:PSP-blue.svg)](https://pubmed.ncbi.nlm.nih.gov/34342170/)
+[![R-CMD-check](https://github.com/FelicienLL/mapbayr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FelicienLL/mapbayr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori*
@@ -359,12 +360,12 @@ assigned with \[OBS\] in `$CMT`. The order of the pair must respect the
 order in which compartments were assigned. To put it more clearly, the
 sigma matrix will be interpreted as such whatever the model :
 
-| N° in the SIGMA matrix diagonal |                      Associated error                      |
-|:-------------------------------:|:----------------------------------------------------------:|
-|                1                | Proportional on concentrations in the 1st cmt with \[OBS\] |
-|                2                |   Additive on concentrations in the 1st cmt with \[OBS\]   |
-|                3                | Proportional on concentrations in the 2nd cmt with \[OBS\] |
-|                4                |   Additive on concentrations in the 2nd cmt with \[OBS\]   |
+| N° in the SIGMA matrix diagonal | Associated error |
+|:--:|:--:|
+| 1 | Proportional on concentrations in the 1st cmt with \[OBS\] |
+| 2 | Additive on concentrations in the 1st cmt with \[OBS\] |
+| 3 | Proportional on concentrations in the 2nd cmt with \[OBS\] |
+| 4 | Additive on concentrations in the 2nd cmt with \[OBS\] |
 
 ``` c
 //example: correlated proportional error between parent and metabolite
