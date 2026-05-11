@@ -21,6 +21,7 @@ library(knitr)
 <!-- badges: start -->
 [![CRAN status](https://www.r-pkg.org/badges/version-last-release/mapbayr)](https://CRAN.R-project.org/package=mapbayr)
 [![](https://img.shields.io/badge/Citation-CPT:PSP-blue.svg)](https://pubmed.ncbi.nlm.nih.gov/34342170/)
+[![R-CMD-check](https://github.com/FelicienLL/mapbayr/actions/workflows/R-CMD-check.yaml/badge.svg)](https://github.com/FelicienLL/mapbayr/actions/workflows/R-CMD-check.yaml)
 <!-- badges: end -->
 
 mapbayr is a free and open source package for *maximum a posteriori* bayesian estimation of PK parameters in R. Thanks to a single function, `mapbayest()`, you can estimate individual PK parameters from: 
