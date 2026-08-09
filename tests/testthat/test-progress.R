@@ -3,12 +3,12 @@ my_data <- exdata(ID = 1)
 
 test_that("progress argument works", {
   skip_on_cran()
-  my_data10 <- seq(10) %>%
+  my_data40 <- seq(40) %>%
     lapply(function(x) mutate(my_data, ID = x)) %>%
     bind_rows()
 
-  expect_message(mapbayest(x = my_model, my_data10), "\\[=====")
-  expect_message(mapbayest(x = my_model, my_data10, progress = FALSE), NA)
+  expect_message(mapbayest(x = my_model, my_data40), "\\[=====")
+  expect_message(mapbayest(x = my_model, my_data40, progress = FALSE), NA)
 })
 
 test_that("do_optimization works outside the call of mapbayest", {
