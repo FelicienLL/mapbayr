@@ -50,7 +50,7 @@ test_that("exmodel works", {
   expect_equal(get_data(mod1)$ID, rep(1, 5)) #6 lines initially, 1 removed with cleaning
 
   mod2 <- exmodel(num = 6, ID = 2, clean_data = FALSE)
-  expect_equal(names(mod2)$param, c("TVCL", "TVVC", "TVKA", "TVD2", "FR",  "ETA1", "ETA2", "ETA3", "ETA4"))
+  expect_equal(names(mod2)$param, c("TVCL", "TVVC", "TVKA", "TVD2", "FR"))
   expect_equal(get_data(mod2)$ID, rep(2, 5)) #5 lines
 
   expect_equal(dim(get_data(exmodel(add_exdata = FALSE))), c(0,0))

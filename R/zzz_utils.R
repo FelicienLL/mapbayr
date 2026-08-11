@@ -23,7 +23,7 @@ NULL
 #' @noRd
 odiag <- function(x){
   if(!is.mrgmod(x)) stop("the first argument to odiag must be a model object", call. = F)
-  diag(omat(x, make = T))
+  diag(omat(collapse_omega(x), make = T))
 }
 
 #' Get quantile from omega diag and a probability
@@ -69,4 +69,8 @@ has_eta_param <- function(x){
   any(
     make_eta_names(n = length(odiag(x))) %in% grep('ETA\\d+', names(x@param), value = TRUE)
   )
+}
+
+get_detailsdata <- function(x, .block){
+  subset(as.list(x)$details$data, block == .block)
 }

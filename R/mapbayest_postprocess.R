@@ -9,10 +9,14 @@ post_mapbay_tab <- function(x, data, etamat){
   # IPRED and POST HOC parameters
   dataposthoc <- merge_datadf_etamatrix(data_df = data, eta_matrix = etamat)
   capturednames <- outvars(x)$capture
-  posthocsims <- mrgsim_df(zero_re(x),
-                           dataposthoc,
-                           Req = capturednames,
-                           end = -1) %>%
+  posthocsims <- mrgsim(
+    x = zero_re(x),
+    data = dataposthoc,
+    Req = capturednames,
+    etasrc = "data.all",
+    output = "df",
+    end = -1
+  ) %>%
     rename(IPRED = "DV") %>%
     select(-all_of(c("ID", "time")))
 

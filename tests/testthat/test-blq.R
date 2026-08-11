@@ -1,10 +1,9 @@
 pchelle_code <- "$PROB
-$PARAM ETA1 = 0, ETA2 = 0
 $OMEGA 0.05 0.02 // CL and V
 $SIGMA 0.1 0.5 // prop and add
 $MAIN
-double CL = 0.2 * exp(ETA(1) + ETA1) ;
-double V1 = 2.0 * exp(ETA(2) + ETA2) ;
+double CL = 0.2 * exp(ETA(1)) ;
+double V1 = 2.0 * exp(ETA(2)) ;
 double Q = 0.1 ;
 double V2 = 0.5;
 $PKMODEL cmt='CENT GUT', depot = FALSE

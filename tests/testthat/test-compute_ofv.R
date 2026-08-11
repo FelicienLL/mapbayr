@@ -7,7 +7,7 @@ test_that("f works", {
   # tweak because of the "etasrc = data"
   etatest <- eta(runif(3))
   arg.ofv$idvaliddata_eta <- merge_validdata_eta(arg.ofv$idvaliddata, etatest)
-  dat_eta <- merge_datadf_etavec(dat, etatest/2)
+  dat_eta <- merge_datadf_etavec(dat, etatest)
 
   #on validated data
   expect_length(f(qmod = arg.ofv$qmod, data = arg.ofv$idvaliddata_eta), 4)
@@ -155,7 +155,6 @@ $CAPTURE DV"
 test_that("dose-related parameters > II", {
 
   code141 <- "
-$PARAM ETA1 = 0, ETA2 = 0
 $CMT GUT CENT
 $OMEGA .5 .5
 $SIGMA .04 0
@@ -163,8 +162,8 @@ $MAIN
 double KA = 1 ;
 double CL = 1 ;
 double V = 30 ;
-double ALAG1 = 5.0 * exp(ETA(1) + ETA1) ;
-double D1 = 5.0 * exp(ETA(2) + ETA2) ;
+double ALAG1 = 5.0 * exp(ETA(1)) ;
+double D1 = 5.0 * exp(ETA(2)) ;
 ALAG_GUT = ALAG1 ;
 D_GUT = D1 ;
 $PKMODEL ncmt = 1, depot = TRUE

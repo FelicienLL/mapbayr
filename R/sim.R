@@ -51,8 +51,6 @@ do_mapbayr_sim <- function(
     new_sigma = NULL  # NULL = keep from the model "x". Accepts a matrix. And also "zero_re", used only if nrep is non-NULL
 ){
 
-  k <- 1
-  if(has_eta_param(x)) k <- 0.5
 
   nID <- length(unique(data$ID))
 
@@ -113,7 +111,7 @@ do_mapbayr_sim <- function(
       }
     }
 
-    eta_matrix <- rename_as_eta(eta_matrix) * k # ETA(1)/2 + ETA1/2
+    eta_matrix <- rename_as_eta(eta_matrix)
     if(is.matrix(data_to_sim)){
       data_to_sim <- merge_datamatrix_etamatrix(data_to_sim, eta_matrix)
     } else {
