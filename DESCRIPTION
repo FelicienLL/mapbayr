@@ -38,7 +38,7 @@ Suggests:
     testthat (>= 3.0.0),
     tibble
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5)
 LazyData: true
 Config/testthat/edition: 3
 Config/roxygen2/version: 8.1.0
