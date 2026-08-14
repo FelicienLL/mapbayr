@@ -6,3 +6,5 @@ inst/logo.pptx
 cran-comments.md
 sandbox.R
 docs
+inst/doc
+**/.quarto/
