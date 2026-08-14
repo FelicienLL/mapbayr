@@ -136,7 +136,15 @@ eta_descr <- function(x){
   }
 }
 
+
+#' Labels of ETA to estimate
+#'
+#' @param x model object
+#'
+#' @return a vector of character
+#' @noRd
 eta_labels <- function(x){
+  if(length(omat(x)) == 0) return(NULL)
   omat(collapse_omega(x))@labels[[1]]
 }
 

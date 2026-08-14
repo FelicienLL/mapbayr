@@ -124,17 +124,24 @@ test_that("log_transformation works with sigma labels", {
   expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(EPS(4)) ;"), compile = FALSE)))
 })
 
-test_that("eta_descr works", {
-  modomlab1 <- mcode("modomlab1",
-                     "$OMEGA 1 3 1",
+test_that("eta_descr and eta_labels works", {
+  # no OMEGA
+  modomlab0 <- mcode("modomlab0",
+                     "$SIGMA 1 1",
                      compile = FALSE
   )
+  expect_equal(eta_descr(modomlab0), NULL)
+  expect_equal(eta_labels(modomlab0), NULL)
 
-  expect_equal(
-    eta_descr(modomlab1), # no labs = labels are ETA1 2 etc
-    c("ETA1", "ETA2", "ETA3")
+  # no labs = descr are ETA1 2 etc
+  modomlab1 <- mcode("modomlab1",
+                      "$OMEGA 1 3 1",
+                      compile = FALSE
   )
+  expect_equal(eta_descr(modomlab1), c("ETA1", "ETA2", "ETA3"))
+  expect_equal(eta_labels(modomlab1), c(".", ".", "."))
 
+  # One annotated OMEGA block
   modomlab2 <- mcode("modomlab2",
                      "$OMEGA @annotated
                      ECL: 1 : Clearance
@@ -142,7 +149,10 @@ test_that("eta_descr works", {
                      ETV : 1 : volume",
                      compile = FALSE
   )
+  expect_equal(eta_descr(modomlab2),  c("Clearance", "ETA2", "volume"))
+  expect_equal(eta_labels(modomlab2),  c("ECL", "ETA2", "ETV"))
 
+  # many omega blocks, labels do not make sense (ETA1 is the second omega)
   modomlab3 <- mcode("modomlab3",
                      "
                      $PARAM @annotated
@@ -150,25 +160,14 @@ test_that("eta_descr works", {
                      $OMEGA @annotated
                      ECL: 1 : Clearance
                      ETA1 : 3 :
+                     $OMEGA 5
                      $OMEGA @annotated
-                     ETV : 1 : v",
+                     ETV : 1 : v
+                     ",
                      compile = FALSE
   )
 
-  expect_equal(
-    eta_descr(modomlab1), # no labs = labels are ETA1 2 etc
-    c("ETA1", "ETA2", "ETA3")
-  )
-
-  expect_equal(
-    eta_descr(modomlab2), # annotations
-    c("Clearance", "ETA2", "volume")
-  )
-
-  expect_equal(
-    # many omega blocks, labels do not make sense (ETA1 is the second omega)
-    eta_descr(modomlab3),
-    c("Clearance", "ETA2", "v")
-  )
+  expect_equal(eta_descr(modomlab3), c("Clearance", "ETA2", "ETA3", "v"))
+  expect_equal(eta_labels(modomlab3), c("ECL", "ETA1", ".", "ETV"))
 
 })
