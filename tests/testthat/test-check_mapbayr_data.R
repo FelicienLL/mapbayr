@@ -8,6 +8,13 @@ test_that("stops if non-numeric columns", {
   expect_error(check_mapbayr_data(mutate(dat, hello = "world", foo = "bar")), "Non-numeric column found: hello foo")
 })
 
+test_that("stops if ETA detected", {
+  expect_no_error(check_mapbayr_data(dat))
+  expect_error(check_mapbayr_data(data.frame(ETA1 = 0)), "Data cannot contain any variable called ETA1, ETA2 etc")
+  expect_error(check_mapbayr_data(data.frame(ETA12 = 0)), "Data cannot contain any variable called ETA1, ETA2 etc")
+  expect_no_error(check_mapbayr_data(dat %>% mutate(THETA1 =0)))
+})
+
 test_that("auto-supply of MDV if missing", {
   data_mdv <- select(dat, -mdv)
   datachecked <- check_mapbayr_data(data_mdv)

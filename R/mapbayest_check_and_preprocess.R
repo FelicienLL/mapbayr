@@ -101,6 +101,11 @@ check_mapbayr_data <- function(data, lloq = NULL){
   # Is there any data?
   if(is.null(data)) stop("No data provided", call. = F)
 
+  # Are there any "ETA" ?
+  if(any(grepl("^ETA\\d+$", colnames(data)))){
+    stop("Data cannot contain any variable called ETA1, ETA2 etc...")
+  }
+
   # Remove .datehour, if any
   data[[".datehour"]] <- NULL
 
@@ -125,6 +130,7 @@ check_mapbayr_data <- function(data, lloq = NULL){
   if(nrow(filter(data, .data$mdv == 0 & .data$evid == 2)) > 0) stop("Lines with evid = 2 & mdv = 0 are not allowed", call. = F)
   if(nrow(filter(data, .data$mdv == 0 & .data$evid != 0)) > 0) stop("Lines with mdv = 0 must have evid = 0.", call. = F)
   if(any(data$mdv==0 & is.na(data$DV))) stop("DV cannot be missing (NA) on an observation line (mdv = 0)", call. = F)
+
 
   # Do we take mapbayest(lloq = ) into account?
   if(is.null(data[["LLOQ"]])){
