@@ -5,6 +5,7 @@
 \alias{mbrest}
 \alias{adm_lines}
 \alias{obs_lines}
+\alias{use_posterior}
 \title{Deprecated functions}
 \usage{
 mbrest(...)
@@ -12,6 +13,8 @@ mbrest(...)
 adm_lines(...)
 
 obs_lines(...)
+
+use_posterior(...)
 }
 \arguments{
 \item{...}{passed to the corresponding function}
@@ -24,5 +27,6 @@ Deprecated functions
 \item mbrest() is now \code{\link[=mapbayest]{mapbayest()}}
 \item adm_lines() is now \code{\link[=adm_rows]{adm_rows()}}
 \item obs_lines() is now \code{\link[=obs_rows]{obs_rows()}}
+\item use_posterior() is defunct. Most features are available using \code{\link[=use_estimates]{use_estimates()}}
 }
 }

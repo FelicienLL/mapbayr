@@ -99,9 +99,8 @@ use_estimates <- function(
   if(verbose){
     information <- c(information, i = paste0("Setting `etasrc = \"", .etasrc, "\"`."))
     information <- c(information, i = "You can use `data_set()` or `ev()` to simulate \"a posteriori\".")
+    rlang::inform(information)
   }
-
-  rlang::inform(information)
 
   mod
 }
