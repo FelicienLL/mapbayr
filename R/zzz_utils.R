@@ -6,7 +6,7 @@
 #' @importFrom ggplot2 geom_point geom_ribbon geom_rug geom_segment geom_vline ggplot label_both labs theme_bw scale_x_continuous scale_y_continuous
 #' @importFrom ggplot2 scale_y_log10 scale_fill_manual scale_shape_manual scale_color_manual scale_linetype_manual stat_function theme
 #' @importFrom magrittr %>%
-#' @importFrom mrgsolve as.list collapse_omega data_set ev is.mrgmod mread mcode mrgsim mrgsim_df mrgsim_q mvgauss omat outvars param realize_addl smat valid_data_set zero_re
+#' @importFrom mrgsolve as.list collapse_omega data_set ev idata_set is.mrgmod mread mcode mrgsim mrgsim_df mrgsim_q mvgauss omat outvars param realize_addl smat valid_data_set zero_re
 #' @importFrom purrr flatten map map2 map2_dbl map2_dfc pmap pmap_dfr quietly safely simplify transpose
 #' @importFrom rlang .data set_names
 #' @importFrom stringr str_detect str_extract_all str_replace str_pad str_subset str_which

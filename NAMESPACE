@@ -57,6 +57,7 @@ export(preprocess.ofv.id)
 export(preprocess.optim)
 export(read_nmphi)
 export(summarise_phi)
+export(use_estimates)
 export(use_posterior)
 importFrom(dplyr,
   across,
@@ -123,6 +124,7 @@ importFrom(mrgsolve,
   collapse_omega,
   data_set,
   ev,
+  idata_set,
   is.mrgmod,
   mcode,
   mread,

@@ -62,9 +62,6 @@ TVV1: 10.0 : Central volume
 V2  : 10.0 : Peripheral volume of distribution
 Q   :  1.0 : Intercompartmental clearance
 
-ETA1: 0 : Clearance (L/h)
-ETA2: 0 : Central volume (L)
-
 $PARAM @annotated @covariates
 BW : 70 : Body weight (kg)
 
@@ -81,8 +78,8 @@ $TABLE
 double DV = (CENT/V1) *(1 + EPS(1)) + EPS(2);
 
 $MAIN
-double CL = TVCL * exp(ETA1 + ETA(1)) * pow(BW / 70, 1.2) ;
-double V1 = TVV1 * exp(ETA2 + ETA(2)) ;
+double CL = TVCL * exp(ETA(1)) * pow(BW / 70, 1.2) ;
+double V1 = TVV1 * exp(ETA(2)) ;
 double K12 = Q / V1  ;
 double K21 = Q / V2  ;
 double K10 = CL / V1 ;
@@ -178,13 +175,35 @@ get_eta(my_est)
 get_param(my_est, "CL")
 #> [1] 1.79217
 
-# The `use_posterior()` functions updates the model object with posterior values and covariates to simulate like with a regular mrgsolve model
-my_est %>% 
-  use_posterior() %>% 
-  data_set(expand.ev(amt = c(50, 100, 200, 500), dur = c(5, 24)) %>% mutate(rate = amt/dur)) %>% 
-  carry_out(dur) %>% 
-  mrgsim() %>% 
-  plot(DV~time|factor(dur), scales = "same")
+# The function `use_estimates()` updates the model object with estimated parameter values (ETA) and covariates to simulate like with a regular mrgsolve model
+
+updated_model <- my_est %>% 
+  use_estimates() 
+
+# Define simulation scenarios (let your inspiration flow) and simulate
+scenarios <- tibble::tibble(
+  ID = 1, time = 0, evid = 1, cmt = 1,
+  amt = c(50, 100, 200, 500), 
+  rate = amt/5, 
+  scenario = forcats::as_factor(paste0(amt, " mg"))
+)
+
+simdat <- data.frame()
+for(i in unique(scenarios$scenario)){
+  simdat <- updated_model %>% 
+    data_set(subset(scenarios, scenario == i)) %>% 
+    mrgsim(output = "df", recover = "scenario") %>% 
+    bind_rows(simdat)
+}
+
+# See the results
+library(ggplot2)
+simdat %>% 
+  ggplot(aes(time, DV)) +
+  geom_line(aes(color = scenario)) +
+  geom_point(data = my_data %>% dplyr::filter(mdv == 0)) + 
+  theme_bw() +
+  scale_colour_discrete(palette = scales::pal_brewer(palette = "Dark2"))
 ```
 
 ![](man/figures/README-plot3-1.png)<!-- -->

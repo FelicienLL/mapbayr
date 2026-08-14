@@ -30,7 +30,7 @@ test_that("estimation and methods works", {
   expect_equal(phi$ETC2_1, 0)
   expect_equal(phi$ETC2_2, 0)
   expect_equal(phi$ETC3_2, 0)
-  expect_equal(param(use_posterior(est))$ETA2, 0)
+  expect_equal(use_estimates(est, verbose = FALSE)@args$idata$ETA2, 0)
   histo <- hist(est)
   expect_s3_class(histo, "ggplot")
 })
@@ -47,7 +47,7 @@ test_that("estimation and methods works", {
   expect_equal(phi$ETC2_1, 0)
   expect_equal(phi$ETC2_2, 0)
   expect_equal(phi$ETC3_2, 0)
-  expect_equal(param(use_posterior(est))$ETA2, 0)
+  expect_equal(use_estimates(est, verbose = FALSE)@args$idata$ETA2, 0)
   histo <- hist(est)
   expect_s3_class(histo, "ggplot")
 

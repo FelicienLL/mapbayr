@@ -61,11 +61,11 @@
 #' get_eta(my_est)
 #' get_param(my_est)
 #' as.data.frame(my_est)
-#' use_posterior(my_est)
+#' use_estimates(my_est)
 #'
 #'@seealso \code{\link{hist.mapbayests}}
 #'@seealso \code{\link{plot.mapbayests}}
-#'@seealso \code{\link{use_posterior}}
+#'@seealso \code{\link{use_estimates}}
 #'
 mapbayest <- function(x,
                       data = NULL,

@@ -102,7 +102,7 @@ print(my_est)
 get_eta(my_est)
 get_param(my_est)
 as.data.frame(my_est)
-use_posterior(my_est)
+use_estimates(my_est)
 
 }
 \seealso{
@@ -110,5 +110,5 @@ use_posterior(my_est)
 
 \code{\link{plot.mapbayests}}
 
-\code{\link{use_posterior}}
+\code{\link{use_estimates}}
 }

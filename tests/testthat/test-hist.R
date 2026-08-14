@@ -57,9 +57,9 @@ test_that("SHK is shown if n ID > 1", {
   expect_true(str_detect(label_var["ETA1"], "SHK = 40%"))
 
   # NA
-  hist_shk_na <- hist(est_hist, shk = NA)
+  hist_shk_na <- hist(est001test, shk = NA)
   label_na <- fetch_facet_labels(hist_shk_na)[["name"]]
-  expect_equal(label_na["ETA1"], c(ETA1 = "CL\nIIV = 55%"))
+  expect_equal(label_na["ETA1"], c(ETA1 = "ETA1\nIIV = 45%"))
 
 })
 
