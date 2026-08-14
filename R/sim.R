@@ -80,8 +80,12 @@ do_mapbayr_sim <- function(
     data_to_sim <- replicate_data(data_to_sim, nrep)
   }
 
+  # If ETAs (`eta`) not provided, we simulate the population PK
+  # Same OMEGA for all individuals (the IIV)
   etasrc <- "omega"
   if(!is.null(eta)){
+    # If ETAs (`eta`) are provided, we simulate individuals with pk param uncertainty
+    # Different OMEGA for each individuals (the variance-covariance matrix)
     if(!is.matrix(eta)){
       eta <- matrix(
         data = eta, nrow = 1,
