@@ -72,5 +72,5 @@ has_eta_param <- function(x){
 }
 
 get_detailsdata <- function(x, .block){
-  subset(as.list(x)$details$data, block == .block)
+  dplyr::filter(as.list(x)$details$data, .data$block == .block)
 }

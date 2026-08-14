@@ -73,14 +73,13 @@ The main function of the mapbayr package. Performs a \emph{maximum a posteriori}
 }
 \examples{
 # First, code a model
-code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-KA = 0.5, TVCL = 1.1, TVV = 23.3
+code1 <- "$PARAM KA = 0.5, TVCL = 1.1, TVV = 23.3
 $OMEGA 0.41 0.32
 $SIGMA 0.04 0
 $CMT DEPOT CENT
 $PK
-double CL=TVCL*exp(ETA1+ETA(1));
-double V=TVV*exp(ETA2+ETA(2)) ;
+double CL=TVCL*exp(ETA(1));
+double V=TVV*exp(ETA(2)) ;
 $ERROR
 double DV=CENT/V*(1+EPS(1))+EPS(2);
 $PKMODEL ncmt = 1, depot = TRUE

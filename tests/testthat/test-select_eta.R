@@ -1,7 +1,6 @@
 test_that("select_eta argument works", {
   mod <- mcode("mod",
-               "$PARAM ETA1 = 0, ETA2 = 0, ETA3 = 0
-               $OMEGA 0.1 0.2 0.3",
+               "$OMEGA 0.1 0.2 0.3",
                compile = FALSE, cache = FALSE)
 
   expect_equal(preprocess.optim(mod)$select_eta, c(1,2,3))
