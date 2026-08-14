@@ -21,36 +21,20 @@ mcode2 <- function(code, ...){
 }
 
 test_that("$PARAM is well-specified", {
-  # expect_error(
-  #   check_mapbayr_model(mcode2("$PARAM CL = 1"), check_compile = FALSE),
-  #   "\\$PARAM. Cannot find parameters named \\\"ETA1\\\", \\\"ETA2\\\", etc... \nDid you forget to add these parameters in \\$PARAM?"
-  # )
 
-  # expect_error(
-  #   check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA3 = 0"), check_compile = FALSE),
-  #   "\\$PARAM. 2 ETA parameter\\(s\\) found, but not named ETA1, ETA2."
-  # )
-
-  # expect_error(
-  #   check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0.1"), check_compile = FALSE),
-  #   "\\$PARAM. The value of one or multiple ETA parameter\\(s\\) is not 0."
-  # )
-
-  # expect_error(
-  #   check_mapbayr_model(mcode2("$PARAM @covariates
-  #                              ETA1 = 0"), check_compile = FALSE),
-  #   "\\$PARAM. One or several ETA parameter\\(s\\) are declared as `@covariates`, which is not allowed."
-  # )
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0"), check_compile = FALSE),
+    "Defining ETA1, ETA2... in \\$PARAM is no longer necessary and not allowed"
+  )
 
 })
 
-# test_that("$OMEGA is well-specified", {
-#   expect_error(
-#     check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-#                                 $OMEGA 0.1 0.1 0.1"), check_compile = FALSE),
-#     "\\$OMEGA. The OMEGA matrix diagonal has length 3, but 2 ETA parameters are defined in \\$PARAM"
-#   )
-# })
+test_that("$OMEGA is well-specified", {
+  expect_error(
+    check_mapbayr_model(mcode2("$PARAM CL = .1"), check_compile = FALSE),
+    "\\ No OMEGA matrix found."
+  )
+})
 
 test_that("$SIGMA is well-specified", {
   expect_error(

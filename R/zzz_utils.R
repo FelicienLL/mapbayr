@@ -66,11 +66,6 @@ etanames_as_nonmem <- function(x){
 }
 
 has_eta_param <- function(x){
-  any(
-    make_eta_names(n = length(odiag(x))) %in% grep('ETA\\d+', names(x@param), value = TRUE)
-  )
+   any(grepl('^ETA\\d+', names(x@param)))
 }
 
-get_detailsdata <- function(x, .block){
-  dplyr::filter(as.list(x)$details$data, .data$block == .block)
-}

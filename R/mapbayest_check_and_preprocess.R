@@ -36,16 +36,14 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     }
 
     # $PARAM
-    eta_names_x <- eta_names(x)
-    neta <- length(eta_names_x)
-
     if(has_eta_param(x)){
-      stop("Defining ETA1, ETA2... in $PARAM is no longer necessary and not allowed.\nRemove any ETA1, ETA2... defined in $PARAM and in $MAIN because mapbayr now relies on ETA(1), ETA(2)... defined in $OMEGA.")
-      eta_names_x <- eta_names(x)
-      neta <- length(eta_names_x)
+      stop("$PARAM Defining ETA1, ETA2... in $PARAM is no longer necessary and not allowed.\nRemove any ETA1, ETA2... defined in $PARAM and in $MAIN because mapbayr now relies on ETA(1), ETA(2)... defined in $OMEGA.")
     }
 
     # $OMEGA
+    if(length(omat(x))==0){
+      stop("$OMEGA No OMEGA matrix found.")
+    }
 
     # $SIGMA
     sdiag_x <- diag(smat(x, make = T))
@@ -85,7 +83,7 @@ check_mapbayr_model <- function(x, check_compile = TRUE){
     if("IPRED" %in% x@capL){
       stop("$CAPTURE. IPRED found in $CAPTURE. Do not set IPRED in $CAPTURE.", call. = FALSE)
     }
-    if(any(eta_names_x %in% x@capL)){
+    if(any(eta_names(x) %in% x@capL)){
       stop("$CAPTURE. ETAn found in $CAPTURE. Do not set ETA1, ETA2 etc... in $CAPTURE.", call. = FALSE)
     }
     if(!"DV" %in% x@capL){
