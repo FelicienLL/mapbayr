@@ -144,20 +144,19 @@ a mapbayests object. Basically a list containing:
 
 [`plot.mapbayests`](https://felicienll.github.io/mapbayr/reference/plot.mapbayests.md)
 
-[`use_posterior`](https://felicienll.github.io/mapbayr/reference/use_posterior.md)
+[`use_estimates`](https://felicienll.github.io/mapbayr/reference/use_estimates.md)
 
 ## Examples
 
 ``` r
 # First, code a model
-code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-KA = 0.5, TVCL = 1.1, TVV = 23.3
+code1 <- "$PARAM KA = 0.5, TVCL = 1.1, TVV = 23.3
 $OMEGA 0.41 0.32
 $SIGMA 0.04 0
 $CMT DEPOT CENT
 $PK
-double CL=TVCL*exp(ETA1+ETA(1));
-double V=TVV*exp(ETA2+ETA(2)) ;
+double CL=TVCL*exp(ETA(1));
+double V=TVV*exp(ETA(2)) ;
 $ERROR
 double DV=CENT/V*(1+EPS(1))+EPS(2);
 $PKMODEL ncmt = 1, depot = TRUE
@@ -214,18 +213,22 @@ as.data.frame(my_est)
 #> 2 -0.5050322
 #> 3 -0.5050322
 #> 4 -0.5050322
-use_posterior(my_est)
+use_estimates(my_est)
+#> ℹ Updating `idata_set()` with individual ETA estimates.
+#> ℹ Setting all elements of the OMEGA and SIGMA matrices to zero.
+#> ℹ Setting `etasrc = "idata.all"`.
+#> ℹ You can use `data_set()` or `ev()` to simulate "a posteriori".
 #> 
 #> 
 #> ---------------  source: my_model.cpp  ---------------
 #> 
-#>   project: /tmp/Rtmpky20Ox
-#>   shared object: my_model-so-1b5e3f256974 
+#>   project: /tmp/RtmpwTobhQ
+#>   shared object: my_model-so-1a341a2bb900 
 #> 
 #>   time:          start: 0 end: 24 delta: 1
 #>                  add: <none>
 #>   compartments:  DEPOT CENT [2]
-#>   parameters:    ETA1 ETA2 KA TVCL TVV [5]
+#>   parameters:    KA TVCL TVV [3]
 #>   captures:      DV CL [2]
 #>   omega:         2x2 
 #>   sigma:         2x2 

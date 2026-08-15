@@ -10,6 +10,8 @@ mbrest(...)
 adm_lines(...)
 
 obs_lines(...)
+
+use_posterior(...)
 ```
 
 ## Arguments
@@ -28,3 +30,6 @@ obs_lines(...)
 
 - obs_lines() is now
   [`obs_rows()`](https://felicienll.github.io/mapbayr/reference/obs_rows.md)
+
+- use_posterior() is defunct. Most features are available using
+  [`use_estimates()`](https://felicienll.github.io/mapbayr/reference/use_estimates.md)

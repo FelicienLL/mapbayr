@@ -22,6 +22,7 @@
 - [`mbrest()`](https://felicienll.github.io/mapbayr/reference/deprecations.md)
   [`adm_lines()`](https://felicienll.github.io/mapbayr/reference/deprecations.md)
   [`obs_lines()`](https://felicienll.github.io/mapbayr/reference/deprecations.md)
+  [`use_posterior()`](https://felicienll.github.io/mapbayr/reference/deprecations.md)
   : Deprecated functions
 - [`do_mapbayr_sim()`](https://felicienll.github.io/mapbayr/reference/do_mapbayr_sim.md)
   : Simulate with mapbayr
@@ -65,8 +66,8 @@
   : Pre-process: arguments for optimization function
 - [`print(`*`<mapbayests>`*`)`](https://felicienll.github.io/mapbayr/reference/print.mapbayests.md)
   : Print a mapbayests object
-- [`use_posterior()`](https://felicienll.github.io/mapbayr/reference/use_posterior.md)
-  : Use posterior estimation
+- [`use_estimates()`](https://felicienll.github.io/mapbayr/reference/use_estimates.md)
+  : Use parameter estimates
 - [`read_nmphi()`](https://felicienll.github.io/mapbayr/reference/vs_nonmem.md)
   [`merge_phi()`](https://felicienll.github.io/mapbayr/reference/vs_nonmem.md)
   [`plot_phi()`](https://felicienll.github.io/mapbayr/reference/vs_nonmem.md)

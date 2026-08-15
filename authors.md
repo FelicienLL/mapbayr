@@ -16,13 +16,13 @@ Source:
 [`DESCRIPTION`](https://github.com/FelicienLL/mapbayr/blob/develop/DESCRIPTION)
 
 Le Louedec F (2026). *mapbayr: MAP-Bayesian Estimation of PK
-Parameters*. R package version 0.10.2.9001,
+Parameters*. R package version 0.10.2.9002,
 <https://github.com/FelicienLL/mapbayr>.
 
     @Manual{,
       title = {mapbayr: MAP-Bayesian Estimation of PK Parameters},
       author = {Felicien {Le Louedec}},
       year = {2026},
-      note = {R package version 0.10.2.9001},
+      note = {R package version 0.10.2.9002},
       url = {https://github.com/FelicienLL/mapbayr},
     }

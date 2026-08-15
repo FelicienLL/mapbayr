@@ -70,10 +70,10 @@ a `mapbayests` object, augmented of an `aug_tab` data.frame.
 ## Details
 
 This function is called in the background by
-[`plot()`](https://rdrr.io/r/graphics/plot.default.html) in order to
-simulate the full PK profile, and return a `mapbayests` object with an
-additional `aug_tab` data.frame inside. The latter is used with by the
-plot method. The time grid, for each PK profile (i.e. patient) is
+[`plot()`](https://mrgsolve.org/docs/reference/plot_mrgsims.html) in
+order to simulate the full PK profile, and return a `mapbayests` object
+with an additional `aug_tab` data.frame inside. The latter is used with
+by the plot method. The time grid, for each PK profile (i.e. patient) is
 defaulted with the minimum time in the dataset for `start` and the
 maximum time in the dataset +20% for `end`. `delta` is a power of 10
 (e.g. 0.1, 1, 10 etc...), automatically chosen to render visually

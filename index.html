@@ -12,8 +12,8 @@
 <link rel="icon" sizes="any" href="favicon.ico">
 <link rel="manifest" href="site.webmanifest">
 <script src="deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="deps/bootstrap-5.3.1/bootstrap.min.css" rel="stylesheet">
-<script src="deps/bootstrap-5.3.1/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
+<link href="deps/bootstrap-5.3.8/bootstrap.min.css" rel="stylesheet">
+<script src="deps/bootstrap-5.3.8/bootstrap.bundle.min.js"></script><link href="deps/font-awesome-6.5.2/css/all.min.css" rel="stylesheet">
 <link href="deps/font-awesome-6.5.2/css/v4-shims.min.css" rel="stylesheet">
 <script src="deps/headroom-0.11.0/headroom.min.js"></script><script src="deps/headroom-0.11.0/jQuery.headroom.min.js"></script><script src="deps/bootstrap-toc-1.0.1/bootstrap-toc.min.js"></script><script src="deps/clipboard.js-2.0.11/clipboard.min.js"></script><script src="deps/search-1.0.0/autocomplete.jquery.min.js"></script><script src="deps/search-1.0.0/fuse.min.js"></script><script src="deps/search-1.0.0/mark.min.js"></script><!-- pkgdown --><script src="pkgdown.js"></script><meta property="og:title" content="MAP-Bayesian Estimation of PK Parameters">
 <meta name="description" content="Performs maximum a posteriori Bayesian estimation of individual pharmacokinetic parameters from a model defined in mrgsolve, typically for model-based therapeutic drug monitoring. Internally computes an objective function value from model and data, performs optimization and returns predictions in a convenient format. The performance of the package was described by Le Louedec et al (2021) &lt;doi:10.1002/psp4.12689&gt;.">
@@ -28,7 +28,7 @@
 
     <a class="navbar-brand me-2" href="index.html">mapbayr</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.2.9001</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.10.2.9002</small>
 
 
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -38,6 +38,12 @@
     <div id="navbar" class="collapse navbar-collapse ms-3">
       <ul class="navbar-nav me-auto">
 <li class="nav-item"><a class="nav-link" href="reference/index.html">Reference</a></li>
+<li class="nav-item dropdown">
+  <button class="nav-link dropdown-toggle" type="button" id="dropdown-articles" data-bs-toggle="dropdown" aria-expanded="false" aria-haspopup="true">Articles</button>
+  <ul class="dropdown-menu" aria-labelledby="dropdown-articles">
+<li><a class="dropdown-item" href="articles/model-specifications.html">Model specifications</a></li>
+  </ul>
+</li>
 <li class="nav-item"><a class="nav-link" href="news/index.html">Changelog</a></li>
       </ul>
 <ul class="navbar-nav">
@@ -91,9 +97,6 @@
 <span><span class="st">V2  : 10.0 : Peripheral volume of distribution</span></span>
 <span><span class="st">Q   :  1.0 : Intercompartmental clearance</span></span>
 <span><span class="st"></span></span>
-<span><span class="st">ETA1: 0 : Clearance (L/h)</span></span>
-<span><span class="st">ETA2: 0 : Central volume (L)</span></span>
-<span><span class="st"></span></span>
 <span><span class="st">$PARAM @annotated @covariates</span></span>
 <span><span class="st">BW : 70 : Body weight (kg)</span></span>
 <span><span class="st"></span></span>
@@ -110,8 +113,8 @@
 <span><span class="st">double DV = (CENT/V1) *(1 + EPS(1)) + EPS(2);</span></span>
 <span><span class="st"></span></span>
 <span><span class="st">$MAIN</span></span>
-<span><span class="st">double CL = TVCL * exp(ETA1 + ETA(1)) * pow(BW / 70, 1.2) ;</span></span>
-<span><span class="st">double V1 = TVV1 * exp(ETA2 + ETA(2)) ;</span></span>
+<span><span class="st">double CL = TVCL * exp(ETA(1)) * pow(BW / 70, 1.2) ;</span></span>
+<span><span class="st">double V1 = TVV1 * exp(ETA(2)) ;</span></span>
 <span><span class="st">double K12 = Q / V1  ;</span></span>
 <span><span class="st">double K21 = Q / V2  ;</span></span>
 <span><span class="st">double K10 = CL / V1 ;</span></span>
@@ -175,7 +178,7 @@
 <span><span class="co">#&gt; 3  1   15    0   1   0    0   0 1.1 1.087 1.647 1.79 90 0.387 0.157</span></span>
 <span><span class="co">#&gt; 4  1   24    0   1   0    0   1 2.0 0.556 0.959 1.79 90 0.387 0.157</span></span></code></pre></div>
 <div class="sourceCode" id="cb8"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_est</span><span class="op">)</span></span></code></pre></div>
+<code class="sourceCode R"><span><span class="fu"><a href="https://mrgsolve.org/docs/reference/plot_mrgsims.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">my_est</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-plot1-1.png"><!-- --></p>
 <div class="sourceCode" id="cb9"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="fu"><a href="https://rdrr.io/r/graphics/hist.html" class="external-link">hist</a></span><span class="op">(</span><span class="va">my_est</span><span class="op">)</span>  </span></code></pre></div>
@@ -188,13 +191,35 @@
 <span><span class="fu"><a href="reference/get_x.html">get_param</a></span><span class="op">(</span><span class="va">my_est</span>, <span class="st">"CL"</span><span class="op">)</span></span>
 <span><span class="co">#&gt; [1] 1.79217</span></span>
 <span></span>
-<span><span class="co"># The `use_posterior()` functions updates the model object with posterior values and covariates to simulate like with a regular mrgsolve model</span></span>
-<span><span class="va">my_est</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="reference/use_posterior.html">use_posterior</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://mrgsolve.org/docs/reference/data_set.html" class="external-link">data_set</a></span><span class="op">(</span><span class="fu"><a href="https://mrgsolve.org/docs/reference/expand.idata.html" class="external-link">expand.ev</a></span><span class="op">(</span>amt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">500</span><span class="op">)</span>, dur <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">5</span>, <span class="fl">24</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">mutate</span><span class="op">(</span>rate <span class="op">=</span> <span class="va">amt</span><span class="op">/</span><span class="va">dur</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://mrgsolve.org/docs/reference/carry_out.html" class="external-link">carry_out</a></span><span class="op">(</span><span class="va">dur</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://mrgsolve.org/docs/reference/mrgsim.html" class="external-link">mrgsim</a></span><span class="op">(</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>  <span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">DV</span><span class="op">~</span><span class="va">time</span><span class="op">|</span><span class="fu"><a href="https://rdrr.io/r/base/factor.html" class="external-link">factor</a></span><span class="op">(</span><span class="va">dur</span><span class="op">)</span>, scales <span class="op">=</span> <span class="st">"same"</span><span class="op">)</span></span></code></pre></div>
+<span><span class="co"># The function `use_estimates()` updates the model object with estimated parameter values (ETA) and covariates to simulate like with a regular mrgsolve model</span></span>
+<span></span>
+<span><span class="va">updated_model</span> <span class="op">&lt;-</span> <span class="va">my_est</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="reference/use_estimates.html">use_estimates</a></span><span class="op">(</span><span class="op">)</span> </span>
+<span></span>
+<span><span class="co"># Define simulation scenarios (let your inspiration flow) and simulate</span></span>
+<span><span class="va">scenarios</span> <span class="op">&lt;-</span> <span class="fu">tibble</span><span class="fu">::</span><span class="fu"><a href="https://tibble.tidyverse.org/reference/tibble.html" class="external-link">tibble</a></span><span class="op">(</span></span>
+<span>  ID <span class="op">=</span> <span class="fl">1</span>, time <span class="op">=</span> <span class="fl">0</span>, evid <span class="op">=</span> <span class="fl">1</span>, cmt <span class="op">=</span> <span class="fl">1</span>,</span>
+<span>  amt <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="fl">50</span>, <span class="fl">100</span>, <span class="fl">200</span>, <span class="fl">500</span><span class="op">)</span>, </span>
+<span>  rate <span class="op">=</span> <span class="va">amt</span><span class="op">/</span><span class="fl">5</span>, </span>
+<span>  scenario <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu">as_factor</span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/paste.html" class="external-link">paste0</a></span><span class="op">(</span><span class="va">amt</span>, <span class="st">" mg"</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">)</span></span>
+<span></span>
+<span><span class="va">simdat</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/data.frame.html" class="external-link">data.frame</a></span><span class="op">(</span><span class="op">)</span></span>
+<span><span class="kw">for</span><span class="op">(</span><span class="va">i</span> <span class="kw">in</span> <span class="fu"><a href="https://rdrr.io/r/base/unique.html" class="external-link">unique</a></span><span class="op">(</span><span class="va">scenarios</span><span class="op">$</span><span class="va">scenario</span><span class="op">)</span><span class="op">)</span><span class="op">{</span></span>
+<span>  <span class="va">simdat</span> <span class="op">&lt;-</span> <span class="va">updated_model</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://mrgsolve.org/docs/reference/data_set.html" class="external-link">data_set</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/subset.html" class="external-link">subset</a></span><span class="op">(</span><span class="va">scenarios</span>, <span class="va">scenario</span> <span class="op">==</span> <span class="va">i</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://mrgsolve.org/docs/reference/mrgsim.html" class="external-link">mrgsim</a></span><span class="op">(</span>output <span class="op">=</span> <span class="st">"df"</span>, recover <span class="op">=</span> <span class="st">"scenario"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu">bind_rows</span><span class="op">(</span><span class="va">simdat</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
+<span></span>
+<span><span class="co"># See the results</span></span>
+<span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
+<span><span class="va">simdat</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span><span class="va">time</span>, <span class="va">DV</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_path.html" class="external-link">geom_line</a></span><span class="op">(</span><span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span>color <span class="op">=</span> <span class="va">scenario</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/geom_point.html" class="external-link">geom_point</a></span><span class="op">(</span>data <span class="op">=</span> <span class="va">my_data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> <span class="fu">dplyr</span><span class="fu">::</span><span class="fu"><a href="https://dplyr.tidyverse.org/reference/filter.html" class="external-link">filter</a></span><span class="op">(</span><span class="va">mdv</span> <span class="op">==</span> <span class="fl">0</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span> </span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggtheme.html" class="external-link">theme_bw</a></span><span class="op">(</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_colour_discrete.html" class="external-link">scale_colour_discrete</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="fu">scales</span><span class="fu">::</span><span class="fu"><a href="https://scales.r-lib.org/reference/pal_brewer.html" class="external-link">pal_brewer</a></span><span class="op">(</span>palette <span class="op">=</span> <span class="st">"Dark2"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="reference/figures/README-plot3-1.png"><!-- --></p>
 </div>
 </div>
@@ -226,205 +251,6 @@
 <h2 id="performance">Performance<a class="anchor" aria-label="anchor" href="#performance"></a>
 </h2>
 <p>Reliability of parameter estimation against NONMEM was assessed for a wide variety of models and data. The results of this validation study were published in <a href="https://pubmed.ncbi.nlm.nih.gov/34342170/" class="external-link">CPT:Pharmacometrics &amp; System Pharmacology</a>, and materials are available in <a href="https://github.com/FelicienLL/mapbayr-CPTPSP-2021" class="external-link">a dedicated repository</a>. If you observe some discrepancies between mapbayr and NONMEM on your own model and data, feel free to contact us through the <a href="https://github.com/FelicienLL/mapbayr/issues" class="external-link">issue tracker</a>.</p>
-</div>
-<div class="section level2">
-<h2 id="mrgsolve-model-specification">
-<em>mrgsolve</em> model specification<a class="anchor" aria-label="anchor" href="#mrgsolve-model-specification"></a>
-</h2>
-<p>mapbayr contains a library of example model files (.cpp), accessible with <code><a href="reference/exmodel_exdata.html">exmodel()</a></code>. You are invited to perform MAP-Bayesian estimation with your own models. These model files should be slightly modified in order to be “read” by mapbayr with the subsequent specifications:</p>
-<div class="section level3">
-<h3 id="id_1-param-block">1. <code>$PARAM</code> block<a class="anchor" aria-label="anchor" href="#id_1-param-block"></a>
-</h3>
-<div class="section level4">
-<h4 id="id_11-eta-specifications">1.1 ETA specifications<a class="anchor" aria-label="anchor" href="#id_11-eta-specifications"></a>
-</h4>
-<ul>
-<li>Mandatory:
-<ul>
-<li>Add as many ETA as there are parameters to estimate (i.e. the length of the OMEGA matrix diagonal).</li>
-<li>Name them as ETAn (n being the N° of ETA).</li>
-<li>Set 0 as default value.</li>
-</ul>
-</li>
-<li>Strongly recommended:
-<ul>
-<li>Provide a description as a plain text</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb11"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb11-1"><a href="#cb11-1" tabindex="-1"></a>$PARAM @annotated</span>
-<span id="cb11-2"><a href="#cb11-2" tabindex="-1"></a>ETA1 <span class="op">:</span> <span class="dv">0</span> <span class="op">:</span> CL <span class="op">(</span>L<span class="op">/</span>h<span class="op">)</span></span>
-<span id="cb11-3"><a href="#cb11-3" tabindex="-1"></a>ETA2 <span class="op">:</span> <span class="dv">0</span> <span class="op">:</span> VC <span class="op">(</span>L<span class="op">)</span></span>
-<span id="cb11-4"><a href="#cb11-4" tabindex="-1"></a>ETA3 <span class="op">:</span> <span class="dv">0</span> <span class="op">:</span> F <span class="op">()</span></span>
-<span id="cb11-5"><a href="#cb11-5" tabindex="-1"></a><span class="co">//do not write ETA(1)</span></span>
-<span id="cb11-6"><a href="#cb11-6" tabindex="-1"></a><span class="co">//do not write iETA</span></span></code></pre></div>
-</div>
-<div class="section level4">
-<h4 id="id_12-covariates">1.2 Covariates<a class="anchor" aria-label="anchor" href="#id_12-covariates"></a>
-</h4>
-<ul>
-<li>Mandatory:
-<ul>
-<li>Use a <code>@covariates</code> tag to record covariates in the <code>$PARAM</code> block. Otherwise, you will not be allowed to pass a dataset with covariates columns.</li>
-<li>Set the reference value.</li>
-</ul>
-</li>
-<li>Strongly recommended
-<ul>
-<li>Provide a description as a plain text</li>
-<li>Provide units in parentheses (or a description of 0/1 coding for categorical covariates)</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb12"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb12-1"><a href="#cb12-1" tabindex="-1"></a>$PARAM @annotated @covariates</span>
-<span id="cb12-2"><a href="#cb12-2" tabindex="-1"></a>BW <span class="op">:</span> <span class="dv">70</span> <span class="op">:</span> Body weight <span class="op">(</span>kg<span class="op">)</span></span>
-<span id="cb12-3"><a href="#cb12-3" tabindex="-1"></a>SEX <span class="op">:</span> <span class="dv">0</span> <span class="op">:</span> Sex <span class="op">(</span><span class="dv">0</span><span class="op">=</span>Male<span class="op">,</span> <span class="dv">1</span><span class="op">=</span>Female<span class="op">)</span></span></code></pre></div>
-</div>
-</div>
-<div class="section level3">
-<h3 id="id_2-cmt-block">2. <code>$CMT</code> block<a class="anchor" aria-label="anchor" href="#id_2-cmt-block"></a>
-</h3>
-<ul>
-<li>Strongly recommended…<br>
-… yet <strong>mandatory</strong> if you have multiple types of DV, i.e. parent drug + metabolite:
-<ul>
-<li>A <code>@annotated</code> tag must be used to record compartments.</li>
-<li>Write OBS in brackets to define the observation compartment(s). Also used by <code><a href="reference/obs_rows.html">obs_rows()</a></code> to fill the ‘cmt’ column in your dataset.</li>
-<li>Write ADM in brackets to define “default” administration compartment(s). This information is not used for optimization process and the <code><a href="reference/mapbayest.html">mapbayest()</a></code> function. The information is mandatory if you use <code><a href="reference/adm_rows.html">adm_rows()</a></code> to build your dataset in order to automatically set the value of the ‘cmt’ column. Especially useful if you use a model with an absorption from several depot compartment requiring to duplicate administrations lines in the data set.</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb13"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb13-1"><a href="#cb13-1" tabindex="-1"></a><span class="co">//example: model with dual zero and first order absorption in compartment 1 &amp; 2, respectively, and observation of parent drug + metabolite </span></span>
-<span id="cb13-2"><a href="#cb13-2" tabindex="-1"></a>$CMT @annotated</span>
-<span id="cb13-3"><a href="#cb13-3" tabindex="-1"></a>DEPOT<span class="op">:</span> Depot <span class="op">[</span>ADM<span class="op">]</span></span>
-<span id="cb13-4"><a href="#cb13-4" tabindex="-1"></a>CENT_PAR<span class="op">:</span> examplinib central <span class="op">[</span>ADM<span class="op">,</span> OBS<span class="op">]</span></span>
-<span id="cb13-5"><a href="#cb13-5" tabindex="-1"></a>PERIPH <span class="op">:</span> examplinib peripheral</span>
-<span id="cb13-6"><a href="#cb13-6" tabindex="-1"></a>CENT_MET <span class="op">:</span> methylexamplinib central <span class="op">[</span>OBS<span class="op">]</span> </span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_3-omega-block">3. <code>$OMEGA</code> block<a class="anchor" aria-label="anchor" href="#id_3-omega-block"></a>
-</h3>
-<ul>
-<li>Mandatory:
-<ul>
-<li>The length of the omega matrix must be the same as the number of ETAn provided in <code>$PARAM</code>.</li>
-<li>The order of the omega values must correspond to the order of the ETAs provided in <code>$PARAM</code>. This cannot be checked by mapbayr !</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb14"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb14-1"><a href="#cb14-1" tabindex="-1"></a>$OMEGA</span>
-<span id="cb14-2"><a href="#cb14-2" tabindex="-1"></a><span class="fl">0.123</span> <span class="fl">0.456</span> <span class="fl">0.789</span></span>
-<span id="cb14-3"><a href="#cb14-3" tabindex="-1"></a>$OMEGA @block</span>
-<span id="cb14-4"><a href="#cb14-4" tabindex="-1"></a><span class="fl">0.111</span> </span>
-<span id="cb14-5"><a href="#cb14-5" tabindex="-1"></a><span class="fl">0.222</span> <span class="fl">0.333</span></span>
-<span id="cb14-6"><a href="#cb14-6" tabindex="-1"></a><span class="co">// reminder: omega values can be recorded in multiple $OMEGA blocks</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_4-sigma-block">4. <code>$SIGMA</code> block<a class="anchor" aria-label="anchor" href="#id_4-sigma-block"></a>
-</h3>
-<p>The definition of the <code>$SIGMA</code> block may not be as straightforward as other blocks, but we tried to keep it as simple as possible. Keep in mind that mapbayr always expect a <strong>pair of sigma values</strong> for each type of dependent variable: the <strong>first</strong> value for proportional error, the <strong>second</strong> for additive.</p>
-<p>Two situations can be distinguished:</p>
-<ol style="list-style-type: decimal">
-<li>You only have one type of concentration to fit, and you did not use the [OBS] assignment in <code>$CMT</code>.</li>
-</ol>
-<p>Simply write <strong>one pair</strong> of sigma values to describe proportional and additive error on your concentrations. This error model will be automatically applied to the compartment where observations were recorded in your dataset (i.e. value of CMT when MDV = 0).</p>
-<div class="sourceCode" id="cb15"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb15-1"><a href="#cb15-1" tabindex="-1"></a>$SIGMA <span class="fl">0.111</span> <span class="dv">0</span> <span class="co">// proportional error </span></span></code></pre></div>
-<div class="sourceCode" id="cb16"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb16-1"><a href="#cb16-1" tabindex="-1"></a>$SIGMA <span class="dv">0</span> <span class="fl">0.222</span> <span class="co">// (log) additive error</span></span></code></pre></div>
-<div class="sourceCode" id="cb17"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb17-1"><a href="#cb17-1" tabindex="-1"></a>$SIGMA <span class="fl">0.333</span> <span class="fl">0.444</span> <span class="co">// mixed error</span></span></code></pre></div>
-<ol start="2" style="list-style-type: decimal">
-<li>You have multiple types of DV (parent and metabolite), and/or you used the [OBS] assignment in <code>$CMT</code>.</li>
-</ol>
-<p>Write as many <strong>pairs of sigma values</strong> as there are compartments assigned with [OBS] in <code>$CMT</code>. The order of the pair must respect the order in which compartments were assigned. To put it more clearly, the sigma matrix will be interpreted as such whatever the model :</p>
-<table class="table">
-<thead><tr>
-<th align="center">N° in the SIGMA matrix diagonal</th>
-<th align="center">Associated error</th>
-</tr></thead>
-<tbody>
-<tr>
-<td align="center">1</td>
-<td align="center">Proportional on concentrations in the 1st cmt with [OBS]</td>
-</tr>
-<tr>
-<td align="center">2</td>
-<td align="center">Additive on concentrations in the 1st cmt with [OBS]</td>
-</tr>
-<tr>
-<td align="center">3</td>
-<td align="center">Proportional on concentrations in the 2nd cmt with [OBS]</td>
-</tr>
-<tr>
-<td align="center">4</td>
-<td align="center">Additive on concentrations in the 2nd cmt with [OBS]</td>
-</tr>
-</tbody>
-</table>
-<div class="sourceCode" id="cb18"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb18-1"><a href="#cb18-1" tabindex="-1"></a><span class="co">//example: correlated proportional error between parent and metabolite</span></span>
-<span id="cb18-2"><a href="#cb18-2" tabindex="-1"></a>$SIGMA @block</span>
-<span id="cb18-3"><a href="#cb18-3" tabindex="-1"></a><span class="fl">0.050</span> <span class="co">// proportional error on parent drug</span></span>
-<span id="cb18-4"><a href="#cb18-4" tabindex="-1"></a><span class="fl">0.000</span> <span class="fl">0.000</span> <span class="co">// additive error on parent drug</span></span>
-<span id="cb18-5"><a href="#cb18-5" tabindex="-1"></a><span class="fl">0.100</span> <span class="fl">0.000</span> <span class="fl">0.200</span> <span class="co">// proportional error on metabolite</span></span>
-<span id="cb18-6"><a href="#cb18-6" tabindex="-1"></a><span class="fl">0.000</span> <span class="fl">0.000</span> <span class="fl">0.000</span> <span class="fl">0.000</span> <span class="co">// additive error on metabolite</span></span>
-<span id="cb18-7"><a href="#cb18-7" tabindex="-1"></a><span class="co">// reminder: sigma values can be recorded in multiple $SIGMA blocks</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_6-table-block-or-error-block">6. <code>$TABLE</code> block or <code>$ERROR</code> block<a class="anchor" aria-label="anchor" href="#id_6-table-block-or-error-block"></a>
-</h3>
-<ul>
-<li>Mandatory:
-<ul>
-<li>Refer the concentration variable to fit as <code>DV</code>. Mind the code, especially if concentrations are observed in multiple compartments.</li>
-<li>Express log-additive error models as exponential. This way, concentrations will automatically be log-transformed during the optimization process, with no necessity to prior log-transform your concentration.</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb19"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb19-1"><a href="#cb19-1" tabindex="-1"></a>$TABLE</span>
-<span id="cb19-2"><a href="#cb19-2" tabindex="-1"></a><span class="dt">double</span> DV  <span class="op">=</span> <span class="op">(</span>CENTRAL <span class="op">/</span> VC<span class="op">)</span> <span class="op">*</span> exp<span class="op">(</span>EPS<span class="op">(</span><span class="dv">2</span><span class="op">))</span> <span class="op">;</span></span></code></pre></div>
-<ul>
-<li>For fitting parent drug and metabolite simultaneously, refer to them as PAR and MET, and define DV accordingly (only DV will be used during the optimization process, but PAR and MET variables are mandatory for post-processing internal functions)</li>
-</ul>
-<div class="sourceCode" id="cb20"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb20-1"><a href="#cb20-1" tabindex="-1"></a>$TABLE</span>
-<span id="cb20-2"><a href="#cb20-2" tabindex="-1"></a><span class="dt">double</span> PAR <span class="op">=</span> <span class="op">(</span>CENT_PAR <span class="op">/</span> V<span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="dv">1</span> <span class="op">+</span> EPS<span class="op">(</span><span class="dv">1</span><span class="op">))</span> <span class="op">;</span></span>
-<span id="cb20-3"><a href="#cb20-3" tabindex="-1"></a><span class="dt">double</span> MET <span class="op">=</span> <span class="op">(</span>CENT_MET <span class="op">/</span> V<span class="op">)</span> <span class="op">*</span> <span class="op">(</span><span class="dv">1</span> <span class="op">+</span> EPS<span class="op">(</span><span class="dv">3</span><span class="op">))</span> <span class="op">;</span></span>
-<span id="cb20-4"><a href="#cb20-4" tabindex="-1"></a><span class="dt">double</span> DV <span class="op">=</span> PAR <span class="op">;</span></span>
-<span id="cb20-5"><a href="#cb20-5" tabindex="-1"></a><span class="cf">if</span><span class="op">(</span>self<span class="op">.</span>cmt <span class="op">==</span> <span class="dv">4</span><span class="op">)</span> DV <span class="op">=</span> MET <span class="op">;</span> </span>
-<span id="cb20-6"><a href="#cb20-6" tabindex="-1"></a><span class="co">// reminder: use "self.cmt" to internaly refer to a compartment in a mrgsolve model code. </span></span></code></pre></div>
-<p>Note that mapbayr does not strictly rely on this <code>$ERROR</code> block to define the residual error internally and compute the objective function value, but on information passed in the <code>$SIGMA</code> block. However, we strongly advise you to properly code your <code>$ERROR</code> block with <code>EPS(1)</code>, <code>EPS(2)</code> etc…, if only to use your code as a regular mrgsolve model code and simulate random effects.</p>
-</div>
-<div class="section level3">
-<h3 id="id_7-main-block">7. <code>$MAIN</code> block<a class="anchor" aria-label="anchor" href="#id_7-main-block"></a>
-</h3>
-<ul>
-<li>Mandatory:
-<ul>
-<li>Double every expression containing ETA information, with ETAn (will be used for optimization of parameters) and ETA(n) (generated for simulations with random effects like a “regular” mrgsolve model)</li>
-<li>Mind the attribution to the good ETAn and ETA(n) as respect to the information you provided in <code>$PARAM</code> and <code>$OMEGA</code>. This cannot be checked by mapbayr !</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb21"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb21-1"><a href="#cb21-1" tabindex="-1"></a>$PK</span>
-<span id="cb21-2"><a href="#cb21-2" tabindex="-1"></a><span class="dt">double</span> CL <span class="op">=</span> TVCL <span class="op">*</span> exp<span class="op">(</span>ETA1 <span class="op">+</span> ETA<span class="op">(</span><span class="dv">1</span><span class="op">))</span> <span class="op">;</span></span></code></pre></div>
-</div>
-<div class="section level3">
-<h3 id="id_8-capture-block">8. <code>$CAPTURE</code> block<a class="anchor" aria-label="anchor" href="#id_8-capture-block"></a>
-</h3>
-<ul>
-<li>Mandatory:
-<ul>
-<li>DV must be captured</li>
-<li>For models with parent + metabolite, PAR and MET must be captured too.</li>
-<li>Do not capture variables called IPRED and PRED (they will be returned by <code><a href="reference/mapbayest.html">mapbayest()</a></code> anyway)</li>
-<li>Do not capture any ETAn (ETA1, ETA2 etc…) (they will be returned by <code><a href="reference/mapbayest.html">mapbayest()</a></code> anyway)</li>
-</ul>
-</li>
-<li>Strongly recommended:
-<ul>
-<li>Capture a posteriori values of parameters you are interested in (e.g. CL)</li>
-</ul>
-</li>
-</ul>
-<div class="sourceCode" id="cb22"><pre class="sourceCode c"><code class="sourceCode c"><span id="cb22-1"><a href="#cb22-1" tabindex="-1"></a>$CAPTURE DV PAR MET CL</span></code></pre></div>
-</div>
 </div>
 </div>
   </main><aside class="col-md-3"><div class="links">
@@ -477,7 +303,7 @@
 </div>
 
 <div class="pkgdown-footer-right">
-  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.0.</p>
+  <p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.2.1.</p>
 </div>
 
     </footer>

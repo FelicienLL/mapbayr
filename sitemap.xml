@@ -1,5 +1,7 @@
 <urlset xmlns = 'http://www.sitemaps.org/schemas/sitemap/0.9'>
 <url><loc>https://felicienll.github.io/mapbayr/404.html</loc></url>
+<url><loc>https://felicienll.github.io/mapbayr/articles/index.html</loc></url>
+<url><loc>https://felicienll.github.io/mapbayr/articles/model-specifications.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/authors.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/index.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/news/index.html</loc></url>
@@ -31,7 +33,7 @@
 <url><loc>https://felicienll.github.io/mapbayr/reference/preprocess.optim.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/reference/print.mapbayests.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/reference/reexports.html</loc></url>
-<url><loc>https://felicienll.github.io/mapbayr/reference/use_posterior.html</loc></url>
+<url><loc>https://felicienll.github.io/mapbayr/reference/use_estimates.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/reference/vs_nonmem.html</loc></url>
 <url><loc>https://felicienll.github.io/mapbayr/reference/x_cmt.html</loc></url>
 </urlset>

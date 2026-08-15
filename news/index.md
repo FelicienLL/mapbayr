@@ -261,7 +261,7 @@ CRAN release: 2023-02-02
 - [`eta()`](https://felicienll.github.io/mapbayr/reference/eta.md)
   properly sorts vectors of length superior to 9
   ([\#159](https://github.com/FelicienLL/mapbayr/issues/159)).
-- [`use_posterior()`](https://felicienll.github.io/mapbayr/reference/use_posterior.md)
+- [`use_posterior()`](https://felicienll.github.io/mapbayr/reference/deprecations.md)
   works if covariates had not been defined in data
   ([\#160](https://github.com/FelicienLL/mapbayr/issues/160)).
 - In [`hist()`](https://rdrr.io/r/graphics/hist.html),
@@ -299,7 +299,7 @@ CRAN release: 2022-09-29
 - New [`eta()`](https://felicienll.github.io/mapbayr/reference/eta.md)
   generates numerical values named `ETA1, ETA2, ETA3...`, either from
   scratch, from a pre-existing vector or from a ‘mrgsolve’ model object.
-- In [`plot()`](https://rdrr.io/r/graphics/plot.default.html),
+- In [`plot()`](https://mrgsolve.org/docs/reference/plot_mrgsims.html),
   `PREDICTION = c("IPRED", "PRED")` controls to plot either “PRED”,
   “IPRED” or both
   ([\#113](https://github.com/FelicienLL/mapbayr/issues/113)).
@@ -517,8 +517,8 @@ estimation uncertainty.
   deal with steady-state administrations.
   [\#85](https://github.com/FelicienLL/mapbayr/issues/85)
 - Argument passed to
-  [`plot()`](https://rdrr.io/r/graphics/plot.default.html) are now
-  directly passed to
+  [`plot()`](https://mrgsolve.org/docs/reference/plot_mrgsims.html) are
+  now directly passed to
   [`augment()`](https://felicienll.github.io/mapbayr/reference/augment.md).
 - Depends on mrgsolve \>= 1.0.0 to use the newly exported
   [`collapse_omega()`](https://mrgsolve.org/docs/reference/collapse_matrices.html)
@@ -632,7 +632,8 @@ CRAN release: 2021-07-27
   [\#23](https://github.com/FelicienLL/mapbayr/issues/23)
 - Fix minor `testthat` bugs due to upgrade of R and French translation
   of warnings.
-- Fix bug in [`plot()`](https://rdrr.io/r/graphics/plot.default.html)
+- Fix bug in
+  [`plot()`](https://mrgsolve.org/docs/reference/plot_mrgsims.html)
   legend, due to new version of `ggplot2` 3.3.4
   [\#82](https://github.com/FelicienLL/mapbayr/issues/82)
 

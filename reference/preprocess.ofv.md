@@ -79,12 +79,12 @@ preprocess.ofv.fix(x = mod, data = dat)
 #> ---------------  source: mrg_001.cpp  ---------------
 #> 
 #>   project: /home/runner/wor...pbayr/exmodel
-#>   shared object: mrg_001-so-1b5e3bf2febb 
+#>   shared object: mrg_001-so-1a3413e7020f 
 #> 
 #>   time:          start: 0 end: -1 delta: 1
 #>                  add: <none>
 #>   compartments:  DEPOT CENTRAL [2]
-#>   parameters:    TVCL TVVC TVKA ETA1 ETA2 ETA3 [6]
+#>   parameters:    TVCL TVVC TVKA [3]
 #>   captures:      DV [1]
 #>   omega:         3x3 
 #>   sigma:         2x2 

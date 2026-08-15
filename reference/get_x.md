@@ -122,10 +122,10 @@ get_data(est, output = "list")
 
 get_eta(est)
 #> # A tibble: 2 × 4
-#>   ID      ETA1   ETA2     ETA3
-#>   <chr>  <dbl>  <dbl>    <dbl>
-#> 1 1      0.405 0.0729 -0.0750 
-#> 2 2     -0.145 0.0241 -0.00619
+#>      ID   ETA1   ETA2     ETA3
+#>   <dbl>  <dbl>  <dbl>    <dbl>
+#> 1     1  0.405 0.0729 -0.0750 
+#> 2     2 -0.145 0.0241 -0.00619
 get_eta(est, output = "list")
 #> $`1`
 #>        ETA1        ETA2        ETA3 

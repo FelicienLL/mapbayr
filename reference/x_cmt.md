@@ -35,7 +35,7 @@ model <- exmodel(6, compile = FALSE)
 mrgsolve::see(model)
 #> 
 #> Model file:  mrg_006.cpp 
-#> $PROB LAG model 
+#> $PROB LAG model
 #> 
 #> $PARAM @annotated
 #> TVCL   : 4.00 : Clearance (L/h)
@@ -44,20 +44,15 @@ mrgsolve::see(model)
 #> TVD2   : 4.00 : Zero-order constant (h)
 #> FR     : 0.2  : Fraction absorbed from Depot 1 ()
 #> 
-#> ETA1 : 0 : CL
-#> ETA2 : 0 : VC
-#> ETA3 : 0 : KA
-#> ETA4 : 0 : D2
-#> 
 #> $OMEGA
 #> 0.2 // CL
 #> 0.2 // VC
-#> 0.2 // KA 
+#> 0.2 // KA
 #> 0.2 // D2
 #> 
-#> $SIGMA 
+#> $SIGMA
 #> 0.05 // err prop
-#> 0   //  err additive 
+#> 0   //  err additive
 #> 
 #> 
 #> $CMT @annotated
@@ -68,14 +63,14 @@ mrgsolve::see(model)
 #> double DV = (CENTRAL / VC) * (1 + EPS(1)) + EPS(2) ;
 #> 
 #> $MAIN
-#> double CL  = TVCL  * exp(ETA(1) + ETA1 ) ; 
-#> double VC  = TVVC  * exp(ETA(2) + ETA2 ) ;
-#> double KA  = TVKA  * exp(ETA(3) + ETA3 ) ;
-#> double D2  = TVD2  * exp(ETA(4) + ETA4 ) ;
+#> double CL  = TVCL  * exp(ETA(1)) ;
+#> double VC  = TVVC  * exp(ETA(2)) ;
+#> double KA  = TVKA  * exp(ETA(3)) ;
+#> double D2  = TVD2  * exp(ETA(4)) ;
 #> double K20 = CL / VC ;
 #> 
 #> F_DEPOT1  = FR ;
-#> F_CENTRAL = 1 - FR ; 
+#> F_CENTRAL = 1 - FR ;
 #> D_CENTRAL = D2 ;
 #> 
 #> $ODE
@@ -91,7 +86,7 @@ model <- exmodel(401, compile = FALSE)
 mrgsolve::see(model)
 #> 
 #> Model file:  mrg_401.cpp 
-#> $PROB Reference model 
+#> $PROB Reference model
 #> 
 #> $PARAM @annotated
 #> TVCL   : 4.00 : Clearance (L/h)
@@ -100,20 +95,14 @@ mrgsolve::see(model)
 #> TVCLmet : 2.5 : Clerance metabolite (L/h)
 #> TVVCmet : 60 : Central volume metabolite (L)
 #> 
-#> ETA1 : 0 : CL
-#> ETA2 : 0 : VC
-#> ETA3 : 0 : KA
-#> ETA4 : 0 : CLmet
-#> ETA5 : 0 : VCmet
-#> 
 #> $OMEGA
 #> 0.2 // CL
 #> 0.2 // VC
-#> 0.2 // KA 
+#> 0.2 // KA
 #> 0.2 // CLmet
 #> 0.2 // VCmet
 #> 
-#> $SIGMA 
+#> $SIGMA
 #> 0.05 // err prop parent
 #> 0   //  err additive parent
 #> 0.05 // err prop metabolite
@@ -131,14 +120,14 @@ mrgsolve::see(model)
 #> if(self.cmt == 3) DV = MET ;
 #> 
 #> $MAIN
-#> double CL     = TVCL     * exp(ETA(1) + ETA1 ) ; 
-#> double VC     = TVVC     * exp(ETA(2) + ETA2 ) ;
-#> double KA     = TVKA     * exp(ETA(3) + ETA3 ) ;
-#> double CLmet  = TVCLmet  * exp(ETA(4) + ETA4 ) ; 
-#> double VCmet  = TVVCmet  * exp(ETA(5) + ETA5 ) ;
+#> double CL     = TVCL     * exp(ETA(1)) ;
+#> double VC     = TVVC     * exp(ETA(2)) ;
+#> double KA     = TVKA     * exp(ETA(3)) ;
+#> double CLmet  = TVCLmet  * exp(ETA(4)) ;
+#> double VCmet  = TVVCmet  * exp(ETA(5)) ;
 #> 
 #> double K23 = CL / VC ;
-#> double K30 = CLmet / VCmet ; 
+#> double K30 = CLmet / VCmet ;
 #> 
 #> $ODE
 #> dxdt_DEPOT      = - KA * DEPOT ;
