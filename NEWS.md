@@ -3,6 +3,27 @@
 * Set up github actions "check-standard"
 * Set up github pages.
 
+WARNING: Critical BREAKING changes.
+
+The intention of this PR is to stop defining deterministic ETAs in the `$PARAM` and duplicating the expression in the `$MAIN`, as explained in #189. It has many consequences.
+
+## Critical BREAKING changes
+* The checks of the model code performed when `mapbayest()` is called will now return an error if ETA parameters (i.e. ETA1, ETA2 etc) are defined in `$PARAM`. Any R script that used a model coded as such will crash.
+* `use_posterior()` is defunct. Any code where this function is used will crash. It relied too heavily on the update of the values of ETAs defined in `$PARAM`, which is inconsistant with the new expected model specifications. It is replaced by `use_estimates()`, which should be adequate for most of the usages. One feature of `use_posterior()`, i.e. the update of the `$OMEGA` block with the variance-covariance matrix of estimation in order to simulate with uncertainty at the individual level, is deliberately omitted by `use_estimates()`. Alternatively, `do_mapbayr_sim()` might achieve this. 
+
+## User-facing changes
+* New `use_estimates()`, to transform the results of the estimations into an updated mrgsolve model. It partially replaces `use_posterior()` It sets OMEGA and SIGMA matrices to zero, includes an `idataset` (`@args$idata`) with the estimated ETAs and the individual covariate values, and pre-specifies `etasrc = "idata.all"` that will be used when `mrgsolve::mrgsim()` will be called.
+* The checks of the model code performed when `mapbayest()` is called will now return an error if an `$OMEGA` block is missing.
+* The checks of the data set performed when `mapbayest()` is called will now return an error if ETA variables (i.e. ETA1, ETA2 etc) are defined in the data.
+* The checks of the model code performed on the `$OMEGA` and `$PARAM` blocks that corresponded to the previous model specifications were removed.
+* New vignette ("Model specifications") to document this new model specification. 
+* Model codes used in the README, examples, internal library (`exmodel()`, `est001`) and unit tests were updated.
+
+## Internal changes
+* Internal code for the calculation of the objective function value, parameter estimation and postprocessing steps were updated to use ETAs from the dataset only, and not defined in `$PARAM`.
+* Internal `eta_descr()` now extracts the description of annotated (`@annotated`) `$OMEGA` blocks instead of looking into `$PARAM`
+* `lattice` and `quarto` are now suggested packages
+
 # mapbayr 0.10.2
 
 * Internal `are_comparable()` now better checks attributes between the objects. This avoids a conflict with the upload of dplyr 1.2.0 to CRAN.
