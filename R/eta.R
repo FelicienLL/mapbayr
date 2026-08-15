@@ -31,11 +31,11 @@ eta <- function(x, ..., n, val = 0){
       return(rename_as_eta(ans))
     }
   }
+
   if(is.mrgmod(x)){
-    par <- as.double(param(x))
-    ans <- par[grepl("^ETA\\d+$", names(par))]
+    ans <- rep_len(0, length.out = sum(omat(x)@n))
     if(length(ans) == 0) ans <- NULL
-    return(sort_eta(ans))
+    return(rename_as_eta(ans))
   }
   dots <- list(...)
   xdots <- c(list(x), ...)
@@ -55,6 +55,9 @@ make_eta_names <- function(x, n){
 
 # x, a vector or a matrix to be renamed
 rename_as_eta <- function(x){
+  if(is.null(x)){
+    return(NULL)
+  }
   if(is.matrix(x)){
     colnames(x) <- make_eta_names(n = ncol(x))
     return(x)

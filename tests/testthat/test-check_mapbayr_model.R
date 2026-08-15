@@ -21,62 +21,42 @@ mcode2 <- function(code, ...){
 }
 
 test_that("$PARAM is well-specified", {
-  expect_error(
-    check_mapbayr_model(mcode2("$PARAM CL = 1"), check_compile = FALSE),
-    "\\$PARAM. Cannot find parameters named \\\"ETA1\\\", \\\"ETA2\\\", etc... \nDid you forget to add these parameters in \\$PARAM?"
-  )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA3 = 0"), check_compile = FALSE),
-    "\\$PARAM. 2 ETA parameter\\(s\\) found, but not named ETA1, ETA2."
-  )
-
-  expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0.1"), check_compile = FALSE),
-    "\\$PARAM. The value of one or multiple ETA parameter\\(s\\) is not 0."
-  )
-
-  expect_error(
-    check_mapbayr_model(mcode2("$PARAM @covariates
-                               ETA1 = 0"), check_compile = FALSE),
-    "\\$PARAM. One or several ETA parameter\\(s\\) are declared as `@covariates`, which is not allowed."
+    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0"), check_compile = FALSE),
+    "Defining ETA1, ETA2... in \\$PARAM is no longer necessary and not allowed"
   )
 
 })
 
 test_that("$OMEGA is well-specified", {
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1 0.1"), check_compile = FALSE),
-    "\\$OMEGA. The OMEGA matrix diagonal has length 3, but 2 ETA parameters are defined in \\$PARAM"
+    check_mapbayr_model(mcode2("$PARAM CL = .1"), check_compile = FALSE),
+    "\\ No OMEGA matrix found."
   )
 })
 
 test_that("$SIGMA is well-specified", {
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                 $SIGMA 0 0"), check_compile = FALSE),
     "\\$SIGMA. All the values in \\$SIGMA are equal to zero, which is not allowed."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                 $SIGMA 1"), check_compile = FALSE),
     "\\$SIGMA. The SIGMA matrix diagonal has length 1. A pair number is expected."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                 $SIGMA 1 2 3 4"), check_compile = FALSE),
     "\\$SIGMA. More than 2 values defined in \\$SIGMA, while \\[OBS\\] was not defined in \\$CMT."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $CMT @annotated
+    check_mapbayr_model(mcode2("$CMT @annotated
                                 PARENT : [OBS]
                                 METAB : [OBS]
                                 $OMEGA 0.1 0.1
@@ -85,8 +65,7 @@ test_that("$SIGMA is well-specified", {
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                 $SIGMA 1 0
                                 $TABLE
                                 double DV = exp(EPS(2))"), check_compile = FALSE),
@@ -94,8 +73,7 @@ test_that("$SIGMA is well-specified", {
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                                $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                 $SIGMA 1 1
                                 $TABLE
                                 double DV = exp(EPS(2)) ;"), check_compile = FALSE),
@@ -106,40 +84,35 @@ test_that("$SIGMA is well-specified", {
 
 test_that("$CAPTURE is well-specified", {
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                $SIGMA 1 0
                                $CAPTURE PRED"), check_compile = FALSE),
     "\\$CAPTURE. PRED found in \\$CAPTURE. Do not set PRED in \\$CAPTURE."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                $SIGMA 1 0
                                $CAPTURE IPRED"), check_compile = FALSE),
     "\\$CAPTURE. IPRED found in \\$CAPTURE. Do not set IPRED in \\$CAPTURE."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                $SIGMA 1 0
                                $CAPTURE ETA1"), check_compile = FALSE),
     "\\$CAPTURE. ETAn found in \\$CAPTURE. Do not set ETA1\\, ETA2 etc... in \\$CAPTURE."
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $OMEGA 0.1 0.1
+    check_mapbayr_model(mcode2("$OMEGA 0.1 0.1
                                $SIGMA 1 0
                                $TABLE double DV = 0 ;"), check_compile = FALSE),
     "\\$CAPTURE. Cannot find DV in captured items. DV must be captured"
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $CMT @annotated
+    check_mapbayr_model(mcode2("$CMT @annotated
                                PARENT : [OBS]
                                METAB : [OBS]
                                $OMEGA 0.1 0.1
@@ -152,8 +125,7 @@ test_that("$CAPTURE is well-specified", {
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $CMT @annotated
+    check_mapbayr_model(mcode2("$CMT @annotated
                                PARENT : [OBS]
                                METAB : [OBS]
                                $OMEGA 0.1 0.1
@@ -166,8 +138,7 @@ test_that("$CAPTURE is well-specified", {
   )
 
   expect_error(
-    check_mapbayr_model(mcode2("$PARAM ETA1 = 0, ETA2 = 0
-                               $CMT @annotated
+    check_mapbayr_model(mcode2("$CMT @annotated
                                PARENT : [OBS]
                                METAB : [OBS]
                                $OMEGA 0.1 0.1

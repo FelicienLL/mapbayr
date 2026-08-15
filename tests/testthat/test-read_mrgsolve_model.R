@@ -124,37 +124,50 @@ test_that("log_transformation works with sigma labels", {
   expect_true(log_transformation(mcode("mod", paste(sigma_block, "$TABLE double DV = exp(EPS(4)) ;"), compile = FALSE)))
 })
 
-test_that("eta_descr works", {
-  mod87 <- mcode("mod87",
-                 "$PARAM ETA1 = 0, ETA2 = 0
-                 $PARAM @annotated @covariate
-                 BW : 50 : Body weight (kg)", compile = FALSE)
+test_that("eta_descr and eta_labels works", {
+  # no OMEGA
+  modomlab0 <- mcode("modomlab0",
+                     "$SIGMA 1 1",
+                     compile = FALSE
+  )
+  expect_equal(eta_descr(modomlab0), NULL)
+  expect_equal(eta_labels(modomlab0), NULL)
 
-  expect_equal(eta_descr(mod87), c("ETA1", "ETA2"))
+  # no labs = descr are ETA1 2 etc
+  modomlab1 <- mcode("modomlab1",
+                      "$OMEGA 1 3 1",
+                      compile = FALSE
+  )
+  expect_equal(eta_descr(modomlab1), c("ETA1", "ETA2", "ETA3"))
+  expect_equal(eta_labels(modomlab1), c(".", ".", "."))
 
-  mod87bis <- mcode("mod87bis",
-                    "$PARAM @annotated
-                    ETA1 : 0 : Clearance
-                    ETA2 : 0 :
-                    $PARAM @annotated @covariate
-                    BW : 50 : Body weight (kg)", compile = FALSE)
+  # One annotated OMEGA block
+  modomlab2 <- mcode("modomlab2",
+                     "$OMEGA @annotated
+                     ECL: 1 : Clearance
+                     ETA2 : 3 :
+                     ETV : 1 : volume",
+                     compile = FALSE
+  )
+  expect_equal(eta_descr(modomlab2),  c("Clearance", "ETA2", "volume"))
+  expect_equal(eta_labels(modomlab2),  c("ECL", "ETA2", "ETV"))
 
-  expect_equal(eta_descr(mod87bis), c("Clearance", "ETA2"))
+  # many omega blocks, labels do not make sense (ETA1 is the second omega)
+  modomlab3 <- mcode("modomlab3",
+                     "
+                     $PARAM @annotated
+                     CL : 1 : clearance
+                     $OMEGA @annotated
+                     ECL: 1 : Clearance
+                     ETA1 : 3 :
+                     $OMEGA 5
+                     $OMEGA @annotated
+                     ETV : 1 : v
+                     ",
+                     compile = FALSE
+  )
 
-  mod87ter <- mcode("mod87bis",
-                    "$PARAM ETA1 = 0, ETA2 = 0", compile = FALSE)
-
-  expect_equal(eta_descr(mod87ter), c("ETA1", "ETA2"))
-
-  #etas are reordered
-  mod87quat <- mcode("mod87bis",
-                    "$PARAM @annotated
-                    ETA11 : 0 : Volume
-                    ETA2 : 0 :
-                    ETA1 : 0 : Clearance
-                    $PARAM @annotated @covariate
-                    BW : 50 : Body weight (kg)", compile = FALSE)
-
-  expect_equal(eta_descr(mod87quat), c("Clearance", "ETA2", "Volume"))
+  expect_equal(eta_descr(modomlab3), c("Clearance", "ETA2", "ETA3", "v"))
+  expect_equal(eta_labels(modomlab3), c("ECL", "ETA1", ".", "ETV"))
 
 })

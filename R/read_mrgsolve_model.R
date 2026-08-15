@@ -113,6 +113,9 @@ log_transformation <- function(x){
 # ETA -----------
 
 
+
+
+
 #' Description of ETA to estimate
 #'
 #' @param x model object
@@ -126,21 +129,24 @@ eta_descr <- function(x){
   if(is.null(dat[["block"]])){ # Is it annotated ? if not put ETA1, ETA2 etc...
     return(etas)
   } else { # If it is annotated, take names
-    ans <- character(0)
-    for(i in etas){
-      idescr <- dat$descr[(dat$name==i)]
-      if(length(idescr)==0){
-        idescr <- i
-      }
-      if(is.na(idescr)){
-        idescr <- i
-      }
-      ans <- c(ans, idescr)
-    }
+    ans <- dat$descr[match(eta_labels(x), dat$name)]
+    ans[is.na(ans)] <- etas[is.na(ans)]
+    ans
     return(ans)
   }
 }
 
+
+#' Labels of ETA to estimate
+#'
+#' @param x model object
+#'
+#' @return a vector of character
+#' @noRd
+eta_labels <- function(x){
+  if(length(omat(x)) == 0) return(NULL)
+  omat(collapse_omega(x))@labels[[1]]
+}
 
 # COVARIATES -----------
 

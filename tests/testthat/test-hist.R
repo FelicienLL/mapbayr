@@ -1,9 +1,8 @@
 est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
 code_hist <- "
-$PARAM
-ETA1 = 0, ETA2 = 0, ETA3= 0, ETA4 = 0, ETA5 = 0, ETA6 = 0,
-ETA7 = 0, ETA8 = 0, ETA9 = 0, ETA10 = 0, ETA11 = 0, ETA12 = 0
-$OMEGA .1 .2 .3 .4 .1 .1 .1 .1 .1 .11 .11 .11
+$OMEGA @annotated
+ETA1 : .3 : CL
+$OMEGA .1 .2 .3 .4 .1 .1 .1 .1 .1 .11 .11
 $CMT CENT GUT
 $SIGMA 1 0
 $TABLE
@@ -60,7 +59,7 @@ test_that("SHK is shown if n ID > 1", {
   # NA
   hist_shk_na <- hist(est001test, shk = NA)
   label_na <- fetch_facet_labels(hist_shk_na)[["name"]]
-  expect_equal(label_na["ETA1"], c(ETA1 = "CL\nIIV = 45%"))
+  expect_equal(label_na["ETA1"], c(ETA1 = "ETA1\nIIV = 45%"))
 
 })
 

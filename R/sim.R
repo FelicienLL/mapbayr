@@ -51,8 +51,6 @@ do_mapbayr_sim <- function(
     new_sigma = NULL  # NULL = keep from the model "x". Accepts a matrix. And also "zero_re", used only if nrep is non-NULL
 ){
 
-  k <- 1
-  if(has_eta_param(x)) k <- 0.5
 
   nID <- length(unique(data$ID))
 
@@ -82,8 +80,12 @@ do_mapbayr_sim <- function(
     data_to_sim <- replicate_data(data_to_sim, nrep)
   }
 
+  # If ETAs (`eta`) not provided, we simulate the population PK
+  # Same OMEGA for all individuals (the IIV)
   etasrc <- "omega"
   if(!is.null(eta)){
+    # If ETAs (`eta`) are provided, we simulate individuals with pk param uncertainty
+    # Different OMEGA for each individuals (the variance-covariance matrix)
     if(!is.matrix(eta)){
       eta <- matrix(
         data = eta, nrow = 1,
@@ -113,7 +115,7 @@ do_mapbayr_sim <- function(
       }
     }
 
-    eta_matrix <- rename_as_eta(eta_matrix) * k # ETA(1)/2 + ETA1/2
+    eta_matrix <- rename_as_eta(eta_matrix)
     if(is.matrix(data_to_sim)){
       data_to_sim <- merge_datamatrix_etamatrix(data_to_sim, eta_matrix)
     } else {

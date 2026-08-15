@@ -13,11 +13,6 @@ TVF    :  0.8 : Bioavailability ()
 TVQ    :  2.0 : Intercompartimental Clearance (L/h)
 TVLAG  :  1.5 : Lagtime (h)
 
-ETA1 : 0 : Random effect on CL
-ETA2 : 0 : Random effect on VC
-ETA3 : 0 : Random effect on KA
-ETA4 : 0 : Random effect on VP
-
 $OMEGA
 0.4 // CL
 0.4 // VC
@@ -38,10 +33,10 @@ $TABLE
 double DV = (CENTRAL / VC) * (1 + EPS(1)) + EPS(2) ;
 
 $MAIN
-double CL  = TVCL  * exp(ETA(1) + ETA1 ) ;
-double VC  = TVVC  * exp(ETA(2) + ETA2 ) ;
-double KA  = TVKA  * exp(ETA(3) + ETA3 ) ;
-double VP  = TVVP  * exp(ETA(4) + ETA4 ) ;
+double CL  = TVCL  * exp(ETA(1)) ;
+double VC  = TVVC  * exp(ETA(2)) ;
+double KA  = TVKA  * exp(ETA(3)) ;
+double VP  = TVVP  * exp(ETA(4)) ;
 double F   = TVF   ;
 double Q   = TVQ   ;
 double LAG = TVLAG ;
@@ -97,9 +92,6 @@ $PARAM @annotated
 TVCL : 4.00 : Clearance (L/h)
 TVVC : 70.0 : Central volume of distribution (L)
 TVKA : 1.00 : Absorption rate (h-1)
-ETA1 : 0 : CL
-ETA2 : 0 : VC
-ETA3 : 0 : KA
 
 $OMEGA 0.2 0.2 0.2
 $SIGMA 0.05 0
@@ -112,9 +104,9 @@ $TABLE
 double DV = (CENTRAL / VC) * (1 + EPS(1)) ;
 
 $MAIN
-double CL  = TVCL  * exp(ETA(1) + ETA1) ;
-double VC  = TVVC  * exp(ETA(2) + ETA2) ;
-double KA  = TVKA  * exp(ETA(3) + ETA3) ;
+double CL  = TVCL  * exp(ETA(1)) ;
+double VC  = TVVC  * exp(ETA(2)) ;
+double KA  = TVKA  * exp(ETA(3)) ;
 double K20 = CL / VC ;
 
 $ODE
@@ -148,13 +140,12 @@ $CAPTURE DV
 test_that("check_absolute_eta() works if one ETA only",{
   #Fix 116
 
-  code1 <- "$PARAM ETA1 = 0,
-KA = 0.5, V = 23.3
+  code1 <- "$PARAM KA = 0.5, V = 23.3
 $OMEGA 0.41
 $SIGMA 0.04 0
 $CMT DEPOT CENT
 $PK
-double CL=1.1*exp(ETA1+ETA(1)) ;
+double CL=1.1*exp(ETA(1)) ;
 $ERROR
 double DV=CENT/V*(1+EPS(1))+EPS(2);
 $PKMODEL ncmt = 1, depot = TRUE
@@ -180,9 +171,6 @@ $PARAM @annotated
 TVCL : 4.00 : Clearance (L/h)
 TVVC : 70.0 : Central volume of distribution (L)
 TVKA : 1.00 : Absorption rate (h-1)
-ETA1 : 0 : CL
-ETA2 : 0 : VC
-ETA3 : 0 : KA
 
 $OMEGA 0.2 0.2 0.2
 $SIGMA 0.05 0
@@ -195,9 +183,9 @@ $TABLE
 double DV = (CENTRAL / VC) * (1 + EPS(1)) ;
 
 $MAIN
-double CL  = TVCL  * exp(ETA(1) + ETA1) ;
-double VC  = TVVC  * exp(ETA(2) + ETA2) ;
-double KA  = TVKA  * exp(ETA(3) + ETA3) ;
+double CL  = TVCL  * exp(ETA(1)) ;
+double VC  = TVVC  * exp(ETA(2)) ;
+double KA  = TVKA  * exp(ETA(3)) ;
 double K20 = CL / VC ;
 
 $ODE

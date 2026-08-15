@@ -118,7 +118,7 @@ get_eta.mapbayests <- function(x, ..., output = NULL){
   }
 
   if(.out == "df"){
-    e <- bind_rows(selected_eta, .id = "ID")
+    e <- bind_rows(selected_eta, .id = "ID") %>% mutate(ID = as.double(.data$ID))
   }
 
   return(e)

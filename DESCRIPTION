@@ -1,6 +1,6 @@
 Package: mapbayr
 Title: MAP-Bayesian Estimation of PK Parameters
-Version: 0.10.2.9001
+Version: 0.10.2.9002
 Authors@R: 
     c(person(given = "Felicien", family = "Le Louedec", 
              role = c("aut", "cre"), 
@@ -16,7 +16,6 @@ Description: Performs maximum a posteriori Bayesian estimation of individual pha
 License: GPL-3
 Encoding: UTF-8
 Roxygen: list(markdown = TRUE)
-RoxygenNote: 7.3.3
 Imports: 
     dplyr,
     ggplot2 (>= 3.4.0),
@@ -31,12 +30,16 @@ URL: https://github.com/FelicienLL/mapbayr, https://felicienll.github.io/mapbayr
 BugReports: https://github.com/FelicienLL/mapbayr/issues
 Suggests: 
     knitr,
+    lattice,
     lubridate,
     minqa,
+    quarto,
     scales,
     testthat (>= 3.0.0),
     tibble
 Depends: 
-    R (>= 2.10)
+    R (>= 3.5)
 LazyData: true
 Config/testthat/edition: 3
+Config/roxygen2/version: 8.1.0
+VignetteBuilder: quarto

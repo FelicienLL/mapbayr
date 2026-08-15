@@ -6,7 +6,6 @@
 #' The current function binds a matrix of ETA to a "valid" data set, as efficiently as possible.
 #' @param validdata a matrix of class "valid_data_set"
 #' @param eta a named vector of eta values
-#' @param k multiply "eta" by k = 0.5 because eta are taken into account twice (through $PARAM and $OMEGA/etasrc)
 #'
 #' @return a matrix of class "valid_data_set"
 #' @noRd
@@ -17,7 +16,7 @@
 #' merged <- merge_validdata_eta(val, eta)
 #' mrgsolve:::is.valid_data_set(merged)
 #'
-merge_validdata_eta <- function(validdata, eta, k = 0.5){
+merge_validdata_eta <- function(validdata, eta){
   eta <- unlist(eta) #is sometime passed as a list
   ncol_validdata <- ncol(validdata)
   nrow_validdata <- nrow(validdata)
@@ -25,7 +24,7 @@ merge_validdata_eta <- function(validdata, eta, k = 0.5){
   proper_data <- validdata[,-ncol_validdata, drop = FALSE]
   zeros <- validdata[,ncol_validdata, drop = FALSE]
   eta_matrix <- matrix(
-    data = eta * k,
+    data = eta,
     nrow = nrow_validdata,
     ncol = length(eta),
     byrow = TRUE, #faster than data = rep(eta, each = nrow)
@@ -95,7 +94,7 @@ ofv_kang <- function(obs, pred, eta, var, omega_inv, lambda = 1){
 #' @export
 compute_ofv <- function(eta, qmod, sigma, omega_inv, all_cmt, log_transformation, lambda = 1, idvaliddata, idDV, idcmt, idblq = NULL, idlloq = NULL, ...){
   #Update ETA values
-  idvaliddata <- merge_validdata_eta(validdata = idvaliddata, eta = eta, k = 0.5)
+  idvaliddata <- merge_validdata_eta(validdata = idvaliddata, eta = eta)
 
   #Predict concentrations
   pred <- tryCatch(f(qmod = qmod, data = idvaliddata), silent = TRUE, error = function(x)NA)

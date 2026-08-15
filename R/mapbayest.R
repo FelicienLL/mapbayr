@@ -32,14 +32,13 @@
 #' @export
 #' @examples
 #' # First, code a model
-#' code1 <- "$PARAM ETA1 = 0, ETA2 = 0,
-#' KA = 0.5, TVCL = 1.1, TVV = 23.3
+#' code1 <- "$PARAM KA = 0.5, TVCL = 1.1, TVV = 23.3
 #' $OMEGA 0.41 0.32
 #' $SIGMA 0.04 0
 #' $CMT DEPOT CENT
 #' $PK
-#' double CL=TVCL*exp(ETA1+ETA(1));
-#' double V=TVV*exp(ETA2+ETA(2)) ;
+#' double CL=TVCL*exp(ETA(1));
+#' double V=TVV*exp(ETA(2)) ;
 #' $ERROR
 #' double DV=CENT/V*(1+EPS(1))+EPS(2);
 #' $PKMODEL ncmt = 1, depot = TRUE
@@ -61,11 +60,11 @@
 #' get_eta(my_est)
 #' get_param(my_est)
 #' as.data.frame(my_est)
-#' use_posterior(my_est)
+#' use_estimates(my_est)
 #'
 #'@seealso \code{\link{hist.mapbayests}}
 #'@seealso \code{\link{plot.mapbayests}}
-#'@seealso \code{\link{use_posterior}}
+#'@seealso \code{\link{use_estimates}}
 #'
 mapbayest <- function(x,
                       data = NULL,
