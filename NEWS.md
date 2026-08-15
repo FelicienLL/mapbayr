@@ -23,6 +23,8 @@ The intention of this PR is to stop defining deterministic ETAs in the `$PARAM` 
 * Internal code for the calculation of the objective function value, parameter estimation and postprocessing steps were updated to use ETAs from the dataset only, and not defined in `$PARAM`.
 * Internal `eta_descr()` now extracts the description of annotated (`@annotated`) `$OMEGA` blocks instead of looking into `$PARAM`
 * `lattice` and `quarto` are now suggested packages
+* Requires R (>=3.5)
+
 
 # mapbayr 0.10.2
 
