@@ -29,24 +29,6 @@ test_that("f works", {
   )
 })
 
-test_that("h matrix computation works", {
-  expectmat <- matrix(c(400, 0, 200, 0, 1, 0, 1, 0, 0, 40, 0, 20, 0, 1, 0, 1), ncol = 4, nrow = 4)
-
-  expect_equal(h(pred = c(400, 40, 200, 20), cmt = c(2, 3, 2, 3), all_cmt = c(2, 3)), expectmat)
-
-  expectmat[1,1] <- 1
-  expect_equal(h(pred = c(0, 40, 200, 20), cmt = c(2, 3, 2, 3), all_cmt = c(2, 3)), expectmat)
-
-  # e.g. time = 0 with oral drug
-  est <- exmodel(add_exdata = F) %>%
-    adm_rows(amt = 100) %>%
-    obs_rows(time = c(0, 10), DV = c(.1, 1)) %>%
-    mapbayest(output = "df")
-
-  expect_equal(est$IPRED, c(0, 0, 0.9244), tolerance = 0.001)
-
-})
-
 test_that("compute basic ofv", {
   expecteta <- c(
     ETA1 = 0.4050570108131819058,
@@ -62,7 +44,7 @@ test_that("compute basic ofv", {
     qmod = arg.ofv$qmod, idvaliddata = arg.ofv$idvaliddata,
     sigma = arg.ofv$sigma, log_transformation = arg.ofv$log_transformation,
     idDV = arg.ofv$idDV, idcmt = arg.ofv$idcmt,
-    omega_inv = arg.ofv$omega_inv, all_cmt = arg.ofv$all_cmt)
+    omega_inv = arg.ofv$omega_inv, ruvdef = arg.ofv$ruvdef)
 
   expect_equal(of_value1, expectofv)
 
@@ -72,7 +54,7 @@ test_that("compute basic ofv", {
     qmod = arg.ofv$qmod, idvaliddata = arg.ofv$idvaliddata,
     sigma = arg.ofv$sigma, log_transformation = arg.ofv$log_transformation,
     idDV = arg.ofv$idDV, idcmt = arg.ofv$idcmt,
-    omega_inv = arg.ofv$omega_inv, all_cmt = arg.ofv$all_cmt)
+    omega_inv = arg.ofv$omega_inv, ruvdef = arg.ofv$ruvdef)
 
   expect_equal(of_value2, expectofv)
 

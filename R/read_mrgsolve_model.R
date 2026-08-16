@@ -76,6 +76,15 @@ fit_cmt <- function(x, data){
   }
 }
 
+get_ruvdef <- function(x, data){
+  all_cmt <- fit_cmt(x, data)
+  matrix(
+    data = seq_len(length(all_cmt)*2),
+    nrow = 2, #always 2, one for prop, one for add
+    dimnames = list(NULL,all_cmt)
+    )
+}
+
 
 #' Get zero-order infusion compartment from mrgsolve model
 #'

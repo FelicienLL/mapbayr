@@ -59,6 +59,24 @@ test_that("_cmt functions work", {
   expect_equal(fit_cmt(mod2, dat1), c(2,4))
   expect_equal(fit_cmt(mod2, dat2), c(2,4))
   expect_equal(fit_cmt(mod2, dat12), c(2,4))
+
+  expect_equal(get_ruvdef(mod0, dat0), matrix(integer(0), ncol = 0, nrow = 2, dimnames = list(NULL, NULL)))
+  expect_equal(get_ruvdef(mod0, dat1), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(1))))
+  expect_equal(get_ruvdef(mod0, dat2), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod0, dat12), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(1,2))))
+  expect_equal(get_ruvdef(mod0bis, dat0), matrix(integer(0), ncol = 0, nrow = 2, dimnames = list(NULL, NULL)))
+  expect_equal(get_ruvdef(mod0bis, dat1), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(1))))
+  expect_equal(get_ruvdef(mod0bis, dat2), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod0bis, dat12), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(1,2))))
+  expect_equal(get_ruvdef(mod1, dat0), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod1, dat1), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod1, dat2), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod1, dat12), matrix(c(1,2), ncol = 1, dimnames = list(NULL, c(2))))
+  expect_equal(get_ruvdef(mod2, dat0), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(2,4))))
+  expect_equal(get_ruvdef(mod2, dat1), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(2,4))))
+  expect_equal(get_ruvdef(mod2, dat2), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(2,4))))
+  expect_equal(get_ruvdef(mod2, dat12), matrix(c(1,2,3,4), ncol = 2, dimnames = list(NULL, c(2,4))))
+
 })
 
 test_that("adm_0_cmt works", {

@@ -28,7 +28,7 @@ The following arguments are fixed between individuals:
 \item \code{sigma}: a single matrix object
 \item \code{log_transformation}: a logical, whether predictions need to be log-transformed for ofv computation
 \item \code{omega_inv}: a single matrix object
-\item \code{all_cmt}: a vector of compartment numbers where observations can be expected
+\item \code{ruvdef}: a matrix describing how the variance values in the sigma matrix transposes in terms of RUV
 }
 
 The following arguments differs between individuals:

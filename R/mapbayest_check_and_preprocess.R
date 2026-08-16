@@ -370,7 +370,7 @@ preprocess.optim <- function(x, method = c("L-BFGS-B", "newuoa"), select_eta = N
 #'  - `sigma`: a single matrix object
 #'  - `log_transformation`: a logical, whether predictions need to be log-transformed for ofv computation
 #'  - `omega_inv`: a single matrix object
-#'  - `all_cmt`: a vector of compartment numbers where observations can be expected
+#'  - `ruvdef`: a matrix describing how the variance values in the sigma matrix transposes in terms of RUV
 #'
 #' The following arguments differs between individuals:
 #'
@@ -411,7 +411,7 @@ preprocess.ofv.fix <- function(x, data, select_eta = seq_along(eta(x)), lambda =
     sigma = smat(x, make = T),
     log_transformation = log_transformation(x),
     omega_inv = solve(omat(x, make = T)[select_eta,select_eta]),
-    all_cmt = fit_cmt(x, data), #on full data
+    ruvdef = get_ruvdef(x, data), #on full data
     lambda = lambda
   )
 }

@@ -3,7 +3,7 @@ est001test <- mapbayest(exmodel(ID = 1:8), verbose = FALSE, progress = FALSE)
 test_that("mapbayests object `slots` are correct", {
 
   expect_named(est001test, c("model", "arg.optim", "arg.ofv.fix", "arg.ofv.id", "opt.value", "final_eta", "covariance", "mapbay_tab", "information"))
-  expect_named(est001test$arg.ofv.fix, c("qmod", "sigma", "log_transformation", "omega_inv", "all_cmt", "lambda"))
+  expect_named(est001test$arg.ofv.fix, c("qmod", "sigma", "log_transformation", "omega_inv", "ruvdef", "lambda"))
   expect_length(est001test$arg.ofv.id, 8)
   expect_named(est001test$arg.ofv.id[[1]], c("idvaliddata", "idDV", "idcmt"))
   expect_named(est001test$arg.ofv.id[[2]], c("idvaliddata", "idDV", "idcmt"))

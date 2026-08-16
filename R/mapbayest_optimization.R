@@ -3,7 +3,7 @@
 # This is the function that realize optimization from the argument arg.ofv, arg.optim etc...
 
 keep_argofv <- function(x){
-  x[c("qmod",  "sigma", "log_transformation", "omega_inv", "all_cmt", "idvaliddata", "idDV", "idcmt")]
+  x[c("qmod",  "sigma", "log_transformation", "omega_inv", "ruvdef", "idvaliddata", "idDV", "idcmt")]
 }
 
 do_optimization <- function(..., verbose = TRUE, reset = 50){
